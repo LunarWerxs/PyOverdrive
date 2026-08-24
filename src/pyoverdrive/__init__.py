@@ -50,7 +50,17 @@ from .dispatcher.gearbox import (
 )
 from . import fastpaths as _fastpaths
 
-__version__ = "0.0.1.dev0"
+# Single source of truth: the installed distribution's metadata, so the
+# version a user sees can never drift from the version they installed
+# (it did: a hardcoded string here reported 0.0.1.dev0 from a 0.1.0
+# wheel). The fallback covers running from a source tree with no
+# installed distribution.
+try:  # pragma: no cover - trivial, and exercised by the packaging tests
+    from importlib.metadata import PackageNotFoundError, version as _version
+
+    __version__ = _version("pyoverdrive")
+except PackageNotFoundError:  # pragma: no cover
+    __version__ = "0.0.0.dev0+source"
 
 _fastpaths.register_all(GEARBOX)
 

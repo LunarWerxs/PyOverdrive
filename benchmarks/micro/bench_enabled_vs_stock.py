@@ -67,6 +67,8 @@ STOCK_CHOLESKY = np.linalg.cholesky
 STOCK_INTERP = np.interp
 STOCK_TAKE = np.take
 STOCK_QR = np.linalg.qr
+STOCK_APPLY_ALONG_AXIS = np.apply_along_axis
+STOCK_VECTORIZE = np.vectorize
 STOCK_UFUNCS = {op: getattr(np, op) for op in PYRALLEL_SUPPORTED}
 STOCK_BINARY = {op: getattr(np, op) for op in BINARY_SUPPORTED}
 
@@ -81,7 +83,8 @@ pyoverdrive.enable(
      "numpy.nanstd", "numpy.nanvar", "numpy.nanargmax", "numpy.nanargmin",
      "numpy.nanmedian", "numpy.nanpercentile", "numpy.linalg.det",
      "numpy.linalg.slogdet", "numpy.linalg.solve", "numpy.nan_to_num",
-     "numpy.linalg.cholesky", "numpy.interp", "numpy.take", "numpy.linalg.qr"]
+     "numpy.linalg.cholesky", "numpy.interp", "numpy.take", "numpy.linalg.qr",
+     "numpy.apply_along_axis", "numpy.vectorize"]
     + [f"numpy.{op}" for op in PYRALLEL_SUPPORTED]
     + [f"numpy.{op}" for op in BINARY_SUPPORTED]
 )
@@ -1325,6 +1328,28 @@ suite.measure(
     candidates={"pyoverdrive": lambda a=qr_a2: np.linalg.qr(a, mode="r")},
     check=lambda c, b: type(c) is np.ndarray
     and bool(np.allclose(c, b, rtol=1e-9, atol=1e-9 * max(1.0, float(np.abs(b).max())))),
+    samples=3 if SMOKE else 7,
+)
+
+# --- batch 11: the Python-loop interceptions ---------------------------------
+aaa_n = 20_000 if not SMOKE else 2_000
+aaa = rng.standard_normal((aaa_n, 50))
+suite.measure(
+    case=f"apply_along_axis_mean_slices{aaa_n}",
+    params={"slices": aaa_n, "expect": "axis= reduction instead of a Python loop"},
+    baseline=("stock_apply_along_axis", lambda a=aaa: STOCK_APPLY_ALONG_AXIS(np.mean, -1, a)),
+    candidates={"pyoverdrive": lambda a=aaa: np.apply_along_axis(np.mean, -1, a)},
+    check=lambda c, b: c.dtype == b.dtype and bool(np.array_equal(c, b)),
+    samples=3 if SMOKE else 7,
+)
+vec_n = 1_000_000 if not SMOKE else 50_000
+vec_x = np.abs(rng.standard_normal(vec_n)) + 1e-6
+suite.measure(
+    case=f"vectorize_sqrt_n{vec_n}",
+    params={"n": vec_n, "expect": "wrapped ufunc called directly"},
+    baseline=("stock_vectorize", lambda x=vec_x: STOCK_VECTORIZE(np.sqrt)(x)),
+    candidates={"pyoverdrive": lambda x=vec_x: np.vectorize(np.sqrt)(x)},
+    check=lambda c, b: c.dtype == b.dtype and bool(np.array_equal(c, b)),
     samples=3 if SMOKE else 7,
 )
 

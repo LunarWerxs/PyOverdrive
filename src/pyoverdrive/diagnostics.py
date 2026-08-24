@@ -375,6 +375,11 @@ def _inputs_interp_uniform():
     return (rng.uniform(-0.1, 1.1, 20_000), xp, rng.standard_normal(1_000)), {}
 
 
+def _inputs_apply_along_axis():
+    rng = np.random.default_rng(55)
+    return (np.mean, 1, rng.standard_normal((2_000, 100))), {}
+
+
 def _inputs_qr_batch():
     rng = np.random.default_rng(53)
     return (rng.standard_normal((1_000, 3, 3)),), {}
@@ -442,6 +447,16 @@ def _inputs_binary(op_name: str) -> Callable[[], tuple[tuple, dict]]:
     return make
 
 
+def _inputs_vectorize_ufunc():
+    """((construction args, kwargs), (call args, kwargs)) for the class path."""
+    rng = np.random.default_rng(54)
+    return ((np.sin,), {}), ((rng.standard_normal(50_000),), {})
+
+
+def _selfcheck_class_inputs() -> dict[str, Callable[[], tuple]]:
+    return {"vectorize_ufunc_direct": _inputs_vectorize_ufunc}
+
+
 def _selfcheck_inputs() -> dict[str, Callable[[], tuple[tuple, dict]]]:
     from .fastpaths import parallel_binary, parallel_ufunc
 
@@ -470,6 +485,7 @@ def _selfcheck_inputs() -> dict[str, Callable[[], tuple[tuple, dict]]]:
         "solve_small_batch": _inputs_solve_batch,
         "cholesky_small_batch": _inputs_cholesky_batch,
         "qr_small_batch": _inputs_qr_batch,
+        "apply_along_axis_reduce": _inputs_apply_along_axis,
         "eigvalsh_3x3_trig": _inputs_eigvalsh_3x3,
         "einsum_optimize_chain": _inputs_einsum_chain,
         "interp_uniform_grid": _inputs_interp_uniform,
@@ -558,6 +574,33 @@ def selfcheck(verbose: bool = True, file=None) -> dict[str, str]:
                     continue
                 ok = _equal(path.provenance.get("comparison_mode"), got, expected)
                 results[path.name] = "PASS" if ok else "FAIL: result differs from stock"
+        # class-backed paths (ClassPath): construct through the patched
+        # class and through stock, call both, compare. Same contract as a
+        # FastPath, one extra step because the work lives on an instance.
+        for op, cpath in sorted(GEARBOX._class_paths.items()):
+            if not cpath.enabled:
+                results[cpath.name] = "SKIP: disabled"
+                continue
+            make = _selfcheck_class_inputs().get(cpath.name)
+            if make is None:
+                results[cpath.name] = "SKIP: no selfcheck input registered"
+                continue
+            (cargs, ckwargs), (args, kwargs) = make()
+            stock_cls = GEARBOX.stock_fn(op)
+            chosen, reason = GEARBOX.decide(op, cargs, ckwargs)
+            if chosen != cpath.name:
+                results[cpath.name] = f"FAIL: did not dispatch ({chosen}: {reason})"
+                continue
+            GEARBOX.patch([op])
+            try:
+                patched_cls = getattr(*GEARBOX._resolve(np, op))
+                got = patched_cls(*cargs, **ckwargs)(*args, **kwargs)
+                expected = stock_cls(*cargs, **ckwargs)(*args, **kwargs)
+            except Exception as exc:  # noqa: BLE001 - a raising path is a FAIL
+                results[cpath.name] = f"FAIL: raised {exc!r}"
+                continue
+            ok = _equal(cpath.provenance.get("comparison_mode"), got, expected)
+            results[cpath.name] = "PASS" if ok else "FAIL: result differs from stock"
     finally:
         GEARBOX.unpatch()
         if was_active:

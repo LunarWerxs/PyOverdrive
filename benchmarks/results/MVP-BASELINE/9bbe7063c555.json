@@ -1,7 +1,7 @@
 {
   "opp_id": "MVP-BASELINE",
   "title": "pyoverdrive.enable() vs stock, public API",
-  "recorded_at": "2026-08-24T18:39:52+00:00",
+  "recorded_at": "2026-08-24T19:39:50+00:00",
   "fingerprint": {
     "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
     "machine": "AMD64",
@@ -39,7 +39,7 @@
   },
   "conditions": {
     "cpu_busy_before": 0.0,
-    "cpu_busy_after": 0.0015698587127158659,
+    "cpu_busy_after": 0.0,
     "contended": false
   },
   "cases": [
@@ -53,27 +53,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 206835100.0,
-          "min_ns": 202106300.0,
-          "mean_ns": 206459622.2222222,
-          "mad_ns": 3340600.0,
+          "median_ns": 196322300.0,
+          "min_ns": 193744100.0,
+          "mean_ns": 197085000.0,
+          "mad_ns": 1518400.0,
           "samples": 9,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 13571300.0,
-          "min_ns": 13403900.0,
-          "mean_ns": 13549688.888888888,
-          "mad_ns": 99400.0,
+          "median_ns": 13696800.0,
+          "min_ns": 13553800.0,
+          "mean_ns": 14210922.222222222,
+          "mad_ns": 86200.0,
           "samples": 9,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 15.240625437504145
+        "pyoverdrive": 14.333442847964488
       }
     },
     {
@@ -86,27 +86,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 6778.196721311476,
-          "min_ns": 6643.688524590164,
-          "mean_ns": 6765.44262295082,
-          "mad_ns": 55.98360655737633,
+          "median_ns": 6794.312796208531,
+          "min_ns": 6753.47551342812,
+          "mean_ns": 6791.184834123223,
+          "mad_ns": 18.404423380727167,
           "samples": 15,
-          "loops_per_sample": 1220,
+          "loops_per_sample": 1266,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 4282.612781954887,
-          "min_ns": 4246.945488721804,
-          "mean_ns": 4282.929197994988,
-          "mad_ns": 18.89097744360879,
+          "median_ns": 4288.73653281097,
+          "min_ns": 4271.106758080314,
+          "mean_ns": 4300.267711394058,
+          "mad_ns": 9.69637610186146,
           "samples": 15,
-          "loops_per_sample": 2128,
+          "loops_per_sample": 2042,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.5827246277954243
+        "pyoverdrive": 1.5842224730357426
       }
     },
     {
@@ -119,27 +119,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 2195.9719334719334,
-          "min_ns": 2184.6153846153848,
-          "mean_ns": 2201.3617463617466,
-          "mad_ns": 6.081081081080811,
+          "median_ns": 3043.9164866810656,
+          "min_ns": 3029.3736501079916,
+          "mean_ns": 3046.4578833693304,
+          "mad_ns": 4.427645788337031,
           "samples": 15,
-          "loops_per_sample": 3848,
+          "loops_per_sample": 2778,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 4218.450560652395,
-          "min_ns": 4189.14373088685,
-          "mean_ns": 4443.547400611621,
-          "mad_ns": 24.00611620795098,
+          "median_ns": 5114.917452830188,
+          "min_ns": 5089.0919811320755,
+          "mean_ns": 5124.787735849056,
+          "mad_ns": 9.728773584905866,
           "samples": 15,
-          "loops_per_sample": 1962,
+          "loops_per_sample": 1696,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.5205636292042546
+        "pyoverdrive": 0.5951056912945495
       }
     },
     {
@@ -152,27 +152,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 10503300.0,
-          "min_ns": 10309700.0,
-          "mean_ns": 10529288.888888888,
-          "mad_ns": 97100.0,
+          "median_ns": 10628800.0,
+          "min_ns": 10520000.0,
+          "mean_ns": 10706966.666666666,
+          "mad_ns": 108800.0,
           "samples": 9,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 10457600.0,
-          "min_ns": 10315600.0,
-          "mean_ns": 10491366.666666666,
-          "mad_ns": 56800.0,
+          "median_ns": 10773000.0,
+          "min_ns": 10288300.0,
+          "mean_ns": 11604344.444444444,
+          "mad_ns": 233200.0,
           "samples": 9,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0043700275397798
+        "pyoverdrive": 0.9866146848602989
       }
     },
     {
@@ -185,27 +185,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 6421000.0,
-          "min_ns": 6299900.0,
-          "mean_ns": 6589422.222222222,
-          "mad_ns": 70800.0,
+          "median_ns": 6463300.0,
+          "min_ns": 6326400.0,
+          "mean_ns": 6452044.444444444,
+          "mad_ns": 45400.0,
           "samples": 9,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 6478700.0,
-          "min_ns": 6353200.0,
-          "mean_ns": 6517811.111111111,
-          "mad_ns": 37800.0,
+          "median_ns": 6877500.0,
+          "min_ns": 6755200.0,
+          "mean_ns": 6852933.333333333,
+          "mad_ns": 71900.0,
           "samples": 9,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.991093892293207
+        "pyoverdrive": 0.9397746274082152
       }
     },
     {
@@ -218,27 +218,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 32714400.0,
-          "min_ns": 32388900.0,
-          "mean_ns": 32757385.714285713,
-          "mad_ns": 149800.0,
+          "median_ns": 33137300.0,
+          "min_ns": 32982600.0,
+          "mean_ns": 33158728.57142857,
+          "mad_ns": 143000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 817550.0,
-          "min_ns": 815475.0,
-          "mean_ns": 820994.0476190476,
-          "mad_ns": 2075.0,
+          "median_ns": 831283.3333333334,
+          "min_ns": 828725.0,
+          "mean_ns": 830961.9047619047,
+          "mad_ns": 1500.0,
           "samples": 7,
           "loops_per_sample": 12,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 40.015167268057
+        "pyoverdrive": 39.8628225434569
       }
     },
     {
@@ -251,27 +251,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 43669500.0,
-          "min_ns": 43563000.0,
-          "mean_ns": 43713857.14285714,
-          "mad_ns": 106500.0,
+          "median_ns": 44370100.0,
+          "min_ns": 44083900.0,
+          "mean_ns": 44854214.28571428,
+          "mad_ns": 167100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 12906300.0,
-          "min_ns": 12825000.0,
-          "mean_ns": 12957557.142857144,
-          "mad_ns": 81300.0,
+          "median_ns": 13012400.0,
+          "min_ns": 12899900.0,
+          "mean_ns": 12996171.42857143,
+          "mad_ns": 75100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.383580112038307
+        "pyoverdrive": 3.4098321600934494
       }
     },
     {
@@ -284,27 +284,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 5949000.0,
-          "min_ns": 5872400.0,
-          "mean_ns": 5984322.222222222,
-          "mad_ns": 48200.0,
+          "median_ns": 6019200.0,
+          "min_ns": 5938200.0,
+          "mean_ns": 6024900.0,
+          "mad_ns": 70000.0,
           "samples": 9,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 545120.0,
-          "min_ns": 533840.0,
-          "mean_ns": 543480.0,
-          "mad_ns": 1420.0,
+          "median_ns": 544260.0,
+          "min_ns": 543440.0,
+          "mean_ns": 545472.2222222222,
+          "mad_ns": 820.0,
           "samples": 9,
           "loops_per_sample": 10,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 10.913193425300852
+        "pyoverdrive": 11.059420130084886
       }
     },
     {
@@ -317,27 +317,27 @@
       "baseline": "stock_intersect1d",
       "variants": {
         "stock_intersect1d": {
-          "median_ns": 8529200.0,
-          "min_ns": 8362900.0,
-          "mean_ns": 8536911.111111112,
-          "mad_ns": 75500.0,
+          "median_ns": 8559700.0,
+          "min_ns": 8470400.0,
+          "mean_ns": 8642511.111111112,
+          "mad_ns": 41300.0,
           "samples": 9,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 830550.0,
-          "min_ns": 825883.3333333334,
-          "mean_ns": 832659.2592592592,
-          "mad_ns": 3083.333333333372,
+          "median_ns": 845433.3333333334,
+          "min_ns": 842900.0,
+          "mean_ns": 847387.0370370371,
+          "mad_ns": 1700.0,
           "samples": 9,
           "loops_per_sample": 6,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 10.269339594244778
+        "pyoverdrive": 10.124630367070141
       }
     },
     {
@@ -357,27 +357,27 @@
       "baseline": "stock_inner",
       "variants": {
         "stock_inner": {
-          "median_ns": 769400900.0,
-          "min_ns": 726549900.0,
-          "mean_ns": 766215500.0,
-          "mad_ns": 28929900.0,
+          "median_ns": 740696500.0,
+          "min_ns": 734241400.0,
+          "mean_ns": 741394440.0,
+          "mad_ns": 5721700.0,
           "samples": 5,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 24170200.0,
-          "min_ns": 23895300.0,
-          "mean_ns": 24164860.0,
-          "mad_ns": 239100.0,
+          "median_ns": 24245600.0,
+          "min_ns": 23985800.0,
+          "mean_ns": 24189640.0,
+          "mad_ns": 79100.0,
           "samples": 5,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 31.832624471456587
+        "pyoverdrive": 30.549728610552016
       }
     },
     {
@@ -392,27 +392,27 @@
       "baseline": "stock_inner",
       "variants": {
         "stock_inner": {
-          "median_ns": 1942233.3333333333,
-          "min_ns": 1863000.0,
-          "mean_ns": 1985918.1818181819,
-          "mad_ns": 46600.0,
+          "median_ns": 1932433.3333333333,
+          "min_ns": 1796666.6666666667,
+          "mean_ns": 1986757.5757575757,
+          "mad_ns": 85400.0,
           "samples": 11,
           "loops_per_sample": 3,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1961266.6666666667,
-          "min_ns": 1814200.0,
-          "mean_ns": 1952536.3636363635,
-          "mad_ns": 32166.66666666651,
+          "median_ns": 1895033.3333333333,
+          "min_ns": 1755800.0,
+          "mean_ns": 1896354.5454545454,
+          "mad_ns": 65366.66666666651,
           "samples": 11,
           "loops_per_sample": 3,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9902953873347156
+        "pyoverdrive": 1.0197358006015724
       }
     },
     {
@@ -424,27 +424,27 @@
       "baseline": "stock_inner",
       "variants": {
         "stock_inner": {
-          "median_ns": 663.3853937527497,
-          "min_ns": 646.4914210294764,
-          "mean_ns": 658.3252676345505,
-          "mad_ns": 2.2217333919929843,
+          "median_ns": 638.2376811594203,
+          "min_ns": 620.8811594202898,
+          "mean_ns": 636.5557487922705,
+          "mad_ns": 1.6231884057971229,
           "samples": 15,
-          "loops_per_sample": 9092,
+          "loops_per_sample": 8625,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 929.2833146696529,
-          "min_ns": 913.2418812989922,
-          "mean_ns": 1015.8146696528555,
-          "mad_ns": 7.446808510638334,
+          "median_ns": 899.020156774916,
+          "min_ns": 888.6478163493841,
+          "mean_ns": 901.0787607316163,
+          "mad_ns": 8.972564389697709,
           "samples": 15,
           "loops_per_sample": 7144,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.7138677551620238
+        "pyoverdrive": 0.7099258858099365
       }
     },
     {
@@ -459,27 +459,27 @@
       "baseline": "stock_intersect1d",
       "variants": {
         "stock_intersect1d": {
-          "median_ns": 219998200.0,
-          "min_ns": 214703300.0,
-          "mean_ns": 220111740.0,
-          "mad_ns": 1856300.0,
+          "median_ns": 212117600.0,
+          "min_ns": 207361000.0,
+          "mean_ns": 215513140.0,
+          "mad_ns": 4756600.0,
           "samples": 5,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 2638950.0,
-          "min_ns": 2536700.0,
-          "mean_ns": 2693060.0,
-          "mad_ns": 102250.0,
+          "median_ns": 2533500.0,
+          "min_ns": 2289100.0,
+          "mean_ns": 2479330.0,
+          "mad_ns": 113400.0,
           "samples": 5,
           "loops_per_sample": 2,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 83.36580837075351
+        "pyoverdrive": 83.72512334714821
       }
     },
     {
@@ -494,27 +494,27 @@
       "baseline": "stock_intersect1d",
       "variants": {
         "stock_intersect1d": {
-          "median_ns": 204261900.0,
-          "min_ns": 201703900.0,
-          "mean_ns": 207140180.0,
-          "mad_ns": 2558000.0,
+          "median_ns": 194932200.0,
+          "min_ns": 192272500.0,
+          "mean_ns": 195605800.0,
+          "mad_ns": 2127600.0,
           "samples": 5,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 19847700.0,
-          "min_ns": 19394300.0,
-          "mean_ns": 20209620.0,
-          "mad_ns": 453400.0,
+          "median_ns": 18754600.0,
+          "min_ns": 18351800.0,
+          "mean_ns": 18799740.0,
+          "mad_ns": 234500.0,
           "samples": 5,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 10.291464502184132
+        "pyoverdrive": 10.39383404604737
       }
     },
     {
@@ -528,27 +528,27 @@
       "baseline": "stock_intersect1d",
       "variants": {
         "stock_intersect1d": {
-          "median_ns": 20961.333333333332,
-          "min_ns": 20815.555555555555,
-          "mean_ns": 21029.318518518518,
-          "mad_ns": 140.22222222222263,
+          "median_ns": 20917.903930131004,
+          "min_ns": 20789.082969432315,
+          "mean_ns": 21088.34061135371,
+          "mad_ns": 122.27074235807959,
           "samples": 15,
-          "loops_per_sample": 450,
+          "loops_per_sample": 458,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 21416.37554585153,
-          "min_ns": 21325.764192139737,
-          "mean_ns": 21451.47016011645,
-          "mad_ns": 34.27947598253013,
+          "median_ns": 21346.46017699115,
+          "min_ns": 21184.513274336285,
+          "mean_ns": 21467.802359882004,
+          "mad_ns": 62.38938053097445,
           "samples": 15,
-          "loops_per_sample": 458,
+          "loops_per_sample": 452,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9787526039808196
+        "pyoverdrive": 0.9799237792445759
       }
     },
     {
@@ -562,27 +562,27 @@
       "baseline": "stock_intersect1d",
       "variants": {
         "stock_intersect1d": {
-          "median_ns": 14772200.0,
-          "min_ns": 14710100.0,
-          "mean_ns": 15351071.42857143,
-          "mad_ns": 62100.0,
+          "median_ns": 14121300.0,
+          "min_ns": 13877700.0,
+          "mean_ns": 14096585.714285715,
+          "mad_ns": 107000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 14853500.0,
-          "min_ns": 14740500.0,
-          "mean_ns": 14846328.57142857,
-          "mad_ns": 22800.0,
+          "median_ns": 14082200.0,
+          "min_ns": 13952300.0,
+          "mean_ns": 14068342.857142856,
+          "mad_ns": 71100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9945265425657253
+        "pyoverdrive": 1.002776554799676
       }
     },
     {
@@ -595,27 +595,27 @@
       "baseline": "stock_ascontiguousarray",
       "variants": {
         "stock_ascontiguousarray": {
-          "median_ns": 23802200.0,
-          "min_ns": 21500500.0,
-          "mean_ns": 25039157.14285714,
-          "mad_ns": 1552100.0,
+          "median_ns": 20633900.0,
+          "min_ns": 19402200.0,
+          "mean_ns": 20422314.285714287,
+          "mad_ns": 399300.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 6349300.0,
-          "min_ns": 6210800.0,
-          "mean_ns": 6391242.857142857,
-          "mad_ns": 93600.0,
+          "median_ns": 7068400.0,
+          "min_ns": 6740800.0,
+          "mean_ns": 7032057.142857143,
+          "mad_ns": 45500.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.7487912053297214
+        "pyoverdrive": 2.9191754852583327
       }
     },
     {
@@ -628,27 +628,27 @@
       "baseline": "stock_ascontiguousarray",
       "variants": {
         "stock_ascontiguousarray": {
-          "median_ns": 32.00271989120435,
-          "min_ns": 31.641591479197974,
-          "mean_ns": 32.06020330615347,
-          "mad_ns": 0.12970909735038916,
+          "median_ns": 32.1077578448431,
+          "min_ns": 31.37457250854983,
+          "mean_ns": 31.991360172796544,
+          "mad_ns": 0.26879462410751387,
           "samples": 15,
-          "loops_per_sample": 175007,
+          "loops_per_sample": 166670,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 264.51883849292057,
-          "min_ns": 262.21502279817616,
-          "mean_ns": 265.8752633122684,
-          "mad_ns": 1.8918486521078535,
+          "median_ns": 269.1830816918308,
+          "min_ns": 264.05859414058597,
+          "mean_ns": 280.4879512048795,
+          "mad_ns": 0.8899110088991051,
           "samples": 15,
-          "loops_per_sample": 25002,
+          "loops_per_sample": 20002,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.12098465301578455
+        "pyoverdrive": 0.1192785135048014
       }
     },
     {
@@ -661,27 +661,27 @@
       "baseline": "stock_ascontiguousarray",
       "variants": {
         "stock_ascontiguousarray": {
-          "median_ns": 14802.446483180429,
-          "min_ns": 13758.715596330276,
-          "mean_ns": 15135.249745158002,
-          "mad_ns": 212.2324159021391,
+          "median_ns": 15268.40579710145,
+          "min_ns": 14394.202898550724,
+          "mean_ns": 15087.574879227053,
+          "mad_ns": 277.391304347826,
           "samples": 15,
-          "loops_per_sample": 654,
+          "loops_per_sample": 345,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 13962.459546925566,
-          "min_ns": 13633.980582524271,
-          "mean_ns": 13927.464940668824,
-          "mad_ns": 99.51456310679532,
+          "median_ns": 13910.579345088161,
+          "min_ns": 13593.45088161209,
+          "mean_ns": 13895.969773299748,
+          "mad_ns": 150.12594458438252,
           "samples": 15,
-          "loops_per_sample": 618,
+          "loops_per_sample": 397,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0601603845964103
+        "pyoverdrive": 1.0976110640922183
       }
     },
     {
@@ -694,27 +694,27 @@
       "baseline": "stock_ascontiguousarray",
       "variants": {
         "stock_ascontiguousarray": {
-          "median_ns": 12209200.0,
-          "min_ns": 11852900.0,
-          "mean_ns": 12220185.714285715,
-          "mad_ns": 63200.0,
+          "median_ns": 10818600.0,
+          "min_ns": 10656800.0,
+          "mean_ns": 10803842.857142856,
+          "mad_ns": 88100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 4483200.0,
-          "min_ns": 4346700.0,
-          "mean_ns": 4533857.142857143,
-          "mad_ns": 102050.0,
+          "median_ns": 3967400.0,
+          "min_ns": 3753050.0,
+          "mean_ns": 4001128.5714285714,
+          "mad_ns": 138950.0,
           "samples": 7,
           "loops_per_sample": 2,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.7233226266952175
+        "pyoverdrive": 2.726874023289812
       }
     },
     {
@@ -727,27 +727,27 @@
       "baseline": "stock_ascontiguousarray",
       "variants": {
         "stock_ascontiguousarray": {
-          "median_ns": 32.141957160856784,
-          "min_ns": 31.33377332453351,
-          "mean_ns": 32.066358672826546,
-          "mad_ns": 0.3665926681466374,
+          "median_ns": 31.67644722782517,
+          "min_ns": 31.446170724599586,
+          "mean_ns": 31.712179131882344,
+          "mad_ns": 0.14913689166719024,
           "samples": 15,
-          "loops_per_sample": 166670,
+          "loops_per_sample": 175007,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 265.11848815118486,
-          "min_ns": 263.29867013298673,
-          "mean_ns": 266.22704396227044,
-          "mad_ns": 1.6098390160983627,
+          "median_ns": 263.24694024478043,
+          "min_ns": 261.73906087513,
+          "mean_ns": 263.77009839212866,
+          "mad_ns": 0.9279257659387667,
           "samples": 15,
-          "loops_per_sample": 20002,
+          "loops_per_sample": 25002,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.12123619663419213
+        "pyoverdrive": 0.12032978312443364
       }
     },
     {
@@ -760,27 +760,27 @@
       "baseline": "stock_ascontiguousarray",
       "variants": {
         "stock_ascontiguousarray": {
-          "median_ns": 9945.267489711934,
-          "min_ns": 9826.64609053498,
-          "mean_ns": 9949.176954732511,
-          "mad_ns": 83.2304526748976,
+          "median_ns": 9863.064133016627,
+          "min_ns": 9827.197149643705,
+          "mean_ns": 9916.82501979414,
+          "mad_ns": 35.86698337292182,
           "samples": 15,
-          "loops_per_sample": 972,
+          "loops_per_sample": 842,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 10113.41719077568,
-          "min_ns": 10077.463312368973,
-          "mean_ns": 10151.879804332633,
-          "mad_ns": 21.278825995806983,
+          "median_ns": 10166.247379454926,
+          "min_ns": 10109.853249475891,
+          "mean_ns": 10203.410202655485,
+          "mad_ns": 47.4842767295595,
           "samples": 15,
           "loops_per_sample": 954,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9833736018309307
+        "pyoverdrive": 0.9701774671496776
       }
     },
     {
@@ -794,27 +794,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 45710400.0,
-          "min_ns": 42856200.0,
-          "mean_ns": 46043814.28571428,
-          "mad_ns": 2592500.0,
+          "median_ns": 50103500.0,
+          "min_ns": 43938300.0,
+          "mean_ns": 48540257.14285714,
+          "mad_ns": 74600.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 12194800.0,
-          "min_ns": 11217300.0,
-          "mean_ns": 12274000.0,
-          "mad_ns": 971600.0,
+          "median_ns": 13657000.0,
+          "min_ns": 12484300.0,
+          "mean_ns": 13541600.0,
+          "mad_ns": 198100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.7483517564863713
+        "pyoverdrive": 3.66870469356374
       }
     },
     {
@@ -828,27 +828,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 352046.6666666667,
-          "min_ns": 349193.3333333333,
-          "mean_ns": 352516.36363636365,
-          "mad_ns": 1573.333333333314,
+          "median_ns": 351113.3333333333,
+          "min_ns": 343826.6666666667,
+          "mean_ns": 350472.1212121212,
+          "mad_ns": 1813.333333333314,
           "samples": 11,
           "loops_per_sample": 15,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 333809.0909090909,
-          "min_ns": 317145.45454545453,
-          "mean_ns": 339283.47107438016,
-          "mad_ns": 8800.0,
+          "median_ns": 232673.33333333334,
+          "min_ns": 226480.0,
+          "mean_ns": 235930.60606060605,
+          "mad_ns": 5256.666666666686,
           "samples": 11,
-          "loops_per_sample": 22,
+          "loops_per_sample": 30,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.054634748586109
+        "pyoverdrive": 1.50903985559153
       }
     },
     {
@@ -862,27 +862,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 34402400.0,
-          "min_ns": 34333700.0,
-          "mean_ns": 34412242.85714286,
-          "mad_ns": 27400.0,
+          "median_ns": 34028100.0,
+          "min_ns": 33720400.0,
+          "mean_ns": 34505028.571428575,
+          "mad_ns": 230900.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 7260700.0,
-          "min_ns": 6071700.0,
-          "mean_ns": 7126157.142857143,
-          "mad_ns": 342600.0,
+          "median_ns": 7272100.0,
+          "min_ns": 6497400.0,
+          "mean_ns": 7192357.142857143,
+          "mad_ns": 346900.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 4.738165741595163
+        "pyoverdrive": 4.6792673368078
       }
     },
     {
@@ -896,27 +896,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 352333.3333333333,
-          "min_ns": 348626.6666666667,
-          "mean_ns": 351797.57575757575,
-          "mad_ns": 906.6666666666861,
+          "median_ns": 351980.0,
+          "min_ns": 350226.6666666667,
+          "mean_ns": 352537.57575757575,
+          "mad_ns": 1306.666666666686,
           "samples": 11,
           "loops_per_sample": 15,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 344786.6666666667,
-          "min_ns": 343073.3333333333,
-          "mean_ns": 345969.696969697,
-          "mad_ns": 1020.0,
+          "median_ns": 350433.3333333333,
+          "min_ns": 343246.6666666667,
+          "mean_ns": 349353.9393939394,
+          "mad_ns": 1293.3333333333721,
           "samples": 11,
           "loops_per_sample": 15,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0218879307011097
+        "pyoverdrive": 1.004413583182726
       }
     },
     {
@@ -930,27 +930,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 46310200.0,
-          "min_ns": 43524200.0,
-          "mean_ns": 47862371.428571425,
-          "mad_ns": 1162500.0,
+          "median_ns": 46489500.0,
+          "min_ns": 42738900.0,
+          "mean_ns": 46216471.428571425,
+          "mad_ns": 368000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 46242900.0,
-          "min_ns": 46160000.0,
-          "mean_ns": 46938457.14285714,
-          "mad_ns": 49700.0,
+          "median_ns": 45843000.0,
+          "min_ns": 45550700.0,
+          "mean_ns": 45768314.28571428,
+          "mad_ns": 129900.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.00145535855234
+        "pyoverdrive": 1.0141024802041751
       }
     },
     {
@@ -964,27 +964,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 52326300.0,
-          "min_ns": 52127000.0,
-          "mean_ns": 52795957.14285714,
-          "mad_ns": 188700.0,
+          "median_ns": 52236800.0,
+          "min_ns": 48507600.0,
+          "mean_ns": 52065357.14285714,
+          "mad_ns": 76100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 51959100.0,
-          "min_ns": 48228200.0,
-          "mean_ns": 51088328.571428575,
-          "mad_ns": 294200.0,
+          "median_ns": 51501400.0,
+          "min_ns": 51360700.0,
+          "mean_ns": 51635242.85714286,
+          "mad_ns": 140700.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0070670970051445
+        "pyoverdrive": 1.01427922347742
       }
     },
     {
@@ -998,27 +998,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 14538500.0,
-          "min_ns": 14441900.0,
-          "mean_ns": 15369557.142857144,
-          "mad_ns": 79500.0,
+          "median_ns": 14327800.0,
+          "min_ns": 14189800.0,
+          "mean_ns": 14354585.714285715,
+          "mad_ns": 137800.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 7475900.0,
-          "min_ns": 7227800.0,
-          "mean_ns": 7884085.714285715,
-          "mad_ns": 219600.0,
+          "median_ns": 7520900.0,
+          "min_ns": 5943000.0,
+          "mean_ns": 7787800.0,
+          "mad_ns": 1471900.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.94471568640565
+        "pyoverdrive": 1.9050645534444015
       }
     },
     {
@@ -1032,27 +1032,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 388750.0,
-          "min_ns": 377088.46153846156,
-          "mean_ns": 423705.59440559434,
-          "mad_ns": 7076.9230769230635,
+          "median_ns": 384092.3076923077,
+          "min_ns": 377784.6153846154,
+          "mean_ns": 386815.3846153846,
+          "mad_ns": 3376.9230769230635,
           "samples": 11,
-          "loops_per_sample": 26,
+          "loops_per_sample": 13,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 354550.0,
-          "min_ns": 348914.28571428574,
-          "mean_ns": 358398.70129870134,
-          "mad_ns": 957.1428571428405,
+          "median_ns": 450736.36363636365,
+          "min_ns": 445954.54545454547,
+          "mean_ns": 455033.0578512397,
+          "mad_ns": 4536.363636363647,
           "samples": 11,
-          "loops_per_sample": 14,
+          "loops_per_sample": 11,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0964603017910026
+        "pyoverdrive": 0.8521440440118966
       }
     },
     {
@@ -1066,27 +1066,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 8313800.0,
-          "min_ns": 8114000.0,
-          "mean_ns": 8325871.428571428,
-          "mad_ns": 71700.0,
+          "median_ns": 8331600.0,
+          "min_ns": 8244800.0,
+          "mean_ns": 8324585.714285715,
+          "mad_ns": 45400.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 2898850.0,
-          "min_ns": 2795950.0,
-          "mean_ns": 3018321.4285714286,
-          "mad_ns": 102900.0,
+          "median_ns": 3000400.0,
+          "min_ns": 2893850.0,
+          "mean_ns": 2994800.0,
+          "mad_ns": 23300.0,
           "samples": 7,
           "loops_per_sample": 2,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.867964882625869
+        "pyoverdrive": 2.776829756032529
       }
     },
     {
@@ -1100,27 +1100,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 407525.0,
-          "min_ns": 403658.3333333333,
-          "mean_ns": 407864.3939393939,
-          "mad_ns": 1608.333333333314,
+          "median_ns": 397775.0,
+          "min_ns": 392354.1666666667,
+          "mean_ns": 398659.84848484845,
+          "mad_ns": 3158.333333333314,
           "samples": 11,
-          "loops_per_sample": 12,
+          "loops_per_sample": 24,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 405376.92307692306,
-          "min_ns": 394376.92307692306,
-          "mean_ns": 439555.9440559441,
-          "mad_ns": 3753.846153846185,
+          "median_ns": 400138.46153846156,
+          "min_ns": 387269.23076923075,
+          "mean_ns": 398118.8811188811,
+          "mad_ns": 5961.538461538439,
           "samples": 11,
           "loops_per_sample": 13,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.00529896202964
+        "pyoverdrive": 0.994093390749356
       }
     },
     {
@@ -1134,27 +1134,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 17059600.0,
-          "min_ns": 15976100.0,
-          "mean_ns": 17162157.14285714,
-          "mad_ns": 127500.0,
+          "median_ns": 17225600.0,
+          "min_ns": 16952700.0,
+          "mean_ns": 17290785.714285713,
+          "mad_ns": 35000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 17313400.0,
-          "min_ns": 17108700.0,
-          "mean_ns": 17854314.285714287,
-          "mad_ns": 182900.0,
+          "median_ns": 17338400.0,
+          "min_ns": 17219300.0,
+          "mean_ns": 17336414.285714287,
+          "mad_ns": 45800.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9853408342670995
+        "pyoverdrive": 0.993494209384949
       }
     },
     {
@@ -1168,27 +1168,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 18796600.0,
-          "min_ns": 18551700.0,
-          "mean_ns": 18804642.85714286,
-          "mad_ns": 24900.0,
+          "median_ns": 17683000.0,
+          "min_ns": 17494600.0,
+          "mean_ns": 18160428.57142857,
+          "mad_ns": 131600.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 18789700.0,
-          "min_ns": 18537800.0,
-          "mean_ns": 18790171.42857143,
-          "mad_ns": 31500.0,
+          "median_ns": 18620700.0,
+          "min_ns": 18526200.0,
+          "mean_ns": 18624100.0,
+          "mad_ns": 51100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0003672224676285
+        "pyoverdrive": 0.9496420650136675
       }
     },
     {
@@ -1202,27 +1202,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 39213900.0,
-          "min_ns": 37549000.0,
-          "mean_ns": 39143257.14285714,
-          "mad_ns": 143900.0,
+          "median_ns": 39437200.0,
+          "min_ns": 39108100.0,
+          "mean_ns": 39757628.571428575,
+          "mad_ns": 329100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 12989400.0,
-          "min_ns": 12636700.0,
-          "mean_ns": 13012714.285714285,
-          "mad_ns": 87300.0,
+          "median_ns": 13274100.0,
+          "min_ns": 12981200.0,
+          "mean_ns": 13599500.0,
+          "mad_ns": 292100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.0189154233451894
+        "pyoverdrive": 2.9709886169307147
       }
     },
     {
@@ -1236,27 +1236,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 1090600.0,
-          "min_ns": 1079780.0,
-          "mean_ns": 1092805.4545454546,
-          "mad_ns": 9540.0,
+          "median_ns": 1114280.0,
+          "min_ns": 1109120.0,
+          "mean_ns": 1115489.0909090908,
+          "mad_ns": 2300.0,
           "samples": 11,
           "loops_per_sample": 5,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 750008.3333333334,
-          "min_ns": 718808.3333333334,
-          "mean_ns": 744993.9393939395,
-          "mad_ns": 12508.333333333372,
+          "median_ns": 737708.3333333334,
+          "min_ns": 727316.6666666666,
+          "mean_ns": 741232.5757575757,
+          "mad_ns": 8041.666666666744,
           "samples": 11,
           "loops_per_sample": 12,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.454117176475817
+        "pyoverdrive": 1.5104614515673538
       }
     },
     {
@@ -1270,27 +1270,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 27495000.0,
-          "min_ns": 27432000.0,
-          "mean_ns": 27573871.42857143,
-          "mad_ns": 63000.0,
+          "median_ns": 27528800.0,
+          "min_ns": 27423800.0,
+          "mean_ns": 27829285.714285713,
+          "mad_ns": 105000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 6252200.0,
-          "min_ns": 5959500.0,
-          "mean_ns": 6281400.0,
-          "mad_ns": 219800.0,
+          "median_ns": 6230300.0,
+          "min_ns": 5823000.0,
+          "mean_ns": 6253357.142857143,
+          "mad_ns": 294100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 4.397652026486677
+        "pyoverdrive": 4.418535223022968
       }
     },
     {
@@ -1304,27 +1304,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 1158400.0,
-          "min_ns": 1112240.0,
-          "mean_ns": 1157390.9090909092,
-          "mad_ns": 15640.0,
+          "median_ns": 1114120.0,
+          "min_ns": 1085420.0,
+          "mean_ns": 1109585.4545454546,
+          "mad_ns": 10340.0,
           "samples": 11,
           "loops_per_sample": 5,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1126160.0,
-          "min_ns": 1114840.0,
-          "mean_ns": 1126320.0,
-          "mad_ns": 6500.0,
+          "median_ns": 1084400.0,
+          "min_ns": 1066440.0,
+          "mean_ns": 1081363.6363636365,
+          "mad_ns": 9480.0,
           "samples": 11,
           "loops_per_sample": 5,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0286282588619735
+        "pyoverdrive": 1.0274068609369236
       }
     },
     {
@@ -1338,27 +1338,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 39830400.0,
-          "min_ns": 39703500.0,
-          "mean_ns": 39862914.28571428,
-          "mad_ns": 113600.0,
+          "median_ns": 39971400.0,
+          "min_ns": 36181100.0,
+          "mean_ns": 39219200.0,
+          "mad_ns": 1580100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 38516700.0,
-          "min_ns": 36101900.0,
-          "mean_ns": 38107971.428571425,
-          "mad_ns": 1100400.0,
+          "median_ns": 39287300.0,
+          "min_ns": 39049100.0,
+          "mean_ns": 39307514.28571428,
+          "mad_ns": 128600.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.034107283334242
+        "pyoverdrive": 1.0174127517034768
       }
     },
     {
@@ -1372,27 +1372,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 45806300.0,
-          "min_ns": 45639300.0,
-          "mean_ns": 45900642.85714286,
-          "mad_ns": 143800.0,
+          "median_ns": 45891200.0,
+          "min_ns": 42919100.0,
+          "mean_ns": 45462700.0,
+          "mad_ns": 641400.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 45857700.0,
-          "min_ns": 42708400.0,
-          "mean_ns": 45519214.28571428,
-          "mad_ns": 781800.0,
+          "median_ns": 45084200.0,
+          "min_ns": 44907200.0,
+          "mean_ns": 45126700.0,
+          "mad_ns": 139800.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9988791413437657
+        "pyoverdrive": 1.0178998407424331
       }
     },
     {
@@ -1406,27 +1406,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 12142200.0,
-          "min_ns": 12065000.0,
-          "mean_ns": 12139642.857142856,
-          "mad_ns": 41100.0,
+          "median_ns": 12437800.0,
+          "min_ns": 12372500.0,
+          "mean_ns": 12478057.142857144,
+          "mad_ns": 33200.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 7683800.0,
-          "min_ns": 6364200.0,
-          "mean_ns": 8059742.857142857,
-          "mad_ns": 1106300.0,
+          "median_ns": 8569700.0,
+          "min_ns": 8341200.0,
+          "mean_ns": 8801714.285714285,
+          "mad_ns": 228500.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.5802337385147973
+        "pyoverdrive": 1.4513693594874966
       }
     },
     {
@@ -1440,27 +1440,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 1052820.0,
-          "min_ns": 1028440.0,
-          "mean_ns": 1053847.2727272727,
-          "mad_ns": 4840.0,
+          "median_ns": 1110200.0,
+          "min_ns": 1104880.0,
+          "mean_ns": 1200501.8181818181,
+          "mad_ns": 4180.0,
           "samples": 11,
           "loops_per_sample": 5,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 976787.5,
-          "min_ns": 874150.0,
-          "mean_ns": 1062122.7272727273,
-          "mad_ns": 5212.5,
+          "median_ns": 731328.5714285715,
+          "min_ns": 710028.5714285715,
+          "mean_ns": 746997.4025974027,
+          "mad_ns": 20900.0,
           "samples": 11,
-          "loops_per_sample": 8,
+          "loops_per_sample": 7,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0778393458147242
+        "pyoverdrive": 1.5180591096438965
       }
     },
     {
@@ -1474,27 +1474,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 6241600.0,
-          "min_ns": 6210400.0,
-          "mean_ns": 6240328.571428572,
-          "mad_ns": 15100.0,
+          "median_ns": 6251700.0,
+          "min_ns": 6223600.0,
+          "mean_ns": 6286085.714285715,
+          "mad_ns": 28100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 2769450.0,
-          "min_ns": 2645300.0,
-          "mean_ns": 2827507.1428571427,
-          "mad_ns": 78150.0,
+          "median_ns": 2987300.0,
+          "min_ns": 2894750.0,
+          "mean_ns": 3005257.1428571427,
+          "mad_ns": 78900.0,
           "samples": 7,
           "loops_per_sample": 2,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.253732690606438
+        "pyoverdrive": 2.092759347906136
       }
     },
     {
@@ -1508,27 +1508,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 1062340.0,
-          "min_ns": 1030280.0,
-          "mean_ns": 1061825.4545454546,
-          "mad_ns": 11820.0,
+          "median_ns": 1073880.0,
+          "min_ns": 1051220.0,
+          "mean_ns": 1077620.0,
+          "mad_ns": 17640.0,
           "samples": 11,
           "loops_per_sample": 5,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1008640.0,
-          "min_ns": 1001420.0,
-          "mean_ns": 1024461.8181818182,
-          "mad_ns": 3120.0,
+          "median_ns": 1040780.0,
+          "min_ns": 1016920.0,
+          "mean_ns": 1037852.7272727273,
+          "mad_ns": 12820.0,
           "samples": 11,
           "loops_per_sample": 5,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0532400063451777
+        "pyoverdrive": 1.0318030707738426
       }
     },
     {
@@ -1542,27 +1542,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 13897900.0,
-          "min_ns": 12767900.0,
-          "mean_ns": 13633557.142857144,
-          "mad_ns": 165600.0,
+          "median_ns": 14032100.0,
+          "min_ns": 13962900.0,
+          "mean_ns": 14026985.714285715,
+          "mad_ns": 36200.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 14237700.0,
-          "min_ns": 14002000.0,
-          "mean_ns": 14288200.0,
-          "mad_ns": 141700.0,
+          "median_ns": 14288500.0,
+          "min_ns": 13969600.0,
+          "mean_ns": 14253885.714285715,
+          "mad_ns": 163300.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9761337856535817
+        "pyoverdrive": 0.9820554991776603
       }
     },
     {
@@ -1576,27 +1576,27 @@
       "baseline": "stock_exp",
       "variants": {
         "stock_exp": {
-          "median_ns": 16875300.0,
-          "min_ns": 16627000.0,
-          "mean_ns": 17581585.714285713,
-          "mad_ns": 230100.0,
+          "median_ns": 16740800.0,
+          "min_ns": 14243700.0,
+          "mean_ns": 16478428.57142857,
+          "mad_ns": 661000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 16703300.0,
-          "min_ns": 16643800.0,
-          "mean_ns": 16726057.142857144,
-          "mad_ns": 53400.0,
+          "median_ns": 15629000.0,
+          "min_ns": 15336000.0,
+          "mean_ns": 15963071.42857143,
+          "mad_ns": 293000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0102973663886776
+        "pyoverdrive": 1.0711369889308338
       }
     },
     {
@@ -1610,27 +1610,27 @@
       "baseline": "stock_add",
       "variants": {
         "stock_add": {
-          "median_ns": 19692900.0,
-          "min_ns": 14749100.0,
-          "mean_ns": 18923585.714285713,
-          "mad_ns": 190500.0,
+          "median_ns": 19443800.0,
+          "min_ns": 19410300.0,
+          "mean_ns": 19541285.714285713,
+          "mad_ns": 33500.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 13073400.0,
-          "min_ns": 12968100.0,
-          "mean_ns": 13056714.285714285,
-          "mad_ns": 61200.0,
+          "median_ns": 12157200.0,
+          "min_ns": 12062500.0,
+          "mean_ns": 12632342.857142856,
+          "mad_ns": 26900.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.5063334710174858
+        "pyoverdrive": 1.5993649853584706
       }
     },
     {
@@ -1644,27 +1644,27 @@
       "baseline": "stock_add",
       "variants": {
         "stock_add": {
-          "median_ns": 8157500.0,
-          "min_ns": 8084000.0,
-          "mean_ns": 8167285.714285715,
-          "mad_ns": 52900.0,
+          "median_ns": 8138700.0,
+          "min_ns": 8078300.0,
+          "mean_ns": 8136042.857142857,
+          "mad_ns": 33500.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 6210400.0,
-          "min_ns": 5991000.0,
-          "mean_ns": 6267200.0,
-          "mad_ns": 217900.0,
+          "median_ns": 6258300.0,
+          "min_ns": 6060000.0,
+          "mean_ns": 6303485.714285715,
+          "mad_ns": 132200.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.31352247842329
+        "pyoverdrive": 1.3004649825032357
       }
     },
     {
@@ -1678,27 +1678,27 @@
       "baseline": "stock_add",
       "variants": {
         "stock_add": {
-          "median_ns": 19892500.0,
-          "min_ns": 19721600.0,
-          "mean_ns": 19989900.0,
-          "mad_ns": 93900.0,
+          "median_ns": 19321200.0,
+          "min_ns": 16383700.0,
+          "mean_ns": 19030442.85714286,
+          "mad_ns": 687400.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "operator_plus": {
-          "median_ns": 19748800.0,
-          "min_ns": 19602900.0,
-          "mean_ns": 19755357.14285714,
-          "mad_ns": 139800.0,
+          "median_ns": 19205400.0,
+          "min_ns": 18700500.0,
+          "mean_ns": 19317285.714285713,
+          "mad_ns": 239400.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "operator_plus": 1.0072763914769505
+        "operator_plus": 1.0060295541878848
       }
     },
     {
@@ -1712,27 +1712,27 @@
       "baseline": "stock_add",
       "variants": {
         "stock_add": {
-          "median_ns": 17751100.0,
-          "min_ns": 14251100.0,
-          "mean_ns": 17713157.14285714,
-          "mad_ns": 53100.0,
+          "median_ns": 17429800.0,
+          "min_ns": 17297600.0,
+          "mean_ns": 17489457.14285714,
+          "mad_ns": 32200.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 17648900.0,
-          "min_ns": 17449500.0,
-          "mean_ns": 17624900.0,
-          "mad_ns": 79200.0,
+          "median_ns": 17044800.0,
+          "min_ns": 16825700.0,
+          "mean_ns": 17074814.285714287,
+          "mad_ns": 168300.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.005790729167257
+        "pyoverdrive": 1.0225875340279733
       }
     },
     {
@@ -1746,27 +1746,27 @@
       "baseline": "stock_convolve",
       "variants": {
         "stock_convolve": {
-          "median_ns": 647425.0,
-          "min_ns": 647275.0,
-          "mean_ns": 647850.0,
-          "mad_ns": 100.0,
+          "median_ns": 578655.5555555555,
+          "min_ns": 577833.3333333334,
+          "mean_ns": 578738.0952380953,
+          "mad_ns": 766.6666666666279,
           "samples": 7,
-          "loops_per_sample": 8,
+          "loops_per_sample": 9,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 171128.57142857142,
-          "min_ns": 170387.5,
-          "mean_ns": 171256.63265306124,
-          "mad_ns": 410.7142857142899,
+          "median_ns": 175231.0344827586,
+          "min_ns": 173896.55172413794,
+          "mean_ns": 182869.95073891623,
+          "mad_ns": 1334.4827586206666,
           "samples": 7,
-          "loops_per_sample": 56,
+          "loops_per_sample": 29,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.7832665497954756
+        "pyoverdrive": 3.3022435624124036
       }
     },
     {
@@ -1780,27 +1780,27 @@
       "baseline": "stock_correlate",
       "variants": {
         "stock_correlate": {
-          "median_ns": 2788450.0,
-          "min_ns": 2781950.0,
-          "mean_ns": 2796728.5714285714,
-          "mad_ns": 2150.0,
+          "median_ns": 2786950.0,
+          "min_ns": 2783700.0,
+          "mean_ns": 2788621.4285714286,
+          "mad_ns": 3250.0,
           "samples": 7,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 181824.07407407407,
-          "min_ns": 177674.07407407407,
-          "mean_ns": 195864.2857142857,
-          "mad_ns": 2692.592592592584,
+          "median_ns": 177850.0,
+          "min_ns": 177464.8148148148,
+          "mean_ns": 178810.0529100529,
+          "mad_ns": 385.18518518519704,
           "samples": 7,
           "loops_per_sample": 54,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 15.33597800071294
+        "pyoverdrive": 15.670227719988755
       }
     },
     {
@@ -1814,27 +1814,27 @@
       "baseline": "stock_convolve",
       "variants": {
         "stock_convolve": {
-          "median_ns": 130847.5,
-          "min_ns": 129175.0,
-          "mean_ns": 131617.14285714287,
-          "mad_ns": 357.5,
+          "median_ns": 124333.33333333333,
+          "min_ns": 122683.33333333333,
+          "mean_ns": 124039.56043956045,
+          "mad_ns": 1198.7179487179383,
           "samples": 7,
-          "loops_per_sample": 40,
+          "loops_per_sample": 78,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 130500.0,
-          "min_ns": 129887.5,
-          "mean_ns": 131422.5,
-          "mad_ns": 572.5,
+          "median_ns": 124314.47368421052,
+          "min_ns": 123247.36842105263,
+          "mean_ns": 124103.1954887218,
+          "mad_ns": 735.5263157894806,
           "samples": 7,
-          "loops_per_sample": 40,
+          "loops_per_sample": 76,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.002662835249042
+        "pyoverdrive": 1.000151709198164
       }
     },
     {
@@ -1849,27 +1849,27 @@
       "baseline": "stock_convolve",
       "variants": {
         "stock_convolve": {
-          "median_ns": 624511.1111111111,
-          "min_ns": 622722.2222222222,
-          "mean_ns": 627771.4285714285,
-          "mad_ns": 1511.111111111124,
+          "median_ns": 553860.0,
+          "min_ns": 553510.0,
+          "mean_ns": 554552.8571428572,
+          "mad_ns": 270.0,
           "samples": 7,
-          "loops_per_sample": 9,
+          "loops_per_sample": 10,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 170353.33333333334,
-          "min_ns": 169786.66666666666,
-          "mean_ns": 171440.0,
-          "mad_ns": 566.6666666666861,
+          "median_ns": 173993.10344827586,
+          "min_ns": 172900.0,
+          "mean_ns": 174058.1280788177,
+          "mad_ns": 324.1379310344637,
           "samples": 7,
-          "loops_per_sample": 30,
+          "loops_per_sample": 29,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.665975293181492
+        "pyoverdrive": 3.183229616710928
       }
     },
     {
@@ -1884,27 +1884,27 @@
       "baseline": "stock_correlate",
       "variants": {
         "stock_correlate": {
-          "median_ns": 570111.1111111111,
-          "min_ns": 569333.3333333334,
-          "mean_ns": 570626.9841269841,
-          "mad_ns": 422.2222222222481,
+          "median_ns": 501390.0,
+          "min_ns": 500710.0,
+          "mean_ns": 501320.0,
+          "mad_ns": 380.0,
           "samples": 7,
-          "loops_per_sample": 9,
+          "loops_per_sample": 10,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 170393.33333333334,
-          "min_ns": 169550.0,
-          "mean_ns": 170289.52380952382,
-          "mad_ns": 420.0,
+          "median_ns": 173780.0,
+          "min_ns": 173186.66666666666,
+          "mean_ns": 173857.14285714287,
+          "mad_ns": 100.0,
           "samples": 7,
           "loops_per_sample": 30,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.3458533849785463
+        "pyoverdrive": 2.8851996777534814
       }
     },
     {
@@ -1918,27 +1918,27 @@
       "baseline": "stock_convolve",
       "variants": {
         "stock_convolve": {
-          "median_ns": 653450.0,
-          "min_ns": 652712.5,
-          "mean_ns": 653902.5,
-          "mad_ns": 737.5,
+          "median_ns": 578911.1111111111,
+          "min_ns": 578411.1111111111,
+          "mean_ns": 580257.7777777778,
+          "mad_ns": 500.0,
           "samples": 5,
-          "loops_per_sample": 8,
+          "loops_per_sample": 9,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 658637.5,
-          "min_ns": 657787.5,
-          "mean_ns": 658670.0,
-          "mad_ns": 825.0,
+          "median_ns": 585111.1111111111,
+          "min_ns": 584788.8888888889,
+          "mean_ns": 585111.1111111111,
+          "mad_ns": 288.88888888887595,
           "samples": 5,
-          "loops_per_sample": 8,
+          "loops_per_sample": 9,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.99212389212579
+        "pyoverdrive": 0.9894037219901254
       }
     },
     {
@@ -1955,27 +1955,27 @@
       "baseline": "stock_nanquantile",
       "variants": {
         "stock_nanquantile": {
-          "median_ns": 2714950.0,
-          "min_ns": 2682300.0,
-          "mean_ns": 2724064.285714286,
-          "mad_ns": 14450.0,
+          "median_ns": 2550100.0,
+          "min_ns": 2528400.0,
+          "mean_ns": 2551378.5714285714,
+          "mad_ns": 18200.0,
           "samples": 7,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 47523.49397590361,
-          "min_ns": 47283.73493975904,
-          "mean_ns": 47501.89328743546,
-          "mad_ns": 139.75903614457638,
+          "median_ns": 45757.8125,
+          "min_ns": 45456.770833333336,
+          "mean_ns": 45709.82142857143,
+          "mad_ns": 70.3125,
           "samples": 7,
-          "loops_per_sample": 166,
+          "loops_per_sample": 192,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 57.12858573438629
+        "pyoverdrive": 55.73037391155882
       }
     },
     {
@@ -1991,27 +1991,27 @@
       "baseline": "stock_nanquantile",
       "variants": {
         "stock_nanquantile": {
-          "median_ns": 288383.3333333333,
-          "min_ns": 283483.3333333333,
-          "mean_ns": 288943.65079365077,
-          "mad_ns": 3272.222222222248,
+          "median_ns": 274500.0,
+          "min_ns": 269722.22222222225,
+          "mean_ns": 273169.04761904763,
+          "mad_ns": 1966.666666666686,
           "samples": 7,
           "loops_per_sample": 18,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 290772.22222222225,
-          "min_ns": 286516.6666666667,
-          "mean_ns": 290248.4126984127,
-          "mad_ns": 1411.1111111110658,
+          "median_ns": 275579.4117647059,
+          "min_ns": 269723.5294117647,
+          "mean_ns": 275780.6722689076,
+          "mad_ns": 2152.941176470602,
           "samples": 7,
-          "loops_per_sample": 18,
+          "loops_per_sample": 34,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9917843290853855
+        "pyoverdrive": 0.9960831189899356
       }
     },
     {
@@ -2030,27 +2030,27 @@
       "baseline": "stock_nanquantile",
       "variants": {
         "stock_nanquantile": {
-          "median_ns": 2616250.0,
-          "min_ns": 2593700.0,
-          "mean_ns": 2624428.5714285714,
-          "mad_ns": 19900.0,
+          "median_ns": 2483966.6666666665,
+          "min_ns": 2461766.6666666665,
+          "mean_ns": 2487657.1428571427,
+          "mad_ns": 12433.333333333489,
           "samples": 7,
-          "loops_per_sample": 2,
+          "loops_per_sample": 3,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 2611350.0,
-          "min_ns": 2597400.0,
-          "mean_ns": 2620150.0,
-          "mad_ns": 8100.0,
+          "median_ns": 2463133.3333333335,
+          "min_ns": 2443800.0,
+          "mean_ns": 2460690.476190476,
+          "mad_ns": 5733.333333333023,
           "samples": 7,
-          "loops_per_sample": 2,
+          "loops_per_sample": 3,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0018764240718403
+        "pyoverdrive": 1.0084580615476222
       }
     },
     {
@@ -2064,27 +2064,27 @@
       "baseline": "stock_einsum",
       "variants": {
         "stock_einsum": {
-          "median_ns": 77808600.0,
-          "min_ns": 77510700.0,
-          "mean_ns": 78090340.0,
-          "mad_ns": 297900.0,
+          "median_ns": 77892000.0,
+          "min_ns": 77764300.0,
+          "mean_ns": 78867180.0,
+          "mad_ns": 113000.0,
           "samples": 5,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 7396800.0,
-          "min_ns": 7230600.0,
-          "mean_ns": 7781480.0,
-          "mad_ns": 166200.0,
+          "median_ns": 7929700.0,
+          "min_ns": 7884100.0,
+          "mean_ns": 8357920.0,
+          "mad_ns": 45600.0,
           "samples": 5,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 10.519224529526282
+        "pyoverdrive": 9.822818013291801
       }
     },
     {
@@ -2097,27 +2097,27 @@
       "baseline": "stock_einsum",
       "variants": {
         "stock_einsum": {
-          "median_ns": 1143.9666893269884,
-          "min_ns": 1133.6335825968729,
-          "mean_ns": 1150.6025585563314,
-          "mad_ns": 10.33310673011556,
+          "median_ns": 1113.4357005758156,
+          "min_ns": 1106.4139475367883,
+          "mean_ns": 1127.6958645960565,
+          "mad_ns": 7.021753039027317,
           "samples": 11,
-          "loops_per_sample": 5884,
+          "loops_per_sample": 6252,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1580.2878848460616,
-          "min_ns": 1570.4118352658936,
-          "mean_ns": 1583.2267093162736,
-          "mad_ns": 2.9788084766094016,
+          "median_ns": 1538.8157894736842,
+          "min_ns": 1532.3073308270677,
+          "mean_ns": 1539.2942583732058,
+          "mad_ns": 2.1616541353384946,
           "samples": 11,
-          "loops_per_sample": 5002,
+          "loops_per_sample": 4256,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.7238976520018212
+        "pyoverdrive": 0.7235665946452501
       }
     },
     {
@@ -2130,27 +2130,27 @@
       "baseline": "stock_einsum",
       "variants": {
         "stock_einsum": {
-          "median_ns": 21967.932489451476,
-          "min_ns": 21921.097046413503,
-          "mean_ns": 22023.50813743219,
-          "mad_ns": 44.725738396624365,
+          "median_ns": 21580.088495575223,
+          "min_ns": 21532.522123893807,
+          "mean_ns": 21593.26801517067,
+          "mad_ns": 42.25663716814233,
           "samples": 7,
-          "loops_per_sample": 237,
+          "loops_per_sample": 452,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 22982.71028037383,
-          "min_ns": 22921.495327102803,
-          "mean_ns": 22996.962616822428,
-          "mad_ns": 27.336448598132847,
+          "median_ns": 22556.39269406393,
+          "min_ns": 22519.178082191782,
+          "mean_ns": 22659.947814742336,
+          "mad_ns": 37.214611872146634,
           "samples": 7,
-          "loops_per_sample": 428,
+          "loops_per_sample": 438,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9558460347564435
+        "pyoverdrive": 0.9567171838276413
       }
     },
     {
@@ -2163,27 +2163,27 @@
       "baseline": "stock_searchsorted",
       "variants": {
         "stock_searchsorted": {
-          "median_ns": 108275900.0,
-          "min_ns": 107363000.0,
-          "mean_ns": 108331471.42857143,
-          "mad_ns": 195400.0,
+          "median_ns": 108904200.0,
+          "min_ns": 107366300.0,
+          "mean_ns": 109915542.85714285,
+          "mad_ns": 160000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 57953800.0,
-          "min_ns": 57674700.0,
-          "mean_ns": 58084642.85714286,
-          "mad_ns": 279100.0,
+          "median_ns": 58105600.0,
+          "min_ns": 57491300.0,
+          "mean_ns": 58009600.0,
+          "mad_ns": 204800.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.8683140708633428
+        "pyoverdrive": 1.8742462000220288
       }
     },
     {
@@ -2196,27 +2196,27 @@
       "baseline": "stock_searchsorted",
       "variants": {
         "stock_searchsorted": {
-          "median_ns": 25290600.0,
-          "min_ns": 25127500.0,
-          "mean_ns": 25360571.42857143,
-          "mad_ns": 163100.0,
+          "median_ns": 25481700.0,
+          "min_ns": 25126000.0,
+          "mean_ns": 25681742.85714286,
+          "mad_ns": 354500.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 25478900.0,
-          "min_ns": 25250600.0,
-          "mean_ns": 25543342.85714286,
-          "mad_ns": 150600.0,
+          "median_ns": 25475600.0,
+          "min_ns": 25249000.0,
+          "mean_ns": 25449828.57142857,
+          "mad_ns": 131000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9926095710568352
+        "pyoverdrive": 1.000239444802085
       }
     },
     {
@@ -2228,27 +2228,27 @@
       "baseline": "stock_isclose",
       "variants": {
         "stock_isclose": {
-          "median_ns": 9719.811320754718,
-          "min_ns": 9693.800539083559,
-          "mean_ns": 9760.769419259987,
-          "mad_ns": 21.967654986521666,
+          "median_ns": 9718.542199488491,
+          "min_ns": 9697.69820971867,
+          "mean_ns": 9769.693094629156,
+          "mad_ns": 14.833759590792397,
           "samples": 11,
-          "loops_per_sample": 742,
+          "loops_per_sample": 782,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 5844.3448275862065,
-          "min_ns": 5833.931034482759,
-          "mean_ns": 5849.235109717868,
-          "mad_ns": 9.17241379310417,
+          "median_ns": 5831.926121372032,
+          "min_ns": 5803.4300791556725,
+          "mean_ns": 5832.171983689134,
+          "mad_ns": 9.036939313984476,
           "samples": 11,
-          "loops_per_sample": 1450,
+          "loops_per_sample": 1516,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.663113934495397
+        "pyoverdrive": 1.6664378109786626
       }
     },
     {
@@ -2259,27 +2259,27 @@
       "baseline": "stock_isclose",
       "variants": {
         "stock_isclose": {
-          "median_ns": 7080.843195266272,
-          "min_ns": 7044.2307692307695,
-          "mean_ns": 7094.684418145957,
-          "mad_ns": 13.091715976331216,
+          "median_ns": 7037.779552715655,
+          "min_ns": 7011.102236421725,
+          "mean_ns": 7038.115015974441,
+          "mad_ns": 10.303514376996645,
           "samples": 15,
-          "loops_per_sample": 1352,
+          "loops_per_sample": 1252,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 2767.658349328215,
-          "min_ns": 2757.357645553423,
-          "mean_ns": 2768.0592876946043,
-          "mad_ns": 3.0710172744720694,
+          "median_ns": 2776.8714011516313,
+          "min_ns": 2767.3704414587332,
+          "mean_ns": 2779.1895926636807,
+          "mad_ns": 3.4229046705054316,
           "samples": 15,
           "loops_per_sample": 3126,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.558423873736071
+        "pyoverdrive": 2.5344276115188227
       }
     },
     {
@@ -2291,27 +2291,27 @@
       "baseline": "stock_isclose",
       "variants": {
         "stock_isclose": {
-          "median_ns": 9772.010869565218,
-          "min_ns": 9745.652173913044,
-          "mean_ns": 9775.48171936759,
-          "mad_ns": 9.782608695652016,
+          "median_ns": 9734.564643799473,
+          "min_ns": 9706.332453825857,
+          "mean_ns": 9774.67018469657,
+          "mad_ns": 12.401055408970933,
           "samples": 11,
-          "loops_per_sample": 736,
+          "loops_per_sample": 758,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 11514.268585131895,
-          "min_ns": 11497.122302158274,
-          "mean_ns": 11589.81905384783,
-          "mad_ns": 17.146282973621055,
+          "median_ns": 11687.99504950495,
+          "min_ns": 11591.70792079208,
+          "mean_ns": 11737.1399639964,
+          "mad_ns": 93.44059405940607,
           "samples": 11,
-          "loops_per_sample": 834,
+          "loops_per_sample": 808,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.8486870700743934
+        "pyoverdrive": 0.832868648777515
       }
     },
     {
@@ -2323,27 +2323,27 @@
       "baseline": "stock_isclose",
       "variants": {
         "stock_isclose": {
-          "median_ns": 283248.14814814815,
-          "min_ns": 263451.85185185185,
-          "mean_ns": 281435.97883597884,
-          "mad_ns": 10400.0,
+          "median_ns": 328944.44444444444,
+          "min_ns": 282394.44444444444,
+          "mean_ns": 340075.39682539686,
+          "mad_ns": 37461.111111111124,
           "samples": 7,
-          "loops_per_sample": 27,
+          "loops_per_sample": 18,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 240003.7037037037,
-          "min_ns": 227214.8148148148,
-          "mean_ns": 239211.6402116402,
-          "mad_ns": 8462.962962962949,
+          "median_ns": 323977.77777777775,
+          "min_ns": 309300.0,
+          "mean_ns": 331042.0634920635,
+          "mad_ns": 14677.777777777752,
           "samples": 7,
-          "loops_per_sample": 27,
+          "loops_per_sample": 18,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.1801824045925218
+        "pyoverdrive": 1.015330269565814
       }
     },
     {
@@ -2356,27 +2356,27 @@
       "baseline": "stock_isin",
       "variants": {
         "stock_isin": {
-          "median_ns": 8271267300.0,
-          "min_ns": 8251359300.0,
-          "mean_ns": 8273180380.0,
-          "mad_ns": 10022800.0,
+          "median_ns": 8289542700.0,
+          "min_ns": 8265515200.0,
+          "mean_ns": 8288885500.0,
+          "mad_ns": 11954400.0,
           "samples": 5,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 5518200.0,
-          "min_ns": 5464400.0,
-          "mean_ns": 5524000.0,
-          "mad_ns": 24300.0,
+          "median_ns": 5203900.0,
+          "min_ns": 5122800.0,
+          "mean_ns": 5228560.0,
+          "mad_ns": 32500.0,
           "samples": 5,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1498.9067630749157
+        "pyoverdrive": 1592.9481158361998
       }
     },
     {
@@ -2388,27 +2388,27 @@
       "baseline": "stock_isin",
       "variants": {
         "stock_isin": {
-          "median_ns": 3151600.0,
-          "min_ns": 3114250.0,
-          "mean_ns": 3149690.0,
-          "mad_ns": 14900.0,
+          "median_ns": 3134750.0,
+          "min_ns": 3061600.0,
+          "mean_ns": 3119580.0,
+          "mad_ns": 39200.0,
           "samples": 5,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 3163750.0,
-          "min_ns": 3118900.0,
-          "mean_ns": 3164020.0,
-          "mad_ns": 40100.0,
+          "median_ns": 3091600.0,
+          "min_ns": 3072850.0,
+          "mean_ns": 3098610.0,
+          "mad_ns": 18750.0,
           "samples": 5,
           "loops_per_sample": 2,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9961596207032793
+        "pyoverdrive": 1.0139571742786906
       }
     },
     {
@@ -2423,27 +2423,27 @@
       "baseline": "stock_dot",
       "variants": {
         "stock_dot": {
-          "median_ns": 3565500.0,
-          "min_ns": 3423750.0,
-          "mean_ns": 3574877.777777778,
-          "mad_ns": 52750.0,
+          "median_ns": 3379000.0,
+          "min_ns": 3027550.0,
+          "mean_ns": 3650927.777777778,
+          "mad_ns": 121550.0,
           "samples": 9,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 523112.5,
-          "min_ns": 509468.75,
-          "mean_ns": 525908.3333333334,
-          "mad_ns": 6593.75,
+          "median_ns": 533500.0,
+          "min_ns": 521788.8888888889,
+          "mean_ns": 539541.975308642,
+          "mad_ns": 8044.444444444496,
           "samples": 9,
-          "loops_per_sample": 16,
+          "loops_per_sample": 9,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 6.815933475112906
+        "pyoverdrive": 6.3336457357075915
       }
     },
     {
@@ -2454,27 +2454,27 @@
       "baseline": "stock_dot",
       "variants": {
         "stock_dot": {
-          "median_ns": 132393.47826086957,
-          "min_ns": 119641.30434782608,
-          "mean_ns": 135343.16770186336,
-          "mad_ns": 12308.69565217392,
+          "median_ns": 141282.60869565216,
+          "min_ns": 125030.43478260869,
+          "mean_ns": 150565.21739130435,
+          "mad_ns": 13356.521739130461,
           "samples": 7,
           "loops_per_sample": 46,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 121638.75,
-          "min_ns": 120312.5,
-          "mean_ns": 123475.0,
-          "mad_ns": 1326.25,
+          "median_ns": 122430.0,
+          "min_ns": 121267.5,
+          "mean_ns": 122614.64285714286,
+          "mad_ns": 922.5,
           "samples": 7,
           "loops_per_sample": 80,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.088415313877112
+        "pyoverdrive": 1.1539868389745338
       }
     },
     {
@@ -2490,27 +2490,27 @@
       "baseline": "stock_quantile",
       "variants": {
         "stock_quantile": {
-          "median_ns": 225010500.0,
-          "min_ns": 223549900.0,
-          "mean_ns": 225401571.42857143,
-          "mad_ns": 1386900.0,
+          "median_ns": 224438400.0,
+          "min_ns": 223858100.0,
+          "mean_ns": 224950114.2857143,
+          "mad_ns": 439000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 6265600.0,
-          "min_ns": 6151900.0,
-          "mean_ns": 6280400.0,
-          "mad_ns": 67300.0,
+          "median_ns": 6382400.0,
+          "min_ns": 6265600.0,
+          "mean_ns": 6393871.428571428,
+          "mad_ns": 52400.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 35.91204353932584
+        "pyoverdrive": 35.16520431185761
       }
     },
     {
@@ -2526,27 +2526,27 @@
       "baseline": "stock_percentile",
       "variants": {
         "stock_percentile": {
-          "median_ns": 225510900.0,
-          "min_ns": 223802400.0,
-          "mean_ns": 225808142.85714287,
-          "mad_ns": 468700.0,
+          "median_ns": 224633600.0,
+          "min_ns": 223698400.0,
+          "mean_ns": 224817500.0,
+          "mad_ns": 460700.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 6290300.0,
-          "min_ns": 6148500.0,
-          "mean_ns": 6283057.142857143,
-          "mad_ns": 59900.0,
+          "median_ns": 6405400.0,
+          "min_ns": 6242200.0,
+          "mean_ns": 6404900.0,
+          "mad_ns": 68400.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 35.85057946361859
+        "pyoverdrive": 35.06941018515627
       }
     },
     {
@@ -2558,27 +2558,27 @@
       "baseline": "stock_quantile",
       "variants": {
         "stock_quantile": {
-          "median_ns": 5395400.0,
-          "min_ns": 5338000.0,
-          "mean_ns": 5407071.428571428,
-          "mad_ns": 29900.0,
+          "median_ns": 5312900.0,
+          "min_ns": 5276100.0,
+          "mean_ns": 5315028.571428572,
+          "mad_ns": 20200.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 5332100.0,
-          "min_ns": 5298800.0,
-          "mean_ns": 5335271.428571428,
-          "mad_ns": 26900.0,
+          "median_ns": 5352600.0,
+          "min_ns": 5301800.0,
+          "mean_ns": 5358700.0,
+          "mad_ns": 36100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0118714952832844
+        "pyoverdrive": 0.9925830437544371
       }
     },
     {
@@ -2591,27 +2591,27 @@
       "baseline": "stock_sort",
       "variants": {
         "stock_sort": {
-          "median_ns": 243133.33333333334,
-          "min_ns": 241352.38095238095,
-          "mean_ns": 242902.64550264552,
-          "mad_ns": 1171.4285714285506,
+          "median_ns": 242565.0,
+          "min_ns": 240502.5,
+          "mean_ns": 242956.38888888888,
+          "mad_ns": 1600.0,
           "samples": 9,
-          "loops_per_sample": 21,
+          "loops_per_sample": 40,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 7742.953020134229,
-          "min_ns": 7717.197986577181,
-          "mean_ns": 7742.142058165548,
-          "mad_ns": 13.171140939596626,
+          "median_ns": 7749.742268041237,
+          "min_ns": 7730.240549828179,
+          "mean_ns": 7756.643757159221,
+          "mad_ns": 10.996563573882668,
           "samples": 9,
-          "loops_per_sample": 1192,
+          "loops_per_sample": 1164,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 31.400595186501402
+        "pyoverdrive": 31.299750573680534
       }
     },
     {
@@ -2624,27 +2624,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 348710.71428571426,
-          "min_ns": 347607.14285714284,
-          "mean_ns": 348816.2698412698,
-          "mad_ns": 771.4285714285215,
+          "median_ns": 347280.0,
+          "min_ns": 345153.3333333333,
+          "mean_ns": 347437.77777777775,
+          "mad_ns": 1113.333333333314,
           "samples": 9,
-          "loops_per_sample": 28,
+          "loops_per_sample": 15,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 16644.02985074627,
-          "min_ns": 16584.328358208953,
-          "mean_ns": 16712.354892205636,
-          "mad_ns": 20.895522388058453,
+          "median_ns": 16629.42238267148,
+          "min_ns": 16592.238267148015,
+          "mean_ns": 16687.204171680707,
+          "mad_ns": 25.992779783395235,
           "samples": 9,
-          "loops_per_sample": 536,
+          "loops_per_sample": 554,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 20.95109882719173
+        "pyoverdrive": 20.883467387410857
       }
     },
     {
@@ -2657,27 +2657,27 @@
       "baseline": "stock_sort",
       "variants": {
         "stock_sort": {
-          "median_ns": 5036.615384615385,
-          "min_ns": 4999.7692307692305,
-          "mean_ns": 5037.138461538461,
-          "mad_ns": 6.0,
+          "median_ns": 5044.249201277955,
+          "min_ns": 5032.507987220447,
+          "mean_ns": 5045.52715654952,
+          "mad_ns": 6.629392971246489,
           "samples": 15,
-          "loops_per_sample": 1300,
+          "loops_per_sample": 1252,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 5722.552664188352,
-          "min_ns": 5707.9925650557625,
-          "mean_ns": 5732.1148285832305,
-          "mad_ns": 7.496902106568086,
+          "median_ns": 5787.608426270136,
+          "min_ns": 5767.534076827757,
+          "mean_ns": 5963.482032218091,
+          "mad_ns": 11.152416356877438,
           "samples": 15,
           "loops_per_sample": 1614,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.8801343876019609
+        "pyoverdrive": 0.8715602075603369
       }
     },
     {
@@ -2690,27 +2690,27 @@
       "baseline": "stock_sort",
       "variants": {
         "stock_sort": {
-          "median_ns": 286766.6666666667,
-          "min_ns": 284672.22222222225,
-          "mean_ns": 286892.85714285716,
-          "mad_ns": 1216.666666666686,
+          "median_ns": 286441.17647058825,
+          "min_ns": 283579.4117647059,
+          "mean_ns": 286354.6218487395,
+          "mad_ns": 2270.588235294097,
           "samples": 7,
-          "loops_per_sample": 18,
+          "loops_per_sample": 34,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 287661.1111111111,
-          "min_ns": 284738.8888888889,
-          "mean_ns": 288784.126984127,
-          "mad_ns": 2594.444444444438,
+          "median_ns": 290058.82352941175,
+          "min_ns": 288679.4117647059,
+          "mean_ns": 290119.7478991597,
+          "mad_ns": 797.0588235293981,
           "samples": 7,
-          "loops_per_sample": 18,
+          "loops_per_sample": 34,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9968906313370286
+        "pyoverdrive": 0.9875278848103834
       }
     },
     {
@@ -2726,27 +2726,27 @@
       "baseline": "stock_mean",
       "variants": {
         "stock_mean": {
-          "median_ns": 5485600.0,
-          "min_ns": 5279700.0,
-          "mean_ns": 5567066.666666667,
-          "mad_ns": 181800.0,
+          "median_ns": 5385400.0,
+          "min_ns": 5361100.0,
+          "mean_ns": 5669655.555555556,
+          "mad_ns": 24300.0,
           "samples": 9,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1379950.0,
-          "min_ns": 1369850.0,
-          "mean_ns": 1394261.111111111,
-          "mad_ns": 10100.0,
+          "median_ns": 1435450.0,
+          "min_ns": 1399700.0,
+          "mean_ns": 1445475.0,
+          "mad_ns": 13575.0,
           "samples": 9,
           "loops_per_sample": 4,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.9752164933512084
+        "pyoverdrive": 3.7517154899160543
       }
     },
     {
@@ -2761,27 +2761,27 @@
       "baseline": "stock_sum",
       "variants": {
         "stock_sum": {
-          "median_ns": 500618.1818181818,
-          "min_ns": 490881.8181818182,
-          "mean_ns": 499964.6464646465,
-          "mad_ns": 3000.0,
+          "median_ns": 491272.7272727273,
+          "min_ns": 482054.54545454547,
+          "mean_ns": 493910.10101010103,
+          "mad_ns": 6854.545454545412,
           "samples": 9,
           "loops_per_sample": 11,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 56047.70114942529,
-          "min_ns": 55783.333333333336,
-          "mean_ns": 56433.52490421456,
-          "mad_ns": 239.65517241378984,
+          "median_ns": 56233.14606741573,
+          "min_ns": 55893.25842696629,
+          "mean_ns": 56314.856429463165,
+          "mad_ns": 175.2808988764009,
           "samples": 9,
-          "loops_per_sample": 174,
+          "loops_per_sample": 178,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 8.932002054526997
+        "pyoverdrive": 8.736355008196758
       }
     },
     {
@@ -2796,27 +2796,27 @@
       "baseline": "stock_mean",
       "variants": {
         "stock_mean": {
-          "median_ns": 135350.0,
-          "min_ns": 134905.7142857143,
-          "mean_ns": 135479.52380952382,
-          "mad_ns": 362.8571428571304,
+          "median_ns": 135867.56756756757,
+          "min_ns": 134651.35135135136,
+          "mean_ns": 136010.8108108108,
+          "mad_ns": 445.94594594594673,
           "samples": 9,
-          "loops_per_sample": 70,
+          "loops_per_sample": 74,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 136697.2972972973,
-          "min_ns": 136216.2162162162,
-          "mean_ns": 136857.95795795796,
-          "mad_ns": 481.08108108109445,
+          "median_ns": 136336.11111111112,
+          "min_ns": 135006.94444444444,
+          "mean_ns": 136240.8950617284,
+          "mad_ns": 293.0555555555329,
           "samples": 9,
-          "loops_per_sample": 37,
+          "loops_per_sample": 72,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.990143936098699
+        "pyoverdrive": 0.9965633203138551
       }
     },
     {
@@ -2828,27 +2828,27 @@
       "baseline": "stock_eigvalsh",
       "variants": {
         "stock_eigvalsh": {
-          "median_ns": 1164540.0,
-          "min_ns": 1162100.0,
-          "mean_ns": 1165928.888888889,
-          "mad_ns": 1780.0,
+          "median_ns": 1168400.0,
+          "min_ns": 1165780.0,
+          "mean_ns": 1180486.6666666667,
+          "mad_ns": 2320.0,
           "samples": 9,
           "loops_per_sample": 5,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 44765.625,
-          "min_ns": 43958.333333333336,
-          "mean_ns": 44668.807870370365,
-          "mad_ns": 349.47916666666424,
+          "median_ns": 44459.13461538462,
+          "min_ns": 43969.230769230766,
+          "mean_ns": 44936.9123931624,
+          "mad_ns": 390.86538461538294,
           "samples": 9,
-          "loops_per_sample": 192,
+          "loops_per_sample": 208,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 26.014157068062826
+        "pyoverdrive": 26.280313598269803
       }
     },
     {
@@ -2860,27 +2860,27 @@
       "baseline": "stock_eigvalsh",
       "variants": {
         "stock_eigvalsh": {
-          "median_ns": 8534.116541353384,
-          "min_ns": 8513.815789473685,
-          "mean_ns": 8534.84335839599,
-          "mad_ns": 5.263157894736651,
+          "median_ns": 8469.670542635658,
+          "min_ns": 8442.151162790698,
+          "mean_ns": 8707.235142118863,
+          "mad_ns": 9.302325581395053,
           "samples": 15,
-          "loops_per_sample": 1064,
+          "loops_per_sample": 1032,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 9822.427983539095,
-          "min_ns": 9800.308641975309,
-          "mean_ns": 9838.484224965707,
-          "mad_ns": 7.921810699588605,
+          "median_ns": 9622.325102880659,
+          "min_ns": 9575.925925925925,
+          "mean_ns": 9676.570644718793,
+          "mad_ns": 41.563786008231546,
           "samples": 15,
           "loops_per_sample": 972,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.8688398179813864
+        "pyoverdrive": 0.8802103911558832
       }
     },
     {
@@ -2896,27 +2896,27 @@
       "baseline": "stock_matmul",
       "variants": {
         "stock_matmul": {
-          "median_ns": 19287900.0,
-          "min_ns": 18877200.0,
-          "mean_ns": 39998322.222222224,
-          "mad_ns": 98000.0,
+          "median_ns": 19407400.0,
+          "min_ns": 19302000.0,
+          "mean_ns": 36020766.666666664,
+          "mad_ns": 105400.0,
           "samples": 9,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 7188200.0,
-          "min_ns": 7060800.0,
-          "mean_ns": 9463444.444444444,
-          "mad_ns": 44400.0,
+          "median_ns": 7166500.0,
+          "min_ns": 7075200.0,
+          "mean_ns": 7167144.444444444,
+          "mad_ns": 51400.0,
           "samples": 9,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.6832725856264434
+        "pyoverdrive": 2.708072280750715
       }
     },
     {
@@ -2928,27 +2928,27 @@
       "baseline": "stock_matmul",
       "variants": {
         "stock_matmul": {
-          "median_ns": 52894800.0,
-          "min_ns": 52608300.0,
-          "mean_ns": 52982871.428571425,
-          "mad_ns": 179000.0,
+          "median_ns": 53737900.0,
+          "min_ns": 53441900.0,
+          "mean_ns": 53872571.428571425,
+          "mad_ns": 296000.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 53220300.0,
-          "min_ns": 50611100.0,
-          "mean_ns": 52660814.28571428,
-          "mad_ns": 221200.0,
+          "median_ns": 53231000.0,
+          "min_ns": 52701600.0,
+          "mean_ns": 53426757.14285714,
+          "mad_ns": 253200.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9938839127175156
+        "pyoverdrive": 1.0095226465781217
       }
     },
     {
@@ -2961,27 +2961,27 @@
       "baseline": "stock_roll",
       "variants": {
         "stock_roll": {
-          "median_ns": 4234.697732997481,
-          "min_ns": 4140.239294710327,
-          "mean_ns": 4286.8723761544925,
-          "mad_ns": 40.554156171284376,
+          "median_ns": 4210.63829787234,
+          "min_ns": 4126.987681970884,
+          "mean_ns": 4246.875699888018,
+          "mad_ns": 58.90257558790563,
           "samples": 15,
-          "loops_per_sample": 1588,
+          "loops_per_sample": 1786,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1487.3045078196872,
-          "min_ns": 1476.356945722171,
-          "mean_ns": 1490.2085249923337,
-          "mad_ns": 6.232750689972363,
+          "median_ns": 1483.7253254934901,
+          "min_ns": 1476.942461150777,
+          "mean_ns": 1488.0834383312333,
+          "mad_ns": 5.648887022259487,
           "samples": 15,
-          "loops_per_sample": 4348,
+          "loops_per_sample": 4762,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.8472298112007555
+        "pyoverdrive": 2.837882609081889
       }
     },
     {
@@ -2993,27 +2993,27 @@
       "baseline": "stock_roll",
       "variants": {
         "stock_roll": {
-          "median_ns": 10527.565982404692,
-          "min_ns": 10463.489736070382,
-          "mean_ns": 10552.29716520039,
-          "mad_ns": 47.50733137829957,
+          "median_ns": 10473.57142857143,
+          "min_ns": 10449.857142857143,
+          "mean_ns": 10496.666666666666,
+          "mad_ns": 23.714285714286234,
           "samples": 9,
-          "loops_per_sample": 682,
+          "loops_per_sample": 700,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 11298.611111111111,
-          "min_ns": 11258.680555555555,
-          "mean_ns": 11348.726851851852,
-          "mad_ns": 16.493055555556566,
+          "median_ns": 11223.384615384615,
+          "min_ns": 11195.846153846154,
+          "mean_ns": 11385.504273504273,
+          "mad_ns": 27.53846153846098,
           "samples": 9,
-          "loops_per_sample": 576,
+          "loops_per_sample": 650,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9317575300960514
+        "pyoverdrive": 0.9331918835085301
       }
     },
     {
@@ -3028,27 +3028,27 @@
       "baseline": "stock_argmax",
       "variants": {
         "stock_argmax": {
-          "median_ns": 80193800.0,
-          "min_ns": 77922900.0,
-          "mean_ns": 80457114.28571428,
-          "mad_ns": 479600.0,
+          "median_ns": 82102900.0,
+          "min_ns": 75944600.0,
+          "mean_ns": 81829100.0,
+          "mad_ns": 1410600.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 32080400.0,
-          "min_ns": 31757500.0,
-          "mean_ns": 32159957.14285714,
-          "mad_ns": 157600.0,
+          "median_ns": 33570100.0,
+          "min_ns": 33381300.0,
+          "mean_ns": 33971857.14285714,
+          "mad_ns": 106800.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.499775563895712
+        "pyoverdrive": 2.4457150857459466
       }
     },
     {
@@ -3060,27 +3060,27 @@
       "baseline": "stock_inv",
       "variants": {
         "stock_inv": {
-          "median_ns": 2098433.3333333335,
-          "min_ns": 2072700.0,
-          "mean_ns": 2092837.0370370368,
-          "mad_ns": 17900.000000000233,
+          "median_ns": 2068800.0,
+          "min_ns": 2059466.6666666667,
+          "mean_ns": 2067414.8148148146,
+          "mad_ns": 1466.6666666667443,
           "samples": 9,
           "loops_per_sample": 3,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 686112.5,
-          "min_ns": 681712.5,
-          "mean_ns": 688319.4444444445,
-          "mad_ns": 2062.5,
+          "median_ns": 684100.0,
+          "min_ns": 677475.0,
+          "mean_ns": 683072.2222222222,
+          "mad_ns": 1562.5,
           "samples": 9,
           "loops_per_sample": 8,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.0584391529571806
+        "pyoverdrive": 3.0241192808068997
       }
     },
     {
@@ -3092,27 +3092,27 @@
       "baseline": "stock_inv",
       "variants": {
         "stock_inv": {
-          "median_ns": 13128.910614525139,
-          "min_ns": 13056.703910614526,
-          "mean_ns": 13183.054003724394,
-          "mad_ns": 54.608938547486105,
+          "median_ns": 13062.916666666666,
+          "min_ns": 13030.972222222223,
+          "mean_ns": 13092.018518518518,
+          "mad_ns": 26.944444444443434,
           "samples": 15,
-          "loops_per_sample": 716,
+          "loops_per_sample": 720,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 13714.285714285714,
-          "min_ns": 13694.42857142857,
-          "mean_ns": 13756.580952380953,
-          "mad_ns": 19.857142857143117,
+          "median_ns": 13765.7223796034,
+          "min_ns": 13609.348441926346,
+          "mean_ns": 13857.714825306894,
+          "mad_ns": 98.01699716713847,
           "samples": 15,
-          "loops_per_sample": 700,
+          "loops_per_sample": 706,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9573163989757915
+        "pyoverdrive": 0.9489452355963478
       }
     },
     {
@@ -3125,27 +3125,27 @@
       "baseline": "stock_isin",
       "variants": {
         "stock_isin": {
-          "median_ns": 561919000.0,
-          "min_ns": 558950000.0,
-          "mean_ns": 561421460.0,
-          "mad_ns": 538300.0,
+          "median_ns": 559159700.0,
+          "min_ns": 558365300.0,
+          "mean_ns": 560489800.0,
+          "mad_ns": 794400.0,
           "samples": 5,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 2328066.6666666665,
-          "min_ns": 2317333.3333333335,
-          "mean_ns": 2325833.333333333,
-          "mad_ns": 5233.333333333489,
+          "median_ns": 2343833.3333333335,
+          "min_ns": 2336800.0,
+          "mean_ns": 2346860.0,
+          "mad_ns": 7033.333333333489,
           "samples": 5,
           "loops_per_sample": 3,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 241.36722888806165
+        "pyoverdrive": 238.56632297518308
       }
     },
     {
@@ -3158,27 +3158,27 @@
       "baseline": "stock_isin",
       "variants": {
         "stock_isin": {
-          "median_ns": 9819.022869022869,
-          "min_ns": 9742.723492723493,
-          "mean_ns": 10211.19826119826,
-          "mad_ns": 46.04989604989714,
+          "median_ns": 9812.681912681912,
+          "min_ns": 9753.846153846154,
+          "mean_ns": 9811.037611037611,
+          "mad_ns": 18.295218295219456,
           "samples": 11,
           "loops_per_sample": 962,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 10930.522565320665,
-          "min_ns": 10897.980997624703,
-          "mean_ns": 10944.74195638091,
-          "mad_ns": 17.339667458432814,
+          "median_ns": 11003.273137697517,
+          "min_ns": 10961.286681715575,
+          "mean_ns": 11005.540734660373,
+          "mad_ns": 16.704288939052276,
           "samples": 11,
-          "loops_per_sample": 842,
+          "loops_per_sample": 886,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.8983123002898088
+        "pyoverdrive": 0.8917966308646282
       }
     },
     {
@@ -3190,27 +3190,27 @@
       "baseline": "stock_median",
       "variants": {
         "stock_median": {
-          "median_ns": 8939.083557951482,
-          "min_ns": 8911.859838274933,
-          "mean_ns": 8958.346810422283,
-          "mad_ns": 9.838274932613785,
+          "median_ns": 9017.135549872122,
+          "min_ns": 8973.273657289003,
+          "mean_ns": 9037.877237851662,
+          "mad_ns": 10.869565217390118,
           "samples": 15,
-          "loops_per_sample": 742,
+          "loops_per_sample": 782,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 4673.3050847457625,
-          "min_ns": 4640.783898305085,
-          "mean_ns": 4688.234463276836,
-          "mad_ns": 19.438559322034052,
+          "median_ns": 4637.850971922247,
+          "min_ns": 4622.57019438445,
+          "mean_ns": 4656.079913606912,
+          "mad_ns": 14.25485961123104,
           "samples": 15,
-          "loops_per_sample": 1888,
+          "loops_per_sample": 1852,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.9127969169249706
+        "pyoverdrive": 1.9442486626806805
       }
     },
     {
@@ -3222,27 +3222,27 @@
       "baseline": "stock_median",
       "variants": {
         "stock_median": {
-          "median_ns": 314912.5,
-          "min_ns": 313837.5,
-          "mean_ns": 315511.80555555556,
-          "mad_ns": 606.25,
+          "median_ns": 318483.3333333333,
+          "min_ns": 315573.3333333333,
+          "mean_ns": 319490.3703703704,
+          "mad_ns": 2910.0,
           "samples": 9,
-          "loops_per_sample": 16,
+          "loops_per_sample": 30,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 325662.5,
-          "min_ns": 317525.0,
-          "mean_ns": 324829.1666666667,
-          "mad_ns": 1125.0,
+          "median_ns": 316268.75,
+          "min_ns": 315081.25,
+          "mean_ns": 316264.5833333333,
+          "mad_ns": 725.0,
           "samples": 9,
           "loops_per_sample": 16,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.966990365792807
+        "pyoverdrive": 1.0070022198947362
       }
     },
     {
@@ -3258,27 +3258,27 @@
       "baseline": "stock_hist2d",
       "variants": {
         "stock_hist2d": {
-          "median_ns": 71998600.0,
-          "min_ns": 71501100.0,
-          "mean_ns": 72453214.28571428,
-          "mad_ns": 60800.0,
+          "median_ns": 72350400.0,
+          "min_ns": 72083100.0,
+          "mean_ns": 72867185.71428572,
+          "mad_ns": 199200.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 41342800.0,
-          "min_ns": 39863200.0,
-          "mean_ns": 42039214.28571428,
-          "mad_ns": 1182000.0,
+          "median_ns": 37033500.0,
+          "min_ns": 36785700.0,
+          "mean_ns": 37863757.14285714,
+          "mad_ns": 247800.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.7415027525953732
+        "pyoverdrive": 1.9536473733241524
       }
     },
     {
@@ -3294,27 +3294,27 @@
       "baseline": "stock_hist2d",
       "variants": {
         "stock_hist2d": {
-          "median_ns": 41167600.0,
-          "min_ns": 40954500.0,
-          "mean_ns": 41147328.571428575,
-          "mad_ns": 113800.0,
+          "median_ns": 41563400.0,
+          "min_ns": 40975800.0,
+          "mean_ns": 41514071.428571425,
+          "mad_ns": 347700.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 40797000.0,
-          "min_ns": 39483500.0,
-          "mean_ns": 40658428.571428575,
-          "mad_ns": 306900.0,
+          "median_ns": 40792600.0,
+          "min_ns": 40287600.0,
+          "mean_ns": 40839671.428571425,
+          "mad_ns": 412500.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.0090840012746036
+        "pyoverdrive": 1.018895584002981
       }
     },
     {
@@ -3327,27 +3327,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 44757800.0,
-          "min_ns": 44294200.0,
-          "mean_ns": 45082500.0,
-          "mad_ns": 231100.0,
+          "median_ns": 44919900.0,
+          "min_ns": 44764200.0,
+          "mean_ns": 44953857.14285714,
+          "mad_ns": 88800.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 8512600.0,
-          "min_ns": 8451700.0,
-          "mean_ns": 8644285.714285715,
-          "mad_ns": 60900.0,
+          "median_ns": 9231900.0,
+          "min_ns": 9134000.0,
+          "mean_ns": 9268700.0,
+          "mad_ns": 44900.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 5.257829570284049
+        "pyoverdrive": 4.865726448510057
       }
     },
     {
@@ -3360,27 +3360,27 @@
       "baseline": "stock_unique",
       "variants": {
         "stock_unique": {
-          "median_ns": 6406500.0,
-          "min_ns": 6363800.0,
-          "mean_ns": 6399742.857142857,
-          "mad_ns": 10600.0,
+          "median_ns": 6391800.0,
+          "min_ns": 6365000.0,
+          "mean_ns": 6399714.285714285,
+          "mad_ns": 21900.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 6422000.0,
-          "min_ns": 6379500.0,
-          "mean_ns": 6445057.142857143,
-          "mad_ns": 22100.0,
+          "median_ns": 6419000.0,
+          "min_ns": 6367000.0,
+          "mean_ns": 6421714.285714285,
+          "mad_ns": 17700.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9975864216754905
+        "pyoverdrive": 0.9957625798410967
       }
     },
     {
@@ -3393,27 +3393,27 @@
       "baseline": "stock_searchsorted",
       "variants": {
         "stock_searchsorted": {
-          "median_ns": 1157280.0,
-          "min_ns": 1146520.0,
-          "mean_ns": 1211934.2857142857,
-          "mad_ns": 6140.0,
+          "median_ns": 1154780.0,
+          "min_ns": 1140020.0,
+          "mean_ns": 1154674.2857142857,
+          "mad_ns": 4940.0,
           "samples": 7,
           "loops_per_sample": 5,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1101.951375559821,
-          "min_ns": 1096.9449776071658,
-          "mean_ns": 1108.2876336715108,
-          "mad_ns": 5.006397952655107,
+          "median_ns": 1109.6872875594834,
+          "min_ns": 1102.0564242012238,
+          "mean_ns": 1110.083033893367,
+          "mad_ns": 7.579877634262402,
           "samples": 7,
-          "loops_per_sample": 6252,
+          "loops_per_sample": 5884,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1050.2096786367463
+        "pyoverdrive": 1040.635513217141
       }
     },
     {
@@ -3425,27 +3425,27 @@
       "baseline": "stock_searchsorted",
       "variants": {
         "stock_searchsorted": {
-          "median_ns": 840.0767938564915,
-          "min_ns": 832.3734101271898,
-          "mean_ns": 842.7789776817855,
-          "mad_ns": 3.995680345572282,
+          "median_ns": 811.7830573554115,
+          "min_ns": 809.0112790976722,
+          "mean_ns": 843.1053515718743,
+          "mad_ns": 0.6479481641467828,
           "samples": 15,
           "loops_per_sample": 8334,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1632.8647416413373,
-          "min_ns": 1625.7978723404256,
-          "mean_ns": 1647.5924518743668,
-          "mad_ns": 4.996200607902892,
+          "median_ns": 1637.8048780487804,
+          "min_ns": 1629.968012794882,
+          "mean_ns": 1642.3603891776622,
+          "mad_ns": 5.3578568572570475,
           "samples": 15,
-          "loops_per_sample": 5264,
+          "loops_per_sample": 5002,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.5144803316728217
+        "pyoverdrive": 0.4956530953324181
       }
     },
     {
@@ -3457,27 +3457,27 @@
       "baseline": "stock_sin",
       "variants": {
         "stock_sin": {
-          "median_ns": 496.2832973362131,
-          "min_ns": 492.7375809935205,
-          "mean_ns": 495.9413246940245,
-          "mad_ns": 0.9989200863930705,
+          "median_ns": 497.93374658401655,
+          "min_ns": 494.22115576884624,
+          "mean_ns": 500.0413250683197,
+          "mad_ns": 3.266013463973877,
           "samples": 15,
-          "loops_per_sample": 11112,
+          "loops_per_sample": 15003,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 696.9852411807055,
-          "min_ns": 695.239380849532,
-          "mean_ns": 698.3015358771298,
-          "mad_ns": 1.5748740100791565,
+          "median_ns": 714.3178545716343,
+          "min_ns": 702.2318214542837,
+          "mean_ns": 714.3928485721142,
+          "mad_ns": 3.203743700503992,
           "samples": 15,
           "loops_per_sample": 11112,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.7120427636250952
+        "pyoverdrive": 0.6970758793123265
       }
     },
     {
@@ -3492,27 +3492,27 @@
       "baseline": "stock_nanmean",
       "variants": {
         "stock_nanmean": {
-          "median_ns": 113230.95238095238,
-          "min_ns": 112861.90476190476,
-          "mean_ns": 113183.33333333333,
-          "mad_ns": 102.38095238094684,
+          "median_ns": 115582.14285714286,
+          "min_ns": 114417.85714285714,
+          "mean_ns": 115376.71957671958,
+          "mad_ns": 239.28571428571013,
           "samples": 9,
           "loops_per_sample": 84,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 32323.841059602648,
-          "min_ns": 32254.30463576159,
-          "mean_ns": 32383.112582781454,
-          "mad_ns": 54.96688741721664,
+          "median_ns": 32943.91891891892,
+          "min_ns": 32831.41891891892,
+          "mean_ns": 33020.53303303303,
+          "mad_ns": 56.756756756760296,
           "samples": 9,
-          "loops_per_sample": 302,
+          "loops_per_sample": 296,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.5030166177393123
+        "pyoverdrive": 3.50845153369919
       }
     },
     {
@@ -3524,27 +3524,27 @@
       "baseline": "stock_nanmean",
       "variants": {
         "stock_nanmean": {
-          "median_ns": 120767.5,
-          "min_ns": 120335.0,
-          "mean_ns": 120822.22222222222,
-          "mad_ns": 135.0,
+          "median_ns": 122246.15384615384,
+          "min_ns": 121320.51282051283,
+          "mean_ns": 123040.31339031339,
+          "mad_ns": 925.6410256410163,
           "samples": 9,
-          "loops_per_sample": 80,
+          "loops_per_sample": 78,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 131182.43243243243,
-          "min_ns": 129959.45945945945,
-          "mean_ns": 131485.2852852853,
-          "mad_ns": 1045.9459459459467,
+          "median_ns": 131855.26315789475,
+          "min_ns": 131136.84210526315,
+          "mean_ns": 132389.47368421053,
+          "mad_ns": 718.4210526316019,
           "samples": 9,
-          "loops_per_sample": 74,
+          "loops_per_sample": 38,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9206072624259594
+        "pyoverdrive": 0.9271238092313833
       }
     },
     {
@@ -3556,27 +3556,27 @@
       "baseline": "stock_nansum",
       "variants": {
         "stock_nansum": {
-          "median_ns": 59396.385542168675,
-          "min_ns": 58977.7108433735,
-          "mean_ns": 59530.388219544846,
-          "mad_ns": 368.6746987951774,
+          "median_ns": 60191.56626506024,
+          "min_ns": 60062.65060240964,
+          "mean_ns": 60273.895582329314,
+          "mad_ns": 71.084337349399,
           "samples": 9,
-          "loops_per_sample": 166,
+          "loops_per_sample": 83,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 29326.119402985074,
-          "min_ns": 28745.5223880597,
-          "mean_ns": 29217.205638474294,
-          "mad_ns": 322.7611940298484,
+          "median_ns": 28678.51851851852,
+          "min_ns": 28616.666666666668,
+          "mean_ns": 28709.8353909465,
+          "mad_ns": 39.259259259259125,
           "samples": 9,
-          "loops_per_sample": 268,
+          "loops_per_sample": 270,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.0253748791639574
+        "pyoverdrive": 2.098838063276974
       }
     },
     {
@@ -3591,27 +3591,27 @@
       "baseline": "stock_nanstd",
       "variants": {
         "stock_nanstd": {
-          "median_ns": 264744.44444444444,
-          "min_ns": 264341.6666666667,
-          "mean_ns": 265808.02469135803,
-          "mad_ns": 402.7777777777519,
+          "median_ns": 253850.0,
+          "min_ns": 253565.0,
+          "mean_ns": 254280.55555555556,
+          "mad_ns": 280.0,
           "samples": 9,
-          "loops_per_sample": 36,
+          "loops_per_sample": 20,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 119526.19047619047,
-          "min_ns": 118990.47619047618,
-          "mean_ns": 119791.53439153438,
-          "mad_ns": 152.38095238094684,
+          "median_ns": 117316.27906976744,
+          "min_ns": 117020.93023255814,
+          "mean_ns": 117744.44444444444,
+          "mad_ns": 209.3023255813896,
           "samples": 9,
-          "loops_per_sample": 42,
+          "loops_per_sample": 43,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.214949237398989
+        "pyoverdrive": 2.1638088252785157
       }
     },
     {
@@ -3626,19 +3626,19 @@
       "baseline": "stock_nanargmax",
       "variants": {
         "stock_nanargmax": {
-          "median_ns": 1632850.0,
-          "min_ns": 1597700.0,
-          "mean_ns": 1629651.851851852,
-          "mad_ns": 13483.333333333256,
+          "median_ns": 1628925.0,
+          "min_ns": 1609225.0,
+          "mean_ns": 1632258.3333333333,
+          "mad_ns": 15700.0,
           "samples": 9,
-          "loops_per_sample": 6,
+          "loops_per_sample": 4,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 308911.76470588235,
-          "min_ns": 308200.0,
-          "mean_ns": 310259.47712418303,
+          "median_ns": 311264.70588235295,
+          "min_ns": 308423.5294117647,
+          "mean_ns": 311184.3137254902,
           "mad_ns": 711.7647058823495,
           "samples": 9,
           "loops_per_sample": 17,
@@ -3646,7 +3646,7 @@
         }
       },
       "speedups": {
-        "pyoverdrive": 5.285813577073217
+        "pyoverdrive": 5.233246716432014
       }
     },
     {
@@ -3661,27 +3661,27 @@
       "baseline": "stock_nanmedian",
       "variants": {
         "stock_nanmedian": {
-          "median_ns": 16172000.0,
-          "min_ns": 16060600.0,
-          "mean_ns": 16757528.57142857,
-          "mad_ns": 111400.0,
+          "median_ns": 16256300.0,
+          "min_ns": 16231900.0,
+          "mean_ns": 16321328.57142857,
+          "mad_ns": 24400.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 7951700.0,
-          "min_ns": 7887000.0,
-          "mean_ns": 7991300.0,
-          "mad_ns": 25800.0,
+          "median_ns": 8154600.0,
+          "min_ns": 8076200.0,
+          "mean_ns": 8159128.571428572,
+          "mad_ns": 23100.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.0337789403523776
+        "pyoverdrive": 1.9935128639050352
       }
     },
     {
@@ -3696,27 +3696,27 @@
       "baseline": "stock_nanmedian",
       "variants": {
         "stock_nanmedian": {
-          "median_ns": 15085900.0,
-          "min_ns": 15066000.0,
-          "mean_ns": 15099971.42857143,
-          "mad_ns": 17300.0,
+          "median_ns": 15282600.0,
+          "min_ns": 15089500.0,
+          "mean_ns": 15316257.142857144,
+          "mad_ns": 151300.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 15240100.0,
-          "min_ns": 15092100.0,
-          "mean_ns": 15360742.857142856,
-          "mad_ns": 112300.0,
+          "median_ns": 15186500.0,
+          "min_ns": 15133200.0,
+          "mean_ns": 15188757.142857144,
+          "mad_ns": 28200.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.9898819561551433
+        "pyoverdrive": 1.0063279886741514
       }
     },
     {
@@ -3732,27 +3732,27 @@
       "baseline": "stock_nanpercentile",
       "variants": {
         "stock_nanpercentile": {
-          "median_ns": 2678900.0,
-          "min_ns": 2648250.0,
-          "mean_ns": 2680750.0,
-          "mad_ns": 10350.0,
+          "median_ns": 2550050.0,
+          "min_ns": 2536450.0,
+          "mean_ns": 2560972.222222222,
+          "mad_ns": 8000.0,
           "samples": 9,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 48986.55913978495,
-          "min_ns": 48644.086021505376,
-          "mean_ns": 49109.498207885306,
-          "mad_ns": 104.83870967741677,
+          "median_ns": 47051.51515151515,
+          "min_ns": 46784.343434343435,
+          "mean_ns": 47031.7620650954,
+          "mad_ns": 141.91919191919442,
           "samples": 9,
-          "loops_per_sample": 186,
+          "loops_per_sample": 198,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 54.68642923777643
+        "pyoverdrive": 54.19697945514265
       }
     },
     {
@@ -3764,27 +3764,27 @@
       "baseline": "stock_matmul",
       "variants": {
         "stock_matmul": {
-          "median_ns": 27917000.0,
-          "min_ns": 27828300.0,
-          "mean_ns": 27991328.57142857,
-          "mad_ns": 87100.0,
+          "median_ns": 28499100.0,
+          "min_ns": 28246600.0,
+          "mean_ns": 28541500.0,
+          "mad_ns": 140700.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 2740600.0,
-          "min_ns": 2601900.0,
-          "mean_ns": 4040100.0,
-          "mad_ns": 83400.0,
+          "median_ns": 1809600.0,
+          "min_ns": 1755766.6666666667,
+          "mean_ns": 1824200.0,
+          "mad_ns": 24066.666666666744,
           "samples": 7,
-          "loops_per_sample": 1,
+          "loops_per_sample": 3,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 10.1864555206889
+        "pyoverdrive": 15.748839522546419
       }
     },
     {
@@ -3796,27 +3796,27 @@
       "baseline": "stock_matmul",
       "variants": {
         "stock_matmul": {
-          "median_ns": 27495900.0,
-          "min_ns": 27460200.0,
-          "mean_ns": 27511100.0,
-          "mad_ns": 12900.0,
+          "median_ns": 28744200.0,
+          "min_ns": 28687300.0,
+          "mean_ns": 28904085.714285713,
+          "mad_ns": 56900.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 27567000.0,
-          "min_ns": 27485600.0,
-          "mean_ns": 27657642.85714286,
-          "mad_ns": 81400.0,
+          "median_ns": 28741600.0,
+          "min_ns": 28595200.0,
+          "mean_ns": 28742514.285714287,
+          "mad_ns": 51900.0,
           "samples": 7,
           "loops_per_sample": 1,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.997420829252367
+        "pyoverdrive": 1.0000904612130153
       }
     },
     {
@@ -3828,27 +3828,27 @@
       "baseline": "stock_dot",
       "variants": {
         "stock_dot": {
-          "median_ns": 2248466.6666666665,
-          "min_ns": 2202400.0,
-          "mean_ns": 2238633.333333333,
-          "mad_ns": 5266.666666666511,
+          "median_ns": 2220766.6666666665,
+          "min_ns": 2199666.6666666665,
+          "mean_ns": 2220985.714285714,
+          "mad_ns": 10866.666666666977,
           "samples": 7,
           "loops_per_sample": 3,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 232223.07692307694,
-          "min_ns": 223284.61538461538,
-          "mean_ns": 307548.35164835164,
-          "mad_ns": 8938.46153846156,
+          "median_ns": 226336.36363636365,
+          "min_ns": 224950.0,
+          "mean_ns": 226300.64935064936,
+          "mad_ns": 1095.4545454545587,
           "samples": 7,
-          "loops_per_sample": 26,
+          "loops_per_sample": 22,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 9.682356708293307
+        "pyoverdrive": 9.811797940849633
       }
     },
     {
@@ -3860,27 +3860,27 @@
       "baseline": "stock_det",
       "variants": {
         "stock_det": {
-          "median_ns": 615906.25,
-          "min_ns": 614556.25,
-          "mean_ns": 616600.8928571428,
-          "mad_ns": 712.5,
+          "median_ns": 592633.3333333334,
+          "min_ns": 586300.0,
+          "mean_ns": 594300.0,
+          "mad_ns": 3911.111111111124,
           "samples": 7,
-          "loops_per_sample": 16,
+          "loops_per_sample": 9,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 305364.70588235295,
-          "min_ns": 299605.8823529412,
-          "mean_ns": 304015.96638655465,
-          "mad_ns": 435.29411764704855,
+          "median_ns": 310075.0,
+          "min_ns": 301965.625,
+          "mean_ns": 308750.4464285714,
+          "mad_ns": 1171.875,
           "samples": 7,
-          "loops_per_sample": 17,
+          "loops_per_sample": 32,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.0169529684851284
+        "pyoverdrive": 1.9112580289714856
       }
     },
     {
@@ -3892,27 +3892,27 @@
       "baseline": "stock_slogdet",
       "variants": {
         "stock_slogdet": {
-          "median_ns": 370864.28571428574,
-          "min_ns": 369971.4285714286,
-          "mean_ns": 373040.81632653065,
-          "mad_ns": 878.5714285714785,
+          "median_ns": 367228.5714285714,
+          "min_ns": 361114.28571428574,
+          "mean_ns": 366256.1224489796,
+          "mad_ns": 1250.0,
           "samples": 7,
           "loops_per_sample": 14,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 208420.83333333334,
-          "min_ns": 206012.5,
-          "mean_ns": 233076.19047619047,
-          "mad_ns": 2179.166666666686,
+          "median_ns": 208929.16666666666,
+          "min_ns": 207954.16666666666,
+          "mean_ns": 209204.7619047619,
+          "mad_ns": 525.0,
           "samples": 7,
           "loops_per_sample": 24,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.7794012229149472
+        "pyoverdrive": 1.7576702060677891
       }
     },
     {
@@ -3924,27 +3924,27 @@
       "baseline": "stock_solve",
       "variants": {
         "stock_solve": {
-          "median_ns": 656425.0,
-          "min_ns": 643875.0,
-          "mean_ns": 735123.2142857143,
-          "mad_ns": 9725.0,
+          "median_ns": 641562.5,
+          "min_ns": 635950.0,
+          "mean_ns": 641083.9285714285,
+          "mad_ns": 3500.0,
           "samples": 7,
           "loops_per_sample": 8,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 302717.64705882355,
-          "min_ns": 300288.23529411765,
-          "mean_ns": 306763.8655462185,
-          "mad_ns": 1294.1176470587961,
+          "median_ns": 306270.5882352941,
+          "min_ns": 304329.4117647059,
+          "mean_ns": 307032.7731092437,
+          "mad_ns": 1258.8235294117476,
           "samples": 7,
           "loops_per_sample": 17,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.168439819672768
+        "pyoverdrive": 2.094757135174586
       }
     },
     {
@@ -3956,27 +3956,27 @@
       "baseline": "stock_det",
       "variants": {
         "stock_det": {
-          "median_ns": 602444.4444444445,
-          "min_ns": 599777.7777777778,
-          "mean_ns": 602095.2380952381,
-          "mad_ns": 877.7777777777519,
+          "median_ns": 586655.5555555555,
+          "min_ns": 579555.5555555555,
+          "mean_ns": 597092.0634920634,
+          "mad_ns": 3366.666666666628,
           "samples": 7,
           "loops_per_sample": 9,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 771114.2857142857,
-          "min_ns": 766428.5714285715,
-          "mean_ns": 773181.6326530613,
-          "mad_ns": 1342.8571428571595,
+          "median_ns": 765900.0,
+          "min_ns": 757928.5714285715,
+          "mean_ns": 764422.4489795918,
+          "mad_ns": 2300.0,
           "samples": 7,
           "loops_per_sample": 7,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 0.7812647951222927
+        "pyoverdrive": 0.7659688674181427
       }
     },
     {
@@ -3988,27 +3988,27 @@
       "baseline": "stock_nan_to_num",
       "variants": {
         "stock_nan_to_num": {
-          "median_ns": 2829200.0,
-          "min_ns": 2608100.0,
-          "mean_ns": 2952692.8571428573,
-          "mad_ns": 221100.0,
+          "median_ns": 3782500.0,
+          "min_ns": 3615700.0,
+          "mean_ns": 3876585.714285714,
+          "mad_ns": 166800.0,
           "samples": 7,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1619716.6666666667,
-          "min_ns": 1605266.6666666667,
-          "mean_ns": 1634678.5714285714,
-          "mad_ns": 10866.666666666511,
+          "median_ns": 2287766.6666666665,
+          "min_ns": 2261366.6666666665,
+          "mean_ns": 2289085.714285714,
+          "mad_ns": 22366.66666666651,
           "samples": 7,
-          "loops_per_sample": 6,
+          "loops_per_sample": 3,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.7467252503009785
+        "pyoverdrive": 1.6533591712441538
       }
     },
     {
@@ -4020,27 +4020,27 @@
       "baseline": "stock_cholesky",
       "variants": {
         "stock_cholesky": {
-          "median_ns": 238885.7142857143,
-          "min_ns": 237957.14285714287,
-          "mean_ns": 242235.03401360544,
-          "mad_ns": 928.5714285714203,
+          "median_ns": 231910.0,
+          "min_ns": 231207.5,
+          "mean_ns": 232577.14285714287,
+          "mad_ns": 537.5,
           "samples": 7,
-          "loops_per_sample": 42,
+          "loops_per_sample": 40,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 149308.0,
-          "min_ns": 148638.0,
-          "mean_ns": 149635.7142857143,
-          "mad_ns": 264.0,
+          "median_ns": 151875.75757575757,
+          "min_ns": 151303.0303030303,
+          "mean_ns": 152351.08225108223,
+          "mad_ns": 348.4848484848335,
           "samples": 7,
-          "loops_per_sample": 50,
+          "loops_per_sample": 33,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.599952542969662
+        "pyoverdrive": 1.5269718070991043
       }
     },
     {
@@ -4052,27 +4052,27 @@
       "baseline": "stock_cholesky",
       "variants": {
         "stock_cholesky": {
-          "median_ns": 296255.55555555556,
-          "min_ns": 291138.8888888889,
-          "mean_ns": 296630.95238095237,
-          "mad_ns": 2944.444444444438,
+          "median_ns": 297183.3333333333,
+          "min_ns": 293644.44444444444,
+          "mean_ns": 296706.34920634923,
+          "mad_ns": 1188.888888888876,
           "samples": 7,
           "loops_per_sample": 18,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 135121.05263157896,
-          "min_ns": 134100.0,
-          "mean_ns": 135169.92481203008,
-          "mad_ns": 347.36842105261167,
+          "median_ns": 132523.68421052632,
+          "min_ns": 131297.36842105264,
+          "mean_ns": 132680.07518796992,
+          "mad_ns": 202.63157894735923,
           "samples": 7,
           "loops_per_sample": 38,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 2.1925195947320355
+        "pyoverdrive": 2.2424922390569044
       }
     },
     {
@@ -4084,27 +4084,27 @@
       "baseline": "stock_eigvalsh",
       "variants": {
         "stock_eigvalsh": {
-          "median_ns": 4094500.0,
-          "min_ns": 4068800.0,
-          "mean_ns": 4101064.285714286,
-          "mad_ns": 16500.0,
+          "median_ns": 4078100.0,
+          "min_ns": 4061800.0,
+          "mean_ns": 4084485.714285714,
+          "mad_ns": 11850.0,
           "samples": 7,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 664600.0,
-          "min_ns": 657775.0,
-          "mean_ns": 666648.2142857143,
-          "mad_ns": 3150.0,
+          "median_ns": 684975.0,
+          "min_ns": 675912.5,
+          "mean_ns": 761030.3571428572,
+          "mad_ns": 2075.0,
           "samples": 7,
           "loops_per_sample": 8,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 6.160848630755342
+        "pyoverdrive": 5.953647943355597
       }
     },
     {
@@ -4116,27 +4116,27 @@
       "baseline": "stock_einsum",
       "variants": {
         "stock_einsum": {
-          "median_ns": 8850000.0,
-          "min_ns": 8847100.0,
-          "mean_ns": 8856128.57142857,
-          "mad_ns": 1100.0,
+          "median_ns": 8863900.0,
+          "min_ns": 8848200.0,
+          "mean_ns": 8871857.142857144,
+          "mad_ns": 15700.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 53766.29213483146,
-          "min_ns": 52897.752808988764,
-          "mean_ns": 53536.436597110755,
-          "mad_ns": 82.58426966292609,
+          "median_ns": 51021.19565217391,
+          "min_ns": 50935.86956521739,
+          "mean_ns": 51167.00310559006,
+          "mad_ns": 72.28260869564838,
           "samples": 7,
-          "loops_per_sample": 178,
+          "loops_per_sample": 184,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 164.6012705843016
+        "pyoverdrive": 173.7297585189446
       }
     },
     {
@@ -4148,27 +4148,27 @@
       "baseline": "stock_nan_to_num",
       "variants": {
         "stock_nan_to_num": {
-          "median_ns": 3157250.0,
-          "min_ns": 3107350.0,
-          "mean_ns": 3207250.0,
-          "mad_ns": 49900.0,
+          "median_ns": 3333700.0,
+          "min_ns": 3235150.0,
+          "mean_ns": 3540628.5714285714,
+          "mad_ns": 50150.0,
           "samples": 7,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 2135966.6666666665,
-          "min_ns": 2090766.6666666667,
-          "mean_ns": 2153295.238095238,
-          "mad_ns": 27833.333333333023,
+          "median_ns": 2771050.0,
+          "min_ns": 2475550.0,
+          "mean_ns": 2726885.714285714,
+          "mad_ns": 196200.0,
           "samples": 7,
-          "loops_per_sample": 3,
+          "loops_per_sample": 2,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.4781363629270121
+        "pyoverdrive": 1.203045776871583
       }
     },
     {
@@ -4181,27 +4181,27 @@
       "baseline": "stock_interp",
       "variants": {
         "stock_interp": {
-          "median_ns": 2655900.0,
-          "min_ns": 2653900.0,
-          "mean_ns": 2656228.5714285714,
-          "mad_ns": 700.0,
+          "median_ns": 2652950.0,
+          "min_ns": 2648650.0,
+          "mean_ns": 2653007.1428571427,
+          "mad_ns": 3050.0,
           "samples": 7,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1420133.3333333333,
-          "min_ns": 1096416.6666666667,
-          "mean_ns": 1307628.5714285714,
-          "mad_ns": 20216.666666666744,
+          "median_ns": 1460360.0,
+          "min_ns": 1372620.0,
+          "mean_ns": 1469588.5714285714,
+          "mad_ns": 48740.0,
           "samples": 7,
-          "loops_per_sample": 6,
+          "loops_per_sample": 5,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.870176509247958
+        "pyoverdrive": 1.8166411021939797
       }
     },
     {
@@ -4213,27 +4213,27 @@
       "baseline": "stock_take",
       "variants": {
         "stock_take": {
-          "median_ns": 2058633.3333333333,
-          "min_ns": 1936733.3333333333,
-          "mean_ns": 2164652.380952381,
-          "mad_ns": 27900.0,
+          "median_ns": 2334600.0,
+          "min_ns": 2279766.6666666665,
+          "mean_ns": 2346776.1904761903,
+          "mad_ns": 48633.33333333349,
           "samples": 7,
           "loops_per_sample": 3,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1458200.0,
-          "min_ns": 1433750.0,
-          "mean_ns": 1460232.142857143,
-          "mad_ns": 12125.0,
+          "median_ns": 2172033.3333333335,
+          "min_ns": 1699666.6666666667,
+          "mean_ns": 2158828.5714285714,
+          "mad_ns": 62700.0,
           "samples": 7,
-          "loops_per_sample": 4,
+          "loops_per_sample": 3,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.4117633612215974
+        "pyoverdrive": 1.0748453829744786
       }
     },
     {
@@ -4245,27 +4245,27 @@
       "baseline": "stock_cholesky",
       "variants": {
         "stock_cholesky": {
-          "median_ns": 2595500.0,
-          "min_ns": 2574950.0,
-          "mean_ns": 2593521.4285714286,
-          "mad_ns": 14750.0,
+          "median_ns": 2643350.0,
+          "min_ns": 2609850.0,
+          "mean_ns": 2679628.5714285714,
+          "mad_ns": 33500.0,
           "samples": 7,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1492625.0,
-          "min_ns": 1487100.0,
-          "mean_ns": 1495135.7142857143,
-          "mad_ns": 5250.0,
+          "median_ns": 1573850.0,
+          "min_ns": 1546950.0,
+          "mean_ns": 1589796.4285714286,
+          "mad_ns": 26900.0,
           "samples": 7,
           "loops_per_sample": 4,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 1.7388828406331127
+        "pyoverdrive": 1.6795437938812465
       }
     },
     {
@@ -4278,27 +4278,27 @@
       "baseline": "stock_eigvalsh",
       "variants": {
         "stock_eigvalsh": {
-          "median_ns": 4067250.0,
-          "min_ns": 4038050.0,
-          "mean_ns": 4074264.285714286,
-          "mad_ns": 8100.0,
+          "median_ns": 4149550.0,
+          "min_ns": 4117200.0,
+          "mean_ns": 4185142.8571428573,
+          "mad_ns": 32350.0,
           "samples": 7,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 712987.5,
-          "min_ns": 705812.5,
-          "mean_ns": 723228.5714285715,
-          "mad_ns": 5262.5,
+          "median_ns": 756842.8571428572,
+          "min_ns": 745885.7142857143,
+          "mean_ns": 761261.2244897959,
+          "mad_ns": 10957.14285714284,
           "samples": 7,
-          "loops_per_sample": 8,
+          "loops_per_sample": 7,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 5.704517961394835
+        "pyoverdrive": 5.482710130429038
       }
     },
     {
@@ -4311,27 +4311,27 @@
       "baseline": "stock_einsum",
       "variants": {
         "stock_einsum": {
-          "median_ns": 566166.6666666666,
-          "min_ns": 558344.4444444445,
-          "mean_ns": 565209.5238095239,
-          "mad_ns": 2966.6666666667443,
+          "median_ns": 571033.3333333334,
+          "min_ns": 563044.4444444445,
+          "mean_ns": 574409.5238095239,
+          "mad_ns": 4100.0,
           "samples": 7,
           "loops_per_sample": 9,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 133572.85714285713,
-          "min_ns": 132742.85714285713,
-          "mean_ns": 133768.57142857142,
-          "mad_ns": 754.2857142857101,
+          "median_ns": 136425.75757575757,
+          "min_ns": 135846.9696969697,
+          "mean_ns": 139847.18614718615,
+          "mad_ns": 351.5151515151665,
           "samples": 7,
-          "loops_per_sample": 70,
+          "loops_per_sample": 66,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 4.238635593915217
+        "pyoverdrive": 4.185670972112705
       }
     },
     {
@@ -4344,27 +4344,27 @@
       "baseline": "stock_einsum",
       "variants": {
         "stock_einsum": {
-          "median_ns": 42233800.0,
-          "min_ns": 41971700.0,
-          "mean_ns": 42596700.0,
-          "mad_ns": 262100.0,
+          "median_ns": 43157400.0,
+          "min_ns": 42978600.0,
+          "mean_ns": 43555185.71428572,
+          "mad_ns": 178800.0,
           "samples": 7,
           "loops_per_sample": 1,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 272233.3333333333,
-          "min_ns": 270752.77777777775,
-          "mean_ns": 272941.2698412699,
-          "mad_ns": 1002.7777777777519,
+          "median_ns": 267058.3333333333,
+          "min_ns": 266308.3333333333,
+          "mean_ns": 267325.0,
+          "mad_ns": 100.0,
           "samples": 7,
           "loops_per_sample": 36,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 155.1382392555406
+        "pyoverdrive": 161.60289574687178
       }
     },
     {
@@ -4377,27 +4377,27 @@
       "baseline": "stock_qr",
       "variants": {
         "stock_qr": {
-          "median_ns": 4128300.0,
-          "min_ns": 4092100.0,
-          "mean_ns": 4125628.5714285714,
-          "mad_ns": 21400.0,
+          "median_ns": 4009400.0,
+          "min_ns": 3923300.0,
+          "mean_ns": 3997478.5714285714,
+          "mad_ns": 28050.0,
           "samples": 7,
           "loops_per_sample": 2,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 1091600.0,
-          "min_ns": 1087540.0,
-          "mean_ns": 1092020.0,
-          "mad_ns": 3300.0,
+          "median_ns": 1351125.0,
+          "min_ns": 1330000.0,
+          "mean_ns": 1350907.142857143,
+          "mad_ns": 13400.0,
           "samples": 7,
-          "loops_per_sample": 5,
+          "loops_per_sample": 4,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 3.7818798094540123
+        "pyoverdrive": 2.9674530483856048
       }
     },
     {
@@ -4410,27 +4410,91 @@
       "baseline": "stock_qr",
       "variants": {
         "stock_qr": {
-          "median_ns": 1094200.0,
-          "min_ns": 1089280.0,
-          "mean_ns": 1095128.5714285714,
-          "mad_ns": 3280.0,
+          "median_ns": 1093240.0,
+          "min_ns": 1079520.0,
+          "mean_ns": 1091357.142857143,
+          "mad_ns": 5360.0,
           "samples": 7,
           "loops_per_sample": 5,
           "role": "baseline",
           "correct": true
         },
         "pyoverdrive": {
-          "median_ns": 248495.0,
-          "min_ns": 247605.0,
-          "mean_ns": 250526.42857142858,
-          "mad_ns": 680.0,
+          "median_ns": 229950.0,
+          "min_ns": 229095.45454545456,
+          "mean_ns": 230156.4935064935,
+          "mad_ns": 627.2727272727352,
           "samples": 7,
-          "loops_per_sample": 20,
+          "loops_per_sample": 22,
           "correct": true
         }
       },
       "speedups": {
-        "pyoverdrive": 4.403307913640114
+        "pyoverdrive": 4.754250924113938
+      }
+    },
+    {
+      "case": "apply_along_axis_mean_slices20000",
+      "params": {
+        "slices": 20000,
+        "expect": "axis= reduction instead of a Python loop"
+      },
+      "baseline": "stock_apply_along_axis",
+      "variants": {
+        "stock_apply_along_axis": {
+          "median_ns": 52596200.0,
+          "min_ns": 52470000.0,
+          "mean_ns": 53243414.28571428,
+          "mad_ns": 123000.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "pyoverdrive": {
+          "median_ns": 242738.09523809524,
+          "min_ns": 240271.42857142858,
+          "mean_ns": 242214.2857142857,
+          "mad_ns": 1185.7142857142899,
+          "samples": 7,
+          "loops_per_sample": 21,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "pyoverdrive": 216.67880333496814
+      }
+    },
+    {
+      "case": "vectorize_sqrt_n1000000",
+      "params": {
+        "n": 1000000,
+        "expect": "wrapped ufunc called directly"
+      },
+      "baseline": "stock_vectorize",
+      "variants": {
+        "stock_vectorize": {
+          "median_ns": 259166700.0,
+          "min_ns": 257943700.0,
+          "mean_ns": 259746457.14285713,
+          "mad_ns": 27000.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "pyoverdrive": {
+          "median_ns": 1394575.0,
+          "min_ns": 1386550.0,
+          "mean_ns": 1406557.142857143,
+          "mad_ns": 4450.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "pyoverdrive": 185.83919832206945
       }
     }
   ]

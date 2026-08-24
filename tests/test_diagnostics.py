@@ -140,6 +140,9 @@ def test_selfcheck_reports_fail_when_path_does_not_dispatch(monkeypatch):
         return {"unique_sort": lambda: ((np.array([1.0, 2.0], dtype=np.float64),), {})}
 
     monkeypatch.setattr(diagnostics, "_selfcheck_inputs", _bad_inputs)
+    # class-backed paths draw from their own input table; empty it too so
+    # this test stays isolated to unique_sort
+    monkeypatch.setattr(diagnostics, "_selfcheck_class_inputs", dict)
     results = pyoverdrive.selfcheck(verbose=False)
     assert results["unique_sort"].startswith("FAIL: did not dispatch")
     for name, verdict in results.items():

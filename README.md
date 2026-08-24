@@ -1,11 +1,74 @@
 # PyOverdrive
 
-**NumPy at full throttle.**
+**NumPy at full throttle.** Two lines, and NumPy code you have already written
+gets faster. Nothing else changes.
 
-PyOverdrive is an independent adaptive accelerator for NumPy. It is not affiliated
-with or endorsed by NumPy or NumFOCUS.
+```bash
+pip install pyoverdrive
+```
 
-The project is one umbrella containing two systems:
+```python
+import numpy as np
+import pyoverdrive
+
+pyoverdrive.enable()
+# your existing code, unchanged. Supported calls take a measured fast path;
+# everything else is stock NumPy, untouched.
+```
+
+## Why it is fast
+
+Not by rewriting NumPy. NumPy's kernels are excellent - but a handful of its
+functions reach them by a slow road: a Python loop where a vectorized call
+exists, a per-matrix LAPACK dispatch on a stack of 2x2s, a planner switched off
+by default to protect tiny inputs. PyOverdrive recognizes those calls and takes
+the short road, and stays out of the way everywhere else.
+
+| Your call | What PyOverdrive does instead | Measured |
+|---|---|---:|
+| `np.isin(a, b)` on `StringDType` | hash-set membership | **1593x** |
+| `np.searchsorted(a, huge_python_int)` | an O(1) provable answer | **1041x** |
+| `np.apply_along_axis(np.mean, -1, a)` | the `axis=` reduction, once | **217x** |
+| `np.vectorize(np.sqrt)(x)` | calls the wrapped ufunc directly | **186x** |
+| `np.einsum('ij,jk,kl->il', a, b, c)` | NumPy's own planner, above a measured size gate | **174x** |
+| `np.linalg.qr(stack_of_10k_3x3)` | closed-form Householder, vectorized | **3.8x** |
+
+Measured end-to-end through the public API - `pyoverdrive.enable()` on, your
+call unchanged - on an idle Intel i7-12700K, NumPy 2.5.2, at 0% background
+load. Every number in this repository ships with the machine that produced it
+and the JSON it came from, under
+[`benchmarks/results/`](benchmarks/results). Nothing is admitted on one
+machine's word: a fast path ships only if it wins on both benchmark machines,
+and the slower one's number is the one quoted.
+
+## Why it is safe
+
+The point of an accelerator you can leave switched on is that you never have to
+wonder. So:
+
+- **Results match stock NumPy.** Bit-identical on 47 of the 67 registered paths;
+  the other 20 run in a documented numeric mode with a measured tolerance.
+- **Every fast path is conservative.** It runs only when a predicate proves the
+  input is in its calibrated regime. Anything else - odd dtypes, edge shapes,
+  non-finite values, subclasses - falls back to stock, automatically.
+- **Verify it on your own machine**, not on our claims:
+  ```bash
+  python -m pyoverdrive --selfcheck   # every path vs stock NumPy, here
+  ```
+- **Kill any path, or all of them**, without touching your code:
+  `pyoverdrive.disable_path("qr_small_batch")`, `PYOVERDRIVE_DISABLE=...`,
+  or `pyoverdrive.disable()` to restore stock NumPy exactly.
+- **Ask what it did:** `pyoverdrive.explain("numpy.linalg.qr", a)` reports the
+  decision and the reason without running anything.
+
+Over 2,000 tests - hand-written differential suites per path plus property
+fuzzing against stock - run green on Windows (AMD Zen 4 and Intel hybrid) and
+Linux x86-64.
+
+PyOverdrive is an independent project. It is not affiliated with or endorsed by
+NumPy or NumFOCUS.
+
+## Under the hood
 
 | Component | Name | Role |
 |---|---|---|
@@ -14,17 +77,6 @@ The project is one umbrella containing two systems:
 | Benchmark + verification system | **Dyno** | Measures speed, memory, scaling, and regressions |
 | Adaptive runtime dispatcher | **Gearbox** | Selects stock NumPy, fast paths, SIMD, or parallel execution |
 | Adaptive parallel execution core | **PyRallel** | Executes appropriate operations across CPU cores |
-
-The eventual user experience:
-
-```python
-import numpy as np
-import pyoverdrive
-
-pyoverdrive.enable()
-# existing NumPy code keeps working; supported ops get faster,
-# everything else falls back to stock NumPy
-```
 
 ## Ground rules
 
@@ -115,7 +167,7 @@ into the result JSON. Evidence exists for two machines: fingerprint
 thresholds ship as defaults) and `9bbe7063c555` (Intel i7-12700K hybrid
 8P+4E, numpy 2.5.2, Python 3.13, a fully idle box: 0-1% load on every
 suite). The full correctness gate (differential, property fuzz, and the
-all-paths self-check; 1788 tests and 65 paths at that run, 2026-08-24)
+all-paths self-check; 2065 tests and 67 paths at that run, 2026-08-25)
 additionally runs green on a third environment - Linux x86-64 under
 Docker (python:3.13-slim, numpy 2.5.2) - and on a clean-venv wheel
 install, so the compatibility claims hold across two OSes, two
@@ -131,10 +183,11 @@ multi-thread number; do not move a threshold on its say-so.
 ## Status
 
 Phases 0-4 prototyped on the first machine (Zen 4 AVX-512, 16C/32T, numpy
-2.4.5, fingerprint `8f8198d9abab`). Thirty-nine fast-path families are live behind
+2.4.5, fingerprint `8f8198d9abab`). Forty-one fast-path families are live behind
 `enable()` (plus one calibration-gated), every threshold calibrated from
-committed Dyno evidence. Results are bit-identical to stock except fourteen
-documented numeric-mode families (`inner_tensordot`, float fftconvolve,
+committed Dyno evidence. Results are bit-identical to stock on 47 of the 67
+registered paths; the other 20 run in documented numeric mode
+(`inner_tensordot`, float fftconvolve,
 `nanquantile_masked`, `nanpercentile_masked`, `einsum_optimize`,
 `reduce_tiny_trailing`, `eigvalsh_2x2_closed`, `eigvalsh_3x3_trig`,
 `matmul_split_complex`, `inv_small_batch`, `linalg_small_batch`
@@ -184,6 +237,8 @@ det/slogdet/solve, `cholesky_small_batch`, `qr_small_batch`,
 | `nan_to_num_where` | `np.nan_to_num(x)` default args or scalar `nan=`/`posinf=`/`neginf=` overrides, float64, >= 10k elements | 1.9-2.6x (1.1-1.4x with an inf mix); bit-identical, always a fresh copy |
 | `interp_uniform_grid` | `np.interp(x, xp, fp)`, all plain 1-D float64, xp uniformly spaced (linspace/arange grids), >= 3000 queries, finite x and fp | direct index arithmetic replaces per-query bisection: 2.8-6x across the measured regimes; left=/right=/period= stay on stock |
 | `take_index_assign` | `np.take(a, idx, out=...)`, 1-D float64/int64 a, intp indices >= 1000 | fancy-index gather + assign, 1.3-3.3x, bit-identical, same out object returned; out stays untouched on a bad index exactly like stock |
+| `apply_along_axis_reduce` | `np.apply_along_axis(f, axis, a)` where `f` IS one of NumPy's reducers (identity-matched), plain ndarray, >= 16 slices, no zero-length dims | the `axis=` reduction instead of a Python loop over slices: 15-178x measured (mean 178x at 20k slices), bit-identical. Order-sensitive reducers (mean/sum/std/var/prod) serve the last axis only - off it, NumPy accumulates in a different order and the last ulp disagrees |
+| `vectorize_ufunc_direct` | `np.vectorize(f)` where `f` is one of 34 served unary ufuncs, called on a plain float64 array with size > 0 | calls the wrapped ufunc directly instead of the object loop: 13-112x measured, bit-identical. Installs a subclass of `np.vectorize`, so `isinstance`/`type()` keep working; scalars, 0-d, empty (stock raises), float32 and otypes/excluded/signature/cache all stay on stock |
 
 ## Per-machine calibration
 

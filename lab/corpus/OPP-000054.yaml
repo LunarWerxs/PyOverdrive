@@ -1,0 +1,97 @@
+id: OPP-000054
+title: "numpy.apply_along_axis runs a Python loop, one call per 1-D slice - when func1d IS one of numpy's own reductions the identical work is available as a single vectorized axis= call, measured 55-292x faster and bit-identical on the last axis"
+sources:
+  - url: https://numpy.org/doc/stable/reference/generated/numpy.apply_along_axis.html
+    repository: numpy/numpy
+    type: benchmark
+    number: 0
+    state_at_ingestion: open
+    retrieved_at: "2026-08-25T00:10:00Z"
+claim:
+  speedup: null
+  baseline: >-
+    numpy.lib._shape_base_impl.apply_along_axis is a documented
+    convenience wrapper whose body is a Python loop over an ndindex of
+    the non-axis dimensions, invoking func1d once per 1-D slice and
+    assembling the results. NumPy's own documentation frames the
+    function as convenience, and the loop is visible in the source; no
+    upstream issue is needed to establish the cost, and none is claimed
+    here - the baseline is the implementation itself.
+  candidate: >-
+    When func1d is one of NumPy's own reductions, that loop recomputes,
+    one slice at a time and in Python, exactly what the reduction's own
+    axis= argument does in a single vectorized C call. PyOverdrive
+    detects the reducer by object identity (never by name) and routes
+    to the axis= form.
+  hardware: "measured here; no third-party claim to attribute"
+affected_operations: [numpy.apply_along_axis]
+input_regime:
+  dtypes: [float64, float32, int64, int32, int16, int8, uint64, uint32, uint16, uint8, bool]
+  sizes: [16, 64, 256, 1000, 5000, 20000]
+  notes: >-
+    apply_along_axis(func1d, axis, arr) exactly, no extra args/kwargs,
+    arr a plain ndarray (subclasses refused), no zero-length dimension,
+    valid int axis, at least SLICE_MIN=16 slices. The served reducers
+    split by numerical ORDER-SENSITIVITY, which is measured, not
+    stylistic: max/min/median/any/all/ptp/argmax/argmin are exact
+    (integer or boolean comparisons, or a partition over the same
+    values) and are served on ANY axis; mean/sum/std/var/prod
+    accumulate in floating point and are served on the LAST axis only,
+    where each slice is contiguous and both routes accumulate in the
+    same order. Off the last axis NumPy's reduction walks whole rows
+    across the buffer instead of one strided column at a time, and
+    float addition is not associative - measured last-ulp disagreement
+    on (40, 500) axis=0 for sum, mean, std and var.
+status: shipped
+license_review: clean
+reproducer: benchmarks/historical/opp_000054_apply_along_axis.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [8f8198d9abab, 9bbe7063c555]
+  detail: >
+    Probe 2026-08-24, both machines. Dev box (fp 8f8198d9abab, numpy
+    2.4.5): mean 103.9x at 2000 slices, 292.1x at (100,2000) axis=0,
+    262.1x at 20_000 slices; sum 114.3-234.9x; max 104.2-190.7x;
+    median 10.6-20.3x. Idle box (fp 9bbe7063c555, numpy 2.5.2, 0-1%
+    load): mean 109.4-179.2x, sum 80.9-133.4x, max 54.7-96.1x, median
+    8.4-15.1x. BATCH11-CAL smoke on the dev box confirmed the margin
+    tracks SLICE COUNT rather than element count: 17.0x at the
+    SLICE_MIN=16 floor, 197.2x at 2000 slices, same slice length.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections: []
+related_opportunities: [OPP-000055]
+notes:
+  - >-
+    Bit-identical on every served call; the split above is what makes
+    that claim true rather than approximately true. The differential
+    suite re-proves the split on whatever machine it runs, in both
+    directions (exact reducers dispatch off the last axis and agree;
+    order-sensitive ones REFUSE off the last axis).
+  - >-
+    The identity lookup is rebuilt on the gearbox's patch generation
+    counter, and this is load-bearing: PyOverdrive patches np.mean and
+    np.sum themselves, so while enabled the caller's np.mean IS
+    PyOverdrive's wrapper. The first build of this path matched only
+    the pre-patch objects, so it silently never fired - caught by its
+    own selfcheck, which is exactly what selfcheck is for. The lookup
+    maps both the wrapper and the stock object to the STOCK reducer,
+    so the result is exactly stock-apply_along_axis's and needs no
+    second dispatch.
+  - >-
+    Wrapper edges refused rather than assumed, each read from numpy's
+    implementation and tested: a zero-length non-axis dimension (stock
+    raises ValueError where the axis= form returns empty); a
+    zero-length axis dimension (stock's per-slice warning behavior
+    cannot be reproduced by one call); np.matrix, where stock's own
+    answer is shape-wrong because matrix slices never become 1-D, so
+    the axis= form is different-and-arguably-better - precisely what a
+    transparent accelerator must not be; other ndarray subclasses;
+    1-D input, where stock returns a 0-d ndarray and the axis= form a
+    bare NumPy scalar (the path re-wraps so the TYPE matches too).
+  - >-
+    license_review clean: routes to numpy's own reductions, no
+    third-party code, no algorithm reimplemented.
+  - >-
+    SHIPPED (2026-08-25, batch 11) as apply_along_axis_reduce.

@@ -1,7 +1,8 @@
 # Upstream report draft: StringDType NUL-character bugs in numpy
 
-Status: DRAFT, ready to file on numpy/numpy. Filing is an outward-facing
-act and is the owner's call. Everything below reproduces on numpy 2.4.5
+Status: FILED 2026-08-24 as numpy/numpy#32414 (defects 1 and 2, one
+issue); the searchsorted item landed as a confirmation comment on
+numpy/numpy#29727 (its exact class was already tracked there). Everything below reproduces on numpy 2.4.5
 and 2.5.2 (Windows AMD64, MSVC builds; the isin miss also reproduces on
 Linux x86-64, python:3.13-slim, numpy 2.5.2). Related upstream context:
 numpy/numpy#32161 (StringDType isin performance) is where PyOverdrive
@@ -38,19 +39,32 @@ fixed piecemeal while isin still carries the old behavior.
 
 ```python
 probe = np.array(["\x00", "\x00\x00", "a\x00b", "", "x"], dtype=dt)
+# correct count(probe, "\x00") would be [1, 2, 1, 0, 0]
 
 np.strings.count(probe, "\x00")                          # Python scalar
-# 2.4.5 AND 2.5.2: array([2, 3, 4, 1, 2])  <- behaves as count(probe, "")
+# 2.5.2: array([2, 3, 4, 1, 2])   <- exactly count(probe, "") = str_len + 1
+# 2.4.5: array([1, 1, 4, 1, 2])   <- also count(probe, ""), under 2.4's
+#                                    NUL-blind str_len ([0, 0, 3, 0, 1])
 
 np.strings.count(probe, np.array("\x00", dtype=dt))      # np scalar
-# 2.5.2: array([1, 2, 1, 0, 0])            <- correct
+# 2.5.2: array([1, 2, 1, 0, 0])   <- correct
+# 2.4.5: array([1, 1, 4, 1, 2])   <- truncated here too: on 2.4 BOTH
+#                                    spellings degrade to the "" needle
+
+np.strings.replace(probe, "\x00", "N")                   # Python scalar
+# 2.5.2: ['N\x00N', 'N\x00N\x00N', 'NaN\x00NbN', 'N', 'NxN']
+#        <- replace(probe, "", "N"): inserts everywhere, replaces nothing
 ```
 
 The Python-str needle is truncated at the first NUL somewhere on the
 conversion path, so ``count``/``replace``/``strip`` silently operate on
-the empty string instead (replace and strip become no-ops; probed on
-2.5.2). The same values passed as a 0-d StringDType array survive
-intact. A user has no reason to expect these two spellings to differ.
+the empty string instead. The same values passed as a 0-d StringDType
+array survive intact on 2.5.2 - the np-scalar path was evidently fixed
+between 2.4 and 2.5 while the Python-scalar path kept the truncation,
+so the two spellings of the same call now disagree. A user has no
+reason to expect them to differ. (All outputs above re-measured
+2026-08-24 on 2.4.5 Windows AMD64 and 2.5.2 Windows Intel; the isin
+miss also reproduces on Linux x86-64.)
 
 ## Why it matters beyond aesthetics
 

@@ -30,8 +30,10 @@ from . import (
     nanargminmax_scan,
     nanmedian_scan,
     nanreduce_scan,
+    apply_along_axis_reduce,
     percentile_dense,
     qr_small_batch,
+    vectorize_ufunc,
     searchsorted_extreme_key,
     take_index_assign,
     unique_rows_lexsort,
@@ -100,6 +102,8 @@ _MODULES = [
     interp_uniform_grid,
     take_index_assign,
     qr_small_batch,
+    apply_along_axis_reduce,
+    vectorize_ufunc,
 ]
 
 

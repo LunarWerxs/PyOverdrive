@@ -1,0 +1,104 @@
+id: OPP-000055
+title: "numpy.vectorize wrapping a ufunc runs a Python object loop over a callable that is ALREADY vectorized - calling the ufunc directly is bit-identical and 14-101x faster; served by installing a SUBCLASS of np.vectorize so isinstance and type() keep working"
+sources:
+  - url: https://numpy.org/doc/stable/reference/generated/numpy.vectorize.html
+    repository: numpy/numpy
+    type: benchmark
+    number: 0
+    state_at_ingestion: open
+    retrieved_at: "2026-08-25T00:20:00Z"
+claim:
+  speedup: null
+  baseline: >-
+    NumPy's own documentation states the vectorize function "is
+    provided primarily for convenience, not for performance. The
+    implementation is essentially a for loop." The cost is therefore
+    documented upstream rather than reported as a bug, and no
+    third-party claim is attributed here.
+  candidate: >-
+    Wrapping one of NumPy's OWN ufuncs in vectorize is pure loss: the
+    wrapped callable is already a fully vectorized C loop, and the
+    object loop calls it once per element. This happens in real code -
+    inside generic helpers, in teaching material, and wherever a
+    callable is passed around and vectorized defensively. Calling the
+    wrapped ufunc on the whole array instead is the same arithmetic on
+    the same values.
+  hardware: "measured here; no third-party claim to attribute"
+affected_operations: [numpy.vectorize]
+input_regime:
+  dtypes: [float64]
+  sizes: [100, 1000, 10000, 100000, 1000000]
+  notes: >-
+    An instance constructed as vectorize(f) where f is one of the 34
+    served unary ufuncs and no otypes/signature/excluded/cache were
+    given, CALLED with exactly one positional argument that is a plain
+    float64 ndarray with ndim >= 1 and size > 0. Everything else runs
+    stock's own __call__ unchanged: scalars and 0-d input (stock
+    returns a 0-d ndarray, the raw ufunc a NumPy scalar - same value,
+    different type), empty input (stock RAISES ValueError without
+    otypes), float32 and other dtypes (stock infers the output dtype
+    from a trial call on the first element and runs an object loop,
+    which for float32 computes in float64 and casts - genuinely
+    different bits from the native float32 SIMD loop).
+status: shipped
+license_review: clean
+reproducer: benchmarks/historical/opp_000055_vectorize_ufunc.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [8f8198d9abab, 9bbe7063c555]
+  detail: >
+    Probe 2026-08-24. Dev box (fp 8f8198d9abab, numpy 2.4.5, float64
+    n=1M): sqrt 101.1x, exp 36.6x, sin 20.7x; the first survey cell
+    measured 17.8x for sin at default settings. Idle box (fp
+    9bbe7063c555, numpy 2.5.2, 0-1% load): 14.1x for sin at 1M.
+    BATCH11-CAL smoke (dev box): sqrt 94.8x at n=10_000 and 79.0x at
+    1M, exp 34.3x/26.1x, sin 25.4x/16.1x - the margin is largest at
+    mid sizes, where the per-element Python overhead dominates most
+    relative to the vectorized call.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections: []
+related_opportunities: [OPP-000054]
+notes:
+  - >-
+    THE SERVED SET IS MEASURED, NOT ASSUMED, and this is the whole
+    safety argument. NumPy's scalar loop (what vectorize's object loop
+    calls) and its array loop are separate implementations that may
+    differ in the last ulp, which would make this path a silent
+    value-changer. All 34 candidate unary float64 ufuncs were verified
+    bit-identical between the two loops over an adversarial sweep
+    (tiny/huge/negative/exact halves/domain edges) on BOTH benchmark
+    machines - 34/34 on numpy 2.4.5 Windows AMD Zen 4 and on numpy
+    2.5.2 Windows Intel. The differential suite re-verifies EVERY
+    member wherever it runs, so a future NumPy build that breaks the
+    property fails CI on that platform instead of shipping wrong
+    values.
+  - >-
+    implementation_risk medium is the CLASS PATCH, a first for this
+    project. np.vectorize is a class and the slow part is the
+    instance's __call__, so a plain function wrapper would make
+    isinstance(v, np.vectorize) raise TypeError outright. The gearbox
+    grew a ClassPath registration that installs a SUBCLASS of the
+    stock class instead: construction, attributes, isinstance,
+    type(v) is np.vectorize, and __name__/__qualname__ all keep
+    working, and exactly one method is overridden. unpatch() restores
+    the original class object. The kill switch is LIVE - the installed
+    subclass consults the path's enabled flag on every call - because
+    unlike a FastPath it cannot simply leave an active list.
+  - >-
+    selfcheck was extended to cover class paths (construct through the
+    patched class and through stock, call both, compare), so this path
+    is verified on the user's own machine like every other.
+  - >-
+    The direct call uses the STOCK ufunc, not the live attribute:
+    stock vectorize calls the wrapped callable once per ELEMENT, where
+    every PyOverdrive ufunc path declines on scalar input, so stock's
+    own answer IS the stock ufunc's. Like OPP-000054, the lookup is
+    rebuilt on the gearbox generation counter because while enabled
+    the caller's np.sin is PyOverdrive's wrapper.
+  - >-
+    license_review clean: calls the user's own wrapped ufunc; no
+    third-party code.
+  - >-
+    SHIPPED (2026-08-25, batch 11) as vectorize_ufunc_direct.

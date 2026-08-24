@@ -61,8 +61,37 @@ class FastPath:
     enabled: bool = True
 
 
+@dataclass
+class ClassPath:
+    """One registered accelerated SUBCLASS of a NumPy class.
+
+    A few NumPy accelerator opportunities live behind a CLASS rather than
+    a function: ``np.vectorize(f)`` constructs an object whose ``__call__``
+    is the slow part. Wrapping the name with a plain function would break
+    ``isinstance(v, np.vectorize)`` outright (isinstance against a
+    function raises TypeError), so those are served by installing a
+    SUBCLASS of the stock class instead: construction, attributes,
+    ``isinstance`` and even ``type(v) is np.vectorize`` all keep working,
+    and only the accelerated method is overridden.
+
+    ``make(stock_cls)`` returns that subclass. ``applicable(args, kwargs)``
+    answers, for ``explain()``, whether a CONSTRUCTION with these
+    arguments yields an accelerated instance. The subclass must consult
+    ``path.enabled`` at call time so the kill switch works after patching,
+    exactly like a FastPath leaving the active list.
+    """
+
+    name: str
+    op: str  # e.g. "numpy.vectorize"
+    make: Callable[[type], type]
+    applicable: Callable[[tuple, dict], bool]
+    provenance: dict = field(default_factory=dict)
+    enabled: bool = True
+
+
 class Gearbox:
     def __init__(self) -> None:
+        self._class_paths: dict[str, ClassPath] = {}
         self._paths: dict[str, list[FastPath]] = {}
         # Per-op list of ENABLED paths in priority order. The list object is
         # shared with that op's wrapper closure and mutated in place, so the
@@ -72,6 +101,12 @@ class Gearbox:
         self._debug = os.environ.get("PYOVERDRIVE_DEBUG", "") not in ("", "0")
         self._warned_paths: set[str] = set()
         self.patched = False
+        # Bumped by every patch/unpatch. Paths that identity-match NumPy
+        # callables (e.g. "is this func1d np.mean?") cache that lookup and
+        # invalidate it on this counter: while patched, np.mean is OUR
+        # wrapper, so a lookup built before patching would silently stop
+        # matching and the path would never fire again.
+        self.generation = 0
         killed = os.environ.get("PYOVERDRIVE_DISABLE", "")
         self._killed_at_import = {k.strip() for k in killed.split(",") if k.strip()}
 
@@ -87,12 +122,19 @@ class Gearbox:
         ops.sort(key=lambda p: -p.priority)
         self._rebuild_active(path.op)
 
+    def register_class(self, path: ClassPath) -> None:
+        if path.name in self._killed_at_import:
+            path.enabled = False
+        if path.op in self._class_paths:
+            raise ValueError(f"duplicate class path for op: {path.op}")
+        self._class_paths[path.op] = path
+
     def _rebuild_active(self, op: str) -> None:
         active = self._active.setdefault(op, [])
         active[:] = [p for p in self._paths.get(op, ()) if p.enabled]
 
     def supported_operations(self) -> list[str]:
-        return sorted(self._paths)
+        return sorted(set(self._paths) | set(self._class_paths))
 
     def set_path_enabled(self, name: str, value: bool) -> None:
         for op, paths in self._paths.items():
@@ -101,6 +143,12 @@ class Gearbox:
                     p.enabled = value
                     self._rebuild_active(op)
                     return
+        for cp in self._class_paths.values():
+            if cp.name == name:
+                # the installed subclass reads this flag per call, so the
+                # kill switch takes effect live, without unpatching
+                cp.enabled = value
+                return
         raise KeyError(f"no fast path named {name!r}")
 
     # -- dispatch ---------------------------------------------------------
@@ -147,7 +195,23 @@ class Gearbox:
             print(f"[gearbox] {op} -> {path.name} RAISED {exc!r}; falling back to stock")
 
     def decide(self, op: str, args: tuple, kwargs: dict) -> tuple[str, str]:
-        """(chosen implementation, reason code) without executing the op."""
+        """(chosen implementation, reason code) without executing the op.
+
+        For a class-backed op the question is whether a CONSTRUCTION with
+        these arguments yields an accelerated instance.
+        """
+        cp = self._class_paths.get(op)
+        if cp is not None:
+            if not cp.enabled:
+                return "stock", "path-disabled"
+            try:
+                return (
+                    (cp.name, "predicate-accepted")
+                    if cp.applicable(args, kwargs)
+                    else ("stock", "no-applicable-path")
+                )
+            except Exception:
+                return "stock", f"predicate-error:{cp.name}"
         if op not in self._paths:
             return "stock", "operation-not-supported"
         for path in self._paths[op]:
@@ -172,9 +236,11 @@ class Gearbox:
             module, attr = self._resolve(numpy, op)
             stock = getattr(module, attr)
             self._stock[op] = stock
-            wrapper = self._make_wrapper(op, stock)
-            setattr(module, attr, wrapper)
+            cp = self._class_paths.get(op)
+            replacement = cp.make(stock) if cp is not None else self._make_wrapper(op, stock)
+            setattr(module, attr, replacement)
         self.patched = bool(self._stock)
+        self.generation += 1
 
     def unpatch(self) -> None:
         import numpy
@@ -184,6 +250,24 @@ class Gearbox:
             setattr(module, attr, stock)
         self._stock.clear()
         self.patched = False
+        self.generation += 1
+
+    def matches_op(self, func, op: str) -> bool:
+        """Is ``func`` NumPy's ``op``, by identity, patched or not?
+
+        A caller handing us ``np.mean`` hands us OUR wrapper while
+        PyOverdrive is enabled and the stock function otherwise; both
+        must count, and nothing else may.
+        """
+        if func is self._stock.get(op):
+            return True
+        import numpy
+
+        try:
+            module, attr = self._resolve(numpy, op)
+        except (AttributeError, ValueError):
+            return False
+        return getattr(module, attr, None) is func
 
     def stock_fn(self, op: str) -> Callable:
         """The unpatched implementation (valid while patched)."""

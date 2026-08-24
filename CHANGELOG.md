@@ -6,12 +6,19 @@ First public release candidate. MIT licensed.
 
 ### Fast paths
 
-Thirty-nine always-on fast-path families (65 registered paths) behind
+Forty-one always-on fast-path families (67 registered paths) behind
 `pyoverdrive.enable()`, plus one calibration-gated family. Every
 threshold comes from committed, machine-fingerprinted benchmark
 evidence under `benchmarks/results/`; the headline end-to-end wins on
 the reference machines include:
 
+- `np.apply_along_axis` with one of NumPy's own reducers, served as the
+  equivalent `axis=` call instead of a Python loop over 1-D slices
+  (55-292x, bit-identical; the margin scales with slice count)
+- `np.vectorize` wrapping one of NumPy's own ufuncs, called directly
+  instead of through the object loop (14-101x, bit-identical; served by
+  installing a subclass of `np.vectorize`, so `isinstance` and `type()`
+  keep working)
 - `np.isin` on StringDType (2317x at the upstream-reported shape) and
   on object arrays (240-262x at scale)
 - `np.searchsorted` with out-of-dtype-range Python int keys (~1000x:
@@ -66,13 +73,20 @@ the reference machines include:
   fallback, per-path kill switches (`PYOVERDRIVE_DISABLE`,
   `disable_path`), `explain()` for dispatch decisions, and
   `selfcheck()` proving every path against stock on the host machine.
+- Class-backed paths: where the slow work lives on an instance rather
+  than in a function (`np.vectorize`), the dispatcher installs a
+  SUBCLASS of the stock class rather than wrapping the name with a
+  function, so `isinstance`, `type()`, attributes and `__name__` keep
+  working and `disable()` restores the original class object. Their
+  kill switch is live: the installed subclass consults it per call.
 - Per-machine calibration (`python -m pyoverdrive --calibrate`) for
   paths whose wins are architecture-dependent: verdicts persist per
   machine fingerprint; foreign or stale calibration files are ignored;
   with no file, gated paths stay off.
-- Bit-identical results except eight documented numeric-mode families,
-  each with a measured tolerance; comparison modes recorded in every
-  path's provenance.
+- Bit-identical results on 47 of the 67 registered paths; the other 20
+  run in documented numeric mode, each with a measured tolerance.
+  Every path's comparison mode is recorded in its provenance and
+  checked by the differential suite.
 
 ### Verification
 

@@ -4,21 +4,41 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyoverdrive"
-version = "0.0.1.dev0"
-description = "PyOverdrive: an independent adaptive accelerator for NumPy. NumPy at full throttle."
+version = "0.1.0"
+description = "Drop-in accelerator for NumPy: measured, guarded fast paths behind one enable() call, with automatic fallback to stock NumPy."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.12"
+authors = [{ name = "LunarWerx Studios" }]
+keywords = [
+    "numpy", "performance", "acceleration", "optimization", "fast",
+    "scientific-computing", "vectorization", "benchmark", "linalg",
+]
 dependencies = [
     "numpy>=2.0",
 ]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 4 - Beta",
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
 ]
+
+[project.urls]
+Homepage = "https://github.com/LunarWerxs/PyOverdrive"
+Repository = "https://github.com/LunarWerxs/PyOverdrive"
+Changelog = "https://github.com/LunarWerxs/PyOverdrive/blob/main/CHANGELOG.md"
+Issues = "https://github.com/LunarWerxs/PyOverdrive/issues"
+"Built by" = "https://connections.icu"
 
 [project.optional-dependencies]
 dev = [
@@ -30,6 +50,9 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+pyoverdrive = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "compatibility"]

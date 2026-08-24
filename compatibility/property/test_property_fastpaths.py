@@ -999,6 +999,91 @@ def test_einsum_ellipsis(b, n, m, k, subs, dtype, data):
     compare("numpy.einsum", (subs, *ops), {}, tol)
 
 
+# --- apply_along_axis known-reducer interception (OPP-000054) ---------------
+@settings(**SETTINGS)
+@given(
+    reducer=st.sampled_from(
+        ["mean", "sum", "max", "min", "median", "std", "var", "prod",
+         "any", "all", "ptp", "argmax", "argmin"]
+    ),
+    nslices=st.integers(1, 400),
+    slice_len=st.integers(1, 40),
+    dtype=st.sampled_from([np.float64, np.float32, np.int64, np.int32, np.bool_]),
+    axis_spec=st.sampled_from(["last", "neg1", "first", "middle"]),
+    three_d=st.booleans(),
+    hazard=st.sampled_from(["clean", "nan", "zero_dim", "subclass", "userfunc"]),
+    data=st.data(),
+)
+def test_apply_along_axis_reduce(
+    reducer, nslices, slice_len, dtype, axis_spec, three_d, hazard, data
+):
+    # straddles the slice floor, both axis classes (order-sensitive reducers
+    # must refuse off the last axis), and the refusal hazards
+    rng = np.random.default_rng(data.draw(st.integers(0, 2**32 - 1)))
+    shape = (nslices, slice_len)
+    if three_d and nslices >= 4:
+        shape = (2, nslices // 2, slice_len)
+    a = (rng.standard_normal(shape) * 5).astype(dtype)
+    if hazard == "nan" and dtype in (np.float64, np.float32) and a.size:
+        a.reshape(-1)[0] = np.nan
+    elif hazard == "zero_dim":
+        a = a[:0] if a.ndim == 2 else a[:, :0]
+    elif hazard == "subclass":
+        a = np.ma.MaskedArray(a)
+    nd = a.ndim
+    axis = {"last": nd - 1, "neg1": -1, "first": 0, "middle": nd // 2}[axis_spec]
+    func = (lambda s: np.asarray(s).mean()) if hazard == "userfunc" else getattr(np, reducer)
+    compare("numpy.apply_along_axis", (func, axis, a), {}, exact)
+
+
+# --- vectorize(ufunc) direct call (OPP-000055) ------------------------------
+@settings(**SETTINGS)
+@given(
+    name=st.sampled_from(
+        ["sin", "cos", "exp", "log", "sqrt", "tanh", "arctan", "rint",
+         "sign", "cbrt", "square", "absolute"]
+    ),
+    n=st.integers(0, 5_000),
+    dtype=st.sampled_from([np.float64, np.float32, np.int64]),
+    two_d=st.booleans(),
+    kind=st.sampled_from(["plain", "otypes", "cache", "excluded", "pyfunc"]),
+    data=st.data(),
+)
+def test_vectorize_ufunc_direct(name, n, dtype, two_d, kind, data):
+    # compare() cannot drive a CLASS, so both sides are run by hand: the
+    # patched np.vectorize against the stock class captured from the gearbox
+    rng = np.random.default_rng(data.draw(st.integers(0, 2**32 - 1)))
+    uf = getattr(np, name)
+    x = np.abs(rng.standard_normal(n) * 3).astype(dtype) + dtype(1)
+    if two_d and n and n % 2 == 0:
+        x = x.reshape(2, n // 2)
+    kwargs = {
+        "plain": {}, "otypes": {"otypes": [np.float64]}, "cache": {"cache": True},
+        "excluded": {"excluded": set()}, "pyfunc": {},
+    }[kind]
+    pyfunc = (lambda t: uf(t)) if kind == "pyfunc" else uf
+    stock_cls = GEARBOX.stock_fn("numpy.vectorize")
+
+    def run(cls):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            try:
+                return ("ok", cls(pyfunc, **kwargs)(x))
+            except Exception as exc:  # noqa: BLE001 - parity capture
+                return ("raised", type(exc))
+
+    got_kind, got = run(np.vectorize)
+    exp_kind, exp = run(stock_cls)
+    assert got_kind == exp_kind, (got_kind, got, exp_kind, exp)
+    if got_kind == "raised":
+        assert got is exp
+    else:
+        assert type(got) is type(exp)
+        assert np.asarray(got).dtype == np.asarray(exp).dtype
+        assert np.asarray(got).shape == np.asarray(exp).shape
+        assert np.array_equal(np.asarray(got), np.asarray(exp), equal_nan=True)
+
+
 # --- batched 2x2/3x3 qr Householder closed form (OPP-000053) ----------------
 @settings(**SETTINGS)
 @given(
