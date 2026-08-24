@@ -199,11 +199,23 @@ def test_refusal_bool_shift_true():
 
 
 def test_refusal_float_shift():
-    # Verified against stock (numpy 2.5): np.roll accepts a float shift
-    # (truncated internally) and does NOT raise, so this is a parity
-    # refusal, not an exception-parity case.
+    # Stock's float-shift behavior is VERSION-DEPENDENT: numpy 2.4/2.5
+    # accepts it (truncated internally) while 2.0.2 raises TypeError from
+    # its slice arithmetic (caught by the public repo's oldest-numpy CI
+    # leg). Either way the call must refuse to the path and mirror stock:
+    # same values when stock returns, same exception type when it raises.
     a = _arr(200, np.int64, seed=18)
-    _assert_refused_equal((a, 1.0), {})
+    decision, reason = GEARBOX.decide(OP, (a, 1.0), {})
+    assert decision == "stock", (decision, reason)
+    try:
+        stock = _stock(a, 1.0)
+    except Exception as stock_exc:  # noqa: BLE001 - parity capture
+        with pytest.raises(type(stock_exc)):
+            np.roll(a, 1.0)
+    else:
+        got = np.roll(a, 1.0)
+        assert type(got) is type(stock)
+        assert np.array_equal(got, stock)
 
 
 def test_refusal_2d_input():
