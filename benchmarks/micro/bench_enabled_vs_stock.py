@@ -69,6 +69,9 @@ STOCK_TAKE = np.take
 STOCK_QR = np.linalg.qr
 STOCK_APPLY_ALONG_AXIS = np.apply_along_axis
 STOCK_VECTORIZE = np.vectorize
+STOCK_PINV = np.linalg.pinv
+STOCK_NORM = np.linalg.norm
+STOCK_SVD = np.linalg.svd
 STOCK_UFUNCS = {op: getattr(np, op) for op in PYRALLEL_SUPPORTED}
 STOCK_BINARY = {op: getattr(np, op) for op in BINARY_SUPPORTED}
 
@@ -84,7 +87,8 @@ pyoverdrive.enable(
      "numpy.nanmedian", "numpy.nanpercentile", "numpy.linalg.det",
      "numpy.linalg.slogdet", "numpy.linalg.solve", "numpy.nan_to_num",
      "numpy.linalg.cholesky", "numpy.interp", "numpy.take", "numpy.linalg.qr",
-     "numpy.apply_along_axis", "numpy.vectorize"]
+     "numpy.apply_along_axis", "numpy.vectorize",
+     "numpy.linalg.pinv", "numpy.linalg.norm", "numpy.linalg.svd"]
     + [f"numpy.{op}" for op in PYRALLEL_SUPPORTED]
     + [f"numpy.{op}" for op in BINARY_SUPPORTED]
 )
@@ -1350,6 +1354,38 @@ suite.measure(
     baseline=("stock_vectorize", lambda x=vec_x: STOCK_VECTORIZE(np.sqrt)(x)),
     candidates={"pyoverdrive": lambda x=vec_x: np.vectorize(np.sqrt)(x)},
     check=lambda c, b: c.dtype == b.dtype and bool(np.array_equal(c, b)),
+    samples=3 if SMOKE else 7,
+)
+
+# --- batch 12: the singular-value family on small-matrix batches -------------
+sv_n = 10_000 if not SMOKE else 1_000
+sv_a = np.ascontiguousarray(rng.standard_normal((sv_n, 3, 3)))
+sv_a2 = np.ascontiguousarray(rng.standard_normal((sv_n, 2, 2)))
+suite.measure(
+    case=f"pinv_3x3_batch{sv_n}",
+    params={"batch": sv_n, "expect": "adjugate inverse under a conditioning band"},
+    baseline=("stock_pinv", lambda a=sv_a: STOCK_PINV(a)),
+    candidates={"pyoverdrive": lambda a=sv_a: np.linalg.pinv(a)},
+    check=lambda c, b: c.shape == b.shape
+    and bool(np.all(np.abs(c - b) <= 1e-9 * max(float(np.abs(b).max()), 1e-300))),
+    samples=3 if SMOKE else 7,
+)
+suite.measure(
+    case=f"norm2_2x2_batch{sv_n}",
+    params={"batch": sv_n, "expect": "largest singular value from the gram closed form"},
+    baseline=("stock_norm", lambda a=sv_a2: STOCK_NORM(a, ord=2, axis=(-2, -1))),
+    candidates={"pyoverdrive": lambda a=sv_a2: np.linalg.norm(a, ord=2, axis=(-2, -1))},
+    check=lambda c, b: c.shape == b.shape
+    and bool(np.all(np.abs(c - b) <= 1e-12 * np.maximum(np.abs(b), 1e-300))),
+    samples=3 if SMOKE else 7,
+)
+suite.measure(
+    case=f"svdvals_2x2_batch{sv_n}",
+    params={"batch": sv_n, "expect": "singular values from the gram closed form"},
+    baseline=("stock_svd", lambda a=sv_a2: STOCK_SVD(a, compute_uv=False)),
+    candidates={"pyoverdrive": lambda a=sv_a2: np.linalg.svd(a, compute_uv=False)},
+    check=lambda c, b: c.shape == b.shape
+    and bool(np.all(np.abs(c - b) <= 1e-9 * np.maximum(b[..., :1], 1e-300))),
     samples=3 if SMOKE else 7,
 )
 

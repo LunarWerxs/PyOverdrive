@@ -380,6 +380,21 @@ def _inputs_apply_along_axis():
     return (np.mean, 1, rng.standard_normal((2_000, 100))), {}
 
 
+def _inputs_svd_batch():
+    rng = np.random.default_rng(56)
+    return (rng.standard_normal((2_000, 3, 3)),), {}
+
+
+def _inputs_norm2_batch():
+    rng = np.random.default_rng(57)
+    return (rng.standard_normal((2_000, 3, 3)),), {"ord": 2, "axis": (-2, -1)}
+
+
+def _inputs_svdvals_batch():
+    rng = np.random.default_rng(58)
+    return (rng.standard_normal((2_000, 3, 3)),), {"compute_uv": False}
+
+
 def _inputs_qr_batch():
     rng = np.random.default_rng(53)
     return (rng.standard_normal((1_000, 3, 3)),), {}
@@ -485,6 +500,9 @@ def _selfcheck_inputs() -> dict[str, Callable[[], tuple[tuple, dict]]]:
         "solve_small_batch": _inputs_solve_batch,
         "cholesky_small_batch": _inputs_cholesky_batch,
         "qr_small_batch": _inputs_qr_batch,
+        "pinv_small_batch": _inputs_svd_batch,
+        "norm2_small_batch": _inputs_norm2_batch,
+        "svdvals_small_batch": _inputs_svdvals_batch,
         "apply_along_axis_reduce": _inputs_apply_along_axis,
         "eigvalsh_3x3_trig": _inputs_eigvalsh_3x3,
         "einsum_optimize_chain": _inputs_einsum_chain,

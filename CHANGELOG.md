@@ -6,7 +6,7 @@ First public release candidate. MIT licensed.
 
 ### Fast paths
 
-Forty-one always-on fast-path families (67 registered paths) behind
+Forty-four always-on fast-path families (70 registered paths) behind
 `pyoverdrive.enable()`, plus one calibration-gated family. Every
 threshold comes from committed, machine-fingerprinted benchmark
 evidence under `benchmarks/results/`; the headline end-to-end wins on
@@ -19,6 +19,11 @@ the reference machines include:
   instead of through the object loop (14-101x, bit-identical; served by
   installing a subclass of `np.vectorize`, so `isinstance` and `type()`
   keep working)
+- the singular-value family on 2x2/3x3 stacks from one closed-form
+  core: `np.linalg.pinv` via the adjugate (8.6-24x), `np.linalg.norm`
+  with `ord=2` (8.0-15.1x) and `np.linalg.svd(compute_uv=False)`
+  (7.8-12.1x), each under its own measured conditioning band plus a
+  degeneracy guard, with out-of-band matrices split out to stock
 - `np.isin` on StringDType (2317x at the upstream-reported shape) and
   on object arrays (240-262x at scale)
 - `np.searchsorted` with out-of-dtype-range Python int keys (~1000x:
@@ -83,18 +88,18 @@ the reference machines include:
   paths whose wins are architecture-dependent: verdicts persist per
   machine fingerprint; foreign or stale calibration files are ignored;
   with no file, gated paths stay off.
-- Bit-identical results on 47 of the 67 registered paths; the other 20
+- Bit-identical results on 47 of the 70 registered paths; the other 23
   run in documented numeric mode, each with a measured tolerance.
   Every path's comparison mode is recorded in its provenance and
   checked by the differential suite.
 
 ### Verification
 
-- 1600+ tests: hand-written differential suites per path plus a
+- 2100+ tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
 - Full gate green on Windows x86-64 (AMD Zen 4 + Intel Alder Lake) and
   Linux x86-64 (Docker), numpy 2.4 and 2.5 lines, plus a clean-venv
   wheel-install check.
-- Two genuine upstream numpy findings documented along the way
-  (StringDType NUL-handling defects; uint64 searchsorted promotion),
-  with ready-to-file reports under `docs/research/`.
+- Two genuine upstream numpy findings made along the way and FILED:
+  StringDType NUL-handling defects (numpy/numpy#32414) and a uint64
+  searchsorted promotion case added to numpy/numpy#29727.

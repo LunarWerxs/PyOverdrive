@@ -1,0 +1,153 @@
+id: OPP-000056
+title: "numpy.linalg.svd(compute_uv=False), norm(ord=2) and pinv each route every matrix of a 2x2/3x3 stack through their own LAPACK call - the closed-form eigenvalues of the small gram matrix (and the adjugate for pinv) serve all three from one vectorized pass, 2.3-73x"
+sources:
+  - url: https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html
+    repository: numpy/numpy
+    type: benchmark
+    number: 0
+    state_at_ingestion: open
+    retrieved_at: "2026-08-25T02:00:00Z"
+claim:
+  speedup: null
+  baseline: >-
+    The same per-matrix-LAPACK-dispatch mechanism this project has
+    already shipped four families against (inv OPP-000035, det/slogdet/
+    solve OPP-000045, eigvalsh OPP-000030/000048, cholesky OPP-000047,
+    qr OPP-000053). numpy's svd/norm(ord=2)/pinv gufuncs call gesdd per
+    matrix - pinv twice over, since it decomposes and then reassembles -
+    and at d in {2, 3} that setup dominates the arithmetic completely.
+    No upstream issue is claimed; the baseline is the implementation.
+  candidate: >-
+    The singular values of A are the square roots of the eigenvalues of
+    the symmetric gram matrix A^T A, which at these sizes has a closed
+    form: the quadratic for d=2 and the same trigonometric solution the
+    shipped eigvalsh_3x3_trig path uses for d=3. norm(ord=2) needs only
+    the largest of them. pinv is not served from the gram at all: for a
+    well-conditioned square matrix the pseudo-inverse IS the inverse, so
+    the adjugate formula gives it directly, and the gram is used only to
+    measure the conditioning cheaply.
+  hardware: "measured here; no third-party claim to attribute"
+affected_operations: [numpy.linalg.svd, numpy.linalg.norm, numpy.linalg.pinv]
+input_regime:
+  dtypes: [float64]
+  sizes: [100, 300, 1000, 10000, 100000]
+  notes: >-
+    Plain float64 (..., d, d) ndarrays, d in {2, 3}, ndim >= 3, batch >=
+    BATCH_MIN=100, all finite. pinv(a) with NO keyword arguments
+    (rcond/rtol/hermitian each change what stock computes);
+    svd(a, compute_uv=False) without hermitian (the U/V factors carry a
+    sign convention this path does not serve, so the default
+    compute_uv=True refuses); norm(a, ord=2, axis=(-2,-1) or the
+    positive spelling) without keepdims. Everything else stays on stock.
+status: shipped
+license_review: clean
+reproducer: benchmarks/historical/opp_000056_svd_small_batch.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555, 8f8198d9abab]
+  detail: >
+    Full runs 2026-08-25 on both machines. Idle Intel box (fp
+    9bbe7063c555, numpy 2.5.2, 0% load), OPP-000056 reproducer (raw
+    closed forms, no guards - the margin claim itself): pinv 2x2 20.6x
+    at batch 100 rising to 92.1x at 1000 and 191.0x at 10_000, 34.7x at
+    100_000; norm2 2x2 5.6-63.4x; svdvals 2x2 4.1-52.4x; pinv 3x3
+    9.8x/38.1x/29.5x/18.2x, norm2 3x3 2.8-12.7x, svdvals 3x3 2.5-11.7x.
+    BATCH12-CAL (the SHIPPED route, both bands and both degeneracy
+    guards priced in) is the number a user gets: pinv 2x2 18.9-24.0x,
+    3x3 8.6-11.3x; norm2 2x2 14.0-15.1x, 3x3 8.0-11.3x; svdvals 2x2
+    10.6-12.1x, 3x3 7.8-8.9x. End-to-end through the dispatcher (MVP,
+    idle box): pinv 3x3 batch 10_000 17.66x, norm2 2x2 42.10x, svdvals
+    2x2 32.52x. Dev box (fp 8f8198d9abab, numpy 2.4.5, contended
+    44-65%) agrees in direction at every cell. Out-of-band cells
+    measure 0.87-0.99x on both machines, which is the guard cost noted
+    below.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections: []
+related_opportunities: [OPP-000030, OPP-000035, OPP-000045, OPP-000047, OPP-000048, OPP-000053]
+notes:
+  - >-
+    THREE PATHS, THREE ACCURACY STANDARDS, THREE DIFFERENT GUARDS - the
+    reason this is one module and not one path. norm(ord=2) needs only
+    sigma_max, which the gram route delivers to eps at ANY condition
+    number (measured relerr <= 7.8e-16 from cond 1e2 to 1e14), so it
+    carries NO conditioning guard because none is needed. Singular
+    VALUES are judged the way LAPACK itself guarantees them - absolute
+    error against ||A||, the same standard the shipped eigvalsh paths
+    use. pinv is judged relative to its own magnitude.
+  - >-
+    THE BANDS ARE MEASURED, AND THEY DIFFER BY DIMENSION. Forming the
+    gram squares the condition number, so singular-value error grows
+    like eps*cond^2 rather than eps*cond. Worst-of-4000 measurements
+    (abs error / ||A||): d=2 gives 5.3e-13 at cond 1e4, 7.2e-11 at 1e6,
+    5.1e-10 at 1e7; d=3 gives 2.9e-11 at 1e3, 2.7e-9 at 1e4, 3.0e-7 at
+    1e5 - a worse constant because the trigonometric solution amplifies
+    error as the gram's eigenvalues cluster (the mechanism documented in
+    eigvalsh_3x3's DEGENERACY_MIN). Each floor is the last decade
+    clearing the 1e-9 contract with a decade of margin:
+    SVDVALS_SIGMA_RATIO_MIN = {2: 1e-6, 3: 1e-3}. pinv's error is only
+    LINEAR in cond (2.2e-14 at 1e2, 2.4e-10 at 1e6, 2.2e-9 at 1e7), so
+    one floor of 1e-6 serves both dimensions.
+  - >-
+    A SECOND, INDEPENDENT HAZARD that the conditioning band does not
+    catch, and that the first build of this module shipped wrong: a
+    COALESCING PAIR of singular values. It is unrelated to
+    conditioning - measured on stacks whose sigma_min/sigma_max is a
+    healthy 0.3, so every band check passed - and it broke the contract
+    by four to thirteen times: d=3 singular values (1, 1, 0.3) gave
+    4.3e-9 for svdvals and 4.5e-9 for norm2, (1, 0.3, 0.3) gave 1.3e-8,
+    and d=2 (1, 1) gave 7.5e-9. Two different mechanisms: for d=3 the
+    arccos amplification eigvalsh_3x3's DEGENERACY_MIN documents, for
+    d=2 catastrophic cancellation in the discriminant t^2 - 4*det, whose
+    square root then carries ~sqrt(eps) error. One constant guards both
+    (the squared relative separation margin >= 1e-12), delivering 3.3e-11
+    at the d=2 threshold and ~1e-10 at the d=3 one. An exact multiple of
+    the identity is exact and is NOT refused, and a random stack diverts
+    only ~0.4% of its matrices, so the margin is untouched.
+  - >-
+    HOW IT WAS CAUGHT, because the lesson generalizes: not by the
+    conditioning sweep, which is what the module was designed around,
+    but by an adversarial test agent building fixtures and noticing that
+    one shape held ~4e-9 error "regardless of true conditioning". The
+    guard that exists is not always the guard that is needed; a second,
+    orthogonal failure axis had to be looked for on purpose. norm2 was
+    the sharpest case - it had been reasoned about as needing NO guard
+    at all, since sigma_max is eps-accurate at every condition number,
+    and that reasoning was simply blind to degeneracy.
+  - >-
+    np.linalg.cond is deliberately NOT served: it divides by sigma_min
+    and would amplify exactly the digits the gram route loses.
+    matrix_rank is not served either - an earlier adversarial panel
+    showed its INTEGER contract breaks about half the time whenever the
+    true smallest singular value sits within a few orders of the rank
+    tolerance, and no conditioning band closes that.
+  - >-
+    Band-trippers are SPLIT OUT and served by stock, then scattered
+    back; only past BAD_FRAC_MAX=0.25 does the whole call go to stock.
+    A whole-stack bail was the batch-10 qr trap: random matrices trip
+    any conditioning band with some per-matrix probability, so a large
+    enough stack almost surely contains one and the entire large-batch
+    regime collapses to stock. Measured here: a stack of 100_000 random
+    3x3s DOES contain one, and the first build of this module refused
+    that whole stack.
+  - >-
+    WHAT THE GUARDS COST: a stack that is ENTIRELY ill-conditioned or
+    degenerate pays for the closed form, discovers it cannot use it, and
+    then pays stock too - measured 0.88-0.96x on the BATCH12-CAL
+    mostly-ill cells, i.e. about a 10% regression on that input class.
+    Irreducible: conditioning cannot be judged without measuring it. It
+    buys 8-24x on ordinary input at a ~0.4% divert rate, so the trade is
+    clearly right, but the battery keeps those cells so the cost stays
+    visible rather than implied.
+  - >-
+    The gram is built ENTRYWISE (six products for d=3), never with a
+    batched matmul. That single choice moved the measured pinv margin
+    from ~4x to ~25x, because the matmul was more expensive than the
+    entire closed form it was feeding.
+  - >-
+    license_review clean: textbook closed forms (quadratic, Smith-form
+    trigonometric cubic, adjugate); no third-party code.
+  - >-
+    SHIPPED (2026-08-25, batch 12) as pinv_small_batch,
+    norm2_small_batch and svdvals_small_batch.

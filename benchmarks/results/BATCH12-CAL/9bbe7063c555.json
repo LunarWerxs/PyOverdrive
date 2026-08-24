@@ -1,0 +1,2011 @@
+{
+  "opp_id": "BATCH12-CAL",
+  "title": "pinv / norm(ord=2) / svd(compute_uv=False) on 2x2-3x3 batches via the gram closed form",
+  "recorded_at": "2026-08-24T20:16:01+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.010954616588419452,
+    "cpu_busy_after": 0.004672897196261627,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "pinv_2x2_n100",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 100,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 108947.91666666667,
+          "min_ns": 108766.66666666667,
+          "mean_ns": 109698.51190476191,
+          "mad_ns": 147.91666666665697,
+          "samples": 7,
+          "loops_per_sample": 48,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 18836.947791164657,
+          "min_ns": 18782.128514056225,
+          "mean_ns": 18864.285714285714,
+          "mad_ns": 54.81927710843229,
+          "samples": 7,
+          "loops_per_sample": 498,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 5.7837351292000685
+      }
+    },
+    {
+      "case": "norm2_2x2_n100",
+      "params": {
+        "op": "norm2",
+        "d": 2,
+        "n": 100,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 53452.77777777778,
+          "min_ns": 53352.22222222222,
+          "mean_ns": 53534.7619047619,
+          "mad_ns": 100.55555555556202,
+          "samples": 7,
+          "loops_per_sample": 180,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 13380.49853372434,
+          "min_ns": 13357.91788856305,
+          "mean_ns": 13408.588186007542,
+          "mad_ns": 22.580645161289794,
+          "samples": 7,
+          "loops_per_sample": 682,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 3.994827071880384
+      }
+    },
+    {
+      "case": "svdvals_2x2_n100",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 47518.93203883495,
+          "min_ns": 47311.16504854369,
+          "mean_ns": 47532.73231622746,
+          "mad_ns": 30.582524271841976,
+          "samples": 7,
+          "loops_per_sample": 206,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 16945.581395348836,
+          "min_ns": 16915.81395348837,
+          "mean_ns": 16944.717607973424,
+          "mad_ns": 22.325581395351037,
+          "samples": 7,
+          "loops_per_sample": 430,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 2.8042078303597058
+      }
+    },
+    {
+      "case": "pinv_2x2_n300",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 300,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 300235.29411764705,
+          "min_ns": 299629.4117647059,
+          "mean_ns": 300946.218487395,
+          "mad_ns": 570.5882352940971,
+          "samples": 7,
+          "loops_per_sample": 17,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 21894.919786096256,
+          "min_ns": 21812.0320855615,
+          "mean_ns": 21901.718869365926,
+          "mad_ns": 28.609625668446824,
+          "samples": 7,
+          "loops_per_sample": 374,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 13.71255510642715
+      }
+    },
+    {
+      "case": "norm2_2x2_n300",
+      "params": {
+        "op": "norm2",
+        "d": 2,
+        "n": 300,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 145672.0588235294,
+          "min_ns": 145391.17647058822,
+          "mean_ns": 145657.14285714287,
+          "mad_ns": 179.4117647059029,
+          "samples": 7,
+          "loops_per_sample": 68,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 15326.349206349207,
+          "min_ns": 15282.698412698413,
+          "mean_ns": 15377.619047619048,
+          "mad_ns": 43.650793650793275,
+          "samples": 7,
+          "loops_per_sample": 630,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 9.504680916651841
+      }
+    },
+    {
+      "case": "svdvals_2x2_n300",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 300,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 136959.45945945947,
+          "min_ns": 136397.2972972973,
+          "mean_ns": 137106.1776061776,
+          "mad_ns": 321.6216216216271,
+          "samples": 7,
+          "loops_per_sample": 37,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 19576.486486486487,
+          "min_ns": 19555.135135135137,
+          "mean_ns": 19601.969111969112,
+          "mad_ns": 20.0,
+          "samples": 7,
+          "loops_per_sample": 370,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 6.996120552786714
+      }
+    },
+    {
+      "case": "pinv_2x2_n1000",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 1000,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 965433.3333333334,
+          "min_ns": 960583.3333333334,
+          "mean_ns": 964721.4285714285,
+          "mad_ns": 1583.3333333332557,
+          "samples": 7,
+          "loops_per_sample": 6,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 32211.15107913669,
+          "min_ns": 32101.07913669065,
+          "mean_ns": 32197.43062692703,
+          "mad_ns": 54.316546762591315,
+          "samples": 7,
+          "loops_per_sample": 278,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 29.972022141073033
+      }
+    },
+    {
+      "case": "norm2_2x2_n1000",
+      "params": {
+        "op": "norm2",
+        "d": 2,
+        "n": 1000,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 464718.1818181818,
+          "min_ns": 463172.7272727273,
+          "mean_ns": 465298.7012987013,
+          "mad_ns": 1545.4545454545296,
+          "samples": 7,
+          "loops_per_sample": 11,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 21842.889908256882,
+          "min_ns": 21803.211009174312,
+          "mean_ns": 21887.614678899085,
+          "mad_ns": 15.596330275231594,
+          "samples": 7,
+          "loops_per_sample": 436,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 21.275489817055416
+      }
+    },
+    {
+      "case": "svdvals_2x2_n1000",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 1000,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 447616.6666666667,
+          "min_ns": 446266.6666666667,
+          "mean_ns": 448105.9523809524,
+          "mad_ns": 1350.0,
+          "samples": 7,
+          "loops_per_sample": 12,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 27785.0,
+          "min_ns": 27729.375,
+          "mean_ns": 27791.473214285714,
+          "mad_ns": 41.25,
+          "samples": 7,
+          "loops_per_sample": 320,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 16.11001139703677
+      }
+    },
+    {
+      "case": "pinv_2x2_n10000",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 10000,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 9777000.0,
+          "min_ns": 9765500.0,
+          "mean_ns": 9780028.57142857,
+          "mad_ns": 2500.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 137809.72222222222,
+          "min_ns": 137394.44444444444,
+          "mean_ns": 137995.03968253967,
+          "mad_ns": 387.5,
+          "samples": 7,
+          "loops_per_sample": 72,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 70.94564768249298
+      }
+    },
+    {
+      "case": "norm2_2x2_n10000",
+      "params": {
+        "op": "norm2",
+        "d": 2,
+        "n": 10000,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 4586350.0,
+          "min_ns": 4583350.0,
+          "mean_ns": 4603014.285714285,
+          "mad_ns": 3000.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 91007.4074074074,
+          "min_ns": 90453.70370370371,
+          "mean_ns": 91183.86243386244,
+          "mad_ns": 414.8148148148175,
+          "samples": 7,
+          "loops_per_sample": 108,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 50.39534836399154
+      }
+    },
+    {
+      "case": "svdvals_2x2_n10000",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 10000,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 4426450.0,
+          "min_ns": 4415400.0,
+          "mean_ns": 4632157.142857143,
+          "mad_ns": 11050.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 117085.0,
+          "min_ns": 116251.25,
+          "mean_ns": 117783.03571428571,
+          "mad_ns": 776.25,
+          "samples": 7,
+          "loops_per_sample": 80,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 37.80544049195029
+      }
+    },
+    {
+      "case": "pinv_2x2_n100000",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 100000,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 97392800.0,
+          "min_ns": 96995000.0,
+          "mean_ns": 98410057.14285715,
+          "mad_ns": 397800.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 6507300.0,
+          "min_ns": 6359400.0,
+          "mean_ns": 6587928.571428572,
+          "mad_ns": 87400.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 14.966698938115655
+      }
+    },
+    {
+      "case": "norm2_2x2_n100000",
+      "params": {
+        "op": "norm2",
+        "d": 2,
+        "n": 100000,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 45922500.0,
+          "min_ns": 45804900.0,
+          "mean_ns": 46034100.0,
+          "mad_ns": 117600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 4154400.0,
+          "min_ns": 4069750.0,
+          "mean_ns": 4177171.4285714286,
+          "mad_ns": 84650.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 11.05394280762565
+      }
+    },
+    {
+      "case": "svdvals_2x2_n100000",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 100000,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 44440700.0,
+          "min_ns": 44258900.0,
+          "mean_ns": 45828728.571428575,
+          "mad_ns": 181800.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 4993850.0,
+          "min_ns": 4922150.0,
+          "mean_ns": 5213635.714285715,
+          "mad_ns": 58250.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 8.899085875627021
+      }
+    },
+    {
+      "case": "pinv_3x3_n100",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 100,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 193553.84615384616,
+          "min_ns": 193257.6923076923,
+          "mean_ns": 193698.90109890111,
+          "mad_ns": 230.76923076921958,
+          "samples": 7,
+          "loops_per_sample": 26,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 63373.68421052631,
+          "min_ns": 62976.31578947369,
+          "mean_ns": 63322.36842105263,
+          "mad_ns": 78.28947368421359,
+          "samples": 7,
+          "loops_per_sample": 152,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 3.054167491838782
+      }
+    },
+    {
+      "case": "norm2_3x3_n100",
+      "params": {
+        "op": "norm2",
+        "d": 3,
+        "n": 100,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 110231.11111111111,
+          "min_ns": 110015.55555555556,
+          "mean_ns": 110383.49206349207,
+          "mad_ns": 166.66666666667152,
+          "samples": 7,
+          "loops_per_sample": 45,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 43225.0,
+          "min_ns": 43159.375,
+          "mean_ns": 43269.13265306123,
+          "mad_ns": 12.5,
+          "samples": 7,
+          "loops_per_sample": 224,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 2.5501702975387186
+      }
+    },
+    {
+      "case": "svdvals_3x3_n100",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 100,
+        "sigma_ratio_min": 0.001
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 104577.08333333333,
+          "min_ns": 104312.5,
+          "mean_ns": 104609.82142857143,
+          "mad_ns": 110.41666666665697,
+          "samples": 7,
+          "loops_per_sample": 48,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 47522.596153846156,
+          "min_ns": 47450.0,
+          "mean_ns": 47536.67582417582,
+          "mad_ns": 46.15384615385119,
+          "samples": 7,
+          "loops_per_sample": 208,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 2.2005759743172106
+      }
+    },
+    {
+      "case": "pinv_3x3_n300",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 300,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 554322.2222222222,
+          "min_ns": 553172.2222222222,
+          "mean_ns": 554053.9682539683,
+          "mad_ns": 233.33333333325572,
+          "samples": 7,
+          "loops_per_sample": 18,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 77776.6129032258,
+          "min_ns": 77598.3870967742,
+          "mean_ns": 77791.70506912444,
+          "mad_ns": 134.67741935483355,
+          "samples": 7,
+          "loops_per_sample": 124,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 7.127106742382087
+      }
+    },
+    {
+      "case": "norm2_3x3_n300",
+      "params": {
+        "op": "norm2",
+        "d": 3,
+        "n": 300,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 316618.75,
+          "min_ns": 315756.25,
+          "mean_ns": 317711.60714285716,
+          "mad_ns": 493.75,
+          "samples": 7,
+          "loops_per_sample": 16,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 52281.382978723406,
+          "min_ns": 52125.0,
+          "mean_ns": 52406.990881458965,
+          "mad_ns": 156.38297872340627,
+          "samples": 7,
+          "loops_per_sample": 188,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 6.056051541881594
+      }
+    },
+    {
+      "case": "svdvals_3x3_n300",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 300,
+        "sigma_ratio_min": 0.001
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 307864.70588235295,
+          "min_ns": 306747.0588235294,
+          "mean_ns": 308353.781512605,
+          "mad_ns": 1058.8235294117476,
+          "samples": 7,
+          "loops_per_sample": 17,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 58019.04761904762,
+          "min_ns": 57927.380952380954,
+          "mean_ns": 58061.904761904756,
+          "mad_ns": 66.66666666666424,
+          "samples": 7,
+          "loops_per_sample": 84,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 5.306269553126569
+      }
+    },
+    {
+      "case": "pinv_3x3_n1000",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 1000,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 1848166.6666666667,
+          "min_ns": 1811400.0,
+          "mean_ns": 1839366.6666666665,
+          "mad_ns": 7266.666666666744,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 128156.41025641025,
+          "min_ns": 127989.7435897436,
+          "mean_ns": 128236.99633699634,
+          "mad_ns": 166.66666666665697,
+          "samples": 7,
+          "loops_per_sample": 39,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 14.4211800484184
+      }
+    },
+    {
+      "case": "norm2_3x3_n1000",
+      "params": {
+        "op": "norm2",
+        "d": 3,
+        "n": 1000,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 1036500.0,
+          "min_ns": 1034300.0,
+          "mean_ns": 1037334.2857142857,
+          "mad_ns": 1580.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 87114.91228070176,
+          "min_ns": 86868.42105263157,
+          "mean_ns": 87129.5739348371,
+          "mad_ns": 90.35087719297735,
+          "samples": 7,
+          "loops_per_sample": 114,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 11.898077755737027
+      }
+    },
+    {
+      "case": "svdvals_3x3_n1000",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 1000,
+        "sigma_ratio_min": 0.001
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 1019740.0,
+          "min_ns": 1016760.0,
+          "mean_ns": 1019688.5714285715,
+          "mad_ns": 1120.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 105621.73913043478,
+          "min_ns": 105556.52173913043,
+          "mean_ns": 105974.06832298136,
+          "mad_ns": 65.21739130435162,
+          "samples": 7,
+          "loops_per_sample": 92,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 9.654641254682419
+      }
+    },
+    {
+      "case": "pinv_3x3_n10000",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 10000,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 18545300.0,
+          "min_ns": 18504400.0,
+          "mean_ns": 18600728.57142857,
+          "mad_ns": 40900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 1648300.0,
+          "min_ns": 1559675.0,
+          "mean_ns": 1636428.5714285714,
+          "mad_ns": 6400.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 11.251167869926592
+      }
+    },
+    {
+      "case": "norm2_3x3_n10000",
+      "params": {
+        "op": "norm2",
+        "d": 3,
+        "n": 10000,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 10345300.0,
+          "min_ns": 10314600.0,
+          "mean_ns": 10346642.857142856,
+          "mad_ns": 20700.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 949633.3333333334,
+          "min_ns": 889483.3333333334,
+          "mean_ns": 1021711.9047619049,
+          "mad_ns": 6766.666666666628,
+          "samples": 7,
+          "loops_per_sample": 6,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 10.893994173189652
+      }
+    },
+    {
+      "case": "svdvals_3x3_n10000",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 10000,
+        "sigma_ratio_min": 0.001
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 10216100.0,
+          "min_ns": 10156800.0,
+          "mean_ns": 10320100.0,
+          "mad_ns": 59300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 1034716.6666666666,
+          "min_ns": 986416.6666666666,
+          "mean_ns": 1034776.1904761904,
+          "mad_ns": 13266.666666666744,
+          "samples": 7,
+          "loops_per_sample": 6,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 9.873330863521415
+      }
+    },
+    {
+      "case": "pinv_3x3_n100000",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 100000,
+        "batch_min": 100,
+        "sigma_ratio_min": 1e-06
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 187599000.0,
+          "min_ns": 184523600.0,
+          "mean_ns": 188813314.2857143,
+          "mad_ns": 2938000.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 25091400.0,
+          "min_ns": 23770700.0,
+          "mean_ns": 24984614.285714287,
+          "mad_ns": 391700.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 7.476625457328009
+      }
+    },
+    {
+      "case": "norm2_3x3_n100000",
+      "params": {
+        "op": "norm2",
+        "d": 3,
+        "n": 100000,
+        "batch_min": 100
+      },
+      "baseline": "numpy.linalg.norm",
+      "variants": {
+        "numpy.linalg.norm": {
+          "median_ns": 103322200.0,
+          "min_ns": 103166900.0,
+          "mean_ns": 104110828.57142857,
+          "mad_ns": 60300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_sigma_max": {
+          "median_ns": 13897000.0,
+          "min_ns": 13615200.0,
+          "mean_ns": 14255385.714285715,
+          "mad_ns": 281800.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_sigma_max": 7.434856443836799
+      }
+    },
+    {
+      "case": "svdvals_3x3_n100000",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 100000,
+        "sigma_ratio_min": 0.001
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 104839300.0,
+          "min_ns": 102128400.0,
+          "mean_ns": 105114614.28571428,
+          "mad_ns": 1982000.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 14657400.0,
+          "min_ns": 14410900.0,
+          "mean_ns": 15181042.857142856,
+          "mad_ns": 178600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 7.1526532672916066
+      }
+    },
+    {
+      "case": "svdvals_2x2_cond1e2",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 4000,
+        "cond": 100.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 1783433.3333333333,
+          "min_ns": 1778933.3333333333,
+          "mean_ns": 1787580.9523809522,
+          "mad_ns": 4500.0,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 57430.0,
+          "min_ns": 56504.117647058825,
+          "mean_ns": 57169.243697478996,
+          "mad_ns": 335.2941176470558,
+          "samples": 7,
+          "loops_per_sample": 170,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 31.054036798421265
+      }
+    },
+    {
+      "case": "pinv_2x2_cond1e2",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 4000,
+        "cond": 100.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 3821550.0,
+          "min_ns": 3752000.0,
+          "mean_ns": 3808157.1428571427,
+          "mad_ns": 12950.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 67588.02816901408,
+          "min_ns": 67486.61971830986,
+          "mean_ns": 67588.93360160965,
+          "mad_ns": 71.12676056337659,
+          "samples": 7,
+          "loops_per_sample": 142,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 56.54181818181818
+      }
+    },
+    {
+      "case": "svdvals_2x2_cond1e3",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 4000,
+        "cond": 1000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 1788833.3333333333,
+          "min_ns": 1777500.0,
+          "mean_ns": 1786314.2857142857,
+          "mad_ns": 3966.6666666667443,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 56695.93023255814,
+          "min_ns": 56394.186046511626,
+          "mean_ns": 56709.219269102985,
+          "mad_ns": 144.76744186046562,
+          "samples": 7,
+          "loops_per_sample": 172,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 31.5513534392294
+      }
+    },
+    {
+      "case": "pinv_2x2_cond1e3",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 4000,
+        "cond": 1000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 3801250.0,
+          "min_ns": 3740300.0,
+          "mean_ns": 3795207.1428571427,
+          "mad_ns": 33800.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 68893.38235294117,
+          "min_ns": 68714.70588235294,
+          "mean_ns": 68897.26890756303,
+          "mad_ns": 161.02941176469903,
+          "samples": 7,
+          "loops_per_sample": 136,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 55.17583649074123
+      }
+    },
+    {
+      "case": "svdvals_2x2_cond1e4",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 4000,
+        "cond": 10000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 1787366.6666666667,
+          "min_ns": 1780400.0,
+          "mean_ns": 1790023.8095238095,
+          "mad_ns": 4366.666666666744,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 57083.72093023256,
+          "min_ns": 56984.88372093023,
+          "mean_ns": 62022.840531561465,
+          "mad_ns": 79.6511627906948,
+          "samples": 7,
+          "loops_per_sample": 172,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 31.311320242266223
+      }
+    },
+    {
+      "case": "pinv_2x2_cond1e4",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 4000,
+        "cond": 10000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 3757400.0,
+          "min_ns": 3747200.0,
+          "mean_ns": 3764042.8571428573,
+          "mad_ns": 6400.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 67550.0,
+          "min_ns": 67287.85714285714,
+          "mean_ns": 67622.85714285714,
+          "mad_ns": 160.0,
+          "samples": 7,
+          "loops_per_sample": 140,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 55.6239822353812
+      }
+    },
+    {
+      "case": "svdvals_2x2_cond1e6",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 4000,
+        "cond": 1000000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 1786433.3333333333,
+          "min_ns": 1781000.0,
+          "mean_ns": 1785652.3809523808,
+          "mad_ns": 2200.0,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 1845466.6666666667,
+          "min_ns": 1841100.0,
+          "mean_ns": 1848738.0952380951,
+          "mad_ns": 2300.0,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 0.9680117043566215
+      }
+    },
+    {
+      "case": "pinv_2x2_cond1e6",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 4000,
+        "cond": 1000000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 3755600.0,
+          "min_ns": 3747400.0,
+          "mean_ns": 3761892.8571428573,
+          "mad_ns": 6900.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 3885350.0,
+          "min_ns": 3842050.0,
+          "mean_ns": 3901607.1428571427,
+          "mad_ns": 41900.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 0.966605325131584
+      }
+    },
+    {
+      "case": "svdvals_2x2_cond1e8",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 4000,
+        "cond": 100000000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 1818233.3333333333,
+          "min_ns": 1779633.3333333333,
+          "mean_ns": 1861190.4761904762,
+          "mad_ns": 5966.666666666744,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 1847333.3333333333,
+          "min_ns": 1834300.0,
+          "mean_ns": 1849695.238095238,
+          "mad_ns": 1800.0,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 0.9842475640562973
+      }
+    },
+    {
+      "case": "pinv_2x2_cond1e8",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 4000,
+        "cond": 100000000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 3811100.0,
+          "min_ns": 3746850.0,
+          "mean_ns": 3792528.5714285714,
+          "mad_ns": 22700.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 3854200.0,
+          "min_ns": 3811050.0,
+          "mean_ns": 3863535.714285714,
+          "mad_ns": 22600.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 0.9888173940117274
+      }
+    },
+    {
+      "case": "svdvals_2x2_cond1e12",
+      "params": {
+        "op": "svdvals",
+        "d": 2,
+        "n": 4000,
+        "cond": 1000000000000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 1783700.0,
+          "min_ns": 1776700.0,
+          "mean_ns": 1785995.238095238,
+          "mad_ns": 4633.333333333256,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 1873633.3333333333,
+          "min_ns": 1845833.3333333333,
+          "mean_ns": 1868900.0,
+          "mad_ns": 8966.666666666744,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 0.9520005693038481
+      }
+    },
+    {
+      "case": "pinv_2x2_cond1e12",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 4000,
+        "cond": 1000000000000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 3755650.0,
+          "min_ns": 3737600.0,
+          "mean_ns": 3753714.285714286,
+          "mad_ns": 5250.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 3894300.0,
+          "min_ns": 3827950.0,
+          "mean_ns": 3883614.285714286,
+          "mad_ns": 24200.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 0.9643966823305857
+      }
+    },
+    {
+      "case": "svdvals_3x3_cond1e2",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 4000,
+        "cond": 100.0,
+        "sigma_ratio_min": 0.001,
+        "band_cond": 1000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 4130850.0,
+          "min_ns": 4113100.0,
+          "mean_ns": 4145821.4285714286,
+          "mad_ns": 17750.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 456175.0,
+          "min_ns": 445180.0,
+          "mean_ns": 509377.14285714284,
+          "mad_ns": 10995.0,
+          "samples": 7,
+          "loops_per_sample": 20,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 9.055406368170111
+      }
+    },
+    {
+      "case": "pinv_3x3_cond1e2",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 4000,
+        "cond": 100.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 7141700.0,
+          "min_ns": 7082000.0,
+          "mean_ns": 7157657.142857143,
+          "mad_ns": 59700.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 596033.3333333334,
+          "min_ns": 573966.6666666666,
+          "mean_ns": 592755.5555555556,
+          "mad_ns": 13844.44444444438,
+          "samples": 7,
+          "loops_per_sample": 9,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 11.982047983893517
+      }
+    },
+    {
+      "case": "svdvals_3x3_cond1e3",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 4000,
+        "cond": 1000.0,
+        "sigma_ratio_min": 0.001,
+        "band_cond": 1000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 4056250.0,
+          "min_ns": 4033300.0,
+          "mean_ns": 4067357.1428571427,
+          "mad_ns": 11700.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 4518400.0,
+          "min_ns": 4487500.0,
+          "mean_ns": 4517900.0,
+          "mad_ns": 12700.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 0.8977182188385269
+      }
+    },
+    {
+      "case": "pinv_3x3_cond1e3",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 4000,
+        "cond": 1000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 7371500.0,
+          "min_ns": 7326300.0,
+          "mean_ns": 7533057.142857143,
+          "mad_ns": 45200.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 610855.5555555555,
+          "min_ns": 570355.5555555555,
+          "mean_ns": 608653.9682539683,
+          "mad_ns": 10555.55555555562,
+          "samples": 7,
+          "loops_per_sample": 9,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 12.067500954944796
+      }
+    },
+    {
+      "case": "svdvals_3x3_cond1e4",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 4000,
+        "cond": 10000.0,
+        "sigma_ratio_min": 0.001,
+        "band_cond": 1000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 4087500.0,
+          "min_ns": 4045350.0,
+          "mean_ns": 4079635.714285714,
+          "mad_ns": 7250.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 4507700.0,
+          "min_ns": 4427300.0,
+          "mean_ns": 4508364.285714285,
+          "mad_ns": 35400.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 0.9067817290414181
+      }
+    },
+    {
+      "case": "pinv_3x3_cond1e4",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 4000,
+        "cond": 10000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 7170700.0,
+          "min_ns": 6982300.0,
+          "mean_ns": 7144957.142857143,
+          "mad_ns": 36900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 596633.3333333334,
+          "min_ns": 556111.1111111111,
+          "mean_ns": 596163.4920634921,
+          "mad_ns": 21400.0,
+          "samples": 7,
+          "loops_per_sample": 9,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 12.018604391306775
+      }
+    },
+    {
+      "case": "svdvals_3x3_cond1e6",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 4000,
+        "cond": 1000000.0,
+        "sigma_ratio_min": 0.001,
+        "band_cond": 1000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 3968550.0,
+          "min_ns": 3965600.0,
+          "mean_ns": 3968528.5714285714,
+          "mad_ns": 2750.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 4464650.0,
+          "min_ns": 4419900.0,
+          "mean_ns": 4468157.142857143,
+          "mad_ns": 35950.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 0.8888826671743586
+      }
+    },
+    {
+      "case": "pinv_3x3_cond1e6",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 4000,
+        "cond": 1000000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 6803600.0,
+          "min_ns": 6778700.0,
+          "mean_ns": 6871157.142857143,
+          "mad_ns": 24900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 7620900.0,
+          "min_ns": 7565500.0,
+          "mean_ns": 7749085.714285715,
+          "mad_ns": 49100.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 0.8927554488315028
+      }
+    },
+    {
+      "case": "svdvals_3x3_cond1e8",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 4000,
+        "cond": 100000000.0,
+        "sigma_ratio_min": 0.001,
+        "band_cond": 1000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 3934450.0,
+          "min_ns": 3931950.0,
+          "mean_ns": 3939035.714285714,
+          "mad_ns": 1450.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 4502600.0,
+          "min_ns": 4444250.0,
+          "mean_ns": 4552450.0,
+          "mad_ns": 54750.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 0.8738173499755697
+      }
+    },
+    {
+      "case": "pinv_3x3_cond1e8",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 4000,
+        "cond": 100000000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 6624100.0,
+          "min_ns": 6597100.0,
+          "mean_ns": 6685242.857142857,
+          "mad_ns": 22800.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 7545400.0,
+          "min_ns": 7396200.0,
+          "mean_ns": 7573042.857142857,
+          "mad_ns": 44900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 0.877899117343017
+      }
+    },
+    {
+      "case": "svdvals_3x3_cond1e12",
+      "params": {
+        "op": "svdvals",
+        "d": 3,
+        "n": 4000,
+        "cond": 1000000000000.0,
+        "sigma_ratio_min": 0.001,
+        "band_cond": 1000.0
+      },
+      "baseline": "numpy.linalg.svd",
+      "variants": {
+        "numpy.linalg.svd": {
+          "median_ns": 3916500.0,
+          "min_ns": 3879400.0,
+          "mean_ns": 3911457.1428571427,
+          "mad_ns": 7950.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "gram_closed_form": {
+          "median_ns": 4308350.0,
+          "min_ns": 4289500.0,
+          "mean_ns": 4335078.571428572,
+          "mad_ns": 18850.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "gram_closed_form": 0.909048707741943
+      }
+    },
+    {
+      "case": "pinv_3x3_cond1e12",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 4000,
+        "cond": 1000000000000.0,
+        "sigma_ratio_min": 1e-06,
+        "band_cond": 1000000.0
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 6539600.0,
+          "min_ns": 6463700.0,
+          "mean_ns": 6590357.142857143,
+          "mad_ns": 75900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 7378500.0,
+          "min_ns": 7292100.0,
+          "mean_ns": 7438642.857142857,
+          "mad_ns": 31600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 0.8863048044995595
+      }
+    },
+    {
+      "case": "pinv_2x2_mostly_ill",
+      "params": {
+        "op": "pinv",
+        "d": 2,
+        "n": 4000,
+        "cond": 100000000000000.0,
+        "expect": "whole call to stock (past BAD_FRAC_MAX)"
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 3759950.0,
+          "min_ns": 3754400.0,
+          "mean_ns": 3770400.0,
+          "mad_ns": 5100.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 3842300.0,
+          "min_ns": 3820800.0,
+          "mean_ns": 3846085.714285714,
+          "mad_ns": 15800.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 0.978567524659709
+      }
+    },
+    {
+      "case": "pinv_3x3_mostly_ill",
+      "params": {
+        "op": "pinv",
+        "d": 3,
+        "n": 4000,
+        "cond": 100000000000000.0,
+        "expect": "whole call to stock (past BAD_FRAC_MAX)"
+      },
+      "baseline": "numpy.linalg.pinv",
+      "variants": {
+        "numpy.linalg.pinv": {
+          "median_ns": 6305400.0,
+          "min_ns": 6277300.0,
+          "mean_ns": 6784000.0,
+          "mad_ns": 28100.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "adjugate_banded": {
+          "median_ns": 7200000.0,
+          "min_ns": 7073000.0,
+          "mean_ns": 7225628.571428572,
+          "mad_ns": 41400.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "adjugate_banded": 0.87575
+      }
+    }
+  ]
+}

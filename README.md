@@ -46,8 +46,8 @@ and the slower one's number is the one quoted.
 The point of an accelerator you can leave switched on is that you never have to
 wonder. So:
 
-- **Results match stock NumPy.** Bit-identical on 47 of the 67 registered paths;
-  the other 20 run in a documented numeric mode with a measured tolerance.
+- **Results match stock NumPy.** Bit-identical on 47 of the 70 registered paths;
+  the other 23 run in a documented numeric mode with a measured tolerance.
 - **Every fast path is conservative.** It runs only when a predicate proves the
   input is in its calibrated regime. Anything else - odd dtypes, edge shapes,
   non-finite values, subclasses - falls back to stock, automatically.
@@ -183,10 +183,10 @@ multi-thread number; do not move a threshold on its say-so.
 ## Status
 
 Phases 0-4 prototyped on the first machine (Zen 4 AVX-512, 16C/32T, numpy
-2.4.5, fingerprint `8f8198d9abab`). Forty-one fast-path families are live behind
+2.4.5, fingerprint `8f8198d9abab`). Forty-four fast-path families are live behind
 `enable()` (plus one calibration-gated), every threshold calibrated from
-committed Dyno evidence. Results are bit-identical to stock on 47 of the 67
-registered paths; the other 20 run in documented numeric mode
+committed Dyno evidence. Results are bit-identical to stock on 47 of the 70
+registered paths; the other 23 run in documented numeric mode
 (`inner_tensordot`, float fftconvolve,
 `nanquantile_masked`, `nanpercentile_masked`, `einsum_optimize`,
 `reduce_tiny_trailing`, `eigvalsh_2x2_closed`, `eigvalsh_3x3_trig`,

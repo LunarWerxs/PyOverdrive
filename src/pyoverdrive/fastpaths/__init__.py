@@ -33,6 +33,7 @@ from . import (
     apply_along_axis_reduce,
     percentile_dense,
     qr_small_batch,
+    svd_small_batch,
     vectorize_ufunc,
     searchsorted_extreme_key,
     take_index_assign,
@@ -104,6 +105,7 @@ _MODULES = [
     qr_small_batch,
     apply_along_axis_reduce,
     vectorize_ufunc,
+    svd_small_batch,
 ]
 
 

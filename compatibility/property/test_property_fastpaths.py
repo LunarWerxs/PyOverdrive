@@ -1084,6 +1084,61 @@ def test_vectorize_ufunc_direct(name, n, dtype, two_d, kind, data):
         assert np.array_equal(np.asarray(got), np.asarray(exp), equal_nan=True)
 
 
+# --- singular-value family on 2x2/3x3 batches (OPP-000056) ------------------
+@settings(**SETTINGS)
+@given(
+    batch=st.integers(1, 600),
+    d=st.sampled_from([2, 3, 4]),
+    dtype=st.sampled_from([np.float64, np.float32]),
+    op=st.sampled_from(["pinv", "norm2", "svdvals"]),
+    hazard=st.sampled_from(
+        ["clean", "ill_conditioned", "singular", "all_singular",
+         "nonfinite", "rectangular", "lead_4d"]
+    ),
+    kwarg_twist=st.sampled_from(["none", "rcond", "hermitian", "full", "keepdims"]),
+    data=st.data(),
+)
+def test_svd_small_batch(batch, d, dtype, op, hazard, kwarg_twist, data):
+    # straddles the batch floor and both conditioning bands; the singular
+    # and ill-conditioned hazards exercise the split-to-stock arm, which is
+    # where two valid answers could otherwise diverge
+    rng = np.random.default_rng(data.draw(st.integers(0, 2**32 - 1)))
+    a = rng.standard_normal((batch, d, d))
+    if hazard == "ill_conditioned" and batch:
+        u, _ = np.linalg.qr(rng.standard_normal((batch, d, d)))
+        v, _ = np.linalg.qr(rng.standard_normal((batch, d, d)))
+        s = np.geomspace(1.0, 1e-9, d)
+        a = u @ (s[None, :, None] * np.swapaxes(v, -1, -2))
+    elif hazard == "singular" and batch:
+        a[rng.integers(0, batch)] = 0.0
+    elif hazard == "all_singular":
+        a[...] = 0.0
+    elif hazard == "nonfinite" and batch:
+        a[rng.integers(0, batch), 0, 0] = data.draw(st.sampled_from([np.nan, np.inf]))
+    elif hazard == "rectangular":
+        a = a[..., : max(d - 1, 1)]
+    a = np.ascontiguousarray(a).astype(dtype)
+    if hazard == "lead_4d" and batch >= 4 and batch % 2 == 0:
+        a = a.reshape(2, batch // 2, *a.shape[1:])
+    if op == "pinv":
+        kwargs = {"rcond": 1e-12} if kwarg_twist == "rcond" else (
+            {"hermitian": True} if kwarg_twist == "hermitian" else {}
+        )
+        compare("numpy.linalg.pinv", (a,), kwargs, close_scaled(1e-7, 1e-9))
+    elif op == "norm2":
+        kwargs = {"ord": 2, "axis": (-2, -1)}
+        if kwarg_twist == "keepdims":
+            kwargs["keepdims"] = True
+        compare("numpy.linalg.norm", (a,), kwargs, close_scaled(1e-9, 1e-12))
+    else:
+        kwargs = {"compute_uv": False}
+        if kwarg_twist == "hermitian":
+            kwargs["hermitian"] = True
+        elif kwarg_twist == "full":
+            kwargs["full_matrices"] = False
+        compare("numpy.linalg.svd", (a,), kwargs, close_scaled(1e-7, 1e-9))
+
+
 # --- batched 2x2/3x3 qr Householder closed form (OPP-000053) ----------------
 @settings(**SETTINGS)
 @given(
