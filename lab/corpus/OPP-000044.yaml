@@ -1,0 +1,187 @@
+id: OPP-000044
+title: "numpy.matmul/numpy.dot has no BLAS path for int64/int32 matmul: naive C loop is 2.6x-28.5x slower than float64 BLAS at matched size; cast-to-float64-BLAS-and-round is bit-exact under a provable k*maxA*maxB magnitude bound; thread open since 2019 with no maintainer-endorsed fix"
+sources:
+  - url: https://github.com/numpy/numpy/issues/14556
+    repository: numpy/numpy
+    type: issue
+    number: 14556
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T08:10:18Z"
+  - url: https://github.com/numpy/numpy/issues/16158
+    repository: numpy/numpy
+    type: issue
+    number: 16158
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T08:10:25Z"
+claim:
+  speedup: 65.95
+  baseline: >-
+    PRIMARY (issue 14556, lesshaste, issue body, 2019-09-20T16:50:13Z, numpy
+    1.17.2, Python 3.5.2): a = np.arange(1000*1000,
+    dtype=np.int64).reshape((1000,1000)); b = a.copy(); %timeit a @ b ->
+    "2.44 s +/- 49.1 ms per loop (mean +/- std. dev. of 7 runs, 1 loop
+    each)".
+  candidate: >-
+    Same comment/issue/date/version: %timeit (a.astype(np.float64) @
+    b.astype(np.float64)).astype(np.int64) -> "37 ms +/- 948 us per loop
+    (mean +/- std. dev. of 7 runs, 10 loops each)". DERIVED speedup:
+    2.44 / 0.037 = 65.946 (~65.9x). This cast-to-float64, matmul, cast-back
+    to int64 route is exactly PyOverdrive's candidate mechanism. The
+    reporter's own third measurement is kept apart, since it excludes the
+    round-trip cast overhead this record's candidate actually pays: afloat
+    = a.astype(np.float64); bfloat = b.astype(np.float64); %timeit afloat @
+    bfloat -> "21.6 ms +/- 521 us per loop (mean +/- std. dev. of 7 runs,
+    10 loops each)" (pure float64 BLAS matmul, no round-trip cast, not
+    used in the DERIVED ratio above).
+  hardware: >-
+    unknown beyond software versions; the issue body states only "1.17.2
+    3.5.2 (default, Jul 10 2019, 11:58:48) [GCC 5.4.0 20160609]", no CPU or
+    OS named anywhere in the issue or its three comments.
+affected_operations: [numpy.matmul, numpy.dot]
+input_regime:
+  dtypes: [int64, int32]
+  sizes: [50, 100, 200, 400, 800]
+  notes: >-
+    Guard: casting to float64 and rounding back is bit-exact only when
+    every float64 partial sum is exactly representable, i.e.
+    k * max|A| * max|B| < 2^53 for int64 output (k = shared inner
+    dimension). For int32 output, numpy accumulates int32@int32 in int32
+    and wraps at 2^31 (see notes: issue 16158, seberg, 2022-05-24, "add
+    upcasts to uint64 but matmul does not"), so the guard there is
+    k * max|A| * max|B| < 2^31 - a bound that simultaneously proves
+    stock's own int32 accumulation could not have wrapped either, so stock
+    and candidate results must agree exactly whenever the guard passes.
+    Both bounds require two O(n^2) abs-max scans (one per operand) plus
+    two float64 casts before dispatch; these are counted as part of the
+    measured candidate cost in current_numpy_result, not amortized away.
+    Out-of-bound inputs must refuse to dispatch and fall back to stock.
+    Measured only as square n x n operands, entries drawn from
+    [-1000, 1000), at n = 50/100/200/400/800 (BATCH6-CAL). The original
+    issue's reproducer used n=1000 (1,000,000 elements per operand) but
+    that exact size was not part of the Dyno sweep and is not claimed
+    here. Empty operands and non-2-D (batched/stacked) matmul are out of
+    scope until measured.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000044_int_matmul_blas.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load), square n x n operands with entries in [-1000, 1000):
+    int64 speedup by size: n=50 2.62x, n=100 5.23x, n=200 10.41x, n=400
+    12.18x, n=800 28.48x. int32 speedup by size: n=50 2.69x, n=100 3.80x,
+    n=200 3.80x, n=400 12.99x, n=800 23.51x. Every cell bit-identical
+    (array_equal against stock) across both dtypes and all five sizes.
+    Evidence: benchmarks/results/BATCH6-CAL/9bbe7063c555.json. SEPARATE,
+    CONTENDED, cited as supporting/triage evidence only, not folded into
+    the numbers above: dev-box AMD Zen 4 (fp 8f8198d9abab, numpy 2.4.5,
+    42% load), n=400: int64 6.73x, int32 14.81x.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections:
+  - author: seberg
+    date: "2019-09-21"
+    quote: >-
+      I think it is not impossible, but right now our cblas backend is
+      runtime switchable, such a change would not be. So I think we would
+      need to develop some infrastructure first. I would not be surprised
+      if Intel/Anaconda already think about shipping a patched version of
+      NumPy... I am inclined that we could close this and maybe make sure
+      we have a general tracking issue related to such "backend" issues.
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000029]
+notes:
+  - >-
+    Mechanism, as stated by a numpy maintainer (issue 14556, eric-wieser,
+    MEMBER, 2019-09-21T23:16:45Z): "For reference, today we use blas only
+    for `single`, `double`, `csingle` and `cdouble`," linking
+    numpy/core/src/umath/matmul.c.src#L374-L387 at that commit. This is
+    the thread's own confirmation that int64/int32 matmul runs a naive C
+    loop with no BLAS dispatch at all, which is the entire premise of
+    this record's candidate.
+  - >-
+    seberg's 2019-09-21 comment (quoted verbatim in maintainer_objections)
+    concerns a DIFFERENT, heavier proposal than this record's candidate:
+    native integer GEMM via a runtime-switchable cblas backend (per
+    lesshaste's 2019-09-20 comment relaying that "MKL have now a integer
+    multiplication matrix function"). PyOverdrive's cast-to-float64-BLAS-
+    and-round route needs none of that infrastructure - it dispatches to
+    the float64 BLAS numpy already ships and calls at every other float64
+    matmul, so seberg's stated obstacle does not apply to it.
+  - >-
+    Fast-path sketch (drafted for this record; not stated in this form by
+    the thread). PREDICATE: matmul-shaped call, both operands 2-D, dtype
+    int64 or int32 on both sides, non-empty, and
+    k * max(abs(A)) * max(abs(B)) < 2^53 (int64) or < 2^31 (int32), where
+    k is the shared inner dimension and the two abs-max scans are O(n^2)
+    each. ROUTE: cast both operands to float64, dispatch to numpy's
+    existing float64 BLAS matmul, cast the float64 result back to the
+    original integer dtype. PROOF: within the guard, every accumulated
+    partial sum is an integer strictly less than the guard bound, hence
+    exactly representable in a float64 mantissa, so the float64 GEMM
+    computes the same sums stock's naive int loop would, bit for bit;
+    rounding the result back to int is then exact, not approximate.
+  - >-
+    Reach limitation, same class as OPP-000029's split-complex-matmul
+    record: PyOverdrive patches module-level numpy names only. A call
+    written as numpy.matmul(a, b) or numpy.dot(a, b) is reachable and
+    patchable, but the "@" operator (which invokes ndarray.__matmul__
+    directly) and any ndarray method form such as a.dot(b) are NOT
+    reachable by a module-level monkeypatch. This matters concretely here
+    because the primary issue's own reproducer is written entirely in the
+    unreachable operator form ("a @ b"), not as numpy.matmul(...).
+  - >-
+    Supporting thread (issue 16158, "np.sum enhancement: matmul is faster
+    than sum over axis (for integers)", sharpblade4, opened
+    2020-05-05T13:18:27Z, closed by seberg 2022-05-24T01:21:41Z).
+    Reporter's own reproducer (numpy 1.18.3, uint8, dim=10000):
+    np.matmul(mat, vec) "852 ms per loop" (100 loops, best of 3) vs
+    np.sum(mat, axis=1) "938 ms per loop" (100 loops, best of 3) - matmul
+    beats the naive axis-sum but both are slow relative to BLAS float64,
+    consistent with the naive-loop mechanism this record targets. charris
+    (MEMBER, 2020-05-05): "This has been noted before. Not sure what the
+    best approach would be here." rossbar (CONTRIBUTOR, 2020-07-11): "It
+    seems likely that the speedup in this case is due to BLAS/MKL being
+    used (you could check with np.show_config). However, this means that
+    the performance boost for sum would not be general..." - kept
+    verbatim though it is not independently confirmed anywhere in either
+    dump that uint8 matmul itself dispatches to BLAS (eric-wieser's
+    comment in 14556 says BLAS is used only for
+    single/double/csingle/cdouble, which excludes uint8). seberg's closing
+    comment (2022-05-24) confirms matmul does not upcast narrow integer
+    dtypes before accumulating ("add upcasts to uint64 but matmul does
+    not") - direct support for this record's int32 wraparound guard
+    rationale in input_regime.notes.
+  - >-
+    Thread engagement/timeline, issue 14556: opened by lesshaste
+    2019-09-20 (1 reaction, +1). lesshaste commented same day relaying a
+    third party's note that MKL exposes an integer GEMM. seberg (MEMBER)
+    commented 2019-09-21 (quoted in maintainer_objections). eric-wieser
+    (MEMBER) commented 2019-09-21 (BLAS-dtype-coverage fact, quoted above
+    in notes). No further first-party comments in the dump; labeled "01 -
+    Enhancement", "57 - Close?", "component: numpy.ufunc"; state remained
+    "open" as of updated_at 2019-09-21T23:16:45Z and at retrieval
+    (2026-08-24). Two later cross-references appear in the dump's
+    timeline from unrelated downstream repos citing this exact issue as
+    the reason for their own workarounds: a matchms PR (tornikeo,
+    2024-05-03, merged 2024-06-28) that rewrote similarity functions using
+    matmul instead of a jitted loop, reporting in its own PR body "around
+    x50 times faster" (matchms's own unverified number, not a numpy
+    timing, kept for context only); and a galois issue (theodotk,
+    2025-04-07, closed 2025-04-13) titled "Use BLAS for linear algebra
+    when available" that names issue 14556 explicitly: "Numpy implements
+    matrix multiplication for integer matrices through a slower algorithm
+    than for float matrices, where BLAS is used, and there is no plan to
+    use it for integer matrices, as per this issue."
+  - >-
+    license_review is clean: the candidate is a cast-to-float64-BLAS-and-
+    round-back technique with a provable exactness bound, a widely known
+    approach with no third-party code in either dump to review - the same
+    basis OPP-000040's shipped lexsort route and OPP-000029's shipped
+    split-GEMM route were marked clean on.
+  - >-
+    SHIPPED (2026-08-24) as matmul_int_blas + dot_int_blas (src/pyoverdrive/fastpaths/matmul_int_blas.py): 2-D same-dtype int64/int32 pairs, min dim >= 50, exactness bound k*max|A|*max|B| < 2^53 (int64) / 2^31 (int32) checked with Python-int magnitudes (np.abs would wrap INT64_MIN). Provably bit-exact. 27 differential tests plus a property suite. MVP end-to-end: 20.6x at int64 n=400 (dev box, contended).

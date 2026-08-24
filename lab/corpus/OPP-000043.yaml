@@ -1,0 +1,162 @@
+id: OPP-000043
+title: "np.nanmedian(axis=...) on 2-D data loops per-slice in Python; isnan-scan-then-median vectorizes it for many short slices, vanishes for few long slices; source issue (numpy/numpy#4683) is actually about np.ma.median, same mechanism class but not literally nanmedian"
+sources:
+  - url: https://github.com/numpy/numpy/issues/4683
+    repository: numpy/numpy
+    type: issue
+    number: 4683
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T08:10:22Z"
+claim:
+  speedup: null
+  baseline: >-
+    ISSUE BODY (juliantaylor, 2014-05-07T18:11:04Z, issue title "poor
+    performance of multidimensional masked median"): on
+    d = np.random.uniform(size=(200, 200, 50)), timeit best-of-3 results
+    were np.median(d, axis=2) = 40.1 ms per loop; np.nanmedian(d, axis=2)
+    = 1.32 s per loop; np.ma.median(d, axis=2) = 4.89 s per loop. These
+    are the issue's own stated numbers, verbatim, not a candidate-vs-
+    baseline speedup pair - they show stock np.nanmedian already running
+    roughly 33x slower than stock np.median on this shape (1.32 / 0.0401),
+    a ratio derived here only by dividing the two stated times, not
+    independently reported by the issue.
+  candidate: >-
+    HONESTY POINT: numpy/numpy#4683 is fundamentally about np.ma.median
+    (masked arrays) being slow multidimensionally due to apply_over_axis,
+    not literally np.nanmedian. It is the same mechanism class (a
+    per-slice Python loop wrapped around median) but not the same
+    function. The issue proposes no nanmedian-specific candidate fix: its
+    own suggested workaround is "using bottlenecks nanmedian which is on
+    par with our non-masked performance (and better for the slow axis)",
+    stated only in the context of the masked comparison, with no isolated
+    nanmedian-vs-bottleneck number given anywhere in the dump. The fix
+    that actually closed this issue, PR numpy/numpy#4760 ("ENH: rewrite
+    ma.median to improve poor performance for multiple dimensions",
+    juliantaylor, merged 2014-06-02T22:32:02Z, "Work around this issue by
+    using indexing to select the median element instead of
+    apply_along_axis. ... Closes gh-4683."), targeted np.ma.median via
+    fancy indexing, not np.nanmedian. This record's own surface (an
+    isnan-scan-then-median fast path) targets np.nanmedian directly; its
+    slice-loop slowness and the fast path's win were measured directly on
+    Dyno (see current_numpy_result below), not sourced from this issue.
+  hardware: unknown (2014 issue report; no CPU/OS stated in the dump)
+affected_operations: [numpy.nanmedian]
+input_regime:
+  dtypes: [float64]
+  sizes: [1000000, 2000000]
+  notes: >-
+    Targets np.nanmedian(arr, axis=...) on plain 2-D float64 data (dtype
+    not independently confirmed in the Dyno evidence citation beyond the
+    standard numpy default; treated as float64). The candidate technique
+    is a single O(n) isnan scan over the whole array followed by plain
+    np.median(axis=...) (vectorized internally via partition) when the
+    scan finds zero NaNs - bit-identical to stock np.nanmedian in that
+    case. ADMISSION RULE (many short-to-moderate slices): the win holds
+    when the axis being reduced produces numerous short-to-moderate
+    slices, e.g. (1000,1000) axis=1 -> 1000 slices of length 1000,
+    measured 1.93x. ANTI-REGIME (few long slices): the win VANISHES when
+    there are few, long slices, e.g. (200,10000) axis=1 -> only 200 slices
+    of length 10000, measured 0.97x, because stock's small per-slice
+    Python loop count is amortized across few iterations and no longer
+    dominates. NaN-present input falls back to stock's own path after
+    paying the scan cost, measured at ~1% overhead (0.99x) on
+    (1000,1000) axis=1 with 1% NaN.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000043_nanmedian_scan.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load), candidate = isnan-scan-then-median with scan cost
+    included: nanmedian 2-D (1000,1000) axis=1 no-NaN: 1.93x, bit-
+    identical. nanmedian 2-D (200,10000) axis=1 no-NaN: 0.97x (anti-regime,
+    few long slices). nanmedian 2-D (1000,1000) axis=1 with 1% NaN
+    (wasted scan, falls back to stock): 0.99x. Evidence:
+    benchmarks/results/BATCH6-CAL/9bbe7063c555.json. Dev-box AMD Zen 4
+    (fp 8f8198d9abab, numpy 2.4.5, CONTENDED 42% load, triage only, cited
+    as supporting evidence only, not counted toward the fingerprinted
+    result above): (1000,1000) axis=1 no-NaN 2.73x; 1%-NaN wasted scan
+    1.08x.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections: []
+linked_prs:
+  - url: https://github.com/numpy/numpy/pull/4760
+    repository: numpy/numpy
+    type: pull_request
+    number: 4760
+    note: >-
+      "ENH: rewrite ma.median to improve poor performance for multiple
+      dimensions" (juliantaylor, merged 2014-06-02T22:32:02Z). This PR
+      fixed np.ma.median via fancy indexing instead of apply_along_axis
+      and closed gh-4683; it did NOT touch np.nanmedian. Its own body
+      notes a possible follow-on: "using the current np.nanmedian approach
+      for masked medians along large dimensions so partition is used
+      instead of sort" - i.e. the thread treats np.nanmedian's
+      partition-based approach as the reference for what ma.median should
+      become, not as something itself needing this fix.
+linked_commits: []
+related_opportunities: [OPP-000037, OPP-000041]
+notes:
+  - >-
+    Mechanism: stock np.nanmedian on an axis reduces each 1-D slice with a
+    Python-level loop (conceptually the same class of apply_along_axis-
+    style looping that this issue documents for np.ma.median), which is
+    cheap per call but adds up across many slices. The candidate fast
+    path instead runs one O(n) isnan scan over the whole input; if no NaN
+    is present, it defers to plain np.median(axis=...), whose C
+    implementation is vectorized across slices via partition and does not
+    pay a per-slice Python cost. If any NaN is present, the scan cost
+    (~1% overhead, measured) is paid and stock's own NaN-aware path
+    handles correctness, so results are never wrong in the NaN case, only
+    slightly slower to detect it.
+  - >-
+    Correctness risk (medium): stock np.nanmedian emits a RuntimeWarning
+    ("All-NaN slice encountered") when an entire reduced slice is all-NaN;
+    the fast path must reproduce this warning behavior exactly on the
+    fallback route, not just the returned values, or existing user code
+    that filters warnings will silently regress. keepdims, out, and
+    overwrite_input are all stock np.nanmedian kwargs; the fast path is
+    only validated for the plain no-kwarg call shape and must explicitly
+    refuse (not silently mishandle) any call using keepdims, out, or
+    overwrite_input until each is separately verified against stock.
+  - >-
+    Corroborating context from the cross-referenced thread (astropy/
+    ccdproc#74, "masked median_combine is excruciatingly slow", mwcraig,
+    2014-05-12T16:35:02Z, explicitly cited by that issue as "a known issue
+    ... in numpy: numpy/numpy#4683"): its own benchmark table reports
+    np.median (unmasked) at 1.07s (1x, reference) versus np.ma.median at
+    838s (783x slower), a plain Python loop-over-pixels workaround at
+    254s (237x), scipy.stats.nanmedian at 232s (216x), and
+    bottleneck.nanmedian at 1.35s (1.26x). This table is kept here only
+    as color establishing how severe Python-loop-per-slice slowdowns get
+    in this mechanism class; scipy.stats.nanmedian and bottleneck.nanmedian
+    are third-party functions, not np.nanmedian, and none of these
+    numbers are used anywhere in this record's claim or evidence.
+  - >-
+    Thread engagement, with authors and dates: opened by juliantaylor
+    (CONTRIBUTOR) 2014-05-07T18:11:04Z, listing five possible
+    improvements to ma.median and asking "any more options I'm might be
+    overlooking?" (no reply recorded in this dump). juliantaylor opened
+    PR #4760 2014-05-30T17:08:07Z citing this issue as the motivation
+    ("many masked median along a small dimension is extremely slow due to
+    the usage of apply_along_axis which iterates fully in python"),
+    referenced three WIP commits on a personal fork 2014-05-30 through
+    2014-06-02, and the PR was merged same day by charris (2014-06-02T
+    22:32:02Z), which also closed this issue. A later, unrelated issue
+    (numpy/numpy#4814, durack1, "Memory bloat using numpy.ma.median",
+    2014-06-19T02:18:29Z) was cross-referenced into this thread's timeline
+    but reports a memory-growth problem on numpy 1.7.1, not a speed claim,
+    and is not used as evidence here. Zero direct comments were posted on
+    issue #4683 itself (comments: 0); all engagement shown above came via
+    the linked PR and cross-referenced issues.
+  - >-
+    license_review clean: the candidate technique (a preliminary isnan
+    scan gating a call into plain vectorized np.median) is a standard,
+    widely-used technique with no third-party code adapted from this
+    thread or any other source.
+  - >-
+    SHIPPED (2026-08-24) as nanmedian_scan (src/pyoverdrive/fastpaths/nanmedian_scan.py): 2-D C-order float64, axis 1/-1, size >= 200000, reduced length <= 2000 (the measured envelope; the few-long-slices anti-regime and layout flips refused). Bit-identical. 17 differential tests plus a property suite.

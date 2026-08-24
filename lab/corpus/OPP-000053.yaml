@@ -1,0 +1,110 @@
+id: OPP-000053
+title: "numpy.linalg.qr on 2x2/3x3 stacks pays per-matrix LAPACK dispatch (dgeqrf + dorgqr per tiny matrix) inside its gufunc loop - unrolled Householder reflectors in LAPACK's own dlarfg sign convention reproduce stock's Q and R to ~1e-15 WITH matching signs and win 1.8-11x"
+sources:
+  - url: https://github.com/numpy/numpy/issues/7179
+    repository: numpy/numpy
+    type: issue
+    number: 7179
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T21:30:00Z"
+claim:
+  speedup: null
+  baseline: >-
+    jcrist (issue body, 2016-02-03): "Currently, calls to routines in
+    np.linalg don't release the interpreter lock, but (as far as I can
+    tell) should be able to. This has caused non-optimal behavior for
+    dask.array.linalg... when trying to use these functions in parallel
+    using threads." In-thread timing: one qr of a 2000x2000 at 884 ms
+    wall, two mapped across a ThreadPool at 1.61 s - no thread scaling.
+    seberg (2016-02-05): "You can try gh-7198 if you like. Ironically,
+    QR is _not_ part of it, because unlike most of the functions, it is
+    not a generalized ufunc...."; seberg (2018-05-17, retitling the
+    issue): "I think QR still is not a gufunc, and it would probably be
+    nice if it was, so renaming the issue into that."
+  candidate: >-
+    The literal gufunc ask landed in numpy 1.22 (qr_reduced,
+    qr_complete, qr_r_raw exist in numpy 2.x _umath_linalg), but the
+    gufunc inner loop still makes per-matrix LAPACK calls - dgeqrf, then
+    dorgqr to form Q - whose setup overhead dominates at d in {2, 3},
+    the same per-matrix-dispatch class as the eigvalsh and cholesky
+    small-batch families (OPP-000030/000047/000048). PyOverdrive's
+    candidate unrolls the Householder factorization (one reflector for
+    d=2, two for d=3) in dlarfg's exact convention: beta =
+    -sign(alpha)*hypot(alpha, xnorm) when the below-diagonal part is
+    nonzero, tau = 0 / beta = alpha (identity reflector) when it is
+    exactly zero - so the per-column SIGNS, which are the only freedom
+    in the factorization, match stock's by construction.
+  hardware: "jcrist's 2016 timing hardware unstated in-thread."
+affected_operations: [numpy.linalg.qr]
+input_regime:
+  dtypes: [float64]
+  sizes: [100, 300, 1000, 3000, 10000, 100000, 1000000]
+  notes: >-
+    qr(a) / qr(a, mode) / qr(a, mode=...) with mode in {'reduced',
+    'complete', 'r'} (square input makes reduced and complete coincide),
+    a a plain float64 (..., d, d) stack, d in {2, 3}, batch >=
+    {2: 100, 3: 300}, all-finite. mode='raw', other dtypes, non-square,
+    and non-finite input refuse to stock. Q-modes return stock's
+    QRResult namedtuple; 'r' the plain ndarray. d=3 only: matrices
+    whose trailing block after the first reflector falls inside the
+    QR_RTOL determinism band (rank-deficient / repeated-column input,
+    where dlarfg's discontinuities let two valid factorizations
+    disagree at full scale) are split out mid-run and served by stock,
+    scattered back - whole stack to stock past QR_BAD_FRAC_MAX. The
+    first reflector reads raw input bits, so d=2 needs no band.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000053_qr_small_batch.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555, 8f8198d9abab]
+  detail: >
+    Full BATCH10-CAL 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load), guard-inclusive candidates mirroring the shipped
+    chunk loop and split arm
+    (benchmarks/results/BATCH10-CAL/9bbe7063c555.json): mode='reduced'
+    2x2 4.08x at batch 300, 7.65-11.03x at 1000-3000, 6.5-8.8x at
+    10k-1M; 3x3 2.21x at 300, 3.0-4.2x at 1000-1M with the
+    split-and-recombine arm live at the large cells. mode='r' 2x2
+    2.78-8.17x, 3x3 1.67-3.61x. Below the floor: 3x3 n=100 0.83x,
+    2x2 n=100 1.46-2.03x on this box but 1.04-1.29x mode='r' on the
+    dev box, hence floor 300 for both shapes under the two-machine
+    law. Reproducer (benchmarks/results/OPP-000053/, unchunked
+    unguarded closed form, the raw margin claim): 2x2 4.25x at 300,
+    7.76x at 1000, 3.49x at 1M; 3x3 2.59x at 300, 4.81x at 1000,
+    1.79x at 1M. Dev box (fp 8f8198d9abab, numpy 2.4.5, contended
+    25-28%): direction agrees at every cell, 1.5-9.6x.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+notes:
+  - >-
+    The sign contract is the whole path: qr's factors are unique only
+    up to per-column signs, so serving qr means reproducing LAPACK's
+    dlarfg choices exactly, not producing "a valid QR". Measured
+    agreement |dQ| <= 8.7e-15, |dR| <= 9.3e-16 of scale across random,
+    negative-lead, already-triangular (tau = 0 branch), zero-first-
+    column, and all-zero inputs.
+  - >-
+    correctness_risk medium is the d=3 second reflector: its inputs
+    (b22, b32) are COMPUTED, carrying ~eps*scale noise, and dlarfg is
+    discontinuous at b32 == 0 (identity vs near-flip) and in
+    sign(b22) (copysign) - noise-grade trailing blocks let the two
+    routes return sign-flipped R rows and O(1)-different Q columns,
+    both valid, violating agreement-with-stock. Handled by the QR_RTOL
+    = 1e-6 band (caps route divergence at ~eps/1e-6 = 2e-10, inside
+    the 1e-9 contract) with split-and-recombine (eigvalsh_3x3
+    precedent): trippers are gathered, served by stock, scattered
+    back. A whole-stack bail was tried first and REJECTED by the
+    battery: random Gaussian stacks trip the band with probability
+    ~1e-5 per matrix, so a million-matrix stack almost surely
+    contains one and the large-n regime would have collapsed to stock.
+  - >-
+    license_review clean: Householder QR and the dlarfg conventions are
+    textbook/LAPACK-documented algorithms; formulas re-derived, no
+    third-party code.
+  - >-
+    SHIPPED (2026-08-24, batch 10) as qr_small_batch
+    (src/pyoverdrive/fastpaths/qr_small_batch.py): 36 differential
+    tests plus a property net with triangular/zero-column/all-zero/
+    rank-1/non-finite/f32/mode-spelling hazards.

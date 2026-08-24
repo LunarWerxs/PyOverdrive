@@ -1,0 +1,197 @@
+id: OPP-000034
+title: "np.argmax along a non-contiguous reduction axis forces a hidden copy; Fortran-order reindexing measured ~19.65x faster on a 10000x10000 array"
+sources:
+  - url: https://github.com/numpy/numpy/issues/9182
+    repository: numpy/numpy
+    type: issue
+    number: 9182
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T07:00:00Z"
+claim:
+  speedup: 19.65
+  baseline: >-
+    np.argmax(frames, axis=0) on the C-contiguous 10000x10000 float64 array
+    frames = num.random.random((nx, ny)) with nx = ny = 10000 (the setup
+    code from the issue body), as timed by commenter "ghost" with %timeit:
+    "1 loop, best of 3: 1.9 s per loop" (comment posted 2018-02-16). The
+    19.65 speedup recorded above is DERIVED from ghost's own pair of numbers
+    (1900 ms / 96.7 ms = 19.65); the thread never states a ratio explicitly.
+  candidate: >-
+    np.argmax(f, axis=0) where f = num.asfortranarray(frames), i.e.
+    converting the same array to Fortran (column-major) order before
+    calling argmax along axis 0, posted in the same comment: "10 loops,
+    best of 3: 96.7 ms per loop". A pure-numpy layout trick (stock
+    np.asfortranarray plus stock np.argmax), no third-party code involved.
+  hardware: >-
+    unknown; the comment gives no CPU, OS, or numpy/Python version specific
+    to ghost's own timing. The original issue reporter's environment was
+    "python 2.7.9, numpy 1.14.0.dev0+c556b42" (stated in the issue body for
+    the ORIGINAL my_argmax vs argmax(axis=0) timing, itself unquantified as
+    a ratio: 21.6250059605s vs 22.8837270737s total for 10 timeit
+    iterations each, i.e. ~2.16s vs ~2.29s per loop), but that is not
+    confirmed to be ghost's environment for the later F-order comment the
+    claim above is based on.
+affected_operations: [numpy.argmax]
+input_regime:
+  dtypes: [float64]
+  sizes: ["10000x10000 (1e8 elements, frames/ghost F-order benchmark)", "5500x400 (2.2e6 elements, cipri-tom cython benchmark)"]
+  notes: >-
+    Measured concretely only for 2-D float64 arrays reduced along axis=0
+    (the non-contiguous axis under default C order). The reporter's own
+    setup is frames = num.random.random((10000, 10000)); ghost's F-order
+    comparison reuses that same variable name and shape. cipri-tom's
+    separate cython benchmark uses a smaller (5500, 400) float array, also
+    reduced along axis=0: a.argmax(axis=0) "10 loops, best of 3: 22.3 ms
+    per loop" vs a Cython reimplementation cy_argmax(a) "100 loops, best of
+    3: 3.31 ms per loop" (22.3 / 3.31 = 6.74x, DERIVED, not stated as a
+    ratio in the thread; this is a reimplementation route, not the
+    layout-reorder route the claim above is built on). No int dtypes, no
+    NaN-containing inputs, no 1-D or 3-D+ arrays, and no axis=1 (the
+    already-fast axis) timings appear anywhere in the dump.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000034_argmax_axis0.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load): REPRODUCED - the thread's F-order reference
+    ceiling measured 20.4x (claim: 19.65x DERIVED) at 10000x10000
+    float64, 33.7x float32, 22.3x int64. The naive transparent route
+    (ascontiguousarray(a.T) then fast-axis argmax) is a WASH (1.00-1.08x
+    everywhere: the explicit transpose copy costs what stock's internal
+    copy costs), but a cache-blocked tile transpose plus fast-axis argmax
+    wins at scale: 2.52x at 10000x10000 f64, 4.05x f32, 2.52x int64,
+    1.92x at 100000x100 - while losing at 1000x1000 (0.63x) and
+    100x100000 (0.96x), so the predicate needs a rows floor (probed by
+    BATCH4-CAL). axis=1 anti-regime confirmed at parity; NaN-salted
+    correctness exact. Evidence:
+    benchmarks/results/OPP-000034/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: medium
+maintainer_objections:
+  - author: juliantaylor
+    date: "2017-05-28"
+    quote: >-
+      argmax, as it is currently implemented, does not support strided data
+      so it must make a copy to create a contiguous block of memory, thus
+      the high memory usage and slowness. Running along the fast axis (1,
+      as numpy arrays are C ordered) is significantly faster and should not
+      need a copy.
+  - author: charris
+    date: "2017-05-28"
+    quote: "Sounds like `argmax` can be improved, so reopening this."
+  - author: eric-wieser
+    date: "2018-02-08"
+    quote: >-
+      It's more complex because it handles the following where I think
+      your code does not: nan, Complex types.
+linked_prs: []
+related_opportunities: []
+notes:
+  - >-
+    RESHIPPED CALIBRATION-GATED (2026-08-24, same day): the unshipping
+    below forced the per-machine calibration layer
+    (src/pyoverdrive/calibration.py) into existence, and the path now
+    ships registered DISABLED, enabled only where
+    pyoverdrive.calibrate() measures both regime-edge cells
+    ((3000, 3000) and (10000, 1000)) clearing the 1.3x min-win on the
+    machine it runs on, with the verdict stored per machine fingerprint
+    (foreign or stale files are ignored). Live outcomes: the Zen 4 dev
+    box declines it (0.648x/0.75x probed), the Intel box enables it -
+    both correct, both preserved as MVP evidence rows named
+    calibrated_on/calibrated_off under the respective fingerprints.
+  - >-
+    BUILT AND UNSHIPPED (2026-08-24): a full argmax_blocked_transpose
+    fast path (argmax(a, axis=0/-2) on C-order 2-D f64/f32/i64,
+    rows >= 3000, size >= 9e6, via a 128x128 cache-blocked transpose
+    then fast-axis argmax; bit-identical incl. ties and first-NaN) was
+    implemented, passed 21 differential tests and selfcheck, and won
+    2.2-4.05x on every in-regime Intel cell - then the two-machine MVP
+    proof measured it as a REGRESSION on the AMD Zen 4 dev box: 0.79x
+    at (3200, 3200), and a follow-up probe showed 0.82x/0.84x/0.75x at
+    3200^2/5000^2/(10000, 1000) with only a thin 1.24x (below min-win)
+    at 10000^2. Zen 4's stock strided argmax is ~2.3x faster than Alder
+    Lake's at equal sizes, so the Intel-calibrated regime does not
+    exist there. A size-only predicate cannot ship a win on one
+    architecture that is a 20% loss on another; the path was removed
+    before release (commit history preserves the implementation). It
+    returns if per-machine calibration tables (the pyrallel mechanism)
+    are extended to this family. license_review clean regardless:
+    blocked-transpose technique from first principles.
+  - >-
+    Mechanism, per juliantaylor (CONTRIBUTOR) in the thread: argmax's
+    current implementation does not support strided data, so when the
+    reduction axis is not the contiguous one it must copy the array into a
+    contiguous buffer first; this copy is what produces both the reporter's
+    observed memory doubling and the slowdown. For a default C-ordered
+    (row-major) 2-D array this hits axis=0 (columns are strided) but not
+    axis=1 (rows are contiguous, "the fast axis"). cipri-tom independently
+    traced the C source (calculation.c, pre-1.14 layout) and confirmed the
+    same thing from the code: "it makes a copy of the original such that it
+    is memory-contiguous on that axis. I'm afraid this is the
+    time-consuming part."
+  - >-
+    The transparent fast path this record recommends: when np.argmax is
+    called with an explicit axis argument on a multi-dimensional array
+    whose reduction axis is NOT the contiguous one (e.g. axis=0 on a
+    C-contiguous array), reorder the array so the reduction axis becomes
+    contiguous (the thread's concrete route is num.asfortranarray(frames)
+    before argmax(f, axis=0)) and then call stock np.argmax on that
+    reordered view/copy unchanged, so tie-breaking and NaN handling are
+    inherited byte-for-byte from the existing C implementation rather than
+    reimplemented. Reachability limit: numpy.argmax is a patchable
+    module-level name, but the a.argmax() ndarray METHOD (used directly in
+    cipri-tom's res_np = a.argmax(axis=0)) is not reachable the same way, so
+    a monkeypatch on the free function alone would miss any caller that
+    invokes the method form. Other candidate routes the thread names
+    instead of pure reordering are reimplementation-based: the reporter's
+    own manual per-slice Python loop (my_argmax, marginally faster than
+    stock in the issue body's own numbers) and cipri-tom's Cython
+    reimplementation (cy_argmax, 22.3ms -> 3.31ms on the 5500x400 case);
+    both are reduction-based tricks that recompute the max/argmax rather
+    than just changing memory layout.
+  - >-
+    Correctness hazards, in full: np.argmax must return the FIRST
+    occurrence among ties along the reduction axis, and for float inputs
+    NaN must propagate exactly as stock numpy does (argmax over an axis
+    containing NaN returns the index of a NaN per stock semantics). Any
+    reordering route that changes which tie wins, or which NaN position is
+    reported, is wrong. The pure asfortranarray-then-stock-argmax route
+    should preserve both by construction, since it still calls the
+    unmodified C argmax on every element, only in a different memory
+    layout. The reimplementation routes are the ones actually flagged: MEMBER
+    eric-wieser noted directly of cipri-tom's Cython version that the real
+    C implementation "is more complex because it handles ... nan, Complex
+    types" that the naive reimplementation does not, i.e. any productionized
+    fast path built on a from-scratch reduction loop (manual Python or
+    Cython) needs to be independently verified against NaN and tie-order
+    behavior, not assumed correct because it matches on random,
+    NaN-free, non-tied test data.
+  - >-
+    Age/version caveat: the issue was opened 2017-05-28 on "python 2.7.9,
+    numpy 1.14.0.dev0+c556b42" (Python 2, and a pre-release numpy nearly a
+    decade old as of ingestion), reopened same-day by charris (MEMBER), and
+    last commented on 2018-02-16 (issue JSON updated_at 2018-08-01,
+    comments: 7, all 7 present in the dump); it remains open with zero
+    linked PRs anywhere in the dump. cipri-tom's source-code links point at
+    a numpy commit-pinned arraytypes.c.src / calculation.c from that era;
+    numpy's reduction/argmax internals (SIMD loops, dtype dispatch, string
+    dtype support, etc.) have very likely changed materially since, so the
+    exact copy-triggering code path described here needs to be reconfirmed
+    against current main before any fast path is built on it.
+  - >-
+    license_review is pending, not pre-cleared: the safest candidate
+    (asfortranarray reorder + stock argmax) is pure numpy with no external
+    code, but the thread also surfaces cipri-tom's Cython snippet
+    (cy_argmax) posted publicly in a GitHub comment, which would need its
+    own provenance/license check if it were ever the route taken.
+  - >-
+    Thread engagement: 7 comments total, one +1 reaction on ghost's
+    F-order comment (the strongest single data point in the thread), no
+    other reactions anywhere. Labeled "01 - Enhancement" and "component:
+    numpy._core". Author association on record: juliantaylor CONTRIBUTOR,
+    charris and eric-wieser MEMBER, HerrMuellerluedenscheid and cipri-tom
+    NONE, "ghost" NONE (a deleted/anonymized GitHub account).

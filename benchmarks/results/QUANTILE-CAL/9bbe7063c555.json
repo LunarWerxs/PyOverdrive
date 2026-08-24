@@ -1,0 +1,557 @@
+{
+  "opp_id": "QUANTILE-CAL",
+  "title": "sort+lerp vs stock quantile: nq/m regime edges",
+  "recorded_at": "2026-08-24T04:05:31+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.0,
+    "cpu_busy_after": 0.0,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "smallq_s300_m2048_nq4",
+      "params": {
+        "slices": 300,
+        "m": 2048,
+        "nq": 4,
+        "ratio": 0.002
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 6889100.0,
+          "min_ns": 6810500.0,
+          "mean_ns": 6885400.0,
+          "mad_ns": 28500.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 3835000.0,
+          "min_ns": 3787450.0,
+          "mean_ns": 3905642.8571428573,
+          "mad_ns": 45550.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 1.7963754889178618
+      }
+    },
+    {
+      "case": "smallq_s300_m2048_nq16",
+      "params": {
+        "slices": 300,
+        "m": 2048,
+        "nq": 16,
+        "ratio": 0.0078
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 11753400.0,
+          "min_ns": 11636900.0,
+          "mean_ns": 11750171.42857143,
+          "mad_ns": 57300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 3764350.0,
+          "min_ns": 3749400.0,
+          "mean_ns": 3771500.0,
+          "mad_ns": 10900.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 3.122292029168382
+      }
+    },
+    {
+      "case": "smallq_s300_m2048_nq64",
+      "params": {
+        "slices": 300,
+        "m": 2048,
+        "nq": 64,
+        "ratio": 0.0312
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 16570500.0,
+          "min_ns": 16506800.0,
+          "mean_ns": 16555800.0,
+          "mad_ns": 39400.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 4083800.0,
+          "min_ns": 4012150.0,
+          "mean_ns": 4296785.714285715,
+          "mad_ns": 47500.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 4.057617904892502
+      }
+    },
+    {
+      "case": "m512_s300_m512_nq32",
+      "params": {
+        "slices": 300,
+        "m": 512,
+        "nq": 32,
+        "ratio": 0.0625
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 4070450.0,
+          "min_ns": 4047350.0,
+          "mean_ns": 4078278.5714285714,
+          "mad_ns": 7150.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 945950.0,
+          "min_ns": 935033.3333333334,
+          "mean_ns": 943226.1904761904,
+          "mad_ns": 2666.666666666628,
+          "samples": 7,
+          "loops_per_sample": 6,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 4.303028701305566
+      }
+    },
+    {
+      "case": "m512_s300_m512_nq128",
+      "params": {
+        "slices": 300,
+        "m": 512,
+        "nq": 128,
+        "ratio": 0.25
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 19039700.0,
+          "min_ns": 18736000.0,
+          "mean_ns": 18964185.714285713,
+          "mad_ns": 140500.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 1435850.0,
+          "min_ns": 1424350.0,
+          "mean_ns": 1437414.2857142857,
+          "mad_ns": 11100.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 13.260229132569558
+      }
+    },
+    {
+      "case": "m8192_s300_m8192_nq410",
+      "params": {
+        "slices": 300,
+        "m": 8192,
+        "nq": 410,
+        "ratio": 0.05
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 89341900.0,
+          "min_ns": 89206700.0,
+          "mean_ns": 89623120.0,
+          "mad_ns": 135200.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 19446200.0,
+          "min_ns": 19393800.0,
+          "mean_ns": 19465280.0,
+          "mad_ns": 24300.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 4.59431148502021
+      }
+    },
+    {
+      "case": "m8192_s300_m8192_nq2048",
+      "params": {
+        "slices": 300,
+        "m": 8192,
+        "nq": 2048,
+        "ratio": 0.25
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 3263521700.0,
+          "min_ns": 3256708500.0,
+          "mean_ns": 3265484080.0,
+          "mad_ns": 6813200.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 28420400.0,
+          "min_ns": 28176700.0,
+          "mean_ns": 29050120.0,
+          "mad_ns": 243700.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 114.83025221319897
+      }
+    },
+    {
+      "case": "m65536_s32_m65536_nq3277",
+      "params": {
+        "slices": 32,
+        "m": 65536,
+        "nq": 3277,
+        "ratio": 0.05
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 96424800.0,
+          "min_ns": 92810300.0,
+          "mean_ns": 95455785.71428572,
+          "mad_ns": 971000.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 17326600.0,
+          "min_ns": 17209200.0,
+          "mean_ns": 17365614.285714287,
+          "mad_ns": 108500.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 5.56513107014648
+      }
+    },
+    {
+      "case": "m65536_s32_m65536_nq16384",
+      "params": {
+        "slices": 32,
+        "m": 65536,
+        "nq": 16384,
+        "ratio": 0.25
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 21497878100.0,
+          "min_ns": 21471843500.0,
+          "mean_ns": 21498061200.0,
+          "mad_ns": 10095300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 23406400.0,
+          "min_ns": 23254500.0,
+          "mean_ns": 23910785.714285713,
+          "mad_ns": 95300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 918.4615361610499
+      }
+    },
+    {
+      "case": "oned_s1_m2048_nq102",
+      "params": {
+        "slices": 1,
+        "m": 2048,
+        "nq": 102,
+        "ratio": 0.0498
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 73027.88461538461,
+          "min_ns": 72404.80769230769,
+          "mean_ns": 73414.6978021978,
+          "mad_ns": 623.076923076922,
+          "samples": 7,
+          "loops_per_sample": 104,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 21789.09952606635,
+          "min_ns": 21736.96682464455,
+          "mean_ns": 21878.0297901151,
+          "mad_ns": 52.13270142180045,
+          "samples": 7,
+          "loops_per_sample": 422,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 3.351578826285188
+      }
+    },
+    {
+      "case": "oned_s1_m2048_nq512",
+      "params": {
+        "slices": 1,
+        "m": 2048,
+        "nq": 512,
+        "ratio": 0.25
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 817342.8571428572,
+          "min_ns": 815185.7142857143,
+          "mean_ns": 819546.9387755103,
+          "mad_ns": 1242.8571428571595,
+          "samples": 7,
+          "loops_per_sample": 7,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 25033.988764044945,
+          "min_ns": 24900.56179775281,
+          "mean_ns": 25423.03370786517,
+          "mad_ns": 123.31460674157279,
+          "samples": 7,
+          "loops_per_sample": 356,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 32.649325876376736
+      }
+    },
+    {
+      "case": "oned_s1_m65536_nq3277",
+      "params": {
+        "slices": 1,
+        "m": 65536,
+        "nq": 3277,
+        "ratio": 0.05
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 3542450.0,
+          "min_ns": 3511800.0,
+          "mean_ns": 3563678.5714285714,
+          "mad_ns": 23600.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 596722.2222222222,
+          "min_ns": 592844.4444444445,
+          "mean_ns": 612719.0476190476,
+          "mad_ns": 3877.777777777752,
+          "samples": 7,
+          "loops_per_sample": 9,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 5.936514291034354
+      }
+    },
+    {
+      "case": "oned_s1_m65536_nq16384",
+      "params": {
+        "slices": 1,
+        "m": 65536,
+        "nq": 16384,
+        "ratio": 0.25
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 734138400.0,
+          "min_ns": 732455800.0,
+          "mean_ns": 733900228.5714285,
+          "mad_ns": 739900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 929000.0,
+          "min_ns": 890033.3333333334,
+          "mean_ns": 931083.3333333333,
+          "mad_ns": 28200.0,
+          "samples": 7,
+          "loops_per_sample": 6,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 790.2458557588806
+      }
+    },
+    {
+      "case": "oned_smallq_s1_m65536_nq16",
+      "params": {
+        "slices": 1,
+        "m": 65536,
+        "nq": 16,
+        "ratio": 0.0002
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 1084700.0,
+          "min_ns": 1081300.0,
+          "mean_ns": 1084985.7142857143,
+          "mad_ns": 2720.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 409075.0,
+          "min_ns": 407529.1666666667,
+          "mean_ns": 409382.73809523805,
+          "mad_ns": 633.3333333333139,
+          "samples": 7,
+          "loops_per_sample": 24,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 2.651592006355803
+      }
+    },
+    {
+      "case": "fewslices_s4_m2048_nq512",
+      "params": {
+        "slices": 4,
+        "m": 2048,
+        "nq": 512,
+        "ratio": 0.25
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 3321200.0,
+          "min_ns": 3301550.0,
+          "mean_ns": 3320214.285714286,
+          "mad_ns": 2350.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_lerp": {
+          "median_ns": 71375.71428571429,
+          "min_ns": 71210.0,
+          "mean_ns": 71946.9387755102,
+          "mad_ns": 165.71428571428987,
+          "samples": 7,
+          "loops_per_sample": 70,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_lerp": 46.53123311250325
+      }
+    }
+  ]
+}

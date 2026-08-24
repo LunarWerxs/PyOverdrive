@@ -1,0 +1,1007 @@
+{
+  "opp_id": "OPP-000045",
+  "title": "small-batch det/slogdet/solve closed forms",
+  "recorded_at": "2026-08-24T08:33:15+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.008000000000000007,
+    "cpu_busy_after": 0.0,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "det_2x2_batch100",
+      "params": {
+        "d": 2,
+        "batch": 100
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 9347.427983539095,
+          "min_ns": 9170.884773662552,
+          "mean_ns": 9323.853615520282,
+          "mad_ns": 5.555555555554747,
+          "samples": 7,
+          "loops_per_sample": 972,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 1420.897492300924,
+          "min_ns": 1412.2305323361197,
+          "mean_ns": 1419.3702469989316,
+          "mad_ns": 2.507699076110839,
+          "samples": 7,
+          "loops_per_sample": 4546,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 6.578537884814182
+      }
+    },
+    {
+      "case": "slogdet_2x2_batch100",
+      "params": {
+        "d": 2,
+        "batch": 100
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 8889.823874755382,
+          "min_ns": 8858.414872798434,
+          "mean_ns": 8906.70953312832,
+          "mad_ns": 31.409001956948487,
+          "samples": 7,
+          "loops_per_sample": 1022,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 2751.2470771628996,
+          "min_ns": 2745.946999220577,
+          "mean_ns": 2768.572542033181,
+          "mad_ns": 1.636788776305366,
+          "samples": 7,
+          "loops_per_sample": 2566,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 3.231197935127882
+      }
+    },
+    {
+      "case": "solve_2x2_batch100",
+      "params": {
+        "d": 2,
+        "batch": 100
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 11977.959697732997,
+          "min_ns": 11910.201511335013,
+          "mean_ns": 12076.970133141416,
+          "mad_ns": 44.58438287153513,
+          "samples": 7,
+          "loops_per_sample": 794,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 5676.572958500669,
+          "min_ns": 5662.717536813922,
+          "mean_ns": 5682.071141709696,
+          "mad_ns": 3.2797858099065706,
+          "samples": 7,
+          "loops_per_sample": 1494,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 2.1100688364792353
+      }
+    },
+    {
+      "case": "det_2x2_batch300",
+      "params": {
+        "d": 2,
+        "batch": 300
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 25915.343915343914,
+          "min_ns": 25824.603174603173,
+          "mean_ns": 25900.377928949358,
+          "mad_ns": 41.53439153439467,
+          "samples": 7,
+          "loops_per_sample": 378,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 1670.054598908022,
+          "min_ns": 1662.5787484250316,
+          "mean_ns": 1669.1516169676609,
+          "mad_ns": 6.467870642587286,
+          "samples": 7,
+          "loops_per_sample": 4762,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 15.517662675393284
+      }
+    },
+    {
+      "case": "slogdet_2x2_batch300",
+      "params": {
+        "d": 2,
+        "batch": 300
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 23427.16346153846,
+          "min_ns": 23417.06730769231,
+          "mean_ns": 23434.271978021978,
+          "mad_ns": 10.096153846152447,
+          "samples": 7,
+          "loops_per_sample": 416,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 3828.3477321814253,
+          "min_ns": 3824.0280777537796,
+          "mean_ns": 3829.767047207652,
+          "mad_ns": 3.3477321814257266,
+          "samples": 7,
+          "loops_per_sample": 1852,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 6.119392777361283
+      }
+    },
+    {
+      "case": "solve_2x2_batch300",
+      "params": {
+        "d": 2,
+        "batch": 300
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 29942.814371257486,
+          "min_ns": 29818.8622754491,
+          "mean_ns": 29946.065012831477,
+          "mad_ns": 39.52095808383092,
+          "samples": 7,
+          "loops_per_sample": 334,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 6814.431239388795,
+          "min_ns": 6800.594227504244,
+          "mean_ns": 6817.851079311181,
+          "mad_ns": 3.3955857385399213,
+          "samples": 7,
+          "loops_per_sample": 1178,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 4.394029863883862
+      }
+    },
+    {
+      "case": "det_2x2_batch1000",
+      "params": {
+        "d": 2,
+        "batch": 1000
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 84410.16949152542,
+          "min_ns": 84261.86440677966,
+          "mean_ns": 88902.05811138013,
+          "mad_ns": 86.44067796609306,
+          "samples": 7,
+          "loops_per_sample": 118,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 2452.0383693045565,
+          "min_ns": 2398.3213429256593,
+          "mean_ns": 2444.307411213886,
+          "mad_ns": 8.673061550759485,
+          "samples": 7,
+          "loops_per_sample": 2502,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 34.42448966060254
+      }
+    },
+    {
+      "case": "slogdet_2x2_batch1000",
+      "params": {
+        "d": 2,
+        "batch": 1000
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 75279.10447761194,
+          "min_ns": 75135.82089552238,
+          "mean_ns": 75265.45842217484,
+          "mad_ns": 41.79104477612418,
+          "samples": 7,
+          "loops_per_sample": 67,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 7346.575342465753,
+          "min_ns": 7340.6066536203525,
+          "mean_ns": 7351.565557729941,
+          "mad_ns": 3.8160469667318466,
+          "samples": 7,
+          "loops_per_sample": 1022,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 10.24682943663187
+      }
+    },
+    {
+      "case": "solve_2x2_batch1000",
+      "params": {
+        "d": 2,
+        "batch": 1000
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 91863.63636363637,
+          "min_ns": 91080.0,
+          "mean_ns": 91919.48051948052,
+          "mad_ns": 554.5454545454559,
+          "samples": 7,
+          "loops_per_sample": 55,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 10560.62639821029,
+          "min_ns": 10537.919463087248,
+          "mean_ns": 10568.040907638222,
+          "mad_ns": 16.554809843401017,
+          "samples": 7,
+          "loops_per_sample": 894,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 8.698691999861344
+      }
+    },
+    {
+      "case": "det_2x2_batch5000",
+      "params": {
+        "d": 2,
+        "batch": 5000
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 416725.0,
+          "min_ns": 415900.0,
+          "mean_ns": 417095.23809523805,
+          "mad_ns": 308.33333333331393,
+          "samples": 7,
+          "loops_per_sample": 12,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 6037.648221343874,
+          "min_ns": 5952.667984189723,
+          "mean_ns": 6025.042348955392,
+          "mad_ns": 13.339920948616964,
+          "samples": 7,
+          "loops_per_sample": 1012,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 69.0210798513936
+      }
+    },
+    {
+      "case": "slogdet_2x2_batch5000",
+      "params": {
+        "d": 2,
+        "batch": 5000
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 368985.71428571426,
+          "min_ns": 367907.14285714284,
+          "mean_ns": 369268.36734693876,
+          "mad_ns": 964.285714285681,
+          "samples": 7,
+          "loops_per_sample": 14,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 26433.050847457627,
+          "min_ns": 26400.0,
+          "mean_ns": 26546.549636803877,
+          "mad_ns": 33.05084745762724,
+          "samples": 7,
+          "loops_per_sample": 236,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 13.959255646088385
+      }
+    },
+    {
+      "case": "solve_2x2_batch5000",
+      "params": {
+        "d": 2,
+        "batch": 5000
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 445683.3333333333,
+          "min_ns": 443350.0,
+          "mean_ns": 445416.6666666666,
+          "mad_ns": 916.6666666666279,
+          "samples": 7,
+          "loops_per_sample": 12,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 27138.85542168675,
+          "min_ns": 27107.530120481926,
+          "mean_ns": 27153.9586919105,
+          "mad_ns": 31.32530120482261,
+          "samples": 7,
+          "loops_per_sample": 332,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 16.422333455418546
+      }
+    },
+    {
+      "case": "det_2x2_batch20000",
+      "params": {
+        "d": 2,
+        "batch": 20000
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 1664566.6666666667,
+          "min_ns": 1659933.3333333333,
+          "mean_ns": 1665404.761904762,
+          "mad_ns": 1866.6666666665114,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 18091.44385026738,
+          "min_ns": 18060.96256684492,
+          "mean_ns": 18406.722689075632,
+          "mad_ns": 30.481283422461274,
+          "samples": 7,
+          "loops_per_sample": 374,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 92.0085030494714
+      }
+    },
+    {
+      "case": "slogdet_2x2_batch20000",
+      "params": {
+        "d": 2,
+        "batch": 20000
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 1474025.0,
+          "min_ns": 1463975.0,
+          "mean_ns": 1474735.7142857143,
+          "mad_ns": 4425.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 126419.44444444444,
+          "min_ns": 126056.94444444444,
+          "mean_ns": 126453.96825396825,
+          "mad_ns": 248.61111111112405,
+          "samples": 7,
+          "loops_per_sample": 72,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 11.659796532706379
+      }
+    },
+    {
+      "case": "solve_2x2_batch20000",
+      "params": {
+        "d": 2,
+        "batch": 20000
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 1768833.3333333333,
+          "min_ns": 1762233.3333333333,
+          "mean_ns": 1771395.238095238,
+          "mad_ns": 4433.333333333256,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 328246.6666666667,
+          "min_ns": 322473.3333333333,
+          "mean_ns": 327876.1904761905,
+          "mad_ns": 1393.3333333333721,
+          "samples": 7,
+          "loops_per_sample": 15,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 5.388732051099782
+      }
+    },
+    {
+      "case": "det_3x3_batch100",
+      "params": {
+        "d": 3,
+        "batch": 100
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 12268.414322250639,
+          "min_ns": 12198.209718670078,
+          "mean_ns": 12272.46985750822,
+          "mad_ns": 18.0306905370835,
+          "samples": 7,
+          "loops_per_sample": 782,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 5842.538461538462,
+          "min_ns": 5819.923076923077,
+          "mean_ns": 5845.7032967032965,
+          "mad_ns": 7.615384615383846,
+          "samples": 7,
+          "loops_per_sample": 1300,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 2.0998431423282597
+      }
+    },
+    {
+      "case": "slogdet_3x3_batch100",
+      "params": {
+        "d": 3,
+        "batch": 100
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 11625.123762376237,
+          "min_ns": 11552.722772277228,
+          "mean_ns": 11665.258132956153,
+          "mad_ns": 65.9653465346546,
+          "samples": 7,
+          "loops_per_sample": 808,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 7148.0,
+          "min_ns": 7125.0,
+          "mean_ns": 7145.324675324676,
+          "mad_ns": 8.727272727272975,
+          "samples": 7,
+          "loops_per_sample": 1100,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 1.6263463573553774
+      }
+    },
+    {
+      "case": "solve_3x3_batch100",
+      "params": {
+        "d": 3,
+        "batch": 100
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 15897.249190938512,
+          "min_ns": 15849.190938511327,
+          "mean_ns": 15923.878871937124,
+          "mad_ns": 48.058252427184925,
+          "samples": 7,
+          "loops_per_sample": 618,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 19943.333333333332,
+          "min_ns": 19900.444444444445,
+          "mean_ns": 19956.603174603173,
+          "mad_ns": 30.444444444441615,
+          "samples": 7,
+          "loops_per_sample": 450,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 0.7971209689589761
+      }
+    },
+    {
+      "case": "det_3x3_batch300",
+      "params": {
+        "d": 3,
+        "batch": 300
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 35330.85106382979,
+          "min_ns": 35187.234042553195,
+          "mean_ns": 35328.723404255325,
+          "mad_ns": 124.4680851063822,
+          "samples": 7,
+          "loops_per_sample": 282,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 7006.876061120543,
+          "min_ns": 6977.6740237691,
+          "mean_ns": 7006.985204947853,
+          "mad_ns": 4.329371816637831,
+          "samples": 7,
+          "loops_per_sample": 1178,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 5.042311403204649
+      }
+    },
+    {
+      "case": "slogdet_3x3_batch300",
+      "params": {
+        "d": 3,
+        "batch": 300
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 32738.926174496642,
+          "min_ns": 32684.89932885906,
+          "mean_ns": 32752.54074784276,
+          "mad_ns": 52.01342281878897,
+          "samples": 7,
+          "loops_per_sample": 298,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 9155.450733752621,
+          "min_ns": 9128.616352201258,
+          "mean_ns": 9152.860137765798,
+          "mad_ns": 12.054507337525138,
+          "samples": 7,
+          "loops_per_sample": 954,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 3.575894527377099
+      }
+    },
+    {
+      "case": "solve_3x3_batch300",
+      "params": {
+        "d": 3,
+        "batch": 300
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 42262.184873949576,
+          "min_ns": 42134.4537815126,
+          "mean_ns": 42279.23169267707,
+          "mad_ns": 41.17647058823786,
+          "samples": 7,
+          "loops_per_sample": 119,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 24732.48730964467,
+          "min_ns": 24604.82233502538,
+          "mean_ns": 24716.932559825964,
+          "mad_ns": 60.659898477159004,
+          "samples": 7,
+          "loops_per_sample": 394,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 1.708772124082685
+      }
+    },
+    {
+      "case": "det_3x3_batch1000",
+      "params": {
+        "d": 3,
+        "batch": 1000
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 117567.44186046511,
+          "min_ns": 117288.37209302325,
+          "mean_ns": 117541.52823920266,
+          "mad_ns": 41.86046511627501,
+          "samples": 7,
+          "loops_per_sample": 43,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 11113.793103448275,
+          "min_ns": 11092.528735632184,
+          "mean_ns": 11116.174055829228,
+          "mad_ns": 14.51149425287258,
+          "samples": 7,
+          "loops_per_sample": 696,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 10.578516332465059
+      }
+    },
+    {
+      "case": "slogdet_3x3_batch1000",
+      "params": {
+        "d": 3,
+        "batch": 1000
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 109919.56521739131,
+          "min_ns": 109186.95652173914,
+          "mean_ns": 110197.51552795032,
+          "mad_ns": 732.6086956521758,
+          "samples": 7,
+          "loops_per_sample": 46,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 16115.625,
+          "min_ns": 16020.559210526315,
+          "mean_ns": 17206.790413533836,
+          "mad_ns": 82.56578947368507,
+          "samples": 7,
+          "loops_per_sample": 608,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 6.8206827360025635
+      }
+    },
+    {
+      "case": "solve_3x3_batch1000",
+      "params": {
+        "d": 3,
+        "batch": 1000
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 133244.73684210525,
+          "min_ns": 132581.57894736843,
+          "mean_ns": 133410.15037593985,
+          "mad_ns": 357.8947368421068,
+          "samples": 7,
+          "loops_per_sample": 38,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 39696.4,
+          "min_ns": 39656.8,
+          "mean_ns": 39830.97142857143,
+          "mad_ns": 25.200000000004366,
+          "samples": 7,
+          "loops_per_sample": 250,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 3.356594976927511
+      }
+    },
+    {
+      "case": "det_3x3_batch5000",
+      "params": {
+        "d": 3,
+        "batch": 5000
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 591122.2222222222,
+          "min_ns": 585877.7777777778,
+          "mean_ns": 591304.7619047619,
+          "mad_ns": 4022.222222222248,
+          "samples": 7,
+          "loops_per_sample": 9,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 29650.0,
+          "min_ns": 29591.304347826088,
+          "mean_ns": 29663.14699792961,
+          "mad_ns": 32.97101449275215,
+          "samples": 7,
+          "loops_per_sample": 276,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 19.93666854037849
+      }
+    },
+    {
+      "case": "slogdet_3x3_batch5000",
+      "params": {
+        "d": 3,
+        "batch": 5000
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 555190.0,
+          "min_ns": 551590.0,
+          "mean_ns": 554957.1428571428,
+          "mad_ns": 2490.0,
+          "samples": 7,
+          "loops_per_sample": 10,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 49531.25,
+          "min_ns": 49458.854166666664,
+          "mean_ns": 49526.5625,
+          "mad_ns": 30.72916666666424,
+          "samples": 7,
+          "loops_per_sample": 192,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 11.208883280757098
+      }
+    },
+    {
+      "case": "solve_3x3_batch5000",
+      "params": {
+        "d": 3,
+        "batch": 5000
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 651087.5,
+          "min_ns": 643250.0,
+          "mean_ns": 650553.5714285715,
+          "mad_ns": 2737.5,
+          "samples": 7,
+          "loops_per_sample": 8,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 106011.95652173914,
+          "min_ns": 105911.95652173914,
+          "mean_ns": 106116.92546583852,
+          "mad_ns": 100.0,
+          "samples": 7,
+          "loops_per_sample": 92,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 6.141642144548912
+      }
+    },
+    {
+      "case": "det_3x3_batch20000",
+      "params": {
+        "d": 3,
+        "batch": 20000
+      },
+      "baseline": "linalg.det",
+      "variants": {
+        "linalg.det": {
+          "median_ns": 2367266.6666666665,
+          "min_ns": 2346966.6666666665,
+          "mean_ns": 2375952.380952381,
+          "mad_ns": 20300.0,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 195980.76923076922,
+          "min_ns": 195653.84615384616,
+          "mean_ns": 195996.7032967033,
+          "mad_ns": 176.9230769230926,
+          "samples": 7,
+          "loops_per_sample": 26,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 12.079076309161678
+      }
+    },
+    {
+      "case": "slogdet_3x3_batch20000",
+      "params": {
+        "d": 3,
+        "batch": 20000
+      },
+      "baseline": "linalg.slogdet",
+      "variants": {
+        "linalg.slogdet": {
+          "median_ns": 2232800.0,
+          "min_ns": 2207900.0,
+          "mean_ns": 2231019.0476190476,
+          "mad_ns": 7566.666666666511,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form": {
+          "median_ns": 304800.0,
+          "min_ns": 303593.75,
+          "mean_ns": 304748.66071428574,
+          "mad_ns": 584.375,
+          "samples": 7,
+          "loops_per_sample": 32,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form": 7.3254593175853016
+      }
+    },
+    {
+      "case": "solve_3x3_batch20000",
+      "params": {
+        "d": 3,
+        "batch": 20000
+      },
+      "baseline": "linalg.solve",
+      "variants": {
+        "linalg.solve": {
+          "median_ns": 2584400.0,
+          "min_ns": 2570050.0,
+          "mean_ns": 2591371.4285714286,
+          "mad_ns": 7500.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "cramer": {
+          "median_ns": 1085540.0,
+          "min_ns": 1042880.0,
+          "mean_ns": 1095200.0,
+          "mad_ns": 29820.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cramer": 2.380750594174328
+      }
+    }
+  ]
+}

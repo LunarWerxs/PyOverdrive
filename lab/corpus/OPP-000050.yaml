@@ -1,0 +1,93 @@
+id: OPP-000050
+title: "numpy.interp runs one binary search per query regardless of grid structure; on uniformly spaced xp (linspace/arange - the resampling regime) a vectorized direct-index lerp measures 2.8-6x from 3000 queries up, with the uniformity guard priced in"
+sources:
+  - url: https://github.com/numpy/numpy/issues/2513
+    repository: numpy/numpy
+    type: issue
+    number: 2513
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T10:41:00Z"
+claim:
+  speedup: null
+  baseline: >-
+    CLASS EVIDENCE ONLY, and honestly weak as a direct claim: numpy#2513
+    is the gitbot migration of Trac #1920 ("Improve numpy.interp running
+    time", tkluck, 2011-08-01). The concrete change discussed there was
+    small - rgommers (2011-08-16): "caching the slopes is removed,
+    resulting in a 10% speed-up... I'm not sure I'd call that a 'severe
+    speed penalty'" - and charris closed it in 2012 ("Fixed up a bit and
+    pushed in b9576ed", milestone 1.7). Nobody in the thread proposes
+    exploiting grid uniformity; the thread establishes only that
+    interp's inner loop has been a recognized cost center. The
+    per-query-bisection mechanism this record targets is read directly
+    from stock's compiled_interp, not from the thread.
+  candidate: >-
+    PyOverdrive's candidate (not from the thread): when every np.diff(xp)
+    agrees with the first to 1e-9 relative - which linspace and arange
+    grids satisfy and genuinely irregular grids do not - the containing
+    bin of every query is one subtract-multiply-truncate away, and the
+    whole lookup vectorizes with no per-element bisection. Guards
+    (uniformity scan over xp, isfinite scans over x and fp) are part of
+    the measured candidate cost.
+  hardware: unknown (no benchmark hardware stated in the migrated thread)
+affected_operations: [numpy.interp]
+input_regime:
+  dtypes: [float64]
+  sizes: [3000, 10000, 100000, 1000000]
+  notes: >-
+    Plain 1-D float64 x/xp/fp only; xp uniform within 1e-9 relative and
+    strictly increasing; x all-finite (a NaN query would hit undefined
+    intp-cast behavior) and fp all-finite (the lerp form differs from
+    stock's arithmetic around inf/nan); nq >= 3000 (nq=1000 measured
+    1.06x). left=/right=/period= refuse: the user chose different edge
+    semantics. Queries may be unsorted and out of range on both sides -
+    stock's default edge policy (fp[0] below, fp[-1] at/above) is
+    replicated exactly.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000050_interp_uniform.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load), guard-inclusive candidate, scaled-abs check at
+    1e-9 (benchmarks/results/BATCH8-CAL/9bbe7063c555.json):
+    nq=3000/grid 1000: 3.37x; 10_000/1000: 5.95x; 30_000/1000: 3.32x;
+    100_000/1000: 2.81x; 1M/10_000: 3.19x; 1M/100 (arange-built grid):
+    1.46x. Measured agreement 1e-14..1e-12 relative. Dev-box probe (AMD
+    Zen 4, numpy 2.4.5, contended): 5.39x at 10_000/1000, 4.01x at
+    1M/10_000 - consistent direction. NOTE on the check discipline: the
+    reproducer's first full run flagged a spurious CORRECTNESS-FAIL at
+    the 1M cell because its template check was relative-only (atol=0);
+    lerp outputs cross zero, where rounding noise makes any relative
+    check explode. The check was corrected to the scaled-absolute form
+    the battery already used; the module contract is unaffected.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections: []
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000024, OPP-000038]
+notes:
+  - >-
+    Comparison mode: numeric - the direct lerp (lo + frac*(hi-lo))
+    rounds differently from stock's compiled slope arithmetic. Where
+    the arithmetic bin disagrees with bisection (possible only at a bin
+    boundary, by the 1e-9 uniformity bound), the lerp is continuous
+    across the boundary, so the two answers differ by rounding only.
+  - >-
+    The uniformity guard doubles as the sortedness guard: stock interp
+    does not validate that xp is increasing (garbage in, garbage out);
+    this path never has to reproduce that garbage because any
+    non-increasing xp fails the uniformity scan and refuses to stock.
+  - >-
+    license_review clean: direct-index linear interpolation from first
+    principles; the thread contains no implementation to borrow.
+  - >-
+    SHIPPED (2026-08-24, batch 8) as interp_uniform_grid
+    (src/pyoverdrive/fastpaths/interp_uniform_grid.py): NQ_MIN=3000,
+    UNIFORM_RTOL=1e-9. 23 differential tests plus a property net over
+    linspace/arange/nonuniform grids and inside/straddling/on-point/NaN
+    query mixes.

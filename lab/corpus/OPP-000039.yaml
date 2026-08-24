@@ -1,0 +1,201 @@
+id: OPP-000039
+title: "searchsorted is up to ~32000x slower when the search key is a Python int instead of the array's own dtype (uint64 case)"
+sources:
+  - url: https://github.com/numpy/numpy/issues/29719
+    repository: numpy/numpy
+    type: issue
+    number: 29719
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T12:00:00Z"
+claim:
+  speedup: 32432.43
+  baseline: >-
+    The reporter's own repro on numpy 2.3.1 / Python 3.12.10 / macOS 15.6.1
+    (arm64, Darwin 24.6.0): a = sort(random.randint(0, 2**64, 250_000_000,
+    dtype=uint64)); k = random.randint(0, 2**64, 100, dtype=uint64); 100
+    calls searchsorted(a, key) for key in k with matching uint64 dtype:
+    "searchsorted with matching dtype 0.00037" seconds total for the 100
+    calls. Printed via Python's %.2g format, so the figure carries only 2
+    significant digits.
+  candidate: >-
+    Same array a and same 100 keys, but each key coerced to a Python int
+    first: searchsorted(a, int(key)) for key in k: "searchsorted with
+    python int keys 12" seconds total for the 100 calls, also %.2g. The
+    "candidate" here is the SLOW path (Python int key); this is a
+    regression-shaped opportunity, not a speedup candidate: the win is
+    restoring the matching-dtype timing when the key is a Python int that
+    fits the array's dtype exactly. The 32432.43 speedup above is DERIVED
+    from the reporter's own pair of numbers (12 / 0.00037 = 32432.43),
+    against the issue title's own rounded headline "searchsorted is 30000
+    times slower with Python int keys" and the body's "abysmal
+    performance... 30000 times slower". The title's 30000 is a round
+    approximation of the same 12/0.00037 ratio, not an independently
+    measured figure.
+  hardware: >-
+    macOS 15.6.1, arm64 (Apple Silicon, Darwin 24.6.0, RELEASE_ARM64_T6020),
+    Clang 13.0.0, numpy 2.3.1, Python 3.12.10. SIMD: baseline [NEON,
+    NEON_FP16, NEON_VFPV4, ASIMD], found [ASIMDHP], not found [ASIMDFHM].
+    Single machine, single run pair (not a %timeit loop average); no
+    repeat-count or variance reported.
+affected_operations: [numpy.searchsorted]
+input_regime:
+  dtypes: [uint64]
+  sizes: [250000000]
+  notes: >-
+    Only one array size (250,000,000 elements) and one key count (100
+    scalar lookups) are measured in the thread; no smaller-N or other-dtype
+    timings are posted, so the crossover where the promotion cost stops
+    dominating bisection cost is unmeasured. affected_operations lists only
+    numpy.searchsorted, matching this thread; NOTE this repo already ships a
+    searchsorted fast path (searchsorted_sortqueries, OPP-000021 vein) that
+    targets array-valued v / batched queries. This record's predicate is
+    disjoint: it fires on a SCALAR Python-int v (bool excluded) against a
+    sorted integer-dtype array, i.e. the dtype-promotion slow path, not the
+    query-sorting path OPP-000021 addresses. See related_opportunities.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000039_searchsorted_intkey.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-2% load): the headline claim is NOT reproduced - numpy
+    2.4/2.5 fixed the in-range Python-int path (stock bisects in
+    ~900 ns at every measured size; a cast route is pure overhead,
+    0.77-0.81x) - but the battery found the LIVE REMNANT: an
+    out-of-range key (2**70 on an int64 array) still walks per-element
+    arbitrary-precision comparisons, 163 ms at n=100_000, where the
+    answer is provably a.size (or 0 below range) in O(1). That remnant
+    SHIPPED as searchsorted_extreme_key. Bonus finding: stock's
+    uint64-array + in-range-python-int answer DIVERGED from the exact
+    dtype-cast route (float64 promotion, the spun-off numpy#29727
+    correctness bug, confirmed live on 2.5.2) - added to the upstream
+    report pipeline; that input class stays on stock (we replicate
+    stock, not truth). Evidence:
+    benchmarks/results/OPP-000039/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: high
+implementation_risk: medium
+maintainer_objections:
+  - author: charris
+    role: MEMBER
+    date: "2025-09-09"
+    quote: >-
+      Mixing Python integers and numpy uint64 will convert both key and
+      haystack to a common type, which in this case is float64. So every
+      call will convert the 250 million element array to float64.
+      Bisection is then used, but it is too late :) EDIT: Mixing signed
+      and unsigned types will always result in a signed type that can hold
+      both values. Python ints are signed and treated as numpy int64.
+  - author: charris
+    role: MEMBER
+    date: "2025-09-09"
+    quote: >-
+      Using any sort of binary operator with different types for the two
+      arguments will lead to promotion. As a rule of thumb, always think
+      carefully before using unsigned types. For example, C silently
+      converts signed to unsigned types with the result that -1 converts
+      to the maximum unsigned integer value. In your case, you could
+      explicitly convert the Python key to uint64, but you would always
+      need to remember to do so.
+  - author: charris
+    role: MEMBER
+    date: "2025-09-09"
+    quote: >-
+      Actually, it was fortunate, it made you notice! Promoting a 64 bit
+      unsigned hash to float64 is not one-to-one and could have led to
+      heisenbugs that would have baffled you forever. We have considered
+      raising an error in this case and this is a good argument for doing
+      that.
+  - author: charris
+    role: MEMBER
+    date: "2025-09-09"
+    quote: >-
+      You should open another issue proposing raising an error, maybe
+      reference this one as evidence for the change. That way we would
+      see something specific about promotion rather than a complaint
+      about execution time.
+linked_prs: []
+related_opportunities: [OPP-000021]
+notes:
+  - >-
+    SHIPPED (2026-08-24) as searchsorted_extreme_key
+    (src/pyoverdrive/fastpaths/searchsorted_extreme_key.py): 1-D int
+    arrays + Python-int keys strictly OUTSIDE the dtype's range; answer
+    a.size / 0 by order-theoretic proof (bit-identical for any array
+    contents, sorted or not); the in-range case stays on stock (no win
+    remains there on numpy 2.4/2.5). license_review clean:
+    order-theoretic identity, no code to review.
+  - >-
+    Why closed, and that no fix landed: state_reason is "completed", closed
+    by charris (2025-09-09T03:55:00Z) with zero code changes to
+    searchsorted's performance. The maintainer position is by-design
+    promotion, not a bug: mixing a Python int (treated as int64) with a
+    uint64 array forces NumPy's type-promotion rules to pick float64 as the
+    only type that can (imprecisely) hold both, and that float64 cast of
+    the 250M-element haystack is what costs the time, not the O(log n)
+    bisection itself, which still runs afterward. charris explicitly
+    redirected the reporter to file a SEPARATE issue proposing that this
+    promotion raise an error instead: "You should open another issue
+    proposing raising an error... That way we would see something specific
+    about promotion rather than a complaint about execution time." The
+    reporter complied (issue #29727, for the correctness side: the float64
+    cast can silently return a WRONG searchsorted index for uint64 values
+    above 2**53, demonstrated by numpy.searchsorted(numpy.arange(2**62,
+    2**62+100, 1, dtype=numpy.uint64), 2**62+25) returning 0, which is
+    wrong). Neither #29719 (this thread, performance) nor the spun-off
+    #29727 shipped a fix in the dump; both remain a live gap on current
+    numpy.
+  - >-
+    Mechanism, as the thread states it: "Mixing Python integers and numpy
+    uint64 will convert both key and haystack to a common type, which in
+    this case is float64. So every call will convert the 250 million
+    element array to float64. Bisection is then used, but it is too late
+    :)" (charris). The slow path is not "no bisection"; it is that a fresh
+    O(n) cast of the whole haystack array to float64 is paid on EVERY
+    searchsorted call before the O(log n) bisection runs, because the
+    Python int key does not share a dtype with the uint64 array and numpy's
+    promotion rule for signed-vs-unsigned mixing lands on float64 (no
+    integer type can hold both an int64 and a uint64 full range, so
+    "a signed type that can hold both values" resolves to float64, per
+    charris's edit). At 250,000,000 elements that per-call cast is what
+    turns 0.00037s into 12s across 100 calls.
+  - >-
+    Transparent fast-path sketch (draft, unverified): predicate = a
+    sorted-array numpy.searchsorted call where v is a Python int scalar
+    (bool explicitly excluded, since bool is a Python int subclass but is
+    not the intended target) and a.dtype is an integer dtype (signed or
+    unsigned). Route = check whether v is exactly representable in
+    a.dtype; if so, cast v to a.dtype (a cheap scalar cast, not an
+    array-wide promotion) and call stock searchsorted(a, cast_v, side=side,
+    sorter=sorter) so behavior including side='left'/'right' matches stock
+    by construction on the representable range. Keys OUTSIDE a.dtype's
+    representable range must still return stock's exact answer: for
+    a.dtype's own bounds, values above the max must resolve to a.size and
+    values below the min to 0 IF that is what stock actually returns after
+    its float64 promotion -- this record does NOT assume that behavior.
+    Stock's true out-of-range and side='left'/'right' results (and its
+    behavior on an unsorted array, which is garbage-in/garbage-out by
+    numpy's own contract) must be measured directly and pinned in the
+    reproducer before the fast path is allowed to diverge from them; the
+    #29727 wrong-answer case (2**62+25 against a uint64 arange returning 0)
+    shows stock's own out-of-range/precision behavior is not obviously
+    "index 0 or a.size" and must not be assumed.
+  - >-
+    Scope exclusions, explicit: the sorter= kwarg and any array-valued v
+    (the numpy.random.randint(...) array case, or any non-scalar v) stay on
+    the existing stock path / the existing OPP-000021-vein fast path;
+    this record's predicate is scalar-Python-int-v only, which is what
+    keeps it disjoint from searchsorted_sortqueries (OPP-000021) on the
+    same affected_operations entry (numpy.searchsorted).
+  - >-
+    Comparison mode: bit-identical. Every in-range result (index, and the
+    side='left'/'right' distinction) must match stock searchsorted
+    exactly; this is an integer index computation with no floating-point
+    tolerance to justify anything looser.
+  - >-
+    license_review is pending, not clean, because status is unverified and
+    no reproducer or candidate implementation has been written or reviewed
+    yet; the sketch above is drawn from the public issue thread's own
+    prose, not from any external code.

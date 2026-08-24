@@ -1,0 +1,150 @@
+id: OPP-000041
+title: "numpy.nanmean/nansum/nanstd/nanvar retain Python-level mask-and-copy overhead in the no-NaN case; isnan-scan-then-plain-reduction wins there; nanmax/nanmin already fixed upstream and excluded"
+sources:
+  - url: https://github.com/numpy/numpy/issues/5691
+    repository: numpy/numpy
+    type: issue
+    number: 5691
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T08:10:16Z"
+  - url: https://github.com/pydata/bottleneck
+    repository: pydata/bottleneck
+    type: benchmark
+    retrieved_at: "2026-08-24T12:00:00Z"
+claim:
+  speedup: 29.8
+  baseline: >-
+    PRIMARY, CURRENT source (pydata/bottleneck README benchmark table,
+    https://github.com/pydata/bottleneck, run on numpy 2.4.2, shape
+    (100,), axis=0): stock numpy's Python-level nanmean, nansum, nanstd
+    against bottleneck's C implementations. Reported ratios: nansum
+    12.2x, nanmean 29.8x, nanstd 34.2x. The speedup field above uses the
+    nanmean figure since nanmean is this record's headline affected op;
+    nansum and nanstd are the same table, same run, kept verbatim. No
+    nanvar figure appears in the cited bottleneck table.
+  candidate: >-
+    bottleneck's C-level nan-aware reduction kernels (not adopted by
+    PyOverdrive; cited only as documentation that the SAME overhead
+    class exists today. This record's own candidate is a different
+    mechanism: an isnan scan followed by the plain stock reduction -
+    mean/sum/std/var - run when the scan finds no NaN.)
+  hardware: >-
+    unknown for the bottleneck README table (no CPU/OS stated, only
+    numpy 2.4.2). SEPARATE, OLDER (2015) claim, kept apart as CLASS
+    EVIDENCE and NOT folded into the ratio above: original reporter
+    gdementen, issue body, 2015-03-18T15:38:45Z, numpy 1.9.2 from conda,
+    Windows 7 64b: "there is almost a 3x difference between nanmin and
+    nanmax while there is barely any difference between np.amin &
+    np.amax." Timings from the issue body, a = np.arange(1e6):
+    np.nanmin(a) 850 us, np.nanmax(a) 2.56 ms, np.amin(a) 515 us,
+    np.amax(a) 515 us. juliantaylor (CONTRIBUTOR), 2015-03-18, diagnosed
+    the mechanism: "note that on each new min/max it needs to check for
+    a nan, that why its so much more expensive." This 2015 issue is
+    CLOSED (state_reason completed) as of 2026-07-22, when jorenham
+    (MEMBER) posted: "This no longer seems to be an issue" with
+    np.nanmin(a) and np.nanmax(a) both at 105 us on current numpy - i.e.
+    nanmax/nanmin are HONESTY-POINT EXCLUDED from this record's regime;
+    they were fixed upstream and are not in affected_operations. The
+    2015 issue is retained only as class evidence that numpy's nan-
+    wrapper functions have historically carried Python-level overhead
+    beyond the underlying plain reduction, the same overhead class this
+    record's own measurements show still applies today to nanmean,
+    nansum, nanstd, and nanvar specifically.
+affected_operations: [numpy.nanmean, numpy.nansum, numpy.nanstd, numpy.nanvar]
+input_regime:
+  dtypes: [float64]
+  sizes: [300, 1000, 10000, 100000]
+  notes: >-
+    No-NaN data is the winning regime: the candidate is an O(n) isnan
+    scan followed by the plain reduction, which beats the stock nanX
+    wrapper's mask-and-copy path even after paying for the scan,
+    because the common defensive-usage case is data that turns out to
+    contain no NaN at all. Measured 1-D at n=300, 1000, 10000, 100000
+    and 2-D at (1000,100) and (100,1000) with axis=1. NaN-present data
+    falls back at ~0.96x scan cost: when NaN IS present the scan is
+    wasted before the candidate falls back to the stock implementation,
+    measured at 0.96x (1-D n=100000, 1% NaN) - breakeven-to-slightly-
+    behind, not a win. nanmax/nanmin excluded (already fast upstream):
+    numpy.nanmax and numpy.nanmin are explicitly OUT of this record's
+    regime. The 2015 class evidence (numpy/numpy#5691) that motivated
+    looking at the nanX family no longer applies to them - modern numpy
+    already fixed that overhead, measured separately at 0.61-1.08x for
+    nanmin (no win), so nanmax/nanmin are not part of this record's
+    affected_operations.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000041_nan_reductions.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load), candidate = isnan-scan-then-plain-reduction with
+    scan cost included: nanmean 1-D n=300 1.98x, n=1000 2.11x, n=10000
+    2.49x, n=100000 12.41x; nanmean 2-D (1000,100) axis=1 11.11x,
+    (100,1000) axis=1 12.29x; nanmean 1-D n=100000 with 1% NaN (wasted
+    scan, falls back to stock) 0.96x; nansum 1-D n=10000 1.31x,
+    n=100000 2.86x; nanstd 2-D (1000,100) axis=1 2.56x; nanvar 2-D
+    (1000,100) axis=1 2.43x. Every winning cell bit-identical to stock
+    (checked with array_equal, equal_nan=True). Supporting, CONTENDED,
+    triage-only evidence (dev-box AMD Zen 4, fp 8f8198d9abab, numpy
+    2.4.5, 42% foreign load - not folded into the fingerprints list
+    above): nanmean 1.7-13.3x, nansum 8.8x, nanstd 1.77x, nanvar 1.85x.
+    Evidence: benchmarks/results/BATCH6-CAL/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections:
+  - author: juliantaylor
+    date: "2015-03-19"
+    quote: >-
+      one could remove the nancheck to equalize the performance, but its
+      not going very relevant in normal data, this is the absolute worst
+      case.
+linked_prs: []
+linked_commits: []
+related_opportunities: []
+notes:
+  - >-
+    Class evidence only, not a literal claim about this record's ops:
+    numpy/numpy#5691 is about numpy.nanmax/numpy.nanmin (~3x slower
+    than amax/amin as reported in 2015), fixed by 2026 per jorenham's
+    2026-07-22 closing comment, both at 105 us. This record does NOT
+    claim nanmax/nanmin are slow today; they are explicitly excluded
+    from affected_operations. The issue is cited because it documents,
+    with a maintainer diagnosis, the same mechanism class - a per-call
+    nan check/mask imposing overhead beyond the plain reduction - that
+    this record's own measurements show still applies to nanmean,
+    nansum, nanstd, and nanvar.
+  - >-
+    juliantaylor (CONTRIBUTOR), 2015-03-18, on why nanmax was slow:
+    "note that on each new min/max it needs to check for a nan, that
+    why its so much more expensive. Though it seems the compiler
+    anaconda uses has a poor isnan implementation. On linux with gcc
+    the difference is only about 50%" - the maintainer's own diagnosis
+    already pointed at isnan cost and platform/compiler variance as the
+    driver, the same lever this record's candidate manages directly
+    with one explicit isnan scan rather than the stock implementation's
+    mask-and-copy.
+  - >-
+    Second source, pydata/bottleneck README benchmark table
+    (https://github.com/pydata/bottleneck, run on numpy 2.4.2): shape
+    (100,), axis=0, bottleneck's C implementations vs stock numpy:
+    nansum 12.2x, nanmean 29.8x, nanstd 34.2x. This documents the same
+    overhead class from a different angle (a C reimplementation beating
+    the Python-level nanX wrapper) and is independent of numpy/numpy#5691.
+  - >-
+    correctness_risk is medium: all-NaN-slice warnings (stock nanmean
+    etc. emit RuntimeWarning and return NaN for an all-NaN slice/axis),
+    empty-input warnings, and the dtype/out/keepdims/where kwargs must
+    be refused by the fast path (fall back to stock) rather than
+    silently mishandled - the isnan-scan-then-plain-reduction route was
+    only verified bit-identical to stock in the plain no-kwarg case.
+  - >-
+    license_review clean: isnan scan (numpy.isnan / numpy.any) followed
+    by the plain stock reduction (mean/sum/std/var) is a standard,
+    well-known technique, not third-party code; no bottleneck source
+    was inspected or adapted, its README table was used only as a
+    cited comparison number.
+  - >-
+    SHIPPED (2026-08-24) as nanreduce_scan (src/pyoverdrive/fastpaths/nanreduce_scan.py): four paths nanmean_scan/nansum_scan/nanstd_scan/nanvar_scan, float64, per-op floors 100/10000/3000/3000 from BATCH6-CAL, one isnan probe then the plain reduction, NaN-present input falls back to stock inside the run. Bit-identical. 60 differential tests plus a property suite.

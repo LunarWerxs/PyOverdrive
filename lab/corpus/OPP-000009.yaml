@@ -1,0 +1,58 @@
+id: OPP-000009
+title: "poor free-threaded (nogil) multithreaded scaling for repeated small-array ufunc workloads"
+sources:
+  - url: https://github.com/numpy/numpy/issues/27786
+    repository: numpy/numpy
+    type: issue
+    number: 27786
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-23T08:01:35Z"
+claim:
+  speedup: 60.0
+  baseline: "numpy elementwise + reduction ops (x += 0.01; x[0] += x.mean() * 0.01) run on many concurrent threads under a free-threaded (PYTHON_GIL=0 / nogil) CPython 3.13 build, small float64 arrays (length ~100-1000)"
+  candidate: "the same per-worker workload rewritten with plain Python lists (no numpy), which keeps scaling roughly linearly as thread count grows"
+  hardware: "AMD Ryzen Threadripper PRO 5955WX 16-core (original reporter, eundersander); reproduced on Apple MacBook Pro M3 Max, 11 logical CPUs (ngoldbaum)"
+affected_operations: [numpy.ufunc dispatch/type-resolution cache, numpy.ndarray.__iadd__, numpy.mean, numpy.sum]
+input_regime:
+  dtypes: [float64]
+  sizes: [100, 1000]
+  notes: >
+    many concurrent threads (8 up to 2048 in the reporter's sweep) each
+    operating on a small array under a free-threaded (nogil) CPython build;
+    the collapse is a fixed per-call overhead (a globally locked ufunc
+    identity/type-resolution cache) that dominates once array length is
+    small and thread count is high. Not applicable under a standard GIL
+    build, where only one thread executes Python/C bytecode at a time and
+    this contention path is never exercised.
+status: unverified
+license_review: pending
+reproducer: null
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: []
+main_branch_result: null
+correctness_risk: unknown
+implementation_risk: low
+maintainer_objections:
+  - author: mattip
+    quote: "are you controlling for the OpenBLAS threading underneath NumPy? You might want to use threadpoolctl or set OMP_NUM_THREADS=1"
+  - author: colesbury
+    quote: "readers-writer locks don't necessarily scale that well, even for read-only workloads, because of contention on the count of the number of readers; it's also not part of the public Python C API or the C standard library"
+  - author: seberg
+    quote: "I could imagine that having a custom hashmap is just too terrible in a free-threaded world"
+  - author: ngoldbaum
+    quote: "if you have a cache miss and lots of threads are doing similar ufunc operations then you're almost certain to have races inside promote_and_get_ufuncimpl outside of the custom hashmap implementation"
+linked_prs:
+  - https://github.com/numpy/numpy/pull/27859
+  - https://github.com/numpy/numpy/pull/27896
+  - https://github.com/numpy/numpy/pull/27913
+  - https://github.com/numpy/numpy/pull/28577
+  - https://github.com/numpy/numpy/pull/28583
+  - https://github.com/python-pillow/Pillow/pull/8714
+linked_commits: []
+related_opportunities: []
+notes:
+  - "Free-threaded (nogil, PYTHON_GIL=0) CPython only; a standard GIL build never exercises this contention path since only one thread runs Python/C bytecode at a time, so this opportunity is irrelevant unless PyOverdrive targets free-threaded CPython specifically."
+  - "Already fixed upstream: root cause traced by ngoldbaum via flamegraph to a locked ufunc identity/type-resolution cache in numpy/_core/src/umath/dispatching.c (promote_and_get_info_and_ufuncimpl); fixed by #27859 and #27896/#27913 (fast path for ufunc type resolution), which then required deadlock follow-up fixes #28577/#28583 for the C++ shared-mutex based dispatch cache. Check whether PyOverdrive's baseline numpy version predates these fixes (merged Nov-Dec 2024, first appearing in a 2.2.x/2.3.x release) before treating this as still open."
+  - "Reproducer precondition not met on this machine: requires a free-threaded 3.13t/3.14t CPython build (python.org 'experimental free-threading build' or python-build-standalone with +freethreaded); this workstation runs GIL CPython 3.14.2. Per assignment, reproducer skipped; record and report only."
+  - "python-pillow/Pillow#8714 ('Reduce memory arena contention') is cross-referenced as the same failure shape recurring elsewhere in the free-threading ecosystem (global lock contention on a shared cache/allocator under nogil), not a fix for numpy itself."

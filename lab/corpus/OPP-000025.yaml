@@ -1,0 +1,168 @@
+id: OPP-000025
+title: "np.zeros_like(a) is ~53x slower than np.zeros(shape=a.shape) on a (1000, 1000) float64 array"
+sources:
+  - url: https://github.com/numpy/numpy/issues/9909
+    repository: numpy/numpy
+    type: issue
+    number: 9909
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T03:32:46+00:00"
+claim:
+  speedup: 53.56
+  baseline: >-
+    np.zeros_like(a) with a = np.zeros(shape=(1000,1000)) (float64, numpy's
+    default dtype), timed by the reporter (tarcisiofischer) in a Jupyter
+    notebook via %timeit -n100 at 2.18 ms +/- 47.1 us per loop (mean +/- std.
+    dev. of 7 runs, 100 loops each)
+  candidate: >-
+    np.zeros(shape=a.shape) on the same shape, timed in the same issue body
+    via %timeit -n100 at 40.7 us +/- 5.72 us per loop (mean +/- std. dev. of
+    7 runs, 100 loops each). The 53.56 recorded here is DERIVED, not a ratio
+    the thread ever states - 2.18 ms / 40.7 us = 2180 / 40.7 = 53.56x - but
+    both input numbers are the reporter's own measurements from the issue
+    body, so the derivation uses nothing outside the dump.
+  hardware: >-
+    unknown; the issue gives no CPU, OS, numpy version, or Python version.
+    The only environment statement in the thread is the reporter's "Test has
+    been made using an Jupyter Notebook". The issue was opened 2017-10-23,
+    so the measured numpy predates 1.14.
+affected_operations: [numpy.zeros_like]
+input_regime:
+  dtypes: [float64]
+  sizes: ["(1000, 1000)"]
+  notes: >-
+    Single measured regime, one shape and one dtype. (1000, 1000) float64 is
+    an 8 MB allocation, large enough that np.zeros can be serviced by
+    calloc-style lazily-zeroed OS pages. The benchmark is allocation-only in
+    both legs (the freshly created array is never read or written afterwards
+    inside the %timeit loop), which is exactly the regime where a
+    write-zeros-after-allocating implementation pays full memory-touch cost
+    while np.zeros pays none of it. No small-array, other-dtype, F-order,
+    non-contiguous, or subclass measurement exists anywhere in the thread.
+status: reproduced
+license_review: pending
+reproducer: benchmarks/historical/opp_000025_zeros_like.py
+current_numpy_result:
+  verified_speedup: 4371.77
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load): the ALLOCATION gap reproduces spectacularly
+    (zeros_like 1000x1000 f64 247.7x, 4000x4000 4371.8x, complex128
+    508.9x - np.zeros gets lazy calloc pages, zeros_like allocates and
+    memsets) BUT the record's own risk note is CONFIRMED decisive: the
+    touch rows, which write or read the array after allocating, collapse
+    to 1.06-1.12x (write) and 0.77-0.86x (read - the lazy pages get
+    faulted in during the read instead). A transparent swap would win
+    microbenchmarks, not workloads that use the array. Kept as
+    reproduced for the allocation regime; shipping judgment recorded in
+    notes. Evidence: benchmarks/results/OPP-000025/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections:
+  - author: tadeu
+    date: "2017-10-24"
+    quote: |
+      It should also work with "array-like" objects, like lists of lists, e.g.:
+
+      ```python
+      >>> np.zeros_like([[1,2],[3,4]])
+      array([[0, 0],
+             [0, 0]])
+      ```
+
+      but this can be accomplished with a tiny modification: using `np.shape(a)` instead of `a.shape`.
+  - author: tadeu
+    date: "2017-10-24"
+    quote: |
+      `dtype` and `order` should also be taken from `a` (unless passed explicitly, in this case they would be overridden). Example:
+
+      ```python
+      >>> a=np.zeros((2,2), dtype=str)
+      >>> np.zeros_like(a)
+      array([['', ''],
+             ['', '']],
+            dtype='<U1')
+      >>> np.zeros_like(a, dtype=int)
+      array([[0, 0],
+             [0, 0]])
+      ```
+  - author: hmaarrfk
+    date: "2018-10-15"
+    quote: |
+      I don't think your fix will address the majority of the use cases which are
+
+      ```
+      a = np.zeros((3, 3))
+      b = np.zeros_like(a)
+      ```
+
+      where the subok parameter is never specified, but `a` is not a subclassing `numpy` it is **is** a numpy array.
+linked_prs: []
+linked_commits: []
+related_opportunities: []
+notes:
+  - >-
+    No numpy core maintainer commented in this thread. The three quotes above
+    are from commenters pushing back on details of the reporter's proposed
+    fix - tadeu (author_association NONE, two correctness caveats) and
+    hmaarrfk (author_association CONTRIBUTOR, arguing the proposed subok gate
+    misses the majority use case) - recorded here because they are the only
+    critical voices in the dump, not because any of them rejects the
+    underlying performance complaint. Nobody in the thread disputes the
+    measured gap itself.
+  - >-
+    Mechanism (analysis, anchored to what the thread links but not spelled
+    out inside it): the issue body links the then-current implementation of
+    zeros_like (numpy/core/numeric.py L138), which is empty_like(a) followed
+    by multiarray.copyto(res, zeros(1, dtype=res.dtype)) - allocate, then
+    physically write a zero into every element. np.zeros can instead obtain
+    already-zeroed pages from the OS (calloc-style), which for an 8 MB
+    request costs near-nothing until the pages are first touched. The
+    reporter's first comment (2017-10-23) links the StackOverflow question
+    "Why the performance difference between numpy.zeros and
+    numpy.zeros_like" where this same explanation is discussed. Consequence
+    for honest measurement, see the last note.
+  - >-
+    The reporter's own proposed fix (in the issue body) dispatches on subok -
+    "if not subok, return np.zeros(shape=a.shape, dtype=dtype, order=order)"
+    with the existing empty_like+copyto path kept for the subok=True default.
+    hmaarrfk's 2018-10-15 objection is that this gate never fires for the
+    majority calling pattern, zeros_like(a) with subok never specified on a
+    plain ndarray. A transparent PyOverdrive fast path should therefore gate
+    on the INPUT being exactly np.ndarray (type(a) is np.ndarray), not on
+    the subok flag - when the input is a base ndarray, subok=True and
+    subok=False produce the same base-class result, so routing to np.zeros
+    is safe for either flag value.
+  - >-
+    Semantics hazards a transparent route must clear (all raised in-thread
+    except the layout point). (1) dtype and order must be inherited from a
+    unless explicitly overridden, including string dtypes where zeros fills
+    with '' rather than 0 (tadeu, 2017-10-24; the reporter's own snippet
+    keeps copyto exactly for the string-dtype case). (2) Array-like
+    non-ndarray inputs (lists of lists) are legal zeros_like inputs (tadeu,
+    2017-10-24); simplest is to leave anything that is not exactly ndarray
+    on the stock path. (3) Subclasses (subok=True default) must be preserved,
+    so they stay on stock (hmaarrfk's point, inverted into the predicate).
+    (4) Layout, not in-thread: order='K' (the default) makes zeros_like
+    match a's layout, so an F-ordered or non-contiguous input must either
+    map to np.zeros(..., order='F') when cleanly F-contiguous or fall back
+    to stock; np.zeros cannot reproduce arbitrary strides.
+  - >-
+    Demand and staleness signals from the dump: 4 thumbs-up reactions on the
+    body, issue still open at retrieval (2026-08-24) with the last comment
+    2018-10-15; no numpy PR is linked anywhere in the timeline, so the dump
+    shows no evidence upstream ever picked this up. The two cross-references
+    (scikit-image/scikit-image#3469, 2018-10-15, and lbl-anp/becquerel#312,
+    2022-04-14) are downstream PRs that merely mention the issue, not fixes
+    for it.
+  - >-
+    Measurement honesty warning for the future Dyno reproducer: the derived
+    53.56x is an allocation-only number at one shape. Since np.zeros defers
+    the memory-touch cost to first use while zeros_like pays it up front,
+    an alloc-then-touch benchmark (write or reduce the array after creating
+    it) will show a much smaller end-to-end gap, and small arrays below the
+    allocator's lazy-zero threshold get memset either way. The reproducer
+    must report both alloc-only and alloc-plus-touch ratios across a size
+    sweep, or the claim number cannot be interpreted.

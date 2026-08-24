@@ -1,0 +1,60 @@
+id: OPP-000002
+title: np.inner loops per-slice BLAS calls for ndim > 2; tensordot's single GEMM is ~10x faster
+sources:
+  - url: https://github.com/numpy/numpy/issues/12778
+    repository: numpy/numpy
+    type: issue
+    number: 12778
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T08:01:19+00:00"
+claim:
+  speedup: 10.0
+  baseline: np.inner(a, b), a=(25,25,500) b=(10000,500) float64, ~20 s / 10 calls
+  candidate: np.tensordot(a, b, axes=(-1,-1)), ~2 s / 10 calls
+  hardware: reporter's 2019 machine, numpy 1.15, Anaconda GCC 7.2
+affected_operations: [numpy.inner]
+input_regime:
+  dtypes: [float64, float32, BLAS-eligible dtypes]
+  sizes: [ndim > 2 on either operand, non-tiny contraction lengths]
+  notes: >
+    2-D and 1-D inputs already take a single BLAS call and must not be
+    rerouted; the crossover is the Gearbox predicate's job.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000002_inner.py
+current_numpy_result:
+  verified_speedup: 7.7
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Reproduced. Candidate-level on the reported shape (25,25,500)x(10000,500)
+    float64: 7.7x and 36.5x across two runs (stock's looped-BLAS timing is
+    highly variable with thread-pool state; the win never dropped below 7.7x).
+    Other ndim>2 shapes: 3.1x to 41.8x. float32 same shape: 13.5x. Guards
+    confirmed: 2-D 0.96-1.04x, 1-D tensordot would LOSE 5x, so the predicate
+    only fires for ndim > 2. End-to-end through pyoverdrive.enable(): 18.6x
+    and 23.9x runs (benchmarks/results/MVP-BASELINE/). Shipped as fast path
+    inner_tensordot (float32/float64, matching dtypes, ndim>2); numeric
+    comparison mode, differential tests in compatibility/differential/.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections:
+  - "mattip (2019): confirmed mechanism; PyArray_MatrixProduct2 only uses one
+    BLAS call for ndim <= 2. The naive fix (inner -> tensordot) needs
+    benchmarks proving no regression for smaller 2-D arrays, and edge-case
+    coverage is incomplete, so behaviour changes need care."
+  - "Original reporter raised the open question of whether bit-identical
+    inner results are required for backwards compatibility."
+linked_prs: []
+linked_commits: []
+related_opportunities:
+  - "numpy/numpy#619 (2012 original; this is a 14-year-old known win)"
+notes:
+  - Results are numerically equivalent, not bit-identical, because the single
+    GEMM sums in a different order than the looped small GEMMs. Comparison
+    mode is 'numeric' (spec section 9); the fast path must document this and
+    keep a kill switch.
+  - tensordot allocates reshaped copies; peak memory differs. Record memory in
+    a follow-up Dyno run before shipping.
+  - Nobody ever landed the fix upstream despite maintainer blessing; a
+    Python-level dispatch shim is exactly PyOverdrive's shape of win.

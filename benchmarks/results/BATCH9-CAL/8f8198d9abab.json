@@ -1,0 +1,1645 @@
+{
+  "opp_id": "BATCH9-CAL",
+  "title": "fused-chunked cholesky, eigvalsh split-and-recombine, einsum ellipsis",
+  "recorded_at": "2026-08-24T18:02:05+00:00",
+  "fingerprint": {
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "machine": "AMD64",
+    "system": "Windows 11",
+    "logical_cores": 32,
+    "python": "3.14.2",
+    "numpy": "2.4.5",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "AVX512BF16",
+      "AVX512BITALG",
+      "AVX512BW",
+      "AVX512CD",
+      "AVX512DQ",
+      "AVX512F",
+      "AVX512IFMA",
+      "AVX512VBMI",
+      "AVX512VBMI2",
+      "AVX512VL",
+      "AVX512VNNI",
+      "AVX512VPOPCNTDQ",
+      "AVX512_CLX",
+      "AVX512_CNL",
+      "AVX512_ICL",
+      "AVX512_SKX",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3",
+      "X86_V4"
+    ],
+    "fingerprint": "8f8198d9abab"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.19140625,
+    "cpu_busy_after": 0.15588235294117647,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "chol_2x2_n300",
+      "params": {
+        "d": 2,
+        "n": 300,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 19496.413502109706,
+          "min_ns": 19228.902953586497,
+          "mean_ns": 19462.959614225438,
+          "mad_ns": 130.59071729957577,
+          "samples": 7,
+          "loops_per_sample": 474,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 17658.064516129034,
+          "min_ns": 17469.354838709678,
+          "mean_ns": 17911.031105990784,
+          "mad_ns": 31.048387096772785,
+          "samples": 7,
+          "loops_per_sample": 496,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 17634.296028880868,
+          "min_ns": 17448.014440433213,
+          "mean_ns": 17656.833419288294,
+          "mad_ns": 92.96028880866288,
+          "samples": 7,
+          "loops_per_sample": 554,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.1041081815224714,
+        "fused_chunk4096": 1.10559636008033
+      }
+    },
+    {
+      "case": "chol_2x2_n1000",
+      "params": {
+        "d": 2,
+        "n": 1000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 58041.27906976744,
+          "min_ns": 57329.651162790695,
+          "mean_ns": 58330.481727574755,
+          "mad_ns": 539.5348837209312,
+          "samples": 7,
+          "loops_per_sample": 172,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 34871.90476190476,
+          "min_ns": 34826.666666666664,
+          "mean_ns": 34910.61224489796,
+          "mad_ns": 32.38095238095411,
+          "samples": 7,
+          "loops_per_sample": 210,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 35317.857142857145,
+          "min_ns": 35043.57142857143,
+          "mean_ns": 35295.05102040816,
+          "mad_ns": 102.14285714285506,
+          "samples": 7,
+          "loops_per_sample": 280,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.6644137871463127,
+        "fused_chunk4096": 1.6433975264976117
+      }
+    },
+    {
+      "case": "chol_2x2_n3000",
+      "params": {
+        "d": 2,
+        "n": 3000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 168117.24137931035,
+          "min_ns": 166793.10344827586,
+          "mean_ns": 168142.3645320197,
+          "mad_ns": 813.7931034482608,
+          "samples": 7,
+          "loops_per_sample": 29,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 104025.0,
+          "min_ns": 103222.91666666667,
+          "mean_ns": 104132.14285714286,
+          "mad_ns": 314.5833333333285,
+          "samples": 7,
+          "loops_per_sample": 48,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 83599.16666666667,
+          "min_ns": 82445.0,
+          "mean_ns": 86503.09523809524,
+          "mad_ns": 1154.1666666666715,
+          "samples": 7,
+          "loops_per_sample": 120,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.6161234451267517,
+        "fused_chunk4096": 2.0109918326057117
+      }
+    },
+    {
+      "case": "chol_2x2_n5000",
+      "params": {
+        "d": 2,
+        "n": 5000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 277357.8947368421,
+          "min_ns": 275689.4736842105,
+          "mean_ns": 281073.6842105263,
+          "mad_ns": 905.2631578947185,
+          "samples": 7,
+          "loops_per_sample": 19,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 175413.7931034483,
+          "min_ns": 172644.8275862069,
+          "mean_ns": 194223.64532019704,
+          "mad_ns": 1031.0344827586378,
+          "samples": 7,
+          "loops_per_sample": 29,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 142054.2857142857,
+          "min_ns": 140665.7142857143,
+          "mean_ns": 142774.2857142857,
+          "mad_ns": 1388.5714285714203,
+          "samples": 7,
+          "loops_per_sample": 35,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.5811635438113663,
+        "fused_chunk4096": 1.9524781905890047
+      }
+    },
+    {
+      "case": "chol_2x2_n10000",
+      "params": {
+        "d": 2,
+        "n": 10000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 559100.0,
+          "min_ns": 553220.0,
+          "mean_ns": 580627.1428571428,
+          "mad_ns": 5880.0,
+          "samples": 7,
+          "loops_per_sample": 10,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 346113.3333333333,
+          "min_ns": 344953.3333333333,
+          "mean_ns": 346435.23809523805,
+          "mad_ns": 1100.0,
+          "samples": 7,
+          "loops_per_sample": 15,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 271905.2631578947,
+          "min_ns": 271094.7368421053,
+          "mean_ns": 272069.9248120301,
+          "mad_ns": 305.26315789471846,
+          "samples": 7,
+          "loops_per_sample": 19,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.6153668355259356,
+        "fused_chunk4096": 2.0562308853702915
+      }
+    },
+    {
+      "case": "chol_2x2_n20000",
+      "params": {
+        "d": 2,
+        "n": 20000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 1111900.0,
+          "min_ns": 1107820.0,
+          "mean_ns": 1144045.7142857143,
+          "mad_ns": 4080.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 689375.0,
+          "min_ns": 686937.5,
+          "mean_ns": 689605.3571428572,
+          "mad_ns": 2350.0,
+          "samples": 7,
+          "loops_per_sample": 8,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 530290.0,
+          "min_ns": 527110.0,
+          "mean_ns": 546755.7142857143,
+          "mad_ns": 3180.0,
+          "samples": 7,
+          "loops_per_sample": 10,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.6129102447869448,
+        "fused_chunk4096": 2.0967772350977767
+      }
+    },
+    {
+      "case": "chol_2x2_n100000",
+      "params": {
+        "d": 2,
+        "n": 100000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 5998400.0,
+          "min_ns": 5960900.0,
+          "mean_ns": 5989271.428571428,
+          "mad_ns": 7400.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 3855450.0,
+          "min_ns": 3836600.0,
+          "mean_ns": 3887021.4285714286,
+          "mad_ns": 18850.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 3138750.0,
+          "min_ns": 3051250.0,
+          "mean_ns": 3115807.1428571427,
+          "mad_ns": 28300.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.5558235744206252,
+        "fused_chunk4096": 1.9110792512943051
+      }
+    },
+    {
+      "case": "chol_2x2_n1000000",
+      "params": {
+        "d": 2,
+        "n": 1000000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 62370000.0,
+          "min_ns": 60396300.0,
+          "mean_ns": 62058457.14285714,
+          "mad_ns": 302900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 62469100.0,
+          "min_ns": 38754000.0,
+          "mean_ns": 56765285.71428572,
+          "mad_ns": 181700.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 48855800.0,
+          "min_ns": 41433500.0,
+          "mean_ns": 47111100.0,
+          "mad_ns": 893900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 0.9984136156915979,
+        "fused_chunk4096": 1.2766140355904518
+      }
+    },
+    {
+      "case": "chol_3x3_n300",
+      "params": {
+        "d": 3,
+        "n": 300,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 1024
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 44703.27102803739,
+          "min_ns": 37782.2429906542,
+          "mean_ns": 42991.588785046726,
+          "mad_ns": 1843.4579439252266,
+          "samples": 7,
+          "loops_per_sample": 214,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 29852.717391304348,
+          "min_ns": 26415.217391304348,
+          "mean_ns": 29599.534161490683,
+          "mad_ns": 2482.065217391304,
+          "samples": 7,
+          "loops_per_sample": 184,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 28722.680412371134,
+          "min_ns": 26821.649484536083,
+          "mean_ns": 28787.628865979383,
+          "mad_ns": 1186.082474226805,
+          "samples": 7,
+          "loops_per_sample": 194,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.4974606982029308,
+        "fused_chunk4096": 1.5563753238288742
+      }
+    },
+    {
+      "case": "chol_3x3_n1000",
+      "params": {
+        "d": 3,
+        "n": 1000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 1024
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 99187.23404255319,
+          "min_ns": 83471.27659574468,
+          "mean_ns": 112718.23708206686,
+          "mad_ns": 15715.957446808505,
+          "samples": 7,
+          "loops_per_sample": 94,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 79630.64516129032,
+          "min_ns": 78844.35483870968,
+          "mean_ns": 79576.38248847927,
+          "mad_ns": 134.67741935483355,
+          "samples": 7,
+          "loops_per_sample": 124,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 79679.36507936507,
+          "min_ns": 79466.66666666667,
+          "mean_ns": 79679.36507936507,
+          "mad_ns": 66.66666666667152,
+          "samples": 7,
+          "loops_per_sample": 63,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.2455912399259277,
+        "fused_chunk4096": 1.244829623626609
+      }
+    },
+    {
+      "case": "chol_3x3_n3000",
+      "params": {
+        "d": 3,
+        "n": 3000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 1024
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 416930.76923076925,
+          "min_ns": 415523.07692307694,
+          "mean_ns": 416746.1538461539,
+          "mad_ns": 784.6153846153757,
+          "samples": 7,
+          "loops_per_sample": 13,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 237716.66666666666,
+          "min_ns": 236988.09523809524,
+          "mean_ns": 237790.47619047618,
+          "mad_ns": 347.61904761905316,
+          "samples": 7,
+          "loops_per_sample": 42,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 181096.42857142858,
+          "min_ns": 180985.7142857143,
+          "mean_ns": 181404.08163265305,
+          "mad_ns": 110.71428571428987,
+          "samples": 7,
+          "loops_per_sample": 28,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.753897928475507,
+        "fused_chunk4096": 2.3022583742799885
+      }
+    },
+    {
+      "case": "chol_3x3_n5000",
+      "params": {
+        "d": 3,
+        "n": 5000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 1024
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 693262.5,
+          "min_ns": 690462.5,
+          "mean_ns": 692900.0,
+          "mad_ns": 1737.5,
+          "samples": 7,
+          "loops_per_sample": 8,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 395330.76923076925,
+          "min_ns": 394638.46153846156,
+          "mean_ns": 396667.032967033,
+          "mad_ns": 415.38461538462434,
+          "samples": 7,
+          "loops_per_sample": 13,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 312200.0,
+          "min_ns": 311043.75,
+          "mean_ns": 312231.25,
+          "mad_ns": 706.25,
+          "samples": 7,
+          "loops_per_sample": 16,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.7536264666394255,
+        "fused_chunk4096": 2.220571748878924
+      }
+    },
+    {
+      "case": "chol_3x3_n10000",
+      "params": {
+        "d": 3,
+        "n": 10000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 1024
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 1381150.0,
+          "min_ns": 796850.0,
+          "mean_ns": 1256917.857142857,
+          "mad_ns": 5200.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 787600.0,
+          "min_ns": 493150.0,
+          "mean_ns": 687954.2857142857,
+          "mad_ns": 6570.0,
+          "samples": 7,
+          "loops_per_sample": 10,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 881716.6666666666,
+          "min_ns": 819666.6666666666,
+          "mean_ns": 875516.6666666667,
+          "mad_ns": 16016.666666666628,
+          "samples": 7,
+          "loops_per_sample": 6,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.7536185881157949,
+        "fused_chunk4096": 1.566432905506304
+      }
+    },
+    {
+      "case": "chol_3x3_n16384",
+      "params": {
+        "d": 3,
+        "n": 16384,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 1024
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 2483566.6666666665,
+          "min_ns": 2470500.0,
+          "mean_ns": 2481033.333333333,
+          "mad_ns": 1666.6666666665114,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 1486750.0,
+          "min_ns": 1471625.0,
+          "mean_ns": 1484471.4285714286,
+          "mad_ns": 5650.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 1144220.0,
+          "min_ns": 1139460.0,
+          "mean_ns": 1151320.0,
+          "mad_ns": 4760.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.6704669020794798,
+        "fused_chunk4096": 2.1705324733588527
+      }
+    },
+    {
+      "case": "chol_3x3_n20000",
+      "params": {
+        "d": 3,
+        "n": 20000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 1024
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 3026850.0,
+          "min_ns": 3015100.0,
+          "mean_ns": 3028021.4285714286,
+          "mad_ns": 5200.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 1814366.6666666667,
+          "min_ns": 1804200.0,
+          "mean_ns": 1816366.6666666667,
+          "mad_ns": 3800.0,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 1395675.0,
+          "min_ns": 1380275.0,
+          "mean_ns": 1393507.142857143,
+          "mad_ns": 4525.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.6682680825265013,
+        "fused_chunk4096": 2.1687355580633025
+      }
+    },
+    {
+      "case": "chol_3x3_n30000",
+      "params": {
+        "d": 3,
+        "n": 30000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 4514150.0,
+          "min_ns": 3245450.0,
+          "mean_ns": 4190157.1428571427,
+          "mad_ns": 46850.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 2709700.0,
+          "min_ns": 2676150.0,
+          "mean_ns": 2709385.714285714,
+          "mad_ns": 16650.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 2400083.3333333335,
+          "min_ns": 1784166.6666666667,
+          "mean_ns": 2285328.5714285714,
+          "mad_ns": 25716.66666666651,
+          "samples": 7,
+          "loops_per_sample": 6,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.6659224268369193,
+        "fused_chunk4096": 1.8808305267178222
+      }
+    },
+    {
+      "case": "chol_3x3_n100000",
+      "params": {
+        "d": 3,
+        "n": 100000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 15003100.0,
+          "min_ns": 12826600.0,
+          "mean_ns": 14467400.0,
+          "mad_ns": 8600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 8225900.0,
+          "min_ns": 7922900.0,
+          "mean_ns": 8182914.285714285,
+          "mad_ns": 78300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 7012300.0,
+          "min_ns": 6972600.0,
+          "mean_ns": 7004085.714285715,
+          "mad_ns": 7900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.8238855322821819,
+        "fused_chunk4096": 2.1395405216548067
+      }
+    },
+    {
+      "case": "chol_3x3_n1000000",
+      "params": {
+        "d": 3,
+        "n": 1000000,
+        "window": [
+          1000,
+          null
+        ],
+        "module_chunk": 4096
+      },
+      "baseline": "numpy.linalg.cholesky",
+      "variants": {
+        "numpy.linalg.cholesky": {
+          "median_ns": 147665000.0,
+          "min_ns": 108340700.0,
+          "mean_ns": 141238114.2857143,
+          "mad_ns": 1183900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "fused_chunk1024": {
+          "median_ns": 86588500.0,
+          "min_ns": 76943300.0,
+          "mean_ns": 84964800.0,
+          "mad_ns": 2546000.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        },
+        "fused_chunk4096": {
+          "median_ns": 58830300.0,
+          "min_ns": 56947500.0,
+          "mean_ns": 61712714.28571428,
+          "mad_ns": 1882800.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "fused_chunk1024": 1.7053650311530977,
+        "fused_chunk4096": 2.5100160971472185
+      }
+    },
+    {
+      "case": "eig3_n10000_degen0",
+      "params": {
+        "n": 10000,
+        "degen_frac": 0.0,
+        "degen_frac_max": 0.25,
+        "degeneracy_min": 1e-12
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 6223900.0,
+          "min_ns": 6178000.0,
+          "mean_ns": 6229885.714285715,
+          "mad_ns": 36900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "trig_split": {
+          "median_ns": 1611000.0,
+          "min_ns": 1556200.0,
+          "mean_ns": 1617692.857142857,
+          "mad_ns": 36275.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "trig_split": 3.8633767846058347
+      }
+    },
+    {
+      "case": "eig3_n10000_degen0.001",
+      "params": {
+        "n": 10000,
+        "degen_frac": 0.001,
+        "degen_frac_max": 0.25,
+        "degeneracy_min": 1e-12
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 6255100.0,
+          "min_ns": 6173100.0,
+          "mean_ns": 6264571.428571428,
+          "mad_ns": 66900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "trig_split": {
+          "median_ns": 1566175.0,
+          "min_ns": 1446700.0,
+          "mean_ns": 1543825.0,
+          "mad_ns": 54175.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "trig_split": 3.993870416779734
+      }
+    },
+    {
+      "case": "eig3_n10000_degen0.01",
+      "params": {
+        "n": 10000,
+        "degen_frac": 0.01,
+        "degen_frac_max": 0.25,
+        "degeneracy_min": 1e-12
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 5242800.0,
+          "min_ns": 5191300.0,
+          "mean_ns": 5255657.142857143,
+          "mad_ns": 51500.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "trig_split": {
+          "median_ns": 1412975.0,
+          "min_ns": 1274500.0,
+          "mean_ns": 1404010.7142857143,
+          "mad_ns": 24925.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "trig_split": 3.7104690458076046
+      }
+    },
+    {
+      "case": "eig3_n10000_degen0.1",
+      "params": {
+        "n": 10000,
+        "degen_frac": 0.1,
+        "degen_frac_max": 0.25,
+        "degeneracy_min": 1e-12
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 5786900.0,
+          "min_ns": 5777400.0,
+          "mean_ns": 5787285.714285715,
+          "mad_ns": 2300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "trig_split": {
+          "median_ns": 1837466.6666666667,
+          "min_ns": 1749666.6666666667,
+          "mean_ns": 1861380.9523809527,
+          "mad_ns": 51166.66666666651,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "trig_split": 3.149390465133154
+      }
+    },
+    {
+      "case": "eig3_n10000_degen0.25",
+      "params": {
+        "n": 10000,
+        "degen_frac": 0.25,
+        "degen_frac_max": 0.25,
+        "degeneracy_min": 1e-12
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 3651450.0,
+          "min_ns": 3448300.0,
+          "mean_ns": 4020671.4285714286,
+          "mad_ns": 172450.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "trig_split": {
+          "median_ns": 2197233.3333333335,
+          "min_ns": 2072766.6666666667,
+          "mean_ns": 2194357.1428571427,
+          "mad_ns": 44966.66666666698,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "trig_split": 1.6618398895580806
+      }
+    },
+    {
+      "case": "eig3_n10000_degen0.5",
+      "params": {
+        "n": 10000,
+        "degen_frac": 0.5,
+        "degen_frac_max": 0.25,
+        "degeneracy_min": 1e-12
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 2804600.0,
+          "min_ns": 2572650.0,
+          "mean_ns": 2851707.1428571427,
+          "mad_ns": 153950.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "trig_split": {
+          "median_ns": 3389300.0,
+          "min_ns": 3063350.0,
+          "mean_ns": 3365300.0,
+          "mad_ns": 96100.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "trig_split": 0.8274865016375063
+      }
+    },
+    {
+      "case": "eig3_n100000_degen0",
+      "params": {
+        "n": 100000,
+        "degen_frac": 0.0,
+        "degen_frac_max": 0.25,
+        "degeneracy_min": 1e-12
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 60394700.0,
+          "min_ns": 43340200.0,
+          "mean_ns": 55689657.14285714,
+          "mad_ns": 2005900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "trig_split": {
+          "median_ns": 15832300.0,
+          "min_ns": 15430200.0,
+          "mean_ns": 15923914.285714285,
+          "mad_ns": 107300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "trig_split": 3.8146510614376936
+      }
+    },
+    {
+      "case": "eig3_n100000_degen0.01",
+      "params": {
+        "n": 100000,
+        "degen_frac": 0.01,
+        "degen_frac_max": 0.25,
+        "degeneracy_min": 1e-12
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 56617400.0,
+          "min_ns": 45279100.0,
+          "mean_ns": 54021900.0,
+          "mad_ns": 5094900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "trig_split": {
+          "median_ns": 14654900.0,
+          "min_ns": 13182200.0,
+          "mean_ns": 15209500.0,
+          "mad_ns": 1472700.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "trig_split": 3.863376754532614
+      }
+    },
+    {
+      "case": "eig3_n100000_degen0.1",
+      "params": {
+        "n": 100000,
+        "degen_frac": 0.1,
+        "degen_frac_max": 0.25,
+        "degeneracy_min": 1e-12
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 56809200.0,
+          "min_ns": 39375600.0,
+          "mean_ns": 54050785.71428572,
+          "mad_ns": 687800.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "trig_split": {
+          "median_ns": 16216100.0,
+          "min_ns": 14611400.0,
+          "mean_ns": 17160571.42857143,
+          "mad_ns": 1604700.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "trig_split": 3.5032591066902645
+      }
+    },
+    {
+      "case": "e2_ellipsis_B64_n32",
+      "params": {
+        "subs": "...ij,...jk->...ik",
+        "ell": [
+          64
+        ],
+        "n": 32,
+        "min_size": 65536,
+        "naive_volume": 2097152,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 856366.6666666666,
+          "min_ns": 853783.3333333334,
+          "mean_ns": 856559.5238095239,
+          "mad_ns": 900.0,
+          "samples": 7,
+          "loops_per_sample": 6,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 90200.98039215687,
+          "min_ns": 90087.25490196078,
+          "mean_ns": 90246.35854341737,
+          "mad_ns": 58.82352941176214,
+          "samples": 7,
+          "loops_per_sample": 102,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 9.493984022607465
+      }
+    },
+    {
+      "case": "e2_ellipsis_floor_B10_n32",
+      "params": {
+        "subs": "...ij,...jk->...ik",
+        "ell": [
+          10
+        ],
+        "n": 32,
+        "min_size": 10240,
+        "naive_volume": 327680,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 135389.1891891892,
+          "min_ns": 134943.24324324325,
+          "mean_ns": 135593.4362934363,
+          "mad_ns": 332.43243243245524,
+          "samples": 7,
+          "loops_per_sample": 37,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 27696.646341463416,
+          "min_ns": 27642.98780487805,
+          "mean_ns": 27706.925087108015,
+          "mad_ns": 21.03658536585499,
+          "samples": 7,
+          "loops_per_sample": 328,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 4.888288189119275
+      }
+    },
+    {
+      "case": "e2_ellipsis_below_B8_n16",
+      "params": {
+        "subs": "...ij,...jk->...ik",
+        "ell": [
+          8
+        ],
+        "n": 16,
+        "min_size": 2048,
+        "naive_volume": 32768,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 26631.86813186813,
+          "min_ns": 26616.20879120879,
+          "mean_ns": 26631.868131868134,
+          "mad_ns": 9.065934065933106,
+          "samples": 7,
+          "loops_per_sample": 364,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 17953.162055335968,
+          "min_ns": 16709.486166007904,
+          "mean_ns": 17791.92546583851,
+          "mad_ns": 18.972332015811844,
+          "samples": 7,
+          "loops_per_sample": 506,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 1.483408217994262
+      }
+    },
+    {
+      "case": "e2_ellipsis_implicit_B64_n32",
+      "params": {
+        "subs": "...ij,...jk",
+        "ell": [
+          64
+        ],
+        "n": 32,
+        "min_size": 65536,
+        "naive_volume": 2097152,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 588633.3333333334,
+          "min_ns": 518533.3333333333,
+          "mean_ns": 595838.0952380953,
+          "mad_ns": 41283.333333333256,
+          "samples": 7,
+          "loops_per_sample": 6,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 82851.6129032258,
+          "min_ns": 77391.93548387097,
+          "mean_ns": 81422.58064516129,
+          "mad_ns": 4433.870967741939,
+          "samples": 7,
+          "loops_per_sample": 62,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 7.104669573794322
+      }
+    },
+    {
+      "case": "chain_ellipsis_vol20736",
+      "params": {
+        "subs": "...ij,...jk,...kl->...il",
+        "ell": [
+          1
+        ],
+        "n": 12,
+        "min_size": 144,
+        "naive_volume": 20736,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 24100.909090909092,
+          "min_ns": 22632.727272727272,
+          "mean_ns": 25297.597402597403,
+          "mad_ns": 1396.363636363636,
+          "samples": 7,
+          "loops_per_sample": 220,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 40523.30097087379,
+          "min_ns": 39512.6213592233,
+          "mean_ns": 42030.166435506246,
+          "mad_ns": 1010.6796116504847,
+          "samples": 7,
+          "loops_per_sample": 206,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 0.5947420006142065
+      }
+    },
+    {
+      "case": "chain_ellipsis_vol65536",
+      "params": {
+        "subs": "...ij,...jk,...kl->...il",
+        "ell": [
+          1
+        ],
+        "n": 16,
+        "min_size": 256,
+        "naive_volume": 65536,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 66246.73913043478,
+          "min_ns": 56239.13043478261,
+          "mean_ns": 66026.24223602485,
+          "mad_ns": 5755.434782608689,
+          "samples": 7,
+          "loops_per_sample": 92,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 38844.0,
+          "min_ns": 30522.4,
+          "mean_ns": 39404.91428571429,
+          "mad_ns": 2692.800000000003,
+          "samples": 7,
+          "loops_per_sample": 125,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 1.7054561613231074
+      }
+    },
+    {
+      "case": "chain_ellipsis_vol76832",
+      "params": {
+        "subs": "...ij,...jk,...kl->...il",
+        "ell": [
+          2
+        ],
+        "n": 14,
+        "min_size": 392,
+        "naive_volume": 76832,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 87411.11111111111,
+          "min_ns": 74275.0,
+          "mean_ns": 84688.88888888889,
+          "mad_ns": 3393.055555555562,
+          "samples": 7,
+          "loops_per_sample": 72,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 35293.83561643836,
+          "min_ns": 26530.13698630137,
+          "mean_ns": 33383.561643835616,
+          "mad_ns": 4026.0273972602736,
+          "samples": 7,
+          "loops_per_sample": 146,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 2.4766679388736867
+      }
+    },
+    {
+      "case": "chain_ellipsis_vol131072",
+      "params": {
+        "subs": "...ij,...jk,...kl->...il",
+        "ell": [
+          2
+        ],
+        "n": 16,
+        "min_size": 512,
+        "naive_volume": 131072,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 120995.65217391304,
+          "min_ns": 113639.13043478261,
+          "mean_ns": 120849.06832298137,
+          "mad_ns": 3830.4347826087032,
+          "samples": 7,
+          "loops_per_sample": 46,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 31673.04964539007,
+          "min_ns": 27505.673758865247,
+          "mean_ns": 31866.26139817629,
+          "mad_ns": 788.6524822695028,
+          "samples": 7,
+          "loops_per_sample": 141,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 3.82014531371543
+      }
+    },
+    {
+      "case": "chain_ellipsis_vol196608",
+      "params": {
+        "subs": "...ij,...jk,...kl->...il",
+        "ell": [
+          3
+        ],
+        "n": 16,
+        "min_size": 768,
+        "naive_volume": 196608,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 181028.125,
+          "min_ns": 167343.75,
+          "mean_ns": 188149.55357142858,
+          "mad_ns": 5943.75,
+          "samples": 7,
+          "loops_per_sample": 32,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 38977.142857142855,
+          "min_ns": 26822.85714285714,
+          "mean_ns": 38866.12244897959,
+          "mad_ns": 4812.380952380947,
+          "samples": 7,
+          "loops_per_sample": 105,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 4.644468827884475
+      }
+    },
+    {
+      "case": "chain_ellipsis_vol262144",
+      "params": {
+        "subs": "...ij,...jk,...kl->...il",
+        "ell": [
+          4
+        ],
+        "n": 16,
+        "min_size": 1024,
+        "naive_volume": 262144,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 348416.6666666667,
+          "min_ns": 219137.5,
+          "mean_ns": 314438.6904761905,
+          "mad_ns": 433.33333333331393,
+          "samples": 7,
+          "loops_per_sample": 24,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 40371.851851851854,
+          "min_ns": 40277.77777777778,
+          "mean_ns": 40369.94708994708,
+          "mad_ns": 40.74074074074451,
+          "samples": 7,
+          "loops_per_sample": 270,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 8.630187883013468
+      }
+    },
+    {
+      "case": "chain_ellipsis_B64_n32",
+      "params": {
+        "subs": "...ij,...jk,...kl->...il",
+        "ell": [
+          64
+        ],
+        "n": 32,
+        "min_size": 65536,
+        "naive_volume": 67108864,
+        "projected_floor": 10000,
+        "chain_volume_floor": 65536
+      },
+      "baseline": "numpy.einsum",
+      "variants": {
+        "numpy.einsum": {
+          "median_ns": 67357600.0,
+          "min_ns": 66557200.0,
+          "mean_ns": 67224657.14285715,
+          "mad_ns": 150400.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "optimize_true": {
+          "median_ns": 196265.21739130435,
+          "min_ns": 191458.69565217392,
+          "mean_ns": 195543.16770186336,
+          "mad_ns": 1171.7391304347839,
+          "samples": 7,
+          "loops_per_sample": 46,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "optimize_true": 343.19682771759597
+      }
+    }
+  ]
+}

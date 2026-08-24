@@ -1,0 +1,77 @@
+id: OPP-000017
+title: "BLAS herk fast path for a @ a.H (Hermitian rank-k) style operations"
+sources:
+  - url: https://github.com/numpy/numpy/issues/6951
+    repository: numpy/numpy
+    type: issue
+    number: 6951
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: null
+  baseline: "a @ a.conj().T (equivalently a @ a.H, np.dot(a, a.conj().T)), computed via general BLAS gemm, which produces the full m x m output even though the result is mathematically Hermitian"
+  candidate: >
+    a BLAS herk (Hermitian rank-k update) call, which computes only the
+    upper or lower triangle of the Hermitian result, the complex-dtype
+    analogue of the syrk-based optimization PR #6932 already shipped in
+    numpy for the real-symmetric case a @ a.T
+  hardware: >
+    unknown; no benchmark numbers, timings or percentages appear anywhere
+    in this thread. It is pure API-design discussion (2016-01-06 through
+    2021-12-02) with zero comments containing a measured or reporter-claimed
+    speedup. claim.speedup is left null because the dump supplies no figure
+    to report; any speedup number must come from a real Dyno run, not from
+    the definitional FLOP-count implication of computing one triangle
+    (herk) instead of the full matrix (gemm).
+affected_operations: [numpy.dot, numpy.matmul]
+input_regime:
+  dtypes: [complex64, complex128]
+  sizes: []
+  notes: >
+    no concrete sizes, shapes or dtypes are given anywhere in the thread;
+    the reporter's framing is entirely about a @ a.H / a.H @ a where a is
+    2-D and complex (for real dtypes, a.T already routes through the
+    syrk path shipped in PR #6932, so the gap this issue targets is
+    specifically the complex Hermitian case, where a.H is not a view).
+status: not_reproduced
+license_review: clean
+reproducer: benchmarks/historical/opp_000017_syrk_gram.py
+current_numpy_result:
+  verified_speedup: 0.53
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23 with scipy 1.18.1 newly installed (the earlier
+    blocker), numpy 2.4.5, 12-15% foreign load (below the contended
+    threshold): NOT reproduced, decisively. scipy.linalg.blas herk LOSES to
+    stock a @ a.conj().T / a.conj().T @ a at every shape and dtype measured,
+    0.19x-0.53x (best case complex128 tall m=1e5 k=64: 39.90 ms stock vs
+    75.28 ms herk, 0.53x; worst 0.19x at square n=256 complex64). The
+    theoretical halved-flops advantage of the rank-k update does not
+    survive this OpenBLAS build's gemm, which is far better optimized than
+    its herk on Zen 4. verified_speedup records the LEAST-BAD ratio, i.e.
+    herk never wins. Evidence: benchmarks/results/OPP-000017/8f8198d9abab.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: high
+maintainer_objections:
+  - author: charris
+    quote: "Adding an argument to `dot` would not help `@`, which is where we are trying to go. OTOH, it does provide a function, if somewhat indirectly..."
+  - author: mhvk
+    quote: "I quite like the \"transposed-complex\" type (`conjugated64` and `conjugated128`?), as it would make `conj` a very cheap operation. But it does seem it would imply quite a lot of work, between all the ufunc loops, FFTs, etc. There is also substantial risk of confusion..."
+  - author: mhvk
+    quote: "The fact that `np.dot` can be overridden by `__numpy_ufunc__` makes me extra wary about allowing one to omit its second argument, replacing it with something non-array-like, or even introducing additional keywords in its signature. It should really continue to look and behave as much as possible like a normal `ufunc`, otherwise things are just going to break in unexpected places."
+  - author: ewmoore
+    quote: "It isn't anywhere close to obvious what `np.dot(a)` is suppose to do. `np.dot(a, a.T)` is very clear. `np.dot(a, a.T, conjugate='right')` is pretty clear."
+  - author: jakirkham
+    quote: "I guess I am not thrilled with the keyword argument because we then have to ensure we handle cases like `np.dot(a, b, conjugate=\"right\")` where `a` and `b` are two totally different arrays. This makes the code in `cblas_matrixproduct` a bit more complex (more possible bugs) handling cases that we don't really benefit from."
+linked_prs:
+  - https://github.com/numpy/numpy/pull/6932
+  - https://github.com/numpy/numpy/pull/11133
+linked_commits: []
+related_opportunities: [OPP-000002, OPP-000004]
+notes:
+  - "This thread contains zero maintainer rejections of the underlying optimization; the eight-plus years of inactivity (last substantive maintainer comment 2016-10-12, then a single 2021 me-too from rileyjmurray, nothing since) is unresolved API bikeshedding, not a technical no. Four proposals were floated (new conjugated dtype, kwarg on dot, new linalg function, single-argument dot) and every one drew a specific objection; none reached consensus."
+  - "The core technical obstacle, stated by jakirkham in the opening post, is that a.H is not a view: unlike a.T (a stride trick), .conj() on a complex array must materialize a new buffer. That means by the time a @ a.H reaches any dispatch layer, the two operands are only numerically related, not identity-linked, so a purely transparent auto-detect ('is the RHS exactly the conjugate-transpose of the LHS') is materially harder than it looks and may not be cheaply checkable at all without walking both buffers."
+  - "The ONE fast-path shape PyOverdrive could ship without waiting on numpy's stalled API: an explicit opt-in entry point (e.g. a PyOverdrive-namespaced herk(a) / gram(a) call, not a transparent @ interception) with predicate 'a is 2-D, dtype in {complex64, complex128}', routing to cblas_zherk/cherk (or dsyrk/ssyrk for the already-covered real case) to fill one triangle and then mirror it, instead of a full gemm through a materialized a.conj().T. This sidesteps the exact __numpy_ufunc__-override and dot-signature objections above, since it never touches np.dot's or np.matmul's public signature."
+  - "Semantics differ in two ways any implementation must own: (1) herk mathematically produces only one triangle, so a caller expecting a fully dense array needs an explicit mirror/symmetrize step; (2) herk's accumulation order differs from gemm's, so results can differ from stock a @ a.H in the last bit or two of floating-point precision, the same trade-off class PR #6932 already accepted for the real syrk path."
+  - "rileyjmurray's 2021 comment is the only concrete downstream-use evidence in the thread: wanting a.H @ b without paying the a.conjugate() allocation, i.e. a Gram/covariance-matrix-style workload on tall data, which is a narrower and more common shape than a full square a @ a.H."

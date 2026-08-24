@@ -1,0 +1,227 @@
+{
+  "opp_id": "OPP-000043",
+  "title": "nanmedian 2-D vs isnan-scan + vectorized median",
+  "recorded_at": "2026-08-24T08:33:01+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.006420545746388395,
+    "cpu_busy_after": 0.003129890453834161,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "nanmedian_clean_500x500",
+      "params": {
+        "shape": [
+          500,
+          500
+        ],
+        "axis": 1,
+        "nan_frac": 0.0
+      },
+      "baseline": "nanmedian",
+      "variants": {
+        "nanmedian": {
+          "median_ns": 5493900.0,
+          "min_ns": 5407600.0,
+          "mean_ns": 5485357.142857143,
+          "mad_ns": 29600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "scan_route": {
+          "median_ns": 2107466.6666666665,
+          "min_ns": 2090533.3333333333,
+          "mean_ns": 2112228.5714285714,
+          "mad_ns": 4933.333333333023,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "scan_route": 2.6068739719094016
+      }
+    },
+    {
+      "case": "nanmedian_clean_1000x1000",
+      "params": {
+        "shape": [
+          1000,
+          1000
+        ],
+        "axis": 1,
+        "nan_frac": 0.0
+      },
+      "baseline": "nanmedian",
+      "variants": {
+        "nanmedian": {
+          "median_ns": 15911300.0,
+          "min_ns": 15874400.0,
+          "mean_ns": 15936671.42857143,
+          "mad_ns": 35200.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "scan_route": {
+          "median_ns": 8112300.0,
+          "min_ns": 8026900.0,
+          "mean_ns": 8096214.285714285,
+          "mad_ns": 49100.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "scan_route": 1.9613796333962008
+      }
+    },
+    {
+      "case": "nanmedian_clean_2000x200",
+      "params": {
+        "shape": [
+          2000,
+          200
+        ],
+        "axis": 1,
+        "nan_frac": 0.0
+      },
+      "baseline": "nanmedian",
+      "variants": {
+        "nanmedian": {
+          "median_ns": 7916600.0,
+          "min_ns": 7842800.0,
+          "mean_ns": 7922957.142857143,
+          "mad_ns": 44600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "scan_route": {
+          "median_ns": 3523950.0,
+          "min_ns": 3448700.0,
+          "mean_ns": 3519785.714285714,
+          "mad_ns": 27500.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "scan_route": 2.24651314575973
+      }
+    },
+    {
+      "case": "nanmedian_clean_200x10000",
+      "params": {
+        "shape": [
+          200,
+          10000
+        ],
+        "axis": 1,
+        "nan_frac": 0.0
+      },
+      "baseline": "nanmedian",
+      "variants": {
+        "nanmedian": {
+          "median_ns": 14922800.0,
+          "min_ns": 14851800.0,
+          "mean_ns": 14916485.714285715,
+          "mad_ns": 21600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "scan_route": {
+          "median_ns": 15871700.0,
+          "min_ns": 15722700.0,
+          "mean_ns": 15902885.714285715,
+          "mad_ns": 57400.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "scan_route": 0.9402143437690984
+      }
+    },
+    {
+      "case": "nanmedian_wasted_1000x1000",
+      "params": {
+        "shape": [
+          1000,
+          1000
+        ],
+        "axis": 1,
+        "nan_frac": 0.01
+      },
+      "baseline": "nanmedian",
+      "variants": {
+        "nanmedian": {
+          "median_ns": 17339400.0,
+          "min_ns": 17316400.0,
+          "mean_ns": 17362642.85714286,
+          "mad_ns": 19600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "scan_route": {
+          "median_ns": 17529900.0,
+          "min_ns": 17489300.0,
+          "mean_ns": 17545185.714285713,
+          "mad_ns": 16100.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "scan_route": 0.989132853011141
+      }
+    }
+  ]
+}

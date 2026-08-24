@@ -1,0 +1,132 @@
+id: OPP-000010
+title: "np.intersect1d / np.unique select sort kind by return_indices, not dtype, leaving a speedup unused for narrow integer types"
+sources:
+  - url: https://github.com/numpy/numpy/issues/16923
+    repository: numpy/numpy
+    type: issue
+    number: 16923
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:16:26+00:00"
+claim:
+  speedup: 6.0
+  baseline: "np.intersect1d(a1, a2, return_indices=False) on int16 arrays (D=20000), which sorts via ar.sort() (quicksort default)"
+  candidate: "np.intersect1d(a1, a2, return_indices=True) on the same int16 arrays, which sorts via argsort(kind='mergesort'), hitting NumPy's radix-sort path for <=16-bit integers"
+  hardware: "unknown (reporter mganahl says only \"on my computer\"; no CPU/OS given)"
+affected_operations: [numpy.intersect1d, numpy.unique]
+input_regime:
+  dtypes: [int16, uint16]
+  sizes: [10000, 20000]
+  notes: >
+    reporter's own repro uses int16, D=20000 (two length-20000 arrays,
+    values drawn from 0-9, i.e. heavily duplicated); charris's raw sort
+    comparison uses uint16, size 10000; charris states the underlying
+    radix-sort path applies generically to "integer types <= 16 bits" (so
+    int8/uint8 are plausibly included) but no int8/uint8 numbers appear in
+    this thread; this is not about sortedness of the input, it is a purely
+    dtype-driven sort-algorithm-selection effect, orthogonal to
+    OPP-000007's already-sorted fast path.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000010_intersect_return_indices.py
+current_numpy_result:
+  verified_speedup: 28.02
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, CONTENDED box (cpu_busy ~0.54-0.57
+    before/after, so absolute ns are directional). Candidate: force
+    kind='mergesort' for dtype itemsize <=2 (int8/uint8/int16/uint16),
+    regardless of return_indices, on both np.unique and np.intersect1d. All
+    72/72 cases correct=True, no correctness failures. Best regime,
+    high-cardinality int16/uint16, reproduces far beyond mganahl's informal
+    6x claim: unique up to 28.0x (int16 D=20000: 2480.3us -> 88.5us,
+    consistent with 23.1x at D=10000 and 12.3x at D=100000), intersect1d up
+    to 16.1x (int16 D=10000: 2069.7us -> 128.8us; 13.2x/11.2x at
+    D=20000/100000); uint16 high-cardinality similar, unique 22.9x-24.3x,
+    intersect1d 8.6x-14.3x. On the reporter's own literal repro regime
+    (int16, D=20000, low-cardinality/heavily-duplicated values 0-9), the win
+    is real but well under the claim: intersect1d 2.10x, unique 2.12x. int8/
+    uint8 land ~1.5x-3.0x across regimes (one int8 n10000 point read 7.6x but
+    its baseline MAD was 19% of its median vs 3% for the candidate, i.e.
+    contention noise, not a repeatable effect: neighboring sizes for that
+    same cell read 2.6x-2.8x). It LOSES outside the <=16-bit predicate: on
+    int32/uint32 low-cardinality inputs, forcing mergesort is 3.4x-4.4x
+    SLOWER than stock quicksort (speedup 0.226x-0.359x); even int32/uint32
+    high-cardinality is only a modest 1.9x-4.2x win. This confirms
+    hameerabbasi's 16-bit/32-bit crossover note still holds on current
+    numpy, so the predicate must stay narrow to itemsize <=2. Evidence:
+    benchmarks/results/OPP-000010/8f8198d9abab.json.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections:
+  - author: charris
+    quote: >
+      That was what we wanted to do, but it requires messing with the
+      ndarray structure which led to other problems.
+    context: >
+      Responding to sirvincent's suggestion to let the caller choose the
+      sort algorithm used inside intersect1d directly.
+linked_prs:
+  - https://github.com/numpy/numpy/pull/12586
+  - https://github.com/google/TensorNetwork/pull/780
+related_opportunities: [OPP-000001, OPP-000007]
+notes:
+  - >-
+    SHIPPED (2026-08-23) by extending three existing families rather than
+    adding one: unique_sort's shared _sort_unique helper now sorts with
+    kind='stable' when itemsize <= 2 (numpy's radix path), and
+    int8/uint8/int16/uint16 joined the dtype tables of unique_sort
+    (floors 1000/1000/10000/1000 - int16's low-cardinality n=1000 win
+    straddled the 1.3x min-win across two runs, so its floor errs high),
+    intersect_sorted (combined floor 12_000: low-cardinality small
+    intersects are marginal-to-losing below it) and unique_axis0_column
+    (all four measured 40-298x at its existing 1000-row floor).
+    SMALLINT-CAL battery: unique 1.6-27.8x, intersect 1.85-10.1x inside
+    the floors; the quicksort variant the original calibration measured
+    (0.14-0.46x losses) stays measured OUT for 32-bit+ dtypes, where
+    forcing mergesort loses 3-4x, exactly hameerabbasi's crossover note.
+  - >
+    Root mechanism (rossbar, charris): np.unique/intersect1d choose sort
+    kind by whether return_index/return_indices is requested, not by
+    dtype. return_indices=True forces argsort(kind='mergesort'), which for
+    integer dtypes <=16 bits routes into NumPy's radix sort;
+    return_indices=False calls plain ar.sort() (quicksort default), which
+    does not. The "faster" path today is an accident of the
+    return_indices flag, not a deliberate dtype-based choice.
+  - >
+    Candidate transparent fast path for PyOverdrive: predicate = input
+    dtype is a fixed-width integer with itemsize <= 2 (int8/uint8/int16/
+    uint16); route = force the internal sort to kind='mergesort' (the
+    radix-sort-eligible path) for np.unique and np.intersect1d regardless
+    of return_index/return_indices, mirroring what NumPy already does on
+    the return_indices=True branch today. No new keyword, no semantics
+    change: the output is already sorted/unique either way, this only
+    changes which internal sort produces it.
+  - >
+    No number in this dump isolates the actual proposed fix. mganahl's own
+    claim is an informal 6x ("on my computer", int16, D=20000, no hardware
+    given). rossbar's np.unique(return_index=True) vs (return_index=False)
+    shows 128 microseconds vs 402 microseconds (int16, D=20000). charris's
+    raw sort-only comparison shows 32.5 microseconds vs 364 microseconds
+    (uint16, size 10000, stablesort vs quicksort). None of these measure
+    "return_indices=False with sort kind forced to mergesort", which is the
+    actual candidate; claim.speedup above uses mganahl's reporter-stated 6x
+    per the schema's instruction to prefer the reporter's own figure, but
+    charris's raw sort-only comparison is arguably the more mechanistically
+    defensible figure and should be the one the reproducer targets.
+  - >
+    charris's objection (quoted above) targets a broader ask, exposing
+    sort-algorithm choice as user-facing API, which sirvincent proposed
+    and charris says ran into ndarray-structure complications. That is a
+    different, larger change than PyOverdrive's narrower internal-default
+    fast path, which picks among sort kinds NumPy already ships and
+    exposes no new surface, so the objection may not directly block it,
+    but it is the only maintainer signal on record and should be re-read
+    before building.
+  - >
+    hameerabbasi notes the timsort-vs-radixsort crossover was calibrated
+    once already, in the PR that introduced radix sort (numpy/numpy#12586),
+    and that "the sweet spot was the transition between 16-bit and 32-bit
+    integers" at that time. PyOverdrive's reproducer should sweep dtype
+    width (int8/uint8/int16/uint16/int32/uint32) rather than assume the
+    16-bit cutoff still holds on current NumPy.

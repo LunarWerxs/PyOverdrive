@@ -1,0 +1,132 @@
+id: OPP-000012
+title: "np.isclose wrapper/call overhead vs math.isclose and naive numpy expressions"
+sources:
+  - url: https://github.com/numpy/numpy/issues/16160
+    repository: numpy/numpy
+    type: issue
+    number: 16160
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 2.63
+  baseline: "np.isclose(a, b) on two float64 arrays of length 1000 (default rtol=1e-05, atol=1e-08), NumPy 2.0, per reporter's 2024 retest: 20.7 microseconds"
+  candidate: "equivalent tolerance expression evaluated directly with numpy primitives, np.abs(a-b) <= 1e-8 + 1e-5*np.abs(b), bypassing isclose's python-level wrapper: 7.87 microseconds"
+  hardware: unknown
+affected_operations: [numpy.isclose]
+input_regime:
+  dtypes: [float64]
+  sizes: [1, 1000]
+  notes: >
+    size 1 covers the original report's scalar-input case (np.isclose(0.5, 0,
+    atol=1e-4) vs math.isclose), size 1000 covers the array-input
+    microbenchmarks the thread converges on; the overhead being measured
+    (asanyarray conversions, errstate context manager, two np.all(isfinite())
+    reductions) is a roughly fixed per-call cost, so the relative speedup
+    shrinks as array size grows and elementwise arithmetic starts to
+    dominate. No large-N (1e6+) figures appear anywhere in the thread.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000012_isclose_overhead.py
+current_numpy_result:
+  verified_speedup: 2.78
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, box contended (foreign CPU load
+    35-43% busy across the run). The fused predicate
+    (np.abs(a-b) <= atol + rtol*np.abs(b)) reproduces the claim on the
+    regime the claim targets: scalar_pair 2.78x (8399.9 ns -> 3019.9 ns),
+    float64 n=1 2.55x, float64 n=10 2.48x, float32 n=10 2.46x, float32 n=1
+    2.27x - matching or exceeding the claimed 2.63x. The win shrinks as
+    array size grows, exactly as input_regime predicted for a fixed
+    per-call overhead: float64 n=1000 1.84x, n=10000 1.29x, n=100000 1.25x;
+    float32 n=1000 1.96x, n=10000 1.64x, n=100000 1.08x (near parity).
+    The candidate is NOT uniformly better: edge_rtol_neg_inf LOSES at
+    0.90x (16504.2 ns -> 18290.1 ns) and edge_nan_inf_entries_default_tol
+    LOSES at 0.83x (14968.9 ns -> 17940.3 ns); edge_atol_inf is roughly
+    parity at 1.01x; edge_atol_nan and edge_equal_nan_true win modestly
+    (1.12x, 1.19x). All 18 cases report correct=true, no correctness
+    failures. Evidence: benchmarks/results/OPP-000012/8f8198d9abab.json.
+    Run was contended, so treat absolute ns as noisy; the relative-speedup
+    ranking should still hold.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections:
+  - author: rossbar
+    date: "2020-05-05"
+    quote: >
+      "NumPy functions are intended to be run on NumPy arrays - in this case,
+      you are passing in scalar values which are converted to arrays
+      under-the-hood by `np.isclose`. This (along with some other additional
+      setup) incurs some overhead which is likely what makes `np.isclose`
+      slower than `math.isclose` for scalar inputs."
+  - author: seberg
+    date: "2020-05-10"
+    quote: >
+      "I think we will accept PRs for some of the things you found, but
+      there is probably only so much to be done, considering that this calls
+      many functions all of which incur a significant overhead since they
+      are written to be fast for arrays and not scalars. (and in general any
+      function call has a fairly significant overhead)."
+linked_prs:
+  - https://github.com/numpy/numpy/pull/26252
+  - https://github.com/Qiskit/qiskit/pull/5915
+  - https://github.com/qcc4cp/qcc/pull/16
+  - https://github.com/fjosw/pyerrors/pull/10
+  - https://github.com/py-pdf/pypdf_table_extraction/pull/94
+  - https://github.com/py-pdf/pypdf_table_extraction/pull/166
+related_opportunities: [OPP-000005]
+notes:
+  - >-
+    SHIPPED (2026-08-23) as isclose_fused
+    (src/pyoverdrive/fastpaths/isclose_fused.py): scalar pairs and small
+    all-finite same-shape float64/float32 arrays (caps 1000 / 10_000,
+    the measured decay points) route to the pure fused expression, made
+    exact by moving every guard into the predicate: finite Python-number
+    tolerances only (WarrenWeckesser's errstate case stays on stock),
+    equal_nan refused (1.19x, under min-win), and a finiteness scan so
+    the dispatched arithmetic is bit-identical to stock's within_tol,
+    np.bool_ scalar return included. End-to-end 2.82x on the reported
+    scalar case, 1.5-1.8x small arrays; the NaN-bearing refusal costs
+    0.82x (scan plus stock, same as the 0.83x masked branch the battery
+    measured), documented and pinned as a guard row. 29 differential
+    tests plus two hypothesis fuzz suites.
+  - >
+    The headline number swings a lot depending on which comparison in the
+    thread you pick; the recorded claim.speedup (2.63x) is the reporter's
+    own 2024 apples-to-apples retest (np.isclose vs the equivalent tolerance
+    expression, both with rtol+atol), not the more dramatic original 61.8x
+    figure (0.4876s / 0.007889s over 10000 calls, np.isclose(0.5,0,atol=1e-4)
+    vs math.isclose scalar), since math.isclose is a different stdlib
+    function operating only on Python floats and is not a fair numpy-vs-numpy
+    comparison for PyOverdrive's purposes.
+  - >
+    The overhead is dominated by fixed per-call cost: repeated asanyarray
+    conversions of a, b, atol, rtol; an np.errstate(invalid='ignore') context
+    manager; and two separate np.all(np.isfinite(...)) reductions (per
+    Hoiy's own profiling, np.all alone was ~25% of runtime, and folding the
+    two isfinite reductions into one cut about 12%). This is a call-overhead
+    story, closely related to OPP-000005, not an algorithmic-complexity one.
+  - >
+    Maintainer seberg accepted the underlying premise but bounded
+    expectations, and PR numpy/numpy#26252 ("isclose runs faster by using
+    errstate only when needed") already shipped one piece of this before the
+    issue closed in 2024; NumPy 2.0 also made errstate itself faster
+    generally (seberg, 2024-04-10), which is why the reporter's 2024 numbers
+    are already better than the 2020 ones.
+  - >
+    Transparent fast-path shape PyOverdrive could ship: for
+    np.isclose(a, b, rtol=, atol=, equal_nan=False) where a and b are plain
+    ndarray or python-scalar real-floating inputs (float32/float64) and
+    rtol/atol are finite non-array scalars, skip the repeated asanyarray
+    wrapping and compute the finite-mask and within-tolerance predicate in
+    one fused pass instead of two separate np.all(np.isfinite(...)) calls,
+    while still gating any errstate(invalid='ignore')-equivalent suppression
+    behind a finiteness check on rtol/atol so the inf/nan-tolerance edge
+    case WarrenWeckesser flagged (2020-05-09) keeps its current silent
+    behavior instead of leaking a RuntimeWarning.
+  - >
+    Complex dtypes, array-valued rtol/atol, and equal_nan=True should fall
+    back to stock isclose; none of those were exercised in the thread's
+    benchmarks, and they are exactly where a naive rewrite would risk
+    silently changing NaN/Inf/complex comparison semantics.

@@ -1,0 +1,175 @@
+id: OPP-000016
+title: "FFT-based fast path for full-mode np.correlate / np.convolve on large real arrays"
+sources:
+  - url: https://github.com/numpy/numpy/issues/1858
+    repository: numpy/numpy
+    type: issue
+    number: 1858
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 171.4
+  baseline: >
+    np.correlate(x, x) as originally reported by the reporter (x = randn(1e6)),
+    compared against MATLAB's xcorr(randn(1e6,1)); a later commenter
+    (josef-pkt) clarifies that numpy's default (mode='valid') correlate(x,x)
+    "takes no time since it only calculates one value" while full-mode
+    np.correlate(x,x,'full') "is also taking around an hour" at 1e6, so the
+    slow path this issue is actually about is full-mode (all-lags) convolution
+    and correlation, matching what MATLAB's xcorr computes by default.
+  candidate: >
+    FFT-based convolution/correlation (e.g. via numpy.fft.rfftn/irfftn on real
+    inputs, as sketched by commenter endolith), the same technique MATLAB's
+    xcorr reportedly uses internally per josef-pkt's earlier observation
+    ("xcorr in matlab signal toolbox seems to use fft"), made 2009-10-16,
+    before endolith's earliest comment in the thread (2009-11-20).
+  hardware: >
+    As reported in the original ticket (trac #1260, opened 2009-10-12 by trac
+    user "roger"): Python 2.6.3, numpy version given as "1.30" in the dump
+    (most likely 1.3.0); x86 under x64 Windows 7 and x64 Ubuntu, on an Intel
+    i7. MATLAB 2009a version/hardware not stated. The 171.4 figure recorded
+    here is a DERIVED LOWER BOUND, not a directly reported ratio: MATLAB's
+    xcorr(randn(1e6,1)) completed in about 0.35s while the Python run was
+    killed after exceeding one minute ("takes more than a minute (then
+    killed)"), so 60 / 0.35 = 171.4 is the minimum implied slowdown; the
+    reporter never obtained an actual numpy completion time, so the true
+    ratio is unknown and could be much larger. No exact number is given for
+    the reporter's other claim ("MATLAB is also much faster for arrays of 1e5
+    elements").
+affected_operations: [numpy.correlate, numpy.convolve]
+input_regime:
+  dtypes: [float64]
+  sizes: [100000, 1000000]
+  notes: >
+    Claim regime is full-mode (all-lags) convolution/correlation on large
+    1-D real arrays (1e5-1e6 elements); this is distinct from the default
+    'valid' mode for equal-length correlate(x,x), which per josef-pkt is
+    already fast because it returns a single value. Later in the thread,
+    josef-pkt reports his own use case is time-series analysis (finance) with
+    a few hundred to 10000 observations, sometimes with integer data for bias
+    correction, i.e. a much smaller-N, mixed-dtype regime than the original
+    1e6-element complaint.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000016_fft_convolve.py
+current_numpy_result:
+  verified_speedup: 1518.3
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, CONTENDED box (cpu_busy_before
+    0.39, cpu_busy_after 0.26, other load present during the sweep).
+    Full-mode correlate/convolve reproduces, and at the large end beats the
+    171.4x claim floor outright: at n=20000 float64, fft_rfft_irfft hits
+    1518.3x on convolve (3068693200ns -> 2021200ns) and 1468.6x on correlate
+    (3371764400ns -> 2295975ns). Int64 at the same n wins by far less,
+    67.9x convolve / 62.4x correlate (baseline ~153-156M ns -> ~2.3-2.5M ns),
+    because the naive int64 baseline path is itself already much slower per
+    element and the FFT-int variant pays a cast-to-complex tax. At small n
+    the win narrows sharply but never flips negative: n=1000 float64 is the
+    worst case in the sweep, 2.96x correlate / 2.33x convolve
+    (~94-100us baseline -> ~34-40us candidate); n=5000 float64 sits at
+    10.2x/11.3x, n=1000/5000 int64 at 8.1-15.4x. All 12 cases (float64 and
+    int64, correlate and convolve, n in {1000, 5000, 20000}) report
+    correct=true; no candidate loses to the naive baseline anywhere tested.
+    Evidence: benchmarks/results/OPP-000016/8f8198d9abab.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: medium
+maintainer_objections:
+  - author: cournape
+    quote: >
+      FFT has several disadvantages: it does not work for object arrays, can
+      be memory hungry, and slower when only a few values of the correlation
+      is needed. I think we should keep the current implementation based on
+      naive implementation, and add a FFT-based one. The current function
+      could take an argument to force naive, fft or heuristic (to try to pick
+      the fastest one).
+  - author: pv
+    quote: >
+      I don't think there is any significant disadvantage in using FFT. It
+      might be a bit slower for small N than explicit convolution, and might
+      for intermediate N introduce more numerical error (we're talking maybe
+      about 1e-11 or so). IIRC, for large N FFT should be better both for the
+      numerical error and performance. I don't believe you can perform FFT
+      convolution with integers using the tools currently in Numpy -- cast to
+      complex is probably always needed.
+linked_prs:
+  - https://github.com/scipy/scipy/pull/337
+  - https://github.com/numpy/numpy/pull/5978
+  - https://github.com/bids-standard/pybids/pull/411
+  - https://github.com/numpy/numpy/pull/22255
+related_opportunities: [OPP-000002]
+notes:
+  - >-
+    EXTENDED (2026-08-23, same day): mode='same' and mode='valid' joined
+    the paths (renamed fftconvolve / fftcorrelate, dropping the stale
+    _full suffix), with slice formulas verified against stock across both
+    length orders and parities - including numpy's internal correlate
+    swap, which flips 'same' centering when the second operand is longer
+    with an even min-length (caught by an asymmetric probe; the naive
+    identity passes self-correlation, which is palindromic and hides it).
+    Per-mode naive-work floors from the extended FFTCONV-CAL battery
+    (contended 56-86%, so understated): same >= 3e6 (2.9-4.9x measured,
+    (1000,1000) straddled min-win across three runs and stays out), valid
+    >= (max-min+1)*min >= 2e6 (1.6-3.3x; the near-equal-length valid call
+    is nearly free on stock, measured 0.01-0.02x for FFT, and the work
+    model itself excludes it). Bare np.correlate(a, v) on unequal lengths
+    (default valid) now legitimately dispatches: 3.0-3.2x. int64/int32
+    both modes 12.7-14.3x, still bit-identical under the 2^52 bound.
+  - >-
+    SHIPPED (2026-08-23) as fftconvolve_full + fftcorrelate_full
+    (src/pyoverdrive/fastpaths/fftconvolve.py): full-mode np.convolve /
+    np.correlate on 1-D same-dtype float64/int64/int32 with min(n, m) >=
+    1000 and n*m >= 1e6 routes to rfft/irfft with 5-smooth padding
+    (FFTCONV-CAL battery: 5-smooth beats power-of-two 4.22x vs 1.76x at
+    20000x1000 and rescues shapes pow2 loses). Floats require all-finite
+    inputs (naive keeps NaN damage local, FFT smears it) and claim numeric
+    equality (~1e-12 scaled); ints ship bit-identical under scipy
+    choose_conv_method's exactness bound max|a|*max|v|*min(n,m) <=
+    min(2^52-1, dtype max), which also excludes stock integer wrap-around.
+    Measured with both floors satisfied: float64 2.3-5.1x, int64 5.9-13.4x,
+    int32 6.7-18.0x; thin kernels (m=100-300 under long signals) stay on
+    stock, losing or marginal everywhere measured. mode='same'/'valid'
+    unmeasured, stay on stock.
+  - >
+    The single transparent fast-path shape: for np.correlate/np.convolve
+    called with mode='full' or 'same' on two same-dtype real (non-object)
+    1-D arrays whose combined size exceeds a calibrated threshold N* (to be
+    set by the Dyno reproducer, not guessed), route internally to an
+    rfft/irfft-based convolution instead of the naive direct-summation loop;
+    below N*, or for object-dtype arrays, or for the cheap single-lag
+    'valid' case, stay on the existing naive path. This mirrors cournape's
+    own proposal in the thread ("force naive, fft or heuristic") rather than
+    inventing a new dispatch convention.
+  - >
+    Semantics differ in three ways once the fast path fires: (1) results
+    become approximate rather than exact, on the order of ~1e-11 relative
+    error per pv's estimate, instead of numpy's current exact naive-summation
+    result; (2) integer inputs must be cast to complex/float internally
+    (per pv, numpy currently has no integer-native FFT convolution path),
+    so an integer-in/integer-out contract is not preserved; (3) object-dtype
+    arrays cannot use the FFT path at all (per cournape) and must always
+    fall back to naive.
+  - >
+    The 171.4x figure is a floor, not a measurement: the original reporter's
+    numpy run was killed after exceeding 60s with no logged completion time,
+    so the real gap at 1e6 could be substantially larger. The Dyno reproducer
+    should not anchor calibration to this number; it exists only to satisfy
+    the "never null" claim field until a real numpy-vs-candidate run replaces
+    it.
+  - >
+    Related to OPP-000002 (np.inner ndim>2 via tensordot) only loosely: both
+    are cases where NumPy currently uses a straightforward direct-computation
+    path and a size-dependent switch to a more sophisticated algorithm
+    (tensordot's BLAS reshape; here, FFT) could pay off past some crossover
+    N. No existing corpus item concerns convolution, correlation, or FFT
+    directly, so this is the first spectral-method opportunity on file.
+  - >
+    Downstream evidence this pain recurs: bids-standard/pybids#411 ("ENH,
+    Improve convolution performance for Sparse variables", closed) shows at
+    least one real downstream project had to build its own convolution
+    performance fix rather than rely on numpy/scipy, and scipy/scipy#2651
+    ("ENH, Fold fftconvolve into convolve/correlate functions as a
+    parameter", closed) shows the same ask was made on the scipy side.
+    Neither confirms numpy maintainers agreed to do this; both are closed
+    without a linked resolution visible in this dump.

@@ -1,0 +1,134 @@
+id: OPP-000026
+title: "np.mean axis-reduction leaving a tiny trailing axis is ~2.8x slower than naive per-slice means"
+sources:
+  - url: https://github.com/numpy/numpy/issues/8480
+    repository: numpy/numpy
+    type: issue
+    number: 8480
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T03:32:48Z"
+claim:
+  speedup: 2.83
+  baseline: >-
+    np.mean(img, axis=(0, 1)) on img = np.random.rand(1000, 1000, 3), timed
+    by the reporter (gongbudaizhe) at "100 loops, best of 3: 12.5 ms per
+    loop" on python 2.7.13 / numpy 1.11.3. eric-wieser adds that
+    np.mean(img.reshape(-1,3), axis=0) is "Also just as slow", and that
+    "This applies to np.sum and np.add.reduce as well. I think in general,
+    the problem lies in np.ufunc.reduce."
+  candidate: >-
+    the naive per-slice list [np.mean(img[:,:,0]), np.mean(img[:,:,1]),
+    np.mean(img[:,:,2])] on the same array, timed by the reporter in the
+    same post at "100 loops, best of 3: 4.42 ms per loop". The 2.83 figure
+    is DERIVED, not stated in the thread: 12.5 / 4.42 = 2.828x, computed
+    from the reporter's own two timings, which are the only measured
+    numbers anywhere in the thread. eric-wieser also states "By comparison,
+    einsum performs way better" but gives no number for it.
+  hardware: >-
+    unknown; the reporter's environment block gives only python 2.7.13 and
+    numpy 1.11.3, with no CPU, OS, or machine spec anywhere in the thread.
+affected_operations: [numpy.mean, numpy.sum, numpy.add.reduce]
+input_regime:
+  dtypes: [float64]
+  sizes: ["(1000, 1000, 3)"]
+  notes: >-
+    the one shape the thread actually measured is a C-contiguous float64
+    (1000, 1000, 3) array (np.random.rand) reduced with axis=(0, 1),
+    i.e. a multi-axis reduction that keeps only a tiny trailing axis of
+    length 3. eric-wieser showed the equivalent 2-D form
+    np.mean(img.reshape(-1,3), axis=0) is just as slow, so the regime is a
+    reduction over many rows with a very small non-reduced inner dimension.
+    Per seberg, the same memory-order-preferred iteration path is "much
+    much faster in the case of img.shape[2] being large", so the slow
+    regime is specifically small trailing-axis sizes; the crossover point
+    is not measured in the thread.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000026_mean_small_axis.py
+current_numpy_result:
+  verified_speedup: 8.41
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load): REPRODUCED above claim in the claim's regime.
+    C-order reductions over leading axes with a tiny trailing axis:
+    per-slice route 3.83-6.56x at k in {2,3,4} (8.41x float32), einsum
+    route 1.93-3.02x and steadier. The regime edge is crisp: k=1 is
+    0.97x (nothing to split), k >= 8 flips per-slice to losses
+    (0.08-0.74x) while einsum decays to ~1x by k=64; F-order loses
+    everywhere (einsum 0.07x). np.sum and np.add.reduce show the same
+    3.9-4.1x. Checks used scaled tolerance (summation order differs).
+    Evidence: benchmarks/results/OPP-000026/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: medium
+maintainer_objections:
+  - author: seberg
+    date: "2017-02-19"
+    quote: >-
+      Its a bit tricky. The problem is probably that it is actually much
+      much faster in the case of img.shape[2] being large and that path is
+      always taken preferred (because of better memory order). In the case
+      of img.shape[2] being small, it makes the inner loop small though,
+      making the iteration itself less efficient. In that case avoiding
+      memory layout iteration reordering could make sense. It may not even
+      be too hard to do, but figuring out the right values for when to use
+      which is likely hard.
+linked_prs: []
+linked_commits: []
+related_opportunities: []
+notes:
+  - >-
+    SHIPPED (2026-08-24) as mean_tiny_trailing + sum_tiny_trailing
+    (src/pyoverdrive/fastpaths/reduce_tiny_trailing.py): the reporter's
+    own per-slice route (one full stock reduction per kept column over a
+    reshape(-1, k) view), for C-contiguous float64/float32, trailing k in
+    [2, 5], rows >= 10_000, axis covering exactly all leading axes. The
+    MEANSUM-CAL battery (benchmarks/results/MEANSUM-CAL/9bbe7063c555.json,
+    0-1% load) measured the COMPLETE op x dtype x k grid at the floor:
+    worst cell 2.20x, best 14.4x (sum f32 k=2); the k edge seberg called
+    "likely hard" is crisp (k=5 in at 2.2-3.7x, k=6 thins to 1.44x and is
+    excluded, k=7 ~1.0x), and rows=1000 straddles min-win at k=3/4, hence
+    the uniform floor. numpy.add.reduce from the record's
+    affected_operations is NOT patchable (a ufunc method, not a module
+    name) and stays stock. Comparison mode numeric: the reroute changes
+    summation order; every battery cell passed rtol 1e-9 (f64) / 1e-3
+    (f32). license_review clean: the route is the reporter's own snippet
+    from the public issue thread, no third-party code.
+  - >-
+    The 2.83 speedup is a derivation from the reporter's two timings
+    (12.5 ms / 4.42 ms), not a ratio anyone in the thread stated. It is
+    also a floor on the opportunity only for this exact shape; the thread
+    measured a single shape/dtype and nothing else.
+  - >-
+    Mechanism, per seberg (the only root-cause analysis in the thread) -
+    np.ufunc.reduce always prefers the memory-order iteration path because
+    it is much faster when the trailing (non-reduced) axis is large, but
+    when that axis is tiny the inner loop becomes tiny too and per-iteration
+    overhead dominates. The fix direction he names is "avoiding memory
+    layout iteration reordering" in the small-trailing-axis case; the risk
+    he names is that "figuring out the right values for when to use which
+    is likely hard", i.e. the dispatch threshold is the hard part, not the
+    alternate loop.
+  - >-
+    Scope, per eric-wieser - not mean-specific. "This applies to np.sum and
+    np.add.reduce as well. I think in general, the problem lies in
+    np.ufunc.reduce." He also reports einsum "performs way better" on this
+    pattern, which suggests one candidate route (reshape + einsum-based sum,
+    divided by the reduction count) alongside the naive per-slice route the
+    reporter timed.
+  - >-
+    Transparent fast-path sketch - predicate: reduction (mean/sum/add.reduce)
+    over axes that leave only a small trailing axis (length <= a calibrated
+    threshold, e.g. the thread's 3) on a C-contiguous float array. Route:
+    compute per-slice full reductions (or an einsum/reshaped dot) instead of
+    letting ufunc.reduce take the memory-order path. Semantics hazard: the
+    reroute changes floating-point summation order versus stock numpy's
+    pairwise-summation traversal, so results are numerically close but not
+    guaranteed bit-identical; that is why correctness_risk is medium rather
+    than low. NaN/inf propagation and dtype promotion are unchanged.
+  - >-
+    Age caveat: the thread is from 2017 (numpy 1.11.3) and is still open
+    with no linked PR in the dump; whether the gap survives on current
+    numpy is exactly what the Dyno reproducer must establish before this
+    record can advance past unverified.

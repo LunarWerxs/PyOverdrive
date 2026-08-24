@@ -1,0 +1,107 @@
+id: OPP-000020
+title: "contiguous-copy fast path for np.dot / np.matmul on non-contiguous sliced arrays"
+sources:
+  - url: https://github.com/numpy/numpy/issues/19650
+    repository: numpy/numpy
+    type: issue
+    number: 19650
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 197.27
+  baseline: "a[:, 0, :] @ a[:, :, 20] on a = np.random.randn(1000, 100, 1000) (float64, non-contiguous slices), numpy 1.21.1"
+  candidate: "np.ascontiguousarray(a[:, 0, :]) @ np.ascontiguousarray(a[:, :, 20]) -- explicit copy to contiguous layout before the same matrix product"
+  hardware: unknown
+affected_operations: [numpy.dot, numpy.matmul]
+input_regime:
+  dtypes: [float64]
+  sizes: [1000000, 100000]
+  notes: >
+    single reported benchmark point, not a sweep: a is (1000, 100, 1000)
+    float64 (randn); a[:, 0, :] is a (1000, 1000) view with a non-unit,
+    non-trivial stride pattern from indexing the middle axis, and
+    a[:, :, 20] is a (1000, 100) view strided across the last axis; sizes
+    above are the element counts of those two operand views (1e6 and 1e5);
+    no sweep across sizes, dtypes, or slice patterns was run by the reporter.
+status: not_reproduced
+license_review: clean
+reproducer: benchmarks/historical/opp_000020_noncontig_dot.py
+current_numpy_result:
+  verified_speedup: 0.9345963161178055
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, contended box (cpu_busy_before
+    0.36, cpu_busy_after 0.34): the ascontiguousarray-copy candidate does
+    NOT reproduce the reporter's 197.27x figure on any of the 10 tested
+    cases (float32/float64 x n in {100, 300, 1000} x m in {100, 500, 1000}).
+    It LOSES to plain a[:,0,:] @ a[:,:,last] everywhere -- speedup is below
+    1.0x in all 10 cases, with correct=True throughout (no correctness
+    failures, purely a performance loss). Worst: n1000_m100_float32 at
+    0.35x (717929 ns baseline vs 2058533 ns candidate, i.e. ~2.9x slower),
+    and n1000_m100_float64 at 0.39x (1425767 ns vs 3687650 ns). Least bad:
+    n100_m1000_float32 at 0.93x (406643 ns vs 435100 ns) and
+    n100_m100_float64 at 0.93x (32679 ns vs 35115 ns). The pattern across
+    cases is that loss gets worse as the n dimension (the a[:,:,last] view's
+    row count) grows relative to m, i.e. the larger the operand being
+    copied, the more the ascontiguousarray overhead dominates relative to
+    the BLAS matmul it is supposedly amortizing. No case here reaches even
+    1x, let alone the claimed 197x. Evidence:
+    benchmarks/results/OPP-000020/8f8198d9abab.json. Box was contended
+    during this run (another process using ~35% CPU throughout), which may
+    add noise to the absolute timings but does not explain a consistent
+    sub-1x pattern across all 10 cases.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections:
+  - author: seberg
+    quote: >
+      I will note that this is in C-code, and may require a fair amount (or
+      even a larger amount) of understanding the NumPy ufunc machinery.  It is
+      probably doable, but is project sized, especially for a new
+      contributor.
+  - author: seberg
+    quote: >
+      @thisisamardeep probably some size-based heuristic after timing a bit
+      with openblas.  I honestly do not know.  The main difficulty is that it
+      would likely make sense to make this a new `ArrayMethod` API so that
+      the allocated work-space and heuristic decision can be reused over
+      multiple calls to the inner-loop.
+linked_prs: []
+related_opportunities: [OPP-000002, OPP-000004]
+notes:
+  - >
+    The 197.27x figure is computed directly from the reporter's own %timeit
+    numbers (1.59 s vs 8.06 ms) on one hardware/numpy-version combination
+    (numpy 1.21.1, CPU unspecified) and one problem size; unlike OPP-000007
+    there is no reporter-run sweep, so treat this as a single anecdotal data
+    point until reproduced on current NumPy.
+  - >
+    The candidate timing includes the ascontiguousarray copy cost itself (it
+    is inside the timed expression), so 197.27x is a fair total-wall-clock
+    comparison of "generic strided-access multiply" vs "copy to contiguous
+    layout, then BLAS-backed multiply" -- not a number that hides the copy.
+  - >
+    Transparent fast-path shape PyOverdrive could ship: intercept np.dot /
+    np.matmul (or the @ operator) for float32/float64 operands; predicate =
+    at least one 2-D+ operand is neither C- nor F-contiguous
+    (flags['C_CONTIGUOUS'] is False and flags['F_CONTIGUOUS'] is False) and
+    its element count is above a size threshold; route to
+    np.ascontiguousarray() on the offending operand(s) before handing off to
+    the existing BLAS-backed dot/matmul call. This automates exactly the
+    reporter's own workaround.
+  - >
+    Semantics do not change: the copy reproduces the same values bit for bit
+    before the same multiply runs, so correctness risk is low. The open risk
+    is purely a performance heuristic one -- copying a small or
+    already-cheap array can make things slower -- which is the "fairly
+    complicated" (per akhmerov) / "some size-based heuristic ... I honestly
+    do not know" (per seberg) question that nobody in the thread resolved.
+  - >
+    No maintainer objected to the idea itself; seberg's comments are
+    scope/complexity cautions (C-code, ufunc/ArrayMethod machinery, "project
+    sized") aimed at an in-tree implementation, not a rejection. The thread
+    stalled on volunteer bandwidth -- thisisamardeep started, asked for
+    heuristic guidance, then handed it back ("you can pick this up. i am bit
+    tied up.") on 2021-10-19, and nothing further is recorded in the fetched
+    data.

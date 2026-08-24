@@ -1,0 +1,146 @@
+id: OPP-000024
+title: "np.unique on single-character U1/S1 arrays runs ~3x faster through an integer view than natively"
+sources:
+  - url: https://github.com/numpy/numpy/issues/24821
+    repository: numpy/numpy
+    type: issue
+    number: 24821
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T03:32:45Z"
+claim:
+  speedup: 3.06
+  baseline: >-
+    np.unique(x) directly on a 10,000-element U1 array
+    (np.array(list('ASDFGHJKLZ' * 1000), dtype='U1'), a 10-character
+    alphabet), as timed by the issue author with %timeit in the issue body
+    itself, 204 us +/- 4.61 us per loop (mean +/- std. dev. of 7 runs,
+    1,000 loops each). The 3.06 speedup recorded above is DERIVED from the
+    reporter's own pair of numbers (204 / 66.7 = 3.06); the thread never
+    states a ratio explicitly.
+  candidate: >-
+    np.unique(x.view(np.int32)).view(x.dtype) on the same 10,000-element U1
+    array in the same post, 66.7 us +/- 2.91 us per loop (mean +/- std.
+    dev. of 7 runs, 10,000 loops each). A pure-numpy view trick from the
+    issue body, no third-party code involved.
+  hardware: >-
+    unknown; the issue gives no CPU, OS, machine spec, or numpy/Python
+    version anywhere in the dump. The reporter also timed the 10-element
+    case, unique_basic 2.17 us +/- 40.7 ns vs unique_view 2.53 us +/- 38.4
+    ns, i.e. the view path LOSES (2.17 / 2.53 = 0.86x) on tiny arrays, so
+    the claim carries its own anti-regime and a crossover threshold
+    somewhere between 10 and 10,000 elements.
+affected_operations: [numpy.unique]
+input_regime:
+  dtypes: [U1, S1]
+  sizes: [10, 10000]
+  notes: >-
+    Measured concretely only for U1 with an int32 view, return_counts
+    False, at 10 and 10,000 elements drawn from a 10-character alphabet
+    ('ASDFGHJKLZ'). The reporter states "I've played with this a number of
+    ways (e.g. S1 vs U1; int32 vs int64; return_counts = True vs False;
+    100, 1000, or 10k elements) and seem to notice the same pattern", but
+    posts numbers only for the U1 / int32 / return_counts False pairs
+    above. The 10-element case is a measured loss for the view path
+    (0.86x), so the regime is "arrays of decent size" (the reporter's own
+    phrase), not all sizes.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000024_unique_char_view.py
+current_numpy_result:
+  verified_speedup: 43.16
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load): the MECHANISM reproduces, but the headline lives
+    on different surfaces than the claim's. Plain np.unique on U1 via the
+    int32 view wins only 1.31-1.55x from n=1000 up (below the 3.06x
+    claim, which numpy 2.5's faster string unique likely eroded), and S1
+    via uint8 view 1.54-1.73x. The big wins: np.sort on U1 43.16x at
+    n=10000 (253.6 us -> 5.9 us) and 25.1x at 1e6, and
+    unique(return_counts=True) 26.55x. High-byte S1, Greek U1, and
+    ascii94 all check exact. Evidence:
+    benchmarks/results/OPP-000024/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections:
+  - author: ngoldbaum
+    date: "2023-09-27"
+    quote: >-
+      We could probably add a special case in the sorting code to improve
+      performance for sorting single-character arrays. I have no idea if
+      that would be complicated or would make the code difficult to deal
+      with. I'll also note that string sorting is a more general problem
+      than integer sorting, since a generic string sort can't assume that
+      it is handed single-character strings.
+linked_prs: []
+related_opportunities: []
+notes:
+  - >-
+    SHIPPED (2026-08-24) as sort_char_view + unique_char_view
+    (src/pyoverdrive/fastpaths/char_view.py): np.sort AND np.unique (the
+    issue title's own suggestion; sort is where the win actually lives)
+    on 1-D native-byte-order U1/S1, U1 viewed as int32 and S1 as uint8,
+    bit-identical by monotone bijection. Floors from the CHARVIEW-CAL
+    battery (benchmarks/results/CHARVIEW-CAL/9bbe7063c555.json, 0% load):
+    sort 1000 (U1 3.06x there, 33.1x at 10k, n=100 is a wash; S1
+    2.1-2.5x), unique+counts 300 for U1 (1.50x) / 1000 for S1 (2.61x),
+    index/inverse 1000 (U1 1.42x, S1 2.38x, 8.72x at 10k), plain unique
+    10_000 (the n=1000 1.31x straddles the min-win, same rule as
+    unique_sort's int16 floor). numpy 2.5 eroded the claim's 3.06x plain-
+    unique gap to ~1.5x, but the sort kernel gap it rests on GREW: 33x.
+  - >-
+    Provenance of the ngoldbaum quote above: it is an excerpt from the
+    numpy-discussion mailing list, quoted by the reporter inside the issue
+    body (posted 2023-09-27, which is the date recorded here; the dump does
+    not carry the original listserv post date). The body links the thread
+    at
+    https://mail.python.org/archives/list/numpy-discussion@python.org/thread/VF43XVYRFWVUVCMOFPEEI73EVUJ6MRVI/.
+    It reads as caveats from a maintainer who is otherwise sympathetic
+    ("We could probably add a special case"), not as opposition; the issue
+    itself has zero comments and no recorded pushback of any kind.
+  - >-
+    Mechanism, per the same ngoldbaum excerpt: "Looking at a py-spy profile
+    of a slightly modified version of the code you shared, it seems the
+    difference comes down to NumPy's sorting implementation simply being
+    faster for ints than unicode strings. In particular, it looks like
+    string_quicksort_<npy::unicode_tag, char> is two or three times slower
+    than quicksort_<npy::int_tag, int> when passed the same data." The
+    reporter's end-to-end np.unique gap at 10k elements (3.06x derived) is
+    consistent with a 2-3x sort-kernel gap plus the surrounding
+    unique-machinery overheads.
+  - >-
+    The transparent fast path this record recommends: when np.unique is
+    called (no axis argument) on a native-byte-order U1 or S1 array above
+    a calibrated size threshold N*, reinterpret the buffer as integers,
+    run np.unique on that, and reinterpret the result back. For U1 the
+    view target is int32; numpy orders U1 by its single UCS4 code unit,
+    and every valid codepoint (<= 0x10FFFF) is non-negative in int32, so
+    the int32 view is a strictly monotone bijection and the unique values,
+    counts, indices, and inverse are identical by construction. For S1 the
+    view target must be uint8, NOT int8; S1 ordering is unsigned byte
+    order, and a signed int8 view would misorder bytes >= 0x80. Exclude
+    byte-swapped (non-native endian) dtypes and the axis= path;
+    return_counts / return_index / return_inverse pass through unchanged
+    because element positions are unaffected by the reinterpretation.
+  - >-
+    Thread engagement is thin: zero comments, open since 2023-09-27,
+    labeled "01 - Enhancement" by melissawm on 2023-10-06, no linked PRs
+    anywhere in the dump. The issue title targets the sorting kernel
+    itself ("ENH: Sorting single-character arrays (S1 / U1) using integer
+    sorting"), so numpy.sort / numpy.argsort on U1/S1 are plausible
+    additional beneficiaries of the same view trick, but np.unique is the
+    only operation the thread actually measures, hence the single entry in
+    affected_operations.
+  - >-
+    license_review is clean because the candidate is the reporter's own
+    three-line pure-numpy snippet posted in the public issue body; no
+    external library or vendored code is involved.
+  - >-
+    What the Dyno reproducer must establish (full spec in
+    docs/research/opportunities/OPP-000024.md): the U1/int32 and S1/uint8
+    view candidates against stock np.unique across sizes 10 through 1e6,
+    return_counts on and off, small and large alphabets, exact-equality
+    correctness on every output array, the crossover N* (the thread brackets
+    it only between 10 and 10,000), and a separate np.sort-only pair to
+    isolate ngoldbaum's 2-3x sort-kernel figure from the unique-level 3.06x.

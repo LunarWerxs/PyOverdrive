@@ -1,0 +1,114 @@
+id: OPP-000042
+title: "np.nanargmax/np.nanargmin: Python wrapper builds a where(isnan,-inf) masked copy before argmax even with no NaN present; isnan-scan-then-argmax reproduces 1.75x-5.34x idle-box, falls back correctly on NaN"
+sources:
+  - url: https://github.com/pydata/bottleneck
+    repository: pydata/bottleneck
+    type: benchmark
+    state_at_ingestion: null
+    retrieved_at: "2026-08-24T12:00:00Z"
+  - url: https://github.com/numpy/numpy/issues/5691
+    repository: numpy/numpy
+    type: issue
+    number: 5691
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T08:10:16Z"
+claim:
+  speedup: 26.0
+  baseline: >-
+    pydata/bottleneck README benchmark table, run on numpy 2.4.2: numpy's own
+    np.nanargmax and np.nanargmin timed against bottleneck's C
+    implementations. At shape (100,), axis=0: nanargmin speedup factor 25.9x,
+    nanargmax speedup factor 26.0x (bottleneck-over-numpy). At shape
+    (1000,1000), no-NaN data: both drop to 1.2x. The README frames this gap as
+    numpy's Python-level wrapper overhead around plain argmax/argmin, not a
+    C-level algorithmic difference, since the gap all but closes once the
+    array is large enough that the O(n) work dominates the wrapper's fixed
+    cost. No issue number accompanies this source; it is the project's README
+    benchmark table, not a numbered GitHub issue or PR.
+  candidate: >-
+    Not bottleneck's C implementation (out of scope here, third-party code).
+    PyOverdrive's own candidate, distinct from the cited claim: a single O(n)
+    isnan scan over the input, followed by plain np.argmax/np.argmin when no
+    NaN is found, with a fallback to stock np.nanargmax/np.nanargmin when a
+    NaN is present. See current_numpy_result below for this candidate's own
+    measured numbers, which are PyOverdrive's reproduction evidence, not a
+    restatement of the bottleneck figures above.
+  hardware: unknown (bottleneck README states only "numpy 2.4.2"; no CPU/OS given)
+affected_operations: [numpy.nanargmax, numpy.nanargmin]
+input_regime:
+  dtypes: [float64]
+  sizes: [1000, 10000, 100000]
+  notes: >-
+    dtype not stated explicitly in either source; float64 follows from
+    nanargmax/nanargmin requiring floating-point NaN support and is not an
+    invented number. PyOverdrive's own regime (idle Intel box, fp
+    9bbe7063c555): 1-D n=1000, n=10000, n=100000, NaN-free; 1-D n=100000 with
+    1% NaN present (candidate must fall back to stock); 2-D shape (1000,1000)
+    axis=1, NaN-free. bottleneck's own regime (numpy 2.4.2, hardware unknown):
+    1-D shape (100,) axis=0; 2-D shape (1000,1000), axis unspecified, no-NaN.
+    Zen4 dev-box regime (contended, triage only, not part of the claim basis):
+    1-D n=100000 and 2-D (1000,1000) axis=1.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000042_nanargminmax.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy 2.5.2,
+    0% load). Candidate = isnan-scan-then-argmax, scan cost included in the
+    timing. nanargmax 1-D: n=1000 1.88x, n=10000 1.75x, n=100000 3.04x.
+    nanargmax 2-D (1000,1000) axis=1: 5.34x. nanargmax 1-D n=100000 with 1%
+    NaN present (wasted scan, falls back to stock): 0.89x, i.e. a measured
+    slowdown, as expected when the scan finds a NaN and the candidate must
+    still hand off to the stock path. Every winning cell bit-identical to
+    stock. Evidence: benchmarks/results/BATCH6-CAL/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections: []
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000041]
+notes:
+  - >-
+    Mechanism: np.nanargmax/np.nanargmin are Python-level wrappers that build
+    a where(isnan, -inf) (or +inf for nanargmin) masked COPY of the input
+    before ever calling argmax/argmin, unconditionally, even when the input
+    contains no NaN at all. A single O(n) isnan scan followed by plain
+    np.argmax/np.argmin returns the identical index to stock when no NaN is
+    present, at the cost of one linear pass instead of a full masked-array
+    allocation and copy. When the scan finds a NaN, the candidate falls back
+    to stock nanargmax/nanargmin so behavior (including the ValueError stock
+    raises on an all-NaN slice) is preserved exactly. numpy/numpy#5691
+    ("nanmax strangely slow (3x slower than nanmin)", closed) is cited here as
+    the same nan-wrapper class of evidence already ingested for OPP-000041,
+    not as a new independent report specific to nanargmax/nanargmin.
+  - >-
+    Contended supporting evidence only, not part of the claim basis: dev-box
+    AMD Zen4 (fp 8f8198d9abab, numpy 2.4.5, 42% foreign load, triage only):
+    nanargmax 1-D n=100000 14.17x, 2-D (1000,1000) axis=1 20.83x. These
+    numbers are larger than the idle-box figures, which is the expected
+    direction, not an anomaly: stock's masked-copy allocation suffers more
+    under memory pressure than the candidate's single linear scan, so
+    contention widens the gap rather than narrowing it. The idle-box numbers
+    remain the citable floor; this dev-box run is kept as corroboration only
+    and its fingerprint is deliberately not listed in current_numpy_result.
+  - >-
+    Correctness risk (medium): stock np.nanargmax/np.nanargmin raise
+    ValueError on an all-NaN slice; the candidate's isnan scan must detect
+    this case and fall back to stock so the identical ValueError is raised,
+    not silently return an index. Tie-breaking on repeated max/min values
+    must also match stock's first-occurrence convention exactly, since the
+    candidate's plain argmax/argmin call is only valid as a substitute if its
+    tie-breaking is identical to stock's own argmax/argmin, which the
+    reproducer must confirm cell-by-cell alongside the bit-identical checks
+    already run on the idle box.
+  - >-
+    license_review clean: isnan scan plus plain argmax/argmin is a standard,
+    well-known technique (short-circuiting on an already-necessary NaN check
+    before falling back to the existing wrapper); no third-party code is
+    involved, unlike bottleneck's own C implementation which is out of scope
+    and not adapted here.
+  - >-
+    SHIPPED (2026-08-24) as nanargminmax_scan (src/pyoverdrive/fastpaths/nanargminmax_scan.py): nanargmax_scan/nanargmin_scan, float64, floor 300. All-NaN input re-raises stock's ValueError through the new StockRaised dispatcher protocol (no spurious fast-path-failure warning, no double stock call). Bit-identical. 31 differential tests plus a property suite.

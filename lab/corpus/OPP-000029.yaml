@@ -1,0 +1,167 @@
+id: OPP-000029
+title: "ENH request: complex-by-real matmul (C @ R) via one strided real GEMM instead of promoting R to complex - proposal only, no numpy benchmark in thread"
+sources:
+  - url: https://github.com/numpy/numpy/issues/24565
+    repository: numpy/numpy
+    type: issue
+    number: 24565
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T07:00:00Z"
+claim:
+  speedup: null
+  baseline: >-
+    No numpy benchmark appears anywhere in the thread. Numpy's current
+    behavior for C @ R (a complex-valued MxN matrix times a real-valued NxQ
+    matrix) is implied only by the reporter's framing: numpy presumably
+    promotes the real operand R to complex and dispatches to a single
+    complex GEMM. No %timeit output, code snippet, matrix sizes, dtypes,
+    numpy version, or hardware for this baseline appear in the issue body
+    or its one comment.
+  candidate: >-
+    Also unmeasured. The reporter's proposal, quoted verbatim from the issue
+    body: "it should be possible to perform the C @ R operation between the
+    two matrices using one strided GEMM call, exploiting the contiguous
+    nature of the real and imaginary parts." No implementation, pseudocode,
+    or benchmark is posted. The reporter's only follow-up comment
+    (2023-09-02) states: "I've had a brief look at the ufunc machinery and
+    couldn't see a simple way to implement this, the operands are directly
+    coerced to a common type and there seems to be no way to define a
+    custom C function for a given LHS+RHS pair. Any idea?" - unanswered.
+    The only number anywhere in the thread is a hedged, unattributed aside
+    in the issue body: "I suppose MATLAB is performing something similar as
+    I've noticed a 2x difference in execution time between `C * R` and
+    `(R' * C')'`." This is deliberately NOT adopted as claim.speedup: the
+    sentence never names which library (numpy or MATLAB) the "2x" was
+    measured in, carries no code, sizes, dtypes, or hardware, and compares
+    two different expressions (C*R vs the transposed-trick (R'*C')') rather
+    than timing the proposed single-strided-GEMM candidate directly.
+  hardware: >-
+    unknown; the thread gives no CPU, OS, numpy version, or Python version
+    anywhere in the issue body or its one comment.
+affected_operations: [numpy.matmul]
+input_regime:
+  dtypes: []
+  sizes: []
+  notes: >-
+    Unspecified throughout. The issue names only symbolic operands "a
+    complex-valued matrix C of size MxN" and "a real-valued one R of size
+    NxQ" - no concrete numpy dtype (complex64/complex128,
+    float32/float64) and no concrete dimensions appear anywhere in the
+    issue or its one comment. This is a conceptual feature request with
+    zero attached measurement or reproduction code.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000029_matmul_complex_real.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load): the split-GEMM route is REAL but its regime is
+    narrow and shape-inverted from naive expectation. On most measured
+    shapes stock's upcast-then-complex-GEMM WINS on this box (split at
+    0.36-0.84x for square/tall C in complex128; OpenBLAS's zgemm is
+    strong and the strided .real/.imag views tax the real GEMMs), but
+    when C is short against a large R - (64,2000)@(2000,2000) - the
+    upcast copy of R dominates stock and split wins 3.08x (c128) and
+    3.16x (c64). Reverse direction R@C is a mild 1.17-1.18x. BATCH4-CAL
+    sweeps m x n x q to establish whether the winning regime is crisp
+    enough to ship; verdict pending that battery. Evidence:
+    benchmarks/results/OPP-000029/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: high
+implementation_risk: high
+maintainer_objections: []
+linked_prs: []
+related_opportunities: [OPP-000027]
+notes:
+  - >-
+    SHIPPED (2026-08-24) as matmul_split_complex
+    (src/pyoverdrive/fastpaths/matmul_split_complex.py): matmul(C, R)
+    for 2-D complex128+float64 / complex64+float32 pairs with
+    m <= 256, n >= 1000, q >= 500, both operands all-finite (the split
+    changes non-finite propagation; same guard class as dot_mixed_view/
+    OPP-000027). Regime from BATCH4-CAL: every measured cell in that box
+    wins 1.55-7.5x (the upcast copy of R dominates stock there), while
+    square/tall C measured 0.36-0.84x and stays on stock - the m <= 256
+    bound is a measured cell edge, not an extrapolation. Reverse
+    direction R@C measured 1.17-1.18x (below min-win), unshipped.
+    license_review clean: identity decomposition from first principles,
+    no thread code existed to reuse.
+  - >-
+    Mechanism, as the thread states it (issue body, LemonBoy, 2023-08-28):
+    "it should be possible to perform the C @ R operation between the two
+    matrices using one strided GEMM call, exploiting the contiguous nature
+    of the real and imaginary parts." The reporter frames this as analogous
+    to MATLAB: "I suppose MATLAB is performing something similar as I've
+    noticed a 2x difference in execution time between `C * R` and
+    `(R' * C')'`." No mechanism detail beyond this one sentence is given;
+    there is no discussion of how the strided GEMM call would be issued
+    (one BLAS call vs two), memory layout requirements, or how the result
+    would be reassembled into a complex array.
+  - >-
+    Transparent fast-path sketch (not implemented, drafted for this
+    record only). PREDICATE: a matmul-shaped call where one operand's
+    dtype is a numpy complex type (complex64/complex128) and the other is
+    a real floating type (float32/float64), both operands finite, shapes
+    valid for 2-D matrix multiplication. ROUTE: split the complex operand
+    C = Cr + i*Ci into its contiguous real and imaginary views, run two
+    real GEMMs (Cr @ R and Ci @ R), recombine as (Cr @ R) + i*(Ci @ R).
+    Coverage gap that must be stated plainly: PyOverdrive patches
+    module-level numpy names only, so a call written as np.matmul(C, R)
+    is reachable and patchable, but the @ operator (which invokes
+    ndarray.__matmul__ directly) and any ndarray method form such as
+    C.dot(R) are NOT reachable by a module-level monkeypatch. This matters
+    concretely here because every example in the issue itself is written
+    in the unreachable operator form ("C @ R", "C * R", "(R' * C')'"), not
+    as numpy.matmul(...) calls.
+  - >-
+    Semantics hazard: splitting a complex GEMM C @ R into two real GEMMs
+    (real(C) @ R and imag(C) @ R, recombined as real + i*imag) changes how
+    IEEE-754 non-finite values propagate compared to a single native
+    complex GEMM, because complex multiply-accumulate mixes real and
+    imaginary cross terms within one operation, and exactly those cross
+    terms are what the split discards. PyOverdrive's own shipped
+    dot_mixed_view fast path (see related_opportunities OPP-000027) hit
+    this precise hazard and refused to run on any operand containing
+    non-finite (inf/nan) values for exactly this reason. That shipped
+    precedent is why correctness_risk is recorded as high here, even
+    though this numpy thread itself never mentions inf, nan, or
+    correctness anywhere - the hazard is inferred from PyOverdrive's own
+    prior experience with the same class of decomposition, not from any
+    statement in the thread.
+  - >-
+    Implementation risk, from the reporter's own (non-maintainer)
+    investigation, comment of 2023-09-02: "I've had a brief look at the
+    ufunc machinery and couldn't see a simple way to implement this, the
+    operands are directly coerced to a common type and there seems to be
+    no way to define a custom C function for a given LHS+RHS pair. Any
+    idea?" This went unanswered. It describes a structural obstacle inside
+    numpy's own ufunc dispatch (not a PyOverdrive-specific concern), which
+    is why implementation_risk is recorded as high.
+  - >-
+    maintainer_objections is empty because no numpy maintainer ever
+    commented on this thread. author_association is "NONE" for both the
+    issue and its single comment, and both are from the same user
+    (LemonBoy, the reporter, replying to himself). Thread engagement is
+    thin: 1 comment total, opened 2023-08-28, last updated 2023-09-04,
+    state "open" at ingestion, labeled only "01 - Enhancement", zero
+    reactions, no linked PRs anywhere in the dump.
+  - >-
+    Age and version caveat: nearly three years of inactivity between the
+    last thread update (2023-09-04) and this record's retrieval
+    (2026-08-24T07:00:00Z), with no numpy version named anywhere in the
+    issue or comment. It is unknown whether numpy's ufunc/matmul dispatch
+    machinery has changed since 2023 in ways that would ease or foreclose
+    the reporter's proposal, and unknown whether this is still an accurate
+    description of numpy's current complex-by-real matmul behavior.
+  - >-
+    license_review is pending, not clean, because no code was ever posted
+    in this thread (unlike OPP-000024's reporter, who posted a working
+    snippet) - there is nothing yet to review for licensing, and no
+    reproducer can be written from the thread alone.
+  - >-
+    affected_operations is recorded as [numpy.matmul] because that is the
+    numpy function underlying the "@" syntax the issue uses throughout;
+    the thread itself never names numpy.matmul, numpy.dot, or any other
+    function explicitly, only the "@" and "*" operators on matrix objects.

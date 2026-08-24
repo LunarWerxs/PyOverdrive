@@ -1,0 +1,65 @@
+id: OPP-000008
+title: threaded chunked dispatch for ufuncs (np.sin releases the GIL; NumPy stays single-threaded)
+sources:
+  - url: https://github.com/numpy/numpy/issues/8208
+    repository: numpy/numpy
+    type: issue
+    number: 8208
+    state_at_ingestion: closed
+    retrieved_at: 2026-08-23T08:01:33Z
+claim:
+  speedup: 3.0
+  baseline: "np.sin(x, out=x) on a 1e7-element float64 array (np.linspace(0, 2*pi, 1e7)), single-threaded, timed with timeit"
+  candidate: "same np.sin call split into 4 contiguous chunks, each submitted to a ThreadPoolExecutor(max_workers=4) as executor.submit(lambda x: np.sin(x, out=x), chunk)"
+  hardware: "reporter's own machine, described only as 4 physical cores; no OS or CPU model given"
+affected_operations: [numpy.sin]
+input_regime:
+  dtypes: [float64]
+  sizes: [10000000]
+  notes: "single contiguous 1D array, no NaNs or special values implied; the claim is specific to a compute-bound transcendental ufunc kernel. Reporter notes simple ufuncs like addition probably will not scale (memory-bandwidth bound), which is exactly the contrast case this record's reproducer adds."
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000008_parallel_ufunc.py
+current_numpy_result:
+  verified_speedup: 7.21
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Reproduced and exceeded (Dyno 2026-08-23, numpy 2.4.5, 16C/32T Zen 4).
+    np.sin 1e7: 4t 4.30x, 8t 6.28x, 16t 7.21x (claim was ~3x at 4t). 1e6:
+    8t is the sweet spot at 5.70x. 1e5: marginal (4t 1.49x, 16t LOSES 0.75x),
+    so the parallel crossover sits between 1e5 and 1e6 on this machine. The
+    memory-bound control HALF-holds: np.add 1e7 still gains 2.38-2.75x
+    (dual-channel DDR5 has headroom), it just plateaus by 8t. Evidence:
+    benchmarks/results/OPP-000008/8f8198d9abab.json.
+    SHIPPED as the pyrallel_<op> fast-path family (src/pyoverdrive/fastpaths/
+    parallel_ufunc.py on the PyRallel core src/pyoverdrive/parallel/): sin,
+    cos, tan, exp, log, log10, tanh, sqrt for float64 and float32, thresholds
+    per (op, dtype) and a byte-keyed thread schedule derived by
+    lab/cli/calibrate_pyrallel.py from the 112-case PYRALLEL-CAL battery
+    (benchmarks/results/PYRALLEL-CAL/, bit-identical on every case). That
+    battery ran under 27-44% foreign CPU load and is recorded as contended,
+    so its thresholds are conservative: sin float64 dispatches from 1e5
+    (1.56x) and reaches 6.85x at 1e7 on 16 threads; sqrt, the memory-bound
+    control, only earns 1.57x from 1e6 float64 and 2.6x at 1e7.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections:
+  - author: shoyer
+    objection: "dask.array is a pretty solid way to do parallel ufuncs with NumPy and multi-threading. First class support for parallel processing is probably out of scope for NumPy."
+  - author: rgommers
+    objection: "Agreed, that's definitely out of scope. We should make it possible (releasing GIL when possible etc.), but we shouldn't add functions like np.parallel."
+  - author: rgommers
+    objection: "Besides dask.array there's also IPython parallel, joblib.Parallel, and a bunch more (popular topic). Going to close this, since it's out of scope."
+linked_prs:
+  - https://github.com/pygeos/pygeos/pull/2
+linked_commits: []
+related_opportunities: [OPP-000000, OPP-000006]
+notes:
+  - "Closed same day it was opened (2016-10-24), as out-of-scope rather than as technically wrong; no maintainer disputed the 3x number itself."
+  - "rgommers' stance is the load-bearing one for PyOverdrive: NumPy should make GIL-releasing building blocks available but will not ship a first-class parallel-ufunc API itself, leaving joblib/dask/IPython-parallel as the sanctioned external path. That is precisely the gap an accelerator layer like PyOverdrive can fill without needing NumPy's own consent."
+  - "The linked PR (pygeos/pygeos#2) is a tangential cross-reference from the crawler, not an attempt at this feature; it replaces a NumPy structured dtype with a Python extension type and does not touch threading."
+  - "The reproducer's baseline is a plain np.sin(x) call (per assignment) rather than the reporter's out=x in-place variant, and it adds np.add at the largest size as a memory-bound negative control the original issue predicted but never measured."
+  - "Shipping note (2026-08-23): np.errstate is thread-local in NumPy, so chunk kernels on worker threads would not see the caller's error mode. The shipped path mirrors the caller's geterr() into every chunk and refuses to dispatch under raise/call/log modes, verified by tests/test_pyrallel.py."
+  - "Shipping note: reductions and binary ufuncs are excluded from this family on purpose (ADR-0002); the np.add control's 2.4-2.75x is a bandwidth effect that needs its own evidence and a broadcasting-aware predicate."
+  - "Shipping note (2026-08-23, second batch): the np.add control's bandwidth gain is now its own fast-path family, pyrallel_add/subtract/multiply/divide/maximum/minimum (src/pyoverdrive/fastpaths/parallel_binary.py) for same-shape same-dtype float64/float32/int64 operands, calibrated from the 80-case PYRALLEL-BIN-CAL battery (benchmarks/results/PYRALLEL-BIN-CAL/, contended, 38-51% foreign load): thresholds sit at 1e6-1e7 elements because below ~1e6 a binary op finishes in tens of microseconds and threading loses 6-14x; wins are 1.3-2.2x at 1e6-1e7. Through the public API np.add at 1e7 float64 measured 1.86x (MVP-BASELINE). The operator form a + b never reaches numpy.add and is NOT accelerated."

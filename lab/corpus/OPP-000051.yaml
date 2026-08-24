@@ -1,0 +1,89 @@
+id: OPP-000051
+title: "numpy.take with out= is slower than take without it - stock buffers the gather so out survives an out-of-bounds index (seberg's diagnosis); out[...] = a[indices] wins 1.3-3.3x bit-identically AND keeps that guarantee, because the fancy-index gather materializes (and raises) before out is touched"
+sources:
+  - url: https://github.com/numpy/numpy/issues/28636
+    repository: numpy/numpy
+    type: issue
+    number: 28636
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T10:41:00Z"
+claim:
+  speedup: null
+  baseline: >-
+    ricardoV94 (issue body, 2025-04-03): np.take runs measurably slower
+    when out= is provided than when it allocates its own result.
+    ngoldbaum reproduced in-thread: "17.3 us plus/minus 459 ns per loop"
+    with out= against a faster no-out call on the same input. seberg's
+    diagnosis (in-thread): "The reason is that take ensures that the
+    output is unchanged when an out-of-bounds access happens... I would
+    be OK if a few people are in favor (with a release note)" - i.e.
+    stock routes the out= form through a buffered write so a raising
+    index cannot leave out partially written.
+  candidate: >-
+    The thread's own direction, adopted upstream in intent but not yet
+    landed: mattip (2025-08-20): "We discussed this at a triage meeting
+    and would like to see a PR to implement the idea of avoiding a
+    copy." PyOverdrive's candidate is the plain out[...] = a[indices]
+    fancy-index gather plus one assignment - which needs NO release
+    note, because the gather materializes its result (and raises
+    IndexError on any bad index) before out is assigned, preserving
+    exactly the guarantee stock's buffering exists to provide.
+  hardware: "ngoldbaum's timing hardware unstated in the dump."
+affected_operations: [numpy.take]
+input_regime:
+  dtypes: [float64, int64]
+  sizes: [1000, 10000, 100000, 1000000, 10000000]
+  notes: >-
+    take(a, indices, out=out) exactly: 1-D plain a (float64/int64), 1-D
+    plain intp indices with size >= 1000, out matching dtype and shape.
+    axis=, mode=, and the no-out form refuse to stock. Negative indices
+    wrap exactly as stock's default mode='raise'. An out-of-bounds index
+    reruns STOCK inside the run so the caller sees stock's own
+    IndexError (StockRaised pattern) with out untouched either way.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000051_take_out.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load), exact bit-identity checks
+    (benchmarks/results/BATCH8-CAL/9bbe7063c555.json): gathered sizes
+    1000: 3.34x, 3000: 2.17x, 10_000: 2.15x, 100_000: 1.82x float64 /
+    1.80x int64, 1M: 1.58x, 10M: 1.30x - a win at every measured cell.
+    Reproducer (benchmarks/results/OPP-000051/): 2.08x at 10_000, 1.37x
+    at 1M, 1.34x at 10M. Dev-box probe (AMD Zen 4, numpy 2.4.5,
+    contended): 2.93x at 1M - consistent direction.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections:
+  - >-
+    seberg's caveat is about UPSTREAM changing the default ("I would be
+    OK if a few people are in favor (with a release note)") - the
+    buffered write is a deliberate guarantee, not an accident. It does
+    not bind this path, which preserves the guarantee: the gather
+    raises before out is assigned, so out is never partially written.
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000004]
+notes:
+  - >-
+    Comparison mode: bit-identical, and the returned object is the SAME
+    out array stock returns.
+  - >-
+    The issue is OPEN with upstream triage explicitly inviting the same
+    fix (mattip, 2025-08-20); if numpy lands it, this path's margin
+    shrinks to zero and the monitored-status discipline should retire
+    it - a clean example of the corpus's continuously_monitored end
+    state.
+  - >-
+    license_review clean: fancy-index gather plus assignment, a trivial
+    standard technique; no code from the thread.
+  - >-
+    SHIPPED (2026-08-24, batch 8) as take_index_assign
+    (src/pyoverdrive/fastpaths/take_index_assign.py): SIZE_MIN=1000.
+    18 differential tests (including the no-RuntimeWarning
+    out-of-bounds StockRaised route) plus a property net over
+    pos/mixed/out-of-bounds index draws for both dtypes.

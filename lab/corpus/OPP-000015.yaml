@@ -1,0 +1,141 @@
+id: OPP-000015
+title: "pre-sorted query-array fast path for np.searchsorted on large arrays"
+sources:
+  - url: https://github.com/numpy/numpy/issues/10937
+    repository: numpy/numpy
+    type: issue
+    number: 10937
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 10.71
+  baseline: >
+    np.searchsorted(x, y) on two length-5,000,000 float64 arrays from
+    np.random.randn, where x is already sorted (the haystack) but y (the
+    query array) is left unsorted. Reporter's %time: Wall time 10.4 s.
+  candidate: >
+    y.sort() immediately before the same np.searchsorted(x, y) call, so both
+    x and y are sorted; timed together with the cost of sorting y.
+    Reporter's %time: Wall time 971 ms.
+  hardware: >
+    unknown; the reporter gave only Jupyter %time wall-clock/CPU numbers
+    with no machine spec. The 10.71x speedup value here is computed from
+    the reporter's own wall-clock figures (10.4 s divided by 0.971 s); the
+    reporter never stated an explicit "Nx" number directly.
+affected_operations: [numpy.searchsorted]
+input_regime:
+  dtypes: [float64]
+  sizes: [5000000]
+  notes: >
+    reporter's single example has both arrays the same length (5,000,000,
+    np.random.randn); eric-wieser cautioned in-thread that the benefit is
+    tied to comparable haystack/needle sizes ("For large Nb, `search_sorted`
+    is faster than the merge approach"), so size-ratio behavior is
+    unverified outside this one shape.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000015_searchsorted_sorted_queries.py
+current_numpy_result:
+  verified_speedup: 14.47
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, box CONTENDED (conditions:
+    cpu_busy_before 0.457, cpu_busy_after 0.390 - another process was
+    competing for CPU during this run). 14 cases, argsort_unpermute
+    candidate vs stock np.searchsorted, all correct=true (no correctness
+    failures anywhere in the sweep). The mechanism reproduces, but below the
+    reporter's claimed 10.71x at the reporter's own scale: at
+    equal_n5000000_float64_reporterscale (x and y both 5,000,000 float64,
+    the reporter's exact shape), stock took 4790.3 ms vs candidate 650.1 ms,
+    a 7.37x speedup - a real, substantial win but a materially smaller one
+    than the 10.71x claim, plausibly depressed further by contention. Best
+    result in the sweep is equal_n1000000_int64 (x and y both 1,000,000
+    int64): stock 1512.5 ms vs candidate 104.6 ms, 14.47x. Large float64
+    also wins clearly at 1e5-1e6 (2.17x-2.56x) and on the size-ratio sweeps
+    once len(y) >= 1e4 (2.32x-2.56x). It LOSES at small/skewed sizes,
+    confirming juliantaylor's caveat that the search-space-narrowing
+    heuristic "is actually harmful for the unsorted performance": stock
+    wins at equal_n1000_float64 (0.41x), equal_n1000_int64 (0.51x),
+    equal_n10000_int64 (0.99x, essentially a wash), and
+    ratio_x1000000_y1000_float64 (0.73x, small query array against a large
+    haystack). Evidence: benchmarks/results/OPP-000015/8f8198d9abab.json.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections:
+  - author: juliantaylor
+    quote: >
+      the optimization of reducing the search space is actually harmful for
+      the unsorted performance here, we knew these cases exist when it was
+      implemented, but at the time the binsearch was also untyped so in
+      total the performance was still better for all cases. It might be
+      worthwhile to tune this code again a bit for unsorted keys.
+  - author: charris
+    quote: >
+      Agreed that the effect is unexpectedly large, my back of the envelope
+      calculation, which may be way off, gives me an expected speedup of
+      ~7%. I'm going to guess what is going on is a pattern of memory
+      accesses that doesn't change much search to search, so cache may come
+      into play. For sorted keys one can also proceed by taking increasingly
+      large jumps upward, followed by binary search.
+  - author: eric-wieser
+    quote: >
+      Note that a `merge_sorted(a, b)` implementation would be
+      `O(Na + Nb)`, whereas search_sorted (without the optimization above
+      is `O(Na log Nb)`. For large Nb, `search_sorted` is faster than the
+      merge approach.
+linked_prs:
+  - https://github.com/matplotlib/matplotlib/pull/14913
+linked_commits: []
+related_opportunities: [OPP-000007, OPP-000001]
+notes:
+  - >-
+    SHIPPED (2026-08-23) as searchsorted_sortqueries
+    (src/pyoverdrive/fastpaths/searchsorted_sortqueries.py): argsort the
+    queries, stock-searchsorted the sorted copy, scatter back through the
+    permutation - bit-identical for any values by per-element
+    independence, NaN and abusive unsorted-haystack input included. The
+    SEARCHSORTED-CAL gap battery cut the dispatch region hard, exactly
+    along juliantaylor's caveat: stock is already fast on ANY
+    query-locality (sorted 0.79-0.93x, 1%-swapped 0.48x, 5-10%-shuffled
+    1.07-1.08x, DESCENDING 0.62x despite maximal descent count), so the
+    predicate gates on a 4096-pair sampled disorder estimate
+    (min(descents, ascents) >= 0.40 - only random-like orders pass), a
+    haystack floor of 1e4 (x=64 loses 0.56x, x=1e3 0.95x), and a 10x
+    query:haystack skew cap (100x skew dies at 0.95-1.32x). Inside the
+    gate: 2.2-3.6x float64, up to 14.5x int64, side='right' 3.21x.
+  - >
+    The reporter's number is a computed ratio from raw %time output (10.4 s
+    to 971 ms, ~10.71x wall-clock at N=5,000,000 float64), not a stated
+    "Nx" claim, and hardware is unspecified; treat as illustrative until
+    reproduced on fingerprinted hardware.
+  - >
+    charris's own back-of-envelope estimate for the documented algorithmic
+    effect (the "last success as first trial" binary-search heuristic
+    already in searchsorted) was only "~7%", far below the observed
+    ~10.7x; juliantaylor's branch-misprediction explanation is an offered
+    hypothesis that was never confirmed with follow-up measurement in the
+    thread.
+  - >
+    juliantaylor's second comment is a direct caveat against a naive
+    "always assume sorted" heuristic: the same search-space-narrowing
+    behavior that helps sorted queries is "actually harmful for the
+    unsorted performance", so any transparent fast path must gate on a
+    real sortedness check rather than applying unconditionally.
+  - >
+    No PR was ever opened against numpy/numpy for this issue in eight
+    years open; the only recorded cross-reference is an unrelated
+    matplotlib PR (#14913, reimplementing NonUniformImage/PcolorImage),
+    not an attempt at this feature.
+  - >
+    Proposed transparent fast path: on np.searchsorted(a, v) with v above
+    a size threshold (to be set by the reproducer sweep), run an
+    OPP-000007-style O(n) monotonicity precheck on v; if v is not already
+    sorted, argsort v, run searchsorted against the sorted copy, then
+    unpermute the result indices back into v's original order using that
+    same argsort permutation. No API change; output should be
+    bit-identical to stock, since each element's insertion index does not
+    depend on v's other elements, so no stability requirement on the
+    argsort. Open question for the reproducer: does the 2018-era win still
+    hold on current numpy and modern hardware, and across the
+    haystack/needle size ratios eric-wieser flagged.

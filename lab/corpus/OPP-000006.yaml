@@ -1,0 +1,55 @@
+id: OPP-000006
+title: SLEEF SIMD library for transcendental functions (log10, sin, cos, exp, etc.)
+sources:
+  - url: https://github.com/numpy/numpy/issues/23068
+    repository: numpy/numpy
+    type: issue
+    number: 23068
+    state_at_ingestion: open
+    retrieved_at: 2026-08-23T08:01:30Z
+claim:
+  speedup: 4.0
+  baseline: np.log10 on AArch64 using scalar libm (non-AVX512 platforms have no vectorized transcendental path)
+  candidate: SLEEF-vectorized transcendental loops combined with SVE intrinsics (per PR #22265)
+  hardware: AArch64, Fujitsu A64FX (Armv8.2a + SVE), NumPy 0+untagged.28802.g57e71fd (1.23.3-dev build), Python 3.10.7 / GCC 11.3.0
+affected_operations: [numpy.log10, numpy.log, numpy.log2, numpy.sin, numpy.cos, numpy.tan, numpy.exp]
+input_regime:
+  dtypes: [float32, float64]
+  sizes: []
+  notes: reporter supplied only a graph image (not machine-readable); no exact array sizes given. Gain scales with SIMD lane count (N lanes), reduced by Python/dispatch overhead. Only relevant on architectures that lack an existing vectorized transcendental path (e.g. AArch64/SVE); x86-64 already gets vectorization via SVML on AVX512.
+status: unverified
+license_review: pending
+reproducer: benchmarks/historical/opp_000006_log10_simd.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Baseline-only Dyno run 2026-08-23 on numpy 2.4.5 (x86-64, AVX512-capable;
+    not the AArch64/SVE hardware the original claim used). No SLEEF-backed
+    candidate exists, so this only measures the stock-NumPy per-element
+    throughput floor (median_ns / n) for log10/log/log2/exp, float64 and
+    float32, n in {10000,1000000}. float64 @ n=1e6: log10 4.31 ns/elem, log
+    4.21, log2 5.43, exp 3.29. float64 @ n=1e4: log10 3.41, log 3.40, log2
+    4.62, exp 2.40. float32 @ n=1e6: log10 3.50, log 1.78, log2 3.33, exp
+    1.47. float32 @ n=1e4: log10 2.45, log 1.21, log2 2.19, exp 0.98.
+    Evidence: benchmarks/results/OPP-000006/8f8198d9abab.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: high
+maintainer_objections:
+  - author: mattip
+    quote: "We are trying to move towards using universal intrinsics inside NumPy, so I am not sure we would want to mix in a whole new library with a different paradigm."
+  - author: mattip
+    quote: "SLEEF's sources are twice as large as SVML, and the scope is larger. Would we then declare that we are not going to move these functions to universal intrinsics?"
+  - author: mattip
+    quote: "I don't think SLEEF is a step in the right direction, I think we should close this."
+  - author: Mousius
+    quote: "SLEEF could provide some short-term boost though I don't think it handles errors correctly from my initial look at it."
+linked_prs:
+  - numpy/numpy#23603
+linked_commits: []
+related_opportunities: []
+notes:
+  - "Issue remains open (not merged, not formally closed) but dormant since 2023-05-19; last comment is mattip recommending closure with no resolution recorded."
+  - "Author's SLEEF branch (github.com/yamadafuyuka/numpy, branch add_SLEEF) was never upstreamed; SVE companion PR #22265 referenced in the issue body is not linked in the tracked cross-references."
+  - "Reproduction needs a SLEEF-backed candidate implementation, which does not exist in PyOverdrive yet; the current_numpy_result only records the stock-NumPy baseline throughput floor, so this record is evidence-annotated but not verified, and status correctly stays unverified rather than advancing to reproduced or not_reproduced."

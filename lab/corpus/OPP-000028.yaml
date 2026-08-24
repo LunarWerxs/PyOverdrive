@@ -1,0 +1,139 @@
+id: OPP-000028
+title: "argsort on already-sorted int64 data regressed roughly 3.6x-4.1x after numpy 2.0 switched to the AVX2 x86-simd-sort argsort (upstream fix possibly merged for 2.3.0; must re-measure)"
+sources:
+  - url: https://github.com/numpy/numpy/issues/28714
+    repository: numpy/numpy
+    type: issue
+    number: 28714
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T03:32:51Z"
+claim:
+  speedup: 4.07
+  baseline: >-
+    arr.argsort() on ordered int64 input under the AVX2 argsort introduced
+    by numpy PR 25610. The 4.07 figure is the Ratio column printed verbatim
+    in r-devulap's ASV table in the thread (2025-04-15) for
+    bench_function_base.Sort.time_argsort('quick', 'int64', ('ordered',)),
+    comparing Before [174ac7bc] <main> at 63.8us against After [680b6823]
+    <avx2_arg> at 260us (the thread prints 63.8+/-0.5us and 260+/-1us; the
+    plus-minus and micro-sign glyphs are transliterated to ASCII here; the
+    array size for that ASV run is not stated in the comment). The
+    reporter's own timings corroborate the magnitude, derived: 1.59 ms
+    (numpy 2.0) / 444 us (numpy 1.26.4) = 3.58x for arr = np.arange(10**5)
+    with %timeit arr.argsort(); numpy 2.2.4 measured 1.6 ms on the same
+    call, so the regression persisted at least through 2.2.4.
+  candidate: >-
+    numpy's own prior argsort path, before PR 25610. Concretely, the fast
+    side of both measurements in the thread is stock numpy without the AVX2
+    argsort kernel, r-devulap's Before [174ac7bc] <main> column (63.8us) and
+    the reporter's numpy 1.26.4 run (444 us at N = 10**5). No third-party
+    candidate implementation appears in the thread; the claim is a
+    regression relative to numpy's own earlier behavior, not a novel
+    algorithm.
+  hardware: >-
+    reporter's environment block gives Linux (Ubuntu, kernel
+    6.11.0-21-generic, node 'brokenglass'), x86_64, OpenBLAS-detected
+    architecture 'Haswell', SIMD found up to AVX2 (SSSE3 through FMA3 and
+    AVX2; every AVX512 variant listed under not_found), Python 3.12.3,
+    OpenBLAS 0.3.28 with 32 threads. So the regression was observed on an
+    AVX2-capable machine with no AVX512. The hardware behind r-devulap's
+    ASV table is not stated in the thread.
+affected_operations: [numpy.argsort]
+input_regime:
+  dtypes: [int64]
+  sizes: [100000]
+  notes: >-
+    Already-sorted (ordered) input is the entire regime. The reporter's
+    repro is np.arange(10**5), strictly increasing int64 with no
+    duplicates, default kind ('quick'); r-devulap's ASV row is the
+    ('ordered',) pattern with 'quick' and 'int64'. The reporter explicitly
+    measured the opposite regime too and saw improvement, not regression
+    ("On non-sorted data, I am seeing a performance enhancement when
+    upgrading to 2.0"), and r-devulap scopes the damage to "ordered arrays
+    specially on 64-bit dtypes". Context is pandas working through
+    performance regressions after moving its dev pin to numpy 2.0+
+    (pandas-dev/asv-runner issue 50).
+status: not_reproduced
+license_review: pending
+reproducer: benchmarks/historical/opp_000028_argsort_sorted_regression.py
+current_numpy_result:
+  verified_speedup: 2.12
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load): the REGRESSION is NOT reproduced on current numpy -
+    argsort on already-sorted int64 is ~18-25x FASTER than on random
+    data (1.81 ms vs 32.7 ms at 1e6), i.e. the sorted case is again the
+    fast case, consistent with the linked fix having merged upstream.
+    The strictly-sorted arange candidate wins only inconsistently
+    (1.02x at 1e4, 2.12x at 1e5, 1.09x at 1e6, 2.07x for kind='stable')
+    - a sortedness-scan gate would cost more than it returns at most
+    sizes. verified_speedup records the best candidate ratio, not a
+    regression. Evidence:
+    benchmarks/results/OPP-000028/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections:
+  - author: r-devulap
+    date: "2025-04-15"
+    quote: >-
+      @rhshadrach this is because of the AVX2 argsort introduced in
+      https://github.com/numpy/numpy/pull/25610 which unfortunately has
+      regressions for ordered arrays specially on 64-bit dtypes.
+  - author: r-devulap
+    date: "2025-04-15"
+    quote: >-
+      Fix for this is now part of: https://github.com/numpy/numpy/pull/28619
+linked_prs:
+  - https://github.com/numpy/numpy/pull/25610
+  - https://github.com/intel/x86-simd-sort/pull/197
+  - https://github.com/numpy/numpy/pull/28619
+related_opportunities: []
+notes:
+  - >-
+    Nobody in the thread objects to fixing this; the "objections" recorded
+    above are the maintainer diagnosis and the statement that a fix was
+    already in flight, which together are the main argument against
+    PyOverdrive acting at all. If numpy >= 2.3 restored ordered-input
+    performance, the 4.07x claim describes only the 2.0-2.2.x window and
+    this record should be re-scoped to users pinned inside it (pandas' own
+    pin upgrade is the demand evidence) or closed as fixed upstream.
+  - >-
+    The opportunity does not automatically die with the upstream fix, it
+    shrinks. A sortedness-detecting fast path does an O(n) early-exit scan
+    plus np.arange instead of any sort at all, and even the never-regressed
+    numpy 1.26.4 spent 444 us argsorting the reporter's already-sorted
+    100k-element array. Whether scan-plus-arange beats a fixed stock path
+    by enough to clear PyOverdrive's ship bar is exactly what the Dyno run
+    must measure; the thread supports no number for that comparison.
+  - >-
+    Fast-path sketch (detail in docs/research/opportunities/OPP-000028.md).
+    Predicate: 1-D contiguous native integer array, default arguments, and
+    a strictly-increasing early-exit scan; route: return np.arange(n,
+    dtype=np.intp) without sorting. Restricting the predicate to strictly
+    increasing input makes the output bit-identical to stock for every
+    sort kind, since the argsort permutation is then unique. Hazards that
+    set correctness_risk medium: ties (stock quicksort's tie order is
+    unspecified but concrete, so arange may differ bitwise unless the scan
+    demands strict increase or kind='stable'), float dtypes (a naive
+    comparison scan mishandles NaN, whose sort position numpy defines),
+    and the guard's cost on non-sorted input, which per the reporter got
+    faster in 2.0 and must not be given back (early exit on the first
+    inversion keeps the expected cost on random data trivial; the worst
+    case is a long sorted prefix with a late inversion, paying the full
+    scan and then the full sort).
+  - >-
+    Attribution trail, all from the dump: charris (2025-04-15) first
+    triaged with "Possibly related, #23707, #25610."; r-devulap
+    (2025-04-15) confirmed PR 25610's AVX2 argsort as the cause and posted
+    the ASV table quantifying it at 4.07x for int64 ordered input.
+  - >-
+    PR 28619's own body (cross-referenced into the dump) reports the fix's
+    after-state on a TGL machine at 500,000 elements: argsort int64
+    ('ordered',) went 9.50ms to 3.08ms (ratio 0.32). The same table also
+    shows new '+' rows, e.g. time_argsort('quick', 'uint32', ('uniform',))
+    at ratio 1.49, i.e. the openmp rework traded some uniform-pattern
+    32-bit cases for the ordered-case wins. A PyOverdrive fast path scoped
+    to provably-sorted input has no such tradeoff surface, which is worth
+    stating when comparing against the upstream fix.

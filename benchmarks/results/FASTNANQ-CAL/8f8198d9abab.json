@@ -1,0 +1,946 @@
+{
+  "opp_id": "FASTNANQ-CAL",
+  "title": "vectorized masked nanquantile vs stock, shape-regime sweep",
+  "recorded_at": "2026-08-23T18:35:47+00:00",
+  "fingerprint": {
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "machine": "AMD64",
+    "system": "Windows 11",
+    "logical_cores": 32,
+    "python": "3.14.2",
+    "numpy": "2.4.5",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "AVX512BF16",
+      "AVX512BITALG",
+      "AVX512BW",
+      "AVX512CD",
+      "AVX512DQ",
+      "AVX512F",
+      "AVX512IFMA",
+      "AVX512VBMI",
+      "AVX512VBMI2",
+      "AVX512VL",
+      "AVX512VNNI",
+      "AVX512VPOPCNTDQ",
+      "AVX512_CLX",
+      "AVX512_CNL",
+      "AVX512_ICL",
+      "AVX512_SKX",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3",
+      "X86_V4"
+    ],
+    "fingerprint": "8f8198d9abab"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.09514170040485825,
+    "cpu_busy_after": 0.11466165413533835,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "nanq_10x30_ax0_nan0",
+      "params": {
+        "shape": [
+          10,
+          30
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 10,
+        "n_slices": 30,
+        "elements": 300
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 688462.5,
+          "min_ns": 659512.5,
+          "mean_ns": 684698.2142857143,
+          "mad_ns": 17475.0,
+          "samples": 7,
+          "loops_per_sample": 8,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 30406.194690265485,
+          "min_ns": 29761.061946902653,
+          "mean_ns": 30293.93173198483,
+          "mad_ns": 125.66371681415694,
+          "samples": 7,
+          "loops_per_sample": 226,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 22.642178905090372
+      }
+    },
+    {
+      "case": "nanq_10x30_ax0_nan10",
+      "params": {
+        "shape": [
+          10,
+          30
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 10,
+        "n_slices": 30,
+        "elements": 300
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 704371.4285714285,
+          "min_ns": 670600.0,
+          "mean_ns": 715377.5510204082,
+          "mad_ns": 31257.142857142957,
+          "samples": 7,
+          "loops_per_sample": 7,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 28656.84931506849,
+          "min_ns": 28503.08219178082,
+          "mean_ns": 29209.63796477495,
+          "mad_ns": 54.79452054794456,
+          "samples": 7,
+          "loops_per_sample": 292,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 24.57951398729142
+      }
+    },
+    {
+      "case": "nanq_20x50_ax0_nan0",
+      "params": {
+        "shape": [
+          20,
+          50
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 20,
+        "n_slices": 50,
+        "elements": 1000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 1131260.0,
+          "min_ns": 1110340.0,
+          "mean_ns": 1134911.4285714286,
+          "mad_ns": 13380.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 34494.85294117647,
+          "min_ns": 33900.73529411765,
+          "mean_ns": 34634.97899159664,
+          "mad_ns": 288.9705882352937,
+          "samples": 7,
+          "loops_per_sample": 272,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 32.79503762283376
+      }
+    },
+    {
+      "case": "nanq_20x50_ax0_nan10",
+      "params": {
+        "shape": [
+          20,
+          50
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 20,
+        "n_slices": 50,
+        "elements": 1000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 1212380.0,
+          "min_ns": 1149480.0,
+          "mean_ns": 1203400.0,
+          "mad_ns": 18980.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 32075.757575757576,
+          "min_ns": 31779.166666666668,
+          "mean_ns": 32031.11471861472,
+          "mad_ns": 73.48484848484804,
+          "samples": 7,
+          "loops_per_sample": 264,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 37.797392536608406
+      }
+    },
+    {
+      "case": "nanq_27x100_ax0_nan0",
+      "params": {
+        "shape": [
+          27,
+          100
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 27,
+        "n_slices": 100,
+        "elements": 2700
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 2211333.3333333335,
+          "min_ns": 2123800.0,
+          "mean_ns": 2220780.9523809524,
+          "mad_ns": 38933.33333333349,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 42640.366972477066,
+          "min_ns": 42195.4128440367,
+          "mean_ns": 42781.71690694627,
+          "mad_ns": 346.78899082569114,
+          "samples": 7,
+          "loops_per_sample": 218,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 51.860091512830444
+      }
+    },
+    {
+      "case": "nanq_27x100_ax0_nan10",
+      "params": {
+        "shape": [
+          27,
+          100
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 27,
+        "n_slices": 100,
+        "elements": 2700
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 2474725.0,
+          "min_ns": 2398650.0,
+          "mean_ns": 2462946.4285714286,
+          "mad_ns": 23100.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 39039.91596638656,
+          "min_ns": 38608.403361344535,
+          "mean_ns": 39061.644657863144,
+          "mad_ns": 106.7226890756283,
+          "samples": 7,
+          "loops_per_sample": 238,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 63.38960878222031
+      }
+    },
+    {
+      "case": "nanq_5x500_ax0_nan0",
+      "params": {
+        "shape": [
+          5,
+          500
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 5,
+        "n_slices": 500,
+        "elements": 2500
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 11155500.0,
+          "min_ns": 10967500.0,
+          "mean_ns": 11162957.142857144,
+          "mad_ns": 85900.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 48594.270833333336,
+          "min_ns": 47913.541666666664,
+          "mean_ns": 48864.732142857145,
+          "mad_ns": 647.3958333333285,
+          "samples": 7,
+          "loops_per_sample": 192,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 229.5640989914363
+      }
+    },
+    {
+      "case": "nanq_5x500_ax0_nan10",
+      "params": {
+        "shape": [
+          5,
+          500
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 5,
+        "n_slices": 500,
+        "elements": 2500
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 11057800.0,
+          "min_ns": 10771600.0,
+          "mean_ns": 11146985.714285715,
+          "mad_ns": 286200.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 49892.1686746988,
+          "min_ns": 49448.79518072289,
+          "mean_ns": 49843.02925989673,
+          "mad_ns": 177.7108433734902,
+          "samples": 7,
+          "loops_per_sample": 166,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 221.63398171961217
+      }
+    },
+    {
+      "case": "nanq_100x27_ax0_nan0",
+      "params": {
+        "shape": [
+          100,
+          27
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 100,
+        "n_slices": 27,
+        "elements": 2700
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 606325.0,
+          "min_ns": 601750.0,
+          "mean_ns": 606187.5,
+          "mad_ns": 912.5,
+          "samples": 7,
+          "loops_per_sample": 16,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 37265.85365853659,
+          "min_ns": 36896.34146341463,
+          "mean_ns": 37212.427409988384,
+          "mad_ns": 101.62601626016112,
+          "samples": 7,
+          "loops_per_sample": 246,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 16.270256561293277
+      }
+    },
+    {
+      "case": "nanq_100x27_ax0_nan10",
+      "params": {
+        "shape": [
+          100,
+          27
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 100,
+        "n_slices": 27,
+        "elements": 2700
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 650112.5,
+          "min_ns": 643312.5,
+          "mean_ns": 651469.6428571428,
+          "mad_ns": 2812.5,
+          "samples": 7,
+          "loops_per_sample": 8,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 38407.96460176991,
+          "min_ns": 38260.176991150445,
+          "mean_ns": 38455.246523388116,
+          "mad_ns": 83.18584070796351,
+          "samples": 7,
+          "loops_per_sample": 226,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 16.92650226953296
+      }
+    },
+    {
+      "case": "nanq_100x1000_ax0_nan0",
+      "params": {
+        "shape": [
+          100,
+          1000
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 100,
+        "n_slices": 1000,
+        "elements": 100000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 21978800.0,
+          "min_ns": 21917500.0,
+          "mean_ns": 22003700.0,
+          "mad_ns": 57400.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 1146140.0,
+          "min_ns": 1133980.0,
+          "mean_ns": 1146834.2857142857,
+          "mad_ns": 7160.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 19.176365888983895
+      }
+    },
+    {
+      "case": "nanq_100x1000_ax0_nan10",
+      "params": {
+        "shape": [
+          100,
+          1000
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 100,
+        "n_slices": 1000,
+        "elements": 100000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 25032100.0,
+          "min_ns": 24853200.0,
+          "mean_ns": 25279828.57142857,
+          "mad_ns": 156500.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 636985.7142857143,
+          "min_ns": 622392.8571428572,
+          "mean_ns": 636407.1428571428,
+          "mad_ns": 4142.8571428571595,
+          "samples": 7,
+          "loops_per_sample": 14,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 39.297741595460764
+      }
+    },
+    {
+      "case": "nanq_500x500_ax0_nan0",
+      "params": {
+        "shape": [
+          500,
+          500
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 500,
+        "n_slices": 500,
+        "elements": 250000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 13556100.0,
+          "min_ns": 13428800.0,
+          "mean_ns": 13630471.42857143,
+          "mad_ns": 17600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 2478233.3333333335,
+          "min_ns": 2339566.6666666665,
+          "mean_ns": 2496985.714285714,
+          "mad_ns": 109200.0,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 5.470066041669469
+      }
+    },
+    {
+      "case": "nanq_500x500_ax0_nan10",
+      "params": {
+        "shape": [
+          500,
+          500
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 500,
+        "n_slices": 500,
+        "elements": 250000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 19940500.0,
+          "min_ns": 18268900.0,
+          "mean_ns": 19633528.57142857,
+          "mad_ns": 878600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 1836366.6666666667,
+          "min_ns": 1625966.6666666667,
+          "mean_ns": 1807676.1904761905,
+          "mad_ns": 42633.33333333349,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 10.85867020021419
+      }
+    },
+    {
+      "case": "nanq_50x100x100_ax0_nan0",
+      "params": {
+        "shape": [
+          50,
+          100,
+          100
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 50,
+        "n_slices": 10000,
+        "elements": 500000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 300083500.0,
+          "min_ns": 283729800.0,
+          "mean_ns": 301169814.28571427,
+          "mad_ns": 8169300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 6895900.0,
+          "min_ns": 6310500.0,
+          "mean_ns": 6800657.142857143,
+          "mad_ns": 121200.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 43.51621978276947
+      }
+    },
+    {
+      "case": "nanq_50x100x100_ax0_nan10",
+      "params": {
+        "shape": [
+          50,
+          100,
+          100
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 50,
+        "n_slices": 10000,
+        "elements": 500000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 355734300.0,
+          "min_ns": 302647000.0,
+          "mean_ns": 352125657.14285713,
+          "mad_ns": 32299700.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 4735550.0,
+          "min_ns": 3923150.0,
+          "mean_ns": 4623664.285714285,
+          "mad_ns": 72900.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 75.11995438755794
+      }
+    },
+    {
+      "case": "nanq_10000x3_ax0_nan0",
+      "params": {
+        "shape": [
+          10000,
+          3
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 10000,
+        "n_slices": 3,
+        "elements": 30000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 330583.3333333333,
+          "min_ns": 240094.44444444444,
+          "mean_ns": 321674.60317460314,
+          "mad_ns": 28083.333333333372,
+          "samples": 7,
+          "loops_per_sample": 18,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 231296.15384615384,
+          "min_ns": 203300.0,
+          "mean_ns": 231785.16483516482,
+          "mad_ns": 13580.76923076922,
+          "samples": 7,
+          "loops_per_sample": 26,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 1.42926429098004
+      }
+    },
+    {
+      "case": "nanq_10000x3_ax0_nan10",
+      "params": {
+        "shape": [
+          10000,
+          3
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 10000,
+        "n_slices": 3,
+        "elements": 30000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 368038.8888888889,
+          "min_ns": 260777.77777777778,
+          "mean_ns": 360393.65079365077,
+          "mad_ns": 12672.222222222248,
+          "samples": 7,
+          "loops_per_sample": 18,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 418100.0,
+          "min_ns": 394814.28571428574,
+          "mean_ns": 417017.68707482994,
+          "mad_ns": 6795.238095238106,
+          "samples": 7,
+          "loops_per_sample": 21,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 0.8802652209731855
+      }
+    },
+    {
+      "case": "nanq_100000x5_ax0_nan0",
+      "params": {
+        "shape": [
+          100000,
+          5
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 100000,
+        "n_slices": 5,
+        "elements": 500000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 4982750.0,
+          "min_ns": 4890350.0,
+          "mean_ns": 4993328.571428572,
+          "mad_ns": 36500.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 5886000.0,
+          "min_ns": 4964800.0,
+          "mean_ns": 5863714.285714285,
+          "mad_ns": 384400.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 0.8465426435609922
+      }
+    },
+    {
+      "case": "nanq_100000x5_ax0_nan10",
+      "params": {
+        "shape": [
+          100000,
+          5
+        ],
+        "axis": 0,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 100000,
+        "n_slices": 5,
+        "elements": 500000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 6124700.0,
+          "min_ns": 5963000.0,
+          "mean_ns": 6301600.0,
+          "mad_ns": 161700.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 6614700.0,
+          "min_ns": 6586900.0,
+          "mean_ns": 6640800.0,
+          "mad_ns": 27800.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 0.9259225664051279
+      }
+    },
+    {
+      "case": "nanq_3x10000_ax1_nan0",
+      "params": {
+        "shape": [
+          3,
+          10000
+        ],
+        "axis": 1,
+        "q": 0.8,
+        "nan_frac": 0.0,
+        "reduced_len": 10000,
+        "n_slices": 3,
+        "elements": 30000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 332029.1666666667,
+          "min_ns": 288241.6666666667,
+          "mean_ns": 332258.9285714286,
+          "mad_ns": 13475.0,
+          "samples": 7,
+          "loops_per_sample": 24,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 237890.0,
+          "min_ns": 194780.0,
+          "mean_ns": 232456.42857142858,
+          "mad_ns": 5930.0,
+          "samples": 7,
+          "loops_per_sample": 20,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 1.3957256154805444
+      }
+    },
+    {
+      "case": "nanq_3x10000_ax1_nan10",
+      "params": {
+        "shape": [
+          3,
+          10000
+        ],
+        "axis": 1,
+        "q": 0.8,
+        "nan_frac": 0.1,
+        "reduced_len": 10000,
+        "n_slices": 3,
+        "elements": 30000
+      },
+      "baseline": "numpy.nanquantile",
+      "variants": {
+        "numpy.nanquantile": {
+          "median_ns": 330092.3076923077,
+          "min_ns": 316980.76923076925,
+          "mean_ns": 341071.978021978,
+          "mad_ns": 12880.769230769249,
+          "samples": 7,
+          "loops_per_sample": 26,
+          "role": "baseline",
+          "correct": true
+        },
+        "masked_vectorized": {
+          "median_ns": 219985.7142857143,
+          "min_ns": 194557.14285714287,
+          "mean_ns": 217640.13605442178,
+          "mad_ns": 11895.238095238077,
+          "samples": 7,
+          "loops_per_sample": 21,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "masked_vectorized": 1.5005170165894888
+      }
+    }
+  ]
+}

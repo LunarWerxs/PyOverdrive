@@ -1,0 +1,163 @@
+id: OPP-000037
+title: "np.median is up to ~11x slower than np.partition on small odd-sized float64 arrays; an overhead-class gap that nearly vanishes once partition replicates median's NaN check"
+sources:
+  - url: https://github.com/numpy/numpy/issues/18298
+    repository: numpy/numpy
+    type: issue
+    number: 18298
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T12:00:00Z"
+claim:
+  speedup: 11.2
+  baseline: >-
+    np.median(x) on an odd-length float64 array, x = np.random.rand(n), n=11,
+    as timed by the issue author (anntzer) with %timeit in the issue body:
+    74.6 us +/- 5.06 us per loop (mean +/- std. dev. of 7 runs, 10000 loops
+    each). The reporter asserts np.median(x) == np.sort(x)[n//2] ==
+    np.partition(x, n//2)[n//2] before timing all three. The 11.2 speedup
+    recorded above is DERIVED from the reporter's own pair of numbers
+    (74.6 / 6.68 = 11.17); the thread never states a ratio explicitly.
+  candidate: >-
+    np.partition(x, n//2)[n//2] on the same n=11 array, same post: 6.68 us
+    +/- 244 ns per loop (mean +/- std. dev. of 7 runs, 100000 loops each).
+    Pure stock numpy, no third-party code. NOTE: this baseline candidate
+    pairing omits median's NaN check; see seberg's correction in notes,
+    which is the honest basis for any real fast path.
+  hardware: >-
+    "numpy 1.20.0, Python 3.9.1 (default, Dec 13 2020, 11:55:53) [GCC
+    10.2.0]", stated in the issue body's "NumPy/Python version information"
+    section. No CPU or OS spec given anywhere in the dump.
+affected_operations: [numpy.median]
+input_regime:
+  dtypes: [float64]
+  sizes: [11, 101, 1001, 10001, 100001, 1000001, 10000001]
+  notes: >-
+    The reporter states "I cheated a bit and only test odd-size arrays here,
+    but for even-size arrays, the overhead for partition() would be no more
+    than ~1.5x". All ratios below are DERIVED (median_time / partition_time)
+    from the reporter's own %timeit pairs, one sweep, uncontrolled hardware:
+    n=11: 74.6/6.68=11.2x; n=101: 88.4/7.95=11.1x; n=1001: 103/15=6.9x;
+    n=10001: 398/243=1.6x; n=100001: 2610/2360=1.1x (ms converted to us);
+    n=1000001: 25100/21600=1.2x; n=10000001: 349/375=0.93x, i.e. at 1e7
+    elements np.median is actually FASTER than plain np.partition(x, n//2)
+    -- the win is strictly small-to-mid array overhead, not a fixed-ratio
+    speedup, and it reverses sign at the largest size tested. anntzer
+    (CONTRIBUTOR) pushed back on the overhead framing: "partitioning two
+    elements should not take more than twice the time it takes to partition
+    just one element(?), and the overhead is much more than twofold for
+    small arrays." seberg (MEMBER) re-measured with the NaN-matching
+    candidate (see notes) at n=10001 and n=100001 only; the plain-partition
+    ratios above are NOT NaN-safe and should not be read as an achievable
+    fast-path speedup on their own.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000037_median_partition.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load): REPRODUCED at reduced magnitude (numpy has
+    shaved median's overhead since 2021): 3.0-3.4x at n=10-11,
+    2.9-3.2x at 100-101, 2.2-2.4x at 1000-1001, 2.03-2.09x at 2000,
+    1.74x at 3001, 1.47-1.62x at 5000-5001 (BATCH5-CAL), dying to
+    1.15-1.26x at 10_000 and parity above - cap set at 5001. Every
+    cell bit-identical including the even-size mean and NaN-salted
+    propagation. Evidence:
+    benchmarks/results/OPP-000037/9bbe7063c555.json, BATCH5-CAL.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections:
+  - author: seberg
+    date: "2021-02-02"
+    quote: >-
+      `median` has quite a lot of overheads compared to `partition`(I have
+      some work that might significantly reduce those soon -- by 50% IIRC).
+      But I think the main difference you are timing is the fact that
+      median adds a check for `NaN` (by partitioning also the `-1`
+      element): [n=10001] 112 us +/- 1.05 us (median) vs 79.8 us +/- 372 ns
+      (np.partition(x, [n//2, -1])[n//2]); [n=100001] 1.09 ms +/- 577 ns
+      (median) vs 1.06 ms +/- 1.64 us (NaN-matched partition).
+  - author: seberg
+    date: "2021-02-04"
+    quote: >-
+      There are many reasons for the fairly large overheads, the main one:
+      `np.median` is written in python, which causes other overheads to
+      pile up over the fairly long and complex function.
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000022, OPP-000013]
+notes:
+  - >-
+    SHIPPED (2026-08-24) as median_partition
+    (src/pyoverdrive/fastpaths/median_partition.py): plain 1-D float64,
+    10 <= n <= 5001, axis absent/None only; partitions (k, n-1) /
+    (k-1, k, n-1) exactly as stock's NaN check does; bit-identical
+    including scalar type and warning behavior (differential suite
+    pinned both). license_review clean: the thread's own route.
+  - >-
+    seberg's correction (MEMBER, in-thread) is decisive: median's overhead
+    is NOT purely Python-call overhead, part of it is a real NaN check done
+    by ALSO partitioning the array's -1 (last, post-partition-max) element.
+    With that check replicated via np.partition(x, [n//2, -1])[n//2], the
+    large-n gap nearly vanishes: 112 us vs 79.8 us at n=10001 (1.4x, down
+    from the plain-partition 1.6x) and 1.09 ms vs 1.06 ms at n=100001 (1.03x,
+    down from 1.1x). Any honest fast-path candidate MUST replicate this NaN
+    check, not just call bare np.partition(x, n//2).
+  - >-
+    Mechanism, per seberg (MEMBER): np.median's overhead is Python-level
+    function-call/setup cost ("np.median is written in python, which causes
+    other overheads to pile up over the fairly long and complex function"),
+    layered on top of NumPy's __array_function__ dispatch protocol (implied
+    by "speed up __array_function__ ... would reduce a lot of overheads
+    considerably") and the NaN-check partition of the -1 element. This is an
+    OVERHEAD-CLASS gap, not an algorithmic one: it wins on small-to-mid
+    arrays where fixed per-call cost dominates, and it does NOT hold at
+    large n (median is faster than plain partition by n=1e7).
+  - >-
+    Fast-path sketch: predicate = x is a plain 1-D float64 ndarray, axis
+    absent/None, no out/overwrite_input/keepdims kwargs, size within a
+    calibrated small-to-mid band (thread brackets it loosely between ~10 and
+    ~1e4-1e5 elements; must be re-measured, not assumed). Route: for odd n,
+    np.partition(x, [k, -1]) where k=n//2; for even n, np.partition(x,
+    [k-1, k, -1]) where k=n//2; both via the stock partition function. NaN
+    check: isnan() on the partitioned array's last (-1) element, matching
+    stock's behavior of returning nan when any NaN is present -- the
+    reproducer must VERIFY whether stock median also emits a RuntimeWarning
+    on NaN input, since silently dropping a warning is a behavior
+    regression even if the return value matches. Result extraction: middle
+    element for odd n; for even n the mean of the two middle elements MUST
+    reproduce stock's exact arithmetic (order of operations, intermediate
+    dtype) for bit-identity -- this needs explicit verification against
+    stock np.median's C/Python source, not assumed from formula equivalence.
+  - >-
+    Reachability: numpy.median is a patchable module-level free function.
+    numpy.nanmedian exists as a related but separate function with its own
+    NaN-handling code path (it does NOT raise/warn on NaN, it excludes them)
+    and is explicitly OUT OF SCOPE for this record until independently
+    measured; do not assume the same fast path or the same speedup regime
+    applies to it.
+  - >-
+    Age/version caveat: issue opened 2021-02-02 on numpy 1.20.0 / Python
+    3.9.1, last commented 2021-02-04, remains open with zero linked PRs in
+    the dump. seberg mentions unlanded overhead-reduction work in the same
+    thread ("I have some work that might significantly reduce those soon --
+    by 50% IIRC" for median overhead broadly, plus separate __array_function__
+    and ufunc/method-call overhead work referenced as in-progress). Given
+    this, the reproducer MUST re-measure baseline vs candidate on current
+    PyOverdrive numpy (2.4/2.5), not assume the ~5-year-old ratios hold;
+    they may already be smaller if that overhead work landed.
+  - >-
+    license_review is pending, not pre-cleared: seberg's NaN-matching
+    partition snippet and anntzer's original reproducer are both short
+    public GitHub comment code, but neither has been checked yet against
+    PyOverdrive's provenance bar; treat as unresolved until reviewed.
+  - >-
+    Thread engagement is thin: 3 comments total on an issue opened by
+    CONTRIBUTOR anntzer, both substantive replies from seberg (MEMBER), zero
+    reactions anywhere in the dump, no labels recorded, no linked PRs or
+    commits. Related PyOverdrive work: quantile/nanquantile fast paths
+    already ship (OPP-000022, OPP-000013 vein); median shares numpy's
+    partition-based selection machinery with quantile, so implementation
+    patterns from those records are likely directly reusable here.

@@ -1,0 +1,146 @@
+id: OPP-000021
+title: "opt-in post-hoc covariance to avoid the m - mean(m) copy in np.cov for n_samples >> n_features"
+sources:
+  - url: https://github.com/numpy/numpy/issues/31292
+    repository: numpy/numpy
+    type: issue
+    number: 31292
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 1.97
+  baseline: "np.cov(m) on a (16, 5_000_000) float64 array (n_samples >> n_features); current implementation allocates an m-sized m - mean(m) centered copy before the matmul"
+  candidate: "post-hoc formula cov = (m @ m.conj().T)/fact - (N/fact) * avg @ avg.conj().T computed without centering m in place, proposed as an opt-in np.cov(..., method='post-hoc') keyword; already used in scikit-learn's PCA(svd_solver='covariance_eigh')"
+  hardware: unknown
+affected_operations: [numpy.cov]
+input_regime:
+  dtypes: [float64, float32]
+  sizes:
+    - "16 x 5000000"
+  notes: >
+    n_samples >> n_features regime (tall observation count, few variables);
+    the only concrete same-input timing/memory pair in the thread is the
+    reporter's (16, 5_000_000) float64 benchmark. Precision of the post-hoc
+    path is conditioning-dependent, not size-dependent: relative error grows
+    with the squared ratio of mean to standard deviation (mu/sigma) per the
+    reporter's own sweep, so the regime where the fast path is both fast and
+    safe is well-conditioned (small mu/sigma) data specifically, narrower
+    than "any large n_samples >> n_features array".
+status: reproduced
+license_review: clean
+reproducer: benchmarks/historical/opp_000021_cov_memory.py
+current_numpy_result:
+  verified_speedup: 4.69
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, contended box (foreign CPU load
+    during the run per conditions.contended=true in the evidence JSON): the
+    post-hoc covariance mechanism reproduces and beats the 1.97x claim in
+    most of the 18 well-conditioned cases run (n_features in {2,16,64},
+    n_samples in {10_000, 100_000, 1_000_000}, float32/float64, all
+    correct=true, zero losses). Best: n16_m10000_float32 4.69x (760.4us ->
+    162.0us); n64_m10000_float32 3.04x; n2_m1000000_float32 2.95x. Worst:
+    n2_m1000000_float64 1.15x (8.60ms -> 7.46ms), the case closest in shape
+    to the claim's own (16, 5_000_000) float64 regime is n16_m1000000_float64
+    at only 1.33x (96.1ms -> 72.4ms), below the 1.97x claim; float64 gains
+    shrink toward 1.0x as n_samples grows while float32 stays 2.1x-4.7x
+    across the same sweep. This battery only exercised well-conditioned
+    inputs (mean=0, std=1); the ill-conditioned precision degradation the
+    thread itself flags (mu/sigma-driven error growth) was not probed here
+    and remains unverified. Evidence: benchmarks/results/OPP-000021/
+    8f8198d9abab.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections:
+  - author: seberg
+    date: "2026-05-07"
+    quote: >
+      Sorry, I haven't thought about it much. I don't particularly love
+      adding a new `method=` but a strong user like scikit-learn might be a
+      good enough reason; it's just not something we have often. So I guess
+      the question is how often this trade-off is OK, I remember pandas used
+      to do that and was happy to be faster than NumPy, but eventually
+      stopped, because it is imprecise often.
+  - author: betatim
+    date: "2026-05-08"
+    quote: >
+      Did you run your experiments regarding the precision using `float32`
+      as well? I did a few experiments (and asked AI to do some) and it
+      feels like with `float32` the problem of precision is more serious. In
+      an ideal universe we'd find a way to not introduce a new argument for
+      `np.cov()`. I'm wondering if there is a way to figure out cases for
+      which we could always use the post-hoc centering method. So far I have
+      no ideas :(
+linked_prs:
+  - https://github.com/numpy/numpy/pull/6403
+  - https://github.com/numpy/numpy/pull/12693
+  - https://github.com/numpy/numpy/pull/19857
+  - https://github.com/scikit-learn/scikit-learn/pull/33573
+  - https://github.com/WarrenWeckesser/ufunclab/pull/12
+  - https://github.com/data-apis/array-api-extra/pull/690
+related_opportunities: [OPP-000004, OPP-000002]
+notes:
+  - >-
+    EVALUATED FOR SHIPPING 2026-08-23 and deliberately PARKED (status
+    stays reproduced; nothing here is refuted). Two reasons, both from
+    the evidence: (1) the headline float32 wins (2.1-4.7x) come from
+    computing in float32 where stock np.cov upcasts to float64
+    internally, i.e. they are a precision downgrade a transparent
+    drop-in cannot claim; (2) the float64-matched regime is thin in the
+    claim's own shape (1.15x at n2_m1e6, 1.33x at n16_m1e6, both under
+    or near min-win) and a safe transparent path additionally needs a
+    mu/sigma conditioning probe (the thread's own precision caveat)
+    whose extra pass eats further into that margin. Shippable future
+    form: an OPT-IN method= keyword mirroring the issue's proposal, or a
+    float64 path restricted to the small-n_samples regime where wins
+    reached 2-3x, with the conditioning gate measured first.
+  - >
+    The reporter's headline evidence is a MEMORY claim, not a speed claim:
+    640 MB -> ~0 MB peak allocation eliminated on the (16, 5e6) float64
+    benchmark. The 1.97x figure recorded in claim.speedup (136 ms -> 69 ms)
+    is the only same-input wall-clock pair given in the thread and is the
+    most defensible single number to log, but it likely understates the
+    reporter's actual motivation, which is unlocking dataset sizes that do
+    not fit in memory today, not raw throughput on data that already fits.
+  - >
+    Maintainer seberg is lukewarm on the API surface itself ("I don't
+    particularly love adding a new method=") and cites pandas' own retreat
+    from a faster-but-imprecise covariance path as a cautionary precedent;
+    betatim independently flags float32 precision as more serious than
+    float64 and wants an automatic, no-new-keyword dispatch. The reporter's
+    own analysis rules that out on cost grounds: an automatic conditioning
+    check costs roughly half of what centering already costs, so a fully
+    automatic dispatch "effectively gives back the speedup."
+  - >
+    Precision loss is quantified, not hand-waved: relative error grows
+    quadratically with mu/sigma (mean over standard deviation), matching the
+    Chan-Golub-LeVeque kappa^2 ~= 1 + (mu/sigma)^2 bound. Reporter states
+    float32 is safe to about mu/sigma = 10 and loses accuracy by about
+    mu/sigma = 1000; float64 is safe to about mu/sigma = 1e4 and crosses 1%
+    relative error around mu/sigma = 1e6. On well-conditioned data, max
+    absolute deviation from the stock result was ~2e-14.
+  - >
+    The one transparent fast-path shape PyOverdrive could ship: on a
+    float64 2-D input, run a cheap single-pass max((mean/std)^2) probe (the
+    same diagnostic the reporter proposes) and route only well-conditioned
+    inputs, mu/sigma safely under the float64 threshold the reporter
+    reports, to a post-hoc/BLAS-gemm covariance path; keep the existing
+    two-pass centered path as the fallback for everything else and for all
+    float32 input given betatim's flagged sensitivity there. This differs
+    from the reporter's own proposal, which stays a manual opt-in method=
+    keyword specifically because the reporter found the auto-detect probe
+    itself costs about half of what centering costs; any PyOverdrive
+    auto-routing has to reproduce and beat that specific cost claim on real
+    hardware before it is worth shipping as transparent rather than opt-in.
+    Semantics differ silently outside the safe conditioning range: the
+    post-hoc path returns a numerically degraded (not obviously wrong)
+    result with no error raised, same risk class as OPP-000007's
+    assume_sorted.
+  - >
+    No PR has actually been opened against numpy for this specific issue as
+    of retrieval; the closest internal precedent is PR #6403 (merged 2015),
+    which already halved np.cov's memory once, and the open sibling issue
+    #13199 tracking the same memory/precision class of problem for
+    np.var/np.std. The reporter offered to put up a draft PR but had not
+    done so as of the last comment in the dump (2026-06-04).

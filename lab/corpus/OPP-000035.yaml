@@ -1,0 +1,220 @@
+id: OPP-000035
+title: "numpy.linalg.inv on a stack of 3x3 matrices is 88-213x slower than a hand-coded vectorized closed-form inverse (per-matrix LAPACK overhead)"
+sources:
+  - url: https://github.com/numpy/numpy/issues/17166
+    repository: numpy/numpy
+    type: issue
+    number: 17166
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T12:00:00Z"
+claim:
+  speedup: 213.5
+  baseline: >-
+    numpy.linalg.inv (imported as npinv) on a stacked array of shape
+    (1000, 4, 3, 3) -- 4000 3x3 matrices -- as timed by issue author
+    bhaveshshrimali with %timeit in the issue body: F =
+    random.random((3,3,1000,4)); F2 = einsum("ij...->...ij", F); %timeit
+    npinv(F2) -> 79.2 ms +/- 12.9 ms per loop (mean +/- std. dev. of 7
+    runs, 10 loops each). numpy 1.19.0, python 3.7.6 (GCC 7.5.0); an
+    MKL-backed BLAS/LAPACK per the reporter's numpy.show_config() dump in
+    a follow-up comment (blas_mkl_info / lapack_mkl_info populated).
+  candidate: >-
+    hdinv(F), the reporter's own hard-coded closed-form 3x3 inverse
+    (Cramer's rule via cofactor/adjugate expansion, sharing the vdet
+    helper for the determinant), applied to F with shape (3,3,1000,4) so
+    the two matrix-index axes are LEADING and the 4000-matrix batch is
+    TRAILING: every scalar op (e.g. A[1,1]*A[2,2] - A[1,2]*A[2,1]) runs as
+    one vectorized numpy elementwise pass across all 4000 matrices at
+    once. Same issue body, same %timeit cell: 371 us +/- 27 us per loop
+    (mean +/- std. dev. of 7 runs, 1000 loops each). The 213.5x speedup
+    recorded above is DERIVED (79.2 / 0.371 = 213.5); the issue never
+    states a ratio explicitly. Pure numpy, no compiled extension.
+  hardware: >-
+    Reporter (bhaveshshrimali): unspecified CPU/OS, a conda-forge notebook
+    environment per the show_config() dump, numpy 1.19.0, python 3.7.6.
+    Commenter thrasibule (CONTRIBUTOR) independently reran the SAME
+    (1000,4,3,3) case on a different, also-unspecified machine and got
+    npinv(F2) 13.4 ms +/- 495 us per loop (7 runs, 100 loops each) vs
+    hdinv(F) 152 us +/- 1.38 us per loop (7 runs, 10000 loops each), i.e.
+    88.2x DERIVED (13.4 / 0.152 = 88.2). The two machines disagree
+    substantially on BOTH sides of the ratio: npinv itself is 79.2ms vs
+    13.4ms (~5.9x apart) and hdinv is 371us vs 152us (~2.4x apart), so the
+    213.5x headline is this-machine-only; the thread brackets the true
+    range at roughly 88x-214x. Neither poster names a CPU model, core
+    count, or OS.
+affected_operations: [numpy.linalg.inv, numpy.linalg.det]
+input_regime:
+  dtypes: [float64]
+  sizes: ["(3, 3) single matrix", "(1000, 4, 3, 3) = 4000-matrix stack"]
+  notes: >-
+    Measured concretely only for float64 3x3 matrices, at a single matrix
+    and at a 4000-matrix batch (via the (1000,4,3,3)/(3,3,1000,4) shapes
+    above). thrasibule's single-matrix measurement is an ANTI-REGIME: In
+    [43] npinv(F2[0,0,:,:]) 10.7 us +/- 309 ns per loop (7 runs, 100000
+    loops each) vs In [44] hdinv(F[:,:,0,0]) 20.1 us +/- 316 ns per loop
+    (7 runs, 10000 loops each) -- for a SINGLE 3x3 matrix, npinv is
+    ~1.88x FASTER than hdinv's vectorized-adjugate code path run at batch
+    size 1 (20.1 / 10.7 = 1.88), the opposite ranking from the
+    4000-matrix case. bhaveshshrimali's own single-3x3 numbers complicate
+    this further: on HIS machine, npinv(F) 44.3 us +/- 9.72 us vs
+    hdinv(F) 31.1 us +/- 4 us (7 runs, 10000 loops each each) -- hdinv
+    faster there, disagreeing with thrasibule's single-matrix ranking on
+    thrasibule's own machine. So the crossover batch size where the
+    vectorized-adjugate path starts winning is real but is not pinned
+    down anywhere in the thread, and may itself be machine-dependent.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000035_inv_small_batch.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load): REPRODUCED in mechanism (below the reporter's
+    213x, above sanity): adjugate 5.24x at batch 1000, 8.20x at the
+    thread's own 4000-stack, 3.27x at 10_000, 1.77x at 100_000 (3x3
+    f64); 2x2 12.1x/4.5x; 3x3 f32 16.5x. Batch 1 loses 0.16x, 100
+    straddles 1.39x; BATCH5-CAL fixed the floor at 300 (2.95x). The
+    condition ceiling is MEASURED: the scaled rtol-1e-9 check passes at
+    cond 1e3/1e6 and FAILS at 1e8 and 1e10, so the shipped predicate
+    refuses |det| < 1e-8 * scale^d (between the passing ~3e-8 and
+    failing ~3e-10 det ratios). Evidence:
+    benchmarks/results/OPP-000035/9bbe7063c555.json, BATCH5-CAL.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: medium
+maintainer_objections:
+  - author: ilayn
+    date: "2020-08-28"
+    quote: >-
+      If you make your `hdinv` robust (singularity checks etc.) that
+      would also get slower. You are basically avoiding the LAPACK calls
+      and some overhead for possibly underflowed zero determinants (apart
+      from calling `dgetri` slowdown). Alternative would be flattening
+      arrays to 2D and solving a banded system.
+linked_prs: []
+related_opportunities: [OPP-000030]
+notes:
+  - >-
+    SHIPPED (2026-08-24) as inv_small_batch
+    (src/pyoverdrive/fastpaths/inv_small_batch.py): plain (..., d, d)
+    stacks, d in {2, 3}, floors {3x3 f64: 300, 2x2 f64: 1000, 3x3 f32:
+    10_000}, all-finite, |det| >= 1e-8 * max(scale, 1e-100)^d (the
+    clamp closes the all-zero-matrix hole a dispatch probe found:
+    det 0 vs scale 0 slipped the unclamped test where stock raises
+    LinAlgError). Comparison mode numeric. license_review clean:
+    classical adjugate formulas.
+  - >-
+    Mechanism: numpy.linalg.inv dispatches LAPACK once PER MATRIX through
+    a C ufunc loop. eric-wieser (MEMBER) links the implementation and
+    first suspects redundant copies, then retracts it in the same
+    comment: "It looks like we're doing unecessary copies with
+    linearize_@TYPE@_matrix in cases where we don't need to." followed by
+    "Edit: We likely do need to, because lapack `dgesv` operates
+    in-place." His second comment identifies a real algorithmic choice
+    instead: "It looks like we could compute inv more efficiently as
+    `dgetrf` followed by `dgetri` instead of calling `dgesv`..." (dgesv
+    solves against an identity right-hand side rather than using the
+    LU-then-invert pair). Neither copy overhead nor the dgesv-vs-dgetrf/
+    dgetri choice is the dominant cost, though -- thrasibule's diagnosis
+    is: "Thinking about it more I realized what you're doing in hdinv is
+    really quite clever, because all the operations are vectorized on
+    vectors of size 12000. The algorithm is quite different from what
+    npinv is doing (basically you're reordering the loops), which is why
+    it runs so much faster." npinv's C loop issues 4000 separate per-
+    matrix LAPACK calls for the (1000,4,3,3) case; hdinv instead
+    vectorizes each of the ~9 scalar cofactor/divide ops ACROSS the whole
+    4000-matrix batch in one numpy elementwise pass, trading 4000 tiny
+    LAPACK calls (each with its own setup/pivoting overhead) for 9 big
+    vectorized ones.
+  - >-
+    The transparent fast path this record recommends: numpy.linalg.inv
+    is patchable with a guarded closed-form branch. Predicate: input is a
+    plain (native-byte-order, non-subclassed) float64 array of shape
+    (..., 3, 3) [or (..., 2, 2), same cofactor trick], with a batch size
+    (product of leading dims) above a calibrated floor N* (the thread
+    only shows N*=1 losing and N*=4000 winning by 88x-213x; a real floor
+    needs calibration in between), ALL elements finite across the whole
+    stack, and |det| (via the closed-form cofactor expansion itself)
+    above a scale-relative threshold for EVERY matrix in the batch. If
+    any predicate fails, fall through to the existing per-matrix LAPACK
+    path unchanged.
+  - >-
+    Why the predicate is a hard gate, not a soft one: ilayn (CONTRIBUTOR,
+    quoted in maintainer_objections) objects that a robust hdinv would
+    lose its speed advantage, and the underlying reason is a correctness
+    divergence, not just a speed one. LAPACK's dgesv/dgetrf raises
+    LinAlgError("Singular matrix") on exactly singular input and is
+    numerically careful near singularity via partial pivoting; the
+    adjugate/cofactor route in hdinv instead divides by detA
+    unconditionally and would silently return inf/nan, or a wildly
+    inaccurate result from an underflowed near-zero determinant, instead
+    of raising. Hence the |det| threshold and all-finite check above are
+    non-negotiable rather than tunable for speed. ilayn's alternative,
+    "flattening arrays to 2D and solving a banded system," was not
+    benchmarked by anyone in the thread.
+  - >-
+    Numeric comparison mode: hdinv/finv and LAPACK's dgesv/dgetrf+dgetri
+    are DIFFERENT algorithms (closed-form cofactor/adjugate division vs.
+    LU decomposition with partial pivoting) with different rounding
+    behavior, so a correctness check for the fast path must compare
+    against npinv's OWN output within a relative/absolute tolerance
+    (e.g. allclose), not bit-for-bit, and should widen that tolerance
+    near the |det| threshold where the two algorithms are expected to
+    diverge most.
+  - >-
+    Other accelerated-inv variants surfaced in-thread, none of them
+    beating hdinv: reporter's numba-wrapped per-matrix npinv (vecinv,
+    still one LAPACK call per matrix but with the python loop removed)
+    timed 4.61 ms vs hdinv 248 us +/- 67.5 us (7 runs, 1 loop each) vs
+    npinv 106 ms +/- 1.27 ms in that same later comment (npinv 106ms vs
+    the original 79.2ms report is ~34% higher on presumably the same
+    machine, plain run-to-run notebook noise, not a second regime).
+    thrasibule's numba-jitted per-matrix hand loop using hdinv's own
+    cofactor math (fast_inverse) got 351 us, "just twice as slow as
+    hdinv" by his own characterization (351/152 = 2.3x). scipy's spinv
+    (dgetrf+dgetri via scipy.linalg.inv, check_finite=False) on a single
+    3x3 was 6.78 us +/- 61.6 ns, which thrasibule called "like 25% faster
+    on my machine but there is no miracle" versus his single-matrix npinv
+    of 10.7 us (the derived ratio is actually 10.7/6.78 = 1.58x, i.e.
+    ~58% faster -- his "25%" is his own approximate phrasing, not the
+    derived figure).
+  - >-
+    Age caveat: filed 2020-08-26 against numpy 1.19.0 / python 3.7.6,
+    zero linked PRs, thread activity stops 2020-08-28 (ilayn's comment)
+    with the issue still open and carrying only the "component:
+    numpy.linalg" label in the dump. Five-plus years old at ingestion
+    time; numpy's linalg internals and default BLAS/LAPACK backends may
+    have shifted the baseline gap since, so current_numpy_result must
+    re-measure npinv from scratch rather than trust the 213.5x or 88.2x
+    figures directly.
+  - >-
+    affected_operations includes numpy.linalg.det as a sibling surface,
+    not a separately benchmarked one: the reporter's own vdet helper is
+    already a closed-form cofactor expansion for the 3x3 determinant
+    (used inside both finv and hdinv), so the same reasoning that
+    motivates a closed-form numpy.linalg.inv fast path applies directly
+    to numpy.linalg.det. Unlike inv, det has no singularity FAILURE mode
+    of its own (a singular matrix simply has det 0, which is a valid,
+    correctly-computed answer, not an error), so det's version of the
+    predicate above would not need the |det| threshold or the
+    LinAlgError-divergence guard, only the dtype/shape/batch-floor/
+    all-finite checks.
+  - >-
+    license_review is pending rather than clean because, unlike
+    OPP-000024's isolated three-line snippet, this thread also shows
+    comparison code from third parties: numba's own dgetrf/dgetri
+    overload (numba/np/linalg.py, linked by bhaveshshrimali) and scipy's
+    LAPACK-backed inv (used by thrasibule as spinv). Both are baselines
+    the thread measures AGAINST, not implementation source -- the actual
+    candidate is the reporter's own hdinv/vdet closed-form arithmetic
+    posted in the public issue body -- but the review must confirm the
+    fast-path implementation lifts only from hdinv/vdet and not from
+    either third-party snippet before it can be marked clean.
+  - >-
+    Related: OPP-000030 shipped an eigvalsh 2x2 closed-form path from the
+    same per-matrix-LAPACK-overhead vein (31x): small fixed-size linear
+    algebra kernels (2x2/3x3) called once per matrix across a large batch
+    pay disproportionate per-call LAPACK overhead relative to a
+    closed-form vectorized substitute. This record is the
+    numpy.linalg.inv instance of the same pattern, currently unverified.

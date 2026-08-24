@@ -1,0 +1,179 @@
+{
+  "opp_id": "OPP-000046",
+  "title": "nan_to_num vs copy + copyto masks",
+  "recorded_at": "2026-08-24T08:33:17+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.007911392405063333,
+    "cpu_busy_after": 0.033280507131537296,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "nan_only_n10000",
+      "params": {
+        "n": 10000,
+        "nan_frac": 0.01,
+        "inf_frac": 0.0
+      },
+      "baseline": "nan_to_num",
+      "variants": {
+        "nan_to_num": {
+          "median_ns": 15756.95652173913,
+          "min_ns": 15725.0,
+          "mean_ns": 15767.391304347826,
+          "mad_ns": 19.782608695652016,
+          "samples": 7,
+          "loops_per_sample": 460,
+          "role": "baseline",
+          "correct": true
+        },
+        "where_route": {
+          "median_ns": 7093.121301775148,
+          "min_ns": 7083.579881656805,
+          "mean_ns": 7102.874049027895,
+          "mad_ns": 9.541420118343012,
+          "samples": 7,
+          "loops_per_sample": 1352,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "where_route": 2.221441852093484
+      }
+    },
+    {
+      "case": "nan_only_n1000000",
+      "params": {
+        "n": 1000000,
+        "nan_frac": 0.01,
+        "inf_frac": 0.0
+      },
+      "baseline": "nan_to_num",
+      "variants": {
+        "nan_to_num": {
+          "median_ns": 4080150.0,
+          "min_ns": 3995200.0,
+          "mean_ns": 4078207.1428571427,
+          "mad_ns": 38000.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "where_route": {
+          "median_ns": 2423600.0,
+          "min_ns": 2381200.0,
+          "mean_ns": 2787275.0,
+          "mad_ns": 42400.0,
+          "samples": 7,
+          "loops_per_sample": 4,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "where_route": 1.6835080046212245
+      }
+    },
+    {
+      "case": "nan_inf_n1000000",
+      "params": {
+        "n": 1000000,
+        "nan_frac": 0.01,
+        "inf_frac": 0.005
+      },
+      "baseline": "nan_to_num",
+      "variants": {
+        "nan_to_num": {
+          "median_ns": 4596100.0,
+          "min_ns": 4580850.0,
+          "mean_ns": 4599900.0,
+          "mad_ns": 3400.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "where_route": {
+          "median_ns": 4234050.0,
+          "min_ns": 4154050.0,
+          "mean_ns": 4234085.714285715,
+          "mad_ns": 53250.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "where_route": 1.0855091460894415
+      }
+    },
+    {
+      "case": "clean_n1000000",
+      "params": {
+        "n": 1000000,
+        "nan_frac": 0.0,
+        "inf_frac": 0.0
+      },
+      "baseline": "nan_to_num",
+      "variants": {
+        "nan_to_num": {
+          "median_ns": 4223200.0,
+          "min_ns": 4216000.0,
+          "mean_ns": 4228335.714285715,
+          "mad_ns": 5250.0,
+          "samples": 7,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "where_route": {
+          "median_ns": 2232500.0,
+          "min_ns": 2177800.0,
+          "mean_ns": 2248676.1904761908,
+          "mad_ns": 49366.66666666651,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "where_route": 1.8916909294512878
+      }
+    }
+  ]
+}

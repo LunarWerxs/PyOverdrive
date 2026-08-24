@@ -1,0 +1,317 @@
+{
+  "opp_id": "OPP-000039",
+  "title": "searchsorted python-int key: cast route vs stock promotion",
+  "recorded_at": "2026-08-24T07:11:12+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.01759999999999995,
+    "cpu_busy_after": 0.0,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "searchsorted_i64_n1000_pyint_left",
+      "params": {
+        "n": 1000,
+        "dtype": "int64",
+        "side": "left",
+        "key": "python-int"
+      },
+      "baseline": "numpy.searchsorted",
+      "variants": {
+        "numpy.searchsorted": {
+          "median_ns": 903.0293941211758,
+          "min_ns": 873.4553089382124,
+          "mean_ns": 898.8397774990456,
+          "mad_ns": 3.509298140371925,
+          "samples": 11,
+          "loops_per_sample": 6668,
+          "role": "baseline",
+          "correct": true
+        },
+        "cast_key": {
+          "median_ns": 1120.2687569988802,
+          "min_ns": 1113.5078387458007,
+          "mean_ns": 1119.8271912857579,
+          "mad_ns": 1.5397536394175404,
+          "samples": 11,
+          "loops_per_sample": 7144,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cast_key": 0.8060828158238803
+      }
+    },
+    {
+      "case": "searchsorted_i64_n1000_pyint_right",
+      "params": {
+        "n": 1000,
+        "dtype": "int64",
+        "side": "right",
+        "key": "python-int"
+      },
+      "baseline": "numpy.searchsorted",
+      "variants": {
+        "numpy.searchsorted": {
+          "median_ns": 872.8222613286406,
+          "min_ns": 869.6876374835019,
+          "mean_ns": 873.2942046954365,
+          "mad_ns": 2.518697756269262,
+          "samples": 11,
+          "loops_per_sample": 9092,
+          "role": "baseline",
+          "correct": true
+        },
+        "cast_key": {
+          "median_ns": 1113.530023394853,
+          "min_ns": 1109.929815440603,
+          "mean_ns": 1123.3156887302976,
+          "mad_ns": 0.5198856251624875,
+          "samples": 11,
+          "loops_per_sample": 7694,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cast_key": 0.7838336129165522
+      }
+    },
+    {
+      "case": "searchsorted_i64_n100000_pyint_left",
+      "params": {
+        "n": 100000,
+        "dtype": "int64",
+        "side": "left",
+        "key": "python-int"
+      },
+      "baseline": "numpy.searchsorted",
+      "variants": {
+        "numpy.searchsorted": {
+          "median_ns": 899.1461366181411,
+          "min_ns": 894.2469204927212,
+          "mean_ns": 899.1715870915199,
+          "mad_ns": 1.5957446808511122,
+          "samples": 11,
+          "loops_per_sample": 7144,
+          "role": "baseline",
+          "correct": true
+        },
+        "cast_key": {
+          "median_ns": 1160.708286674132,
+          "min_ns": 1158.0347144456887,
+          "mean_ns": 1162.030438766161,
+          "mad_ns": 2.015677491601309,
+          "samples": 11,
+          "loops_per_sample": 7144,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cast_key": 0.7746529829596845
+      }
+    },
+    {
+      "case": "searchsorted_i64_n100000_pyint_right",
+      "params": {
+        "n": 100000,
+        "dtype": "int64",
+        "side": "right",
+        "key": "python-int"
+      },
+      "baseline": "numpy.searchsorted",
+      "variants": {
+        "numpy.searchsorted": {
+          "median_ns": 897.2965947491551,
+          "min_ns": 892.617624122693,
+          "mean_ns": 897.0271994706619,
+          "mad_ns": 2.8073823758774097,
+          "samples": 11,
+          "loops_per_sample": 7694,
+          "role": "baseline",
+          "correct": true
+        },
+        "cast_key": {
+          "median_ns": 1158.0383923215356,
+          "min_ns": 1154.2141571685663,
+          "mean_ns": 1160.3888313246441,
+          "mad_ns": 1.7546490701859057,
+          "samples": 11,
+          "loops_per_sample": 6668,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cast_key": 0.7748418365908682
+      }
+    },
+    {
+      "case": "searchsorted_i64_n10000000_pyint_left",
+      "params": {
+        "n": 10000000,
+        "dtype": "int64",
+        "side": "left",
+        "key": "python-int"
+      },
+      "baseline": "numpy.searchsorted",
+      "variants": {
+        "numpy.searchsorted": {
+          "median_ns": 929.8304542546385,
+          "min_ns": 927.6071657069738,
+          "mean_ns": 931.8960789690157,
+          "mad_ns": 1.743442098528476,
+          "samples": 7,
+          "loops_per_sample": 6252,
+          "role": "baseline",
+          "correct": true
+        },
+        "cast_key": {
+          "median_ns": 1172.1724524076149,
+          "min_ns": 1170.01679731243,
+          "mean_ns": 1172.854343305071,
+          "mad_ns": 2.00167973124303,
+          "samples": 7,
+          "loops_per_sample": 7144,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cast_key": 0.7932539724379194
+      }
+    },
+    {
+      "case": "searchsorted_i64_n10000000_pyint_right",
+      "params": {
+        "n": 10000000,
+        "dtype": "int64",
+        "side": "right",
+        "key": "python-int"
+      },
+      "baseline": "numpy.searchsorted",
+      "variants": {
+        "numpy.searchsorted": {
+          "median_ns": 925.6779457643388,
+          "min_ns": 922.522198224142,
+          "mean_ns": 937.0221810826562,
+          "mad_ns": 3.1317494600432383,
+          "samples": 7,
+          "loops_per_sample": 8334,
+          "role": "baseline",
+          "correct": true
+        },
+        "cast_key": {
+          "median_ns": 1173.5022396416573,
+          "min_ns": 1167.8191489361702,
+          "mean_ns": 1173.6982082866741,
+          "mad_ns": 4.843225083986454,
+          "samples": 7,
+          "loops_per_sample": 7144,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "cast_key": 0.7888165139309878
+      }
+    },
+    {
+      "case": "searchsorted_u64_n100000_pyint",
+      "params": {
+        "n": 100000,
+        "dtype": "uint64",
+        "key": "python-int"
+      },
+      "baseline": "numpy.searchsorted",
+      "variants": {
+        "numpy.searchsorted": {
+          "median_ns": 42376.03305785124,
+          "min_ns": 41928.09917355372,
+          "mean_ns": 42363.91184573003,
+          "mad_ns": 153.71900826446654,
+          "samples": 9,
+          "loops_per_sample": 121,
+          "role": "baseline",
+          "correct": true
+        },
+        "cast_key": {
+          "median_ns": 1136.724248240563,
+          "min_ns": 1133.3493282149711,
+          "mean_ns": 1136.7366887040591,
+          "mad_ns": 0.543825975687696,
+          "samples": 9,
+          "loops_per_sample": 6252,
+          "correct": false
+        }
+      },
+      "speedups": {
+        "cast_key": null
+      }
+    },
+    {
+      "case": "searchsorted_i64_n100000_key_beyond_int64",
+      "params": {
+        "n": 100000,
+        "dtype": "int64",
+        "key": "2**70 (predicate would refuse)"
+      },
+      "baseline": "numpy.searchsorted",
+      "variants": {
+        "numpy.searchsorted": {
+          "median_ns": 163198400.0,
+          "min_ns": 154321200.0,
+          "mean_ns": 163377214.2857143,
+          "mad_ns": 7665500.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "stock_echo": {
+          "median_ns": 169581700.0,
+          "min_ns": 158613800.0,
+          "mean_ns": 167499700.0,
+          "mad_ns": 6912500.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "stock_echo": 0.9623585563772507
+      }
+    }
+  ]
+}

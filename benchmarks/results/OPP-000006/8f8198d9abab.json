@@ -1,0 +1,411 @@
+{
+  "opp_id": "OPP-000006",
+  "title": "transcendental SIMD coverage: log10/log/log2/exp (#23068)",
+  "recorded_at": "2026-08-23T08:10:58+00:00",
+  "fingerprint": {
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "machine": "AMD64",
+    "system": "Windows 11",
+    "logical_cores": 32,
+    "python": "3.14.2",
+    "numpy": "2.4.5",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "AVX512BF16",
+      "AVX512BITALG",
+      "AVX512BW",
+      "AVX512CD",
+      "AVX512DQ",
+      "AVX512F",
+      "AVX512IFMA",
+      "AVX512VBMI",
+      "AVX512VBMI2",
+      "AVX512VL",
+      "AVX512VNNI",
+      "AVX512VPOPCNTDQ",
+      "AVX512_CLX",
+      "AVX512_CNL",
+      "AVX512_ICL",
+      "AVX512_SKX",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3",
+      "X86_V4"
+    ],
+    "fingerprint": "8f8198d9abab"
+  },
+  "cases": [
+    {
+      "case": "log10_float64_n10000",
+      "params": {
+        "dtype": "float64",
+        "n": 10000,
+        "function": "log10"
+      },
+      "baseline": "numpy.log10",
+      "variants": {
+        "numpy.log10": {
+          "median_ns": 34130.92105263158,
+          "min_ns": 32480.263157894737,
+          "mean_ns": 35634.27033492823,
+          "mad_ns": 1211.1842105263204,
+          "samples": 11,
+          "loops_per_sample": 152,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log_float64_n10000",
+      "params": {
+        "dtype": "float64",
+        "n": 10000,
+        "function": "log"
+      },
+      "baseline": "numpy.log",
+      "variants": {
+        "numpy.log": {
+          "median_ns": 34031.770833333336,
+          "min_ns": 29506.770833333332,
+          "mean_ns": 35130.96590909091,
+          "mad_ns": 4058.854166666668,
+          "samples": 11,
+          "loops_per_sample": 192,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log2_float64_n10000",
+      "params": {
+        "dtype": "float64",
+        "n": 10000,
+        "function": "log2"
+      },
+      "baseline": "numpy.log2",
+      "variants": {
+        "numpy.log2": {
+          "median_ns": 46150.434782608696,
+          "min_ns": 44029.565217391304,
+          "mean_ns": 47531.14624505929,
+          "mad_ns": 1530.434782608696,
+          "samples": 11,
+          "loops_per_sample": 115,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "exp_float64_n10000",
+      "params": {
+        "dtype": "float64",
+        "n": 10000,
+        "function": "exp"
+      },
+      "baseline": "numpy.exp",
+      "variants": {
+        "numpy.exp": {
+          "median_ns": 24042.98245614035,
+          "min_ns": 23689.473684210527,
+          "mean_ns": 25073.7639553429,
+          "mad_ns": 353.50877192982443,
+          "samples": 11,
+          "loops_per_sample": 114,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log10_float64_n1000000",
+      "params": {
+        "dtype": "float64",
+        "n": 1000000,
+        "function": "log10"
+      },
+      "baseline": "numpy.log10",
+      "variants": {
+        "numpy.log10": {
+          "median_ns": 4307550.0,
+          "min_ns": 4117000.0,
+          "mean_ns": 4266070.0,
+          "mad_ns": 59750.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log_float64_n1000000",
+      "params": {
+        "dtype": "float64",
+        "n": 1000000,
+        "function": "log"
+      },
+      "baseline": "numpy.log",
+      "variants": {
+        "numpy.log": {
+          "median_ns": 4214500.0,
+          "min_ns": 3772350.0,
+          "mean_ns": 4569250.0,
+          "mad_ns": 442150.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log2_float64_n1000000",
+      "params": {
+        "dtype": "float64",
+        "n": 1000000,
+        "function": "log2"
+      },
+      "baseline": "numpy.log2",
+      "variants": {
+        "numpy.log2": {
+          "median_ns": 5431700.0,
+          "min_ns": 5292100.0,
+          "mean_ns": 5766460.0,
+          "mad_ns": 139600.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "exp_float64_n1000000",
+      "params": {
+        "dtype": "float64",
+        "n": 1000000,
+        "function": "exp"
+      },
+      "baseline": "numpy.exp",
+      "variants": {
+        "numpy.exp": {
+          "median_ns": 3294600.0,
+          "min_ns": 3185950.0,
+          "mean_ns": 3412810.0,
+          "mad_ns": 108650.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log10_float32_n10000",
+      "params": {
+        "dtype": "float32",
+        "n": 10000,
+        "function": "log10"
+      },
+      "baseline": "numpy.log10",
+      "variants": {
+        "numpy.log10": {
+          "median_ns": 24459.86547085202,
+          "min_ns": 22004.93273542601,
+          "mean_ns": 24342.560130452508,
+          "mad_ns": 962.1076233183849,
+          "samples": 11,
+          "loops_per_sample": 446,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log_float32_n10000",
+      "params": {
+        "dtype": "float32",
+        "n": 10000,
+        "function": "log"
+      },
+      "baseline": "numpy.log",
+      "variants": {
+        "numpy.log": {
+          "median_ns": 12063.77245508982,
+          "min_ns": 10833.233532934131,
+          "mean_ns": 12382.430593358737,
+          "mad_ns": 528.443113772455,
+          "samples": 11,
+          "loops_per_sample": 668,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log2_float32_n10000",
+      "params": {
+        "dtype": "float32",
+        "n": 10000,
+        "function": "log2"
+      },
+      "baseline": "numpy.log2",
+      "variants": {
+        "numpy.log2": {
+          "median_ns": 21901.61943319838,
+          "min_ns": 20472.46963562753,
+          "mean_ns": 22131.542142068458,
+          "mad_ns": 1097.9757085020246,
+          "samples": 11,
+          "loops_per_sample": 247,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "exp_float32_n10000",
+      "params": {
+        "dtype": "float32",
+        "n": 10000,
+        "function": "exp"
+      },
+      "baseline": "numpy.exp",
+      "variants": {
+        "numpy.exp": {
+          "median_ns": 9838.42504743833,
+          "min_ns": 8461.195445920304,
+          "mean_ns": 10267.267552182164,
+          "mad_ns": 1230.9297912713482,
+          "samples": 11,
+          "loops_per_sample": 1054,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log10_float32_n1000000",
+      "params": {
+        "dtype": "float32",
+        "n": 1000000,
+        "function": "log10"
+      },
+      "baseline": "numpy.log10",
+      "variants": {
+        "numpy.log10": {
+          "median_ns": 3504950.0,
+          "min_ns": 3099350.0,
+          "mean_ns": 3525240.0,
+          "mad_ns": 218200.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log_float32_n1000000",
+      "params": {
+        "dtype": "float32",
+        "n": 1000000,
+        "function": "log"
+      },
+      "baseline": "numpy.log",
+      "variants": {
+        "numpy.log": {
+          "median_ns": 1780450.0,
+          "min_ns": 1611150.0,
+          "mean_ns": 1786330.0,
+          "mad_ns": 67475.0,
+          "samples": 5,
+          "loops_per_sample": 4,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "log2_float32_n1000000",
+      "params": {
+        "dtype": "float32",
+        "n": 1000000,
+        "function": "log2"
+      },
+      "baseline": "numpy.log2",
+      "variants": {
+        "numpy.log2": {
+          "median_ns": 3329350.0,
+          "min_ns": 2513700.0,
+          "mean_ns": 3587650.0,
+          "mad_ns": 815650.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "exp_float32_n1000000",
+      "params": {
+        "dtype": "float32",
+        "n": 1000000,
+        "function": "exp"
+      },
+      "baseline": "numpy.exp",
+      "variants": {
+        "numpy.exp": {
+          "median_ns": 1473500.0,
+          "min_ns": 1317437.5,
+          "mean_ns": 1450597.5,
+          "mad_ns": 19250.0,
+          "samples": 5,
+          "loops_per_sample": 8,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    }
+  ]
+}

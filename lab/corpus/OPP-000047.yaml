@@ -1,0 +1,142 @@
+id: OPP-000047
+title: "numpy.linalg.cholesky on 2x2/3x3 batched stacks: per-matrix LAPACK potrf dispatch loses to a vectorized Cholesky-Crout closed form inside a measured batch window (1.8-2.4x guarded end-to-end, 2.7-11.8x raw algorithm); third member of the shipped small-batch linalg family (OPP-000035 inv, OPP-000045 det/slogdet/solve)"
+sources:
+  - url: https://github.com/scipy/scipy/issues/24474
+    repository: scipy/scipy
+    type: issue
+    number: 24474
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T08:59:04Z"
+claim:
+  speedup: null
+  baseline: >-
+    No one in the source thread benchmarks numpy's cholesky against a closed
+    form; the thread is DEMAND-AND-MECHANISM evidence, not a prior claim of
+    this technique. ev-br (scipy maintainer, issue body, 2026-01-31) frames
+    the whole effort: scipy's batched-ND linalg support (scipy#21466,
+    landed 1.16.x) is being moved to low-level C because "This improves
+    performance, esp for batches of small matrices", with a checklist of
+    decompositions (det, lu, norm, the solve family, eigh) to bring to
+    "comparable performance" with numpy.linalg. rgommers (2026-07-29)
+    quantifies the stakes for one member: "if there are cases where scipy
+    is almost 10x slower than numpy, as in the first eigh benchmark
+    here... porting to C/C++... looks like the desired end state."
+  candidate: >-
+    PyOverdrive's candidate is not from the thread: explicit Cholesky-Crout
+    formulas for d=2/d=3 vectorized across the whole stack, never calling
+    LAPACK, measured separately under current_numpy_result. The thread
+    corroborates the underlying mechanism instead: batched small-matrix
+    decompositions are dominated by per-call machinery rather than
+    flops - ilayn (2026-07-29): numpy wins because it is "good at quickly
+    getting down to the compiled internals and no or very little checks
+    are applied", i.e. even scipy's COMPILED loops lose to overhead
+    differences at these sizes, and numpy's own per-matrix potrf gufunc
+    loop is the same class of overhead one level down.
+  hardware: >-
+    Not stated per-benchmark in the dump; the scipy thread's numbers are
+    BasilLiekens' eigh benchmarks (2026-08-03, OPENBLAS_NUM_THREADS=1).
+affected_operations: [numpy.linalg.cholesky]
+input_regime:
+  dtypes: [float64]
+  sizes: [1000, 2000, 3000, 5000, 20000]
+  notes: >-
+    Stacked 2x2 and 3x3 SPD matrices only. Unlike the det/slogdet/solve
+    siblings this one has a measured WINDOW, not just a floor: 2x2 wins
+    from batch 1000 with no cap, but 3x3 wins only in [1000, 3000] on the
+    calibration box - at batch >= 5000 the strided closed-form writes go
+    memory-bound and LAPACK catches up (5000 measured bistable across
+    runs: 1.37x min-of-9 vs 0.98-1.03x battery medians; 20000 a 0.94-1.05x
+    wash). The dev box (AMD Zen 4, numpy 2.4.5) still won ~2x at
+    10_000-100_000, so the cap deliberately forfeits that regime to keep
+    every admitted cell winning on both benchmark machines.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000047_cholesky_small_batch.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno runs 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load), SPD standard-normal stacks (m @ m.T + d*I), numeric
+    comparison at rtol 1e-9. GUARDED end-to-end candidate (pays the pivot
+    re-derivation the dispatch predicate pays,
+    benchmarks/results/BATCH7-CAL/9bbe7063c555.json):
+    2x2 - batch=300: 1.21x, 1000: 1.84x, 2000: 2.11x, 3000: 2.24x,
+    5000: 2.39x, 20000: 1.29x.
+    3x3 - batch=300: 0.93x, 1000: 1.45x, 2000: 1.75x, 3000: 1.84x,
+    5000: 0.98x, 20000: 0.94x.
+    RAW algorithm without the guard (reproducer,
+    benchmarks/results/OPP-000047/9bbe7063c555.json): 2x2 2.70x at 100,
+    7.76x at 1000, 11.79x at 5000, 2.98x at 20000; 3x3 1.42x at 100,
+    3.95x at 1000, 5.51x at 5000, 2.30x at 20000 - the gap between raw
+    and guarded is the conditioning guard's cost, exactly as in
+    OPP-000045. Dev-box probe (AMD Zen 4, numpy 2.4.5, contended,
+    triage-only): 2x2 9.95x at 10_000; 3x3 ~2x at 10_000-100_000; max
+    closed-form error 3.6e-17 of per-matrix scale.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections: []
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000035, OPP-000045, OPP-000030]
+notes:
+  - >-
+    Comparison mode: numeric, NOT bit-identical (battery-checked at rtol
+    1e-9 scaled; measured max error 3.6e-17 of scale). The closed form
+    reads ONLY the lower triangle, exactly like stock potrf UPLO='L'
+    (numpy documents that the upper triangle is ignored), and writes
+    exact 0.0 into the strict upper triangle of the result like stock.
+  - >-
+    The positivity guard (each factorization pivot >= PIVOT_RTOL=1e-8
+    times the per-matrix max-|entry| scale) does triple duty: it refuses
+    non-positive-definite input (stock raises LinAlgError; an unguarded
+    closed form would sqrt a negative), refuses the near-semidefinite
+    boundary band where LAPACK's own rounding decides raise-vs-succeed,
+    and bounds conditioning so the closed form's rounding stays at the
+    measured 1e-17-of-scale level. Same DET_RTOL-style policy as the
+    shipped OPP-000035/OPP-000045 guards.
+  - >-
+    scipy/scipy#24474 is used strictly as demand-and-mechanism evidence
+    for the batched small-matrix linalg surface: it is scipy's own
+    maintainer-driven program to make batched small-matrix decompositions
+    fast, currently open, with cholesky nowhere singled out in-thread.
+    Nobody there proposes closed-form vectorization; the closest
+    structural finding is BasilLiekens' (2026-07-31) LAPACK-driver
+    observation for eigh (numpy uses evd, scipy defaulted evr; switching
+    "brought the difference... down to noise level"), which is
+    driver-selection, not de-LAPACKing.
+  - >-
+    license_review clean: Cholesky-Crout is a textbook factorization
+    formula; no third-party or reporter-owned code involved.
+  - >-
+    correctness_risk medium for the same reasons as OPP-000045
+    (raise-vs-succeed parity at the PD boundary, conditioning-amplified
+    rounding), both handled by the pivot guard. implementation_risk low:
+    fixed-size branch-free formulas.
+  - >-
+    SHIPPED (2026-08-24, batch 7) as cholesky_small_batch
+    (src/pyoverdrive/fastpaths/cholesky_small_batch.py): float64
+    (...,2,2)/(...,3,3) stacks, windows {2: [1000, inf), 3: [1000, 3000]}
+    from the BATCH7-CAL cells above, pivot guard, kwargs (including numpy
+    2.x upper=) refused. 22 differential tests plus a property net with
+    non-PD / non-finite / asymmetric-upper hazards.
+  - >-
+    BATCH 9 REWRITE (2026-08-24): the guard pivots ARE the factorization's
+    intermediates (p2 = a22 - l21^2, p3 = a33 - l31^2 - l32^2), so the
+    predicate-then-recompute double pass was fused into one guarded
+    factorization pass, run in cache-sized chunks (2x2 always 4096; 3x3
+    chunk 1024 below batch 30_000, 4096 above - both boxes show a narrow
+    chunk-4096 resonance around batch 10_000 for 3x3 only, 1.11x idle /
+    1.23x dev, recovered by 16_384). Guard refusal now hands the whole
+    call to stock mid-run (StockRaised pattern), so decision reads PATH
+    with stock's exact behavior. BATCH9-CAL idle-box cells (fp
+    9bbe7063c555, 0% load) under the policy: 2x2 1.86-2.30x at 1000-1M
+    (the old route's weakest admitted cell, 1.29x at 20_000, now 2.30x);
+    3x3 1.59-1.90x at 1000-10_000 and 1.66-1.88x at 16_384-1M; dev box
+    agrees at every cell (1.46-2.00x). Both windows now floor 1000, NO
+    CAP: the old 3x3 cap at 3000 (forced by the unfused route's bistable
+    5000 cell) is lifted - that cell reads 1.90x idle / 1.92x dev fused.
+    The bench note's projected ~5x at batch >=5000 did NOT survive honest
+    guard pricing (that number was raw unguarded Crout); the honest
+    large-batch win is the 1.6-1.9x recorded here.

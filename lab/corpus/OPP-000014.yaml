@@ -1,0 +1,100 @@
+id: OPP-000014
+title: "np.unique(arr, axis=0) pays full structured-dtype overhead even for a trivial single-column 2-D array"
+sources:
+  - url: https://github.com/numpy/numpy/issues/15713
+    repository: numpy/numpy
+    type: issue
+    number: 15713
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 10.0
+  baseline: "np.unique(mat, axis=0) where mat = np.expand_dims(arr, 1), a trivial (1000,1) expansion of a 1-D array arr of size 1000, timed over a 100-iteration loop (numpy 1.18.1)"
+  candidate: "np.unique(arr) on the same data as a plain 1-D array (before expand_dims), same timing loop"
+  hardware: "unknown; reporter's inline code comment says the axis=0 call is \"~10 times slower\" from a 100-iteration time.time() loop in the repro script itself, not a formal benchmark, and no CPU/OS is given, so 10.0 is the most defensible concrete figure in the thread rather than a verified measurement"
+affected_operations: [numpy.unique]
+input_regime:
+  dtypes: [int64]
+  sizes: [1000]
+  notes: >
+    Reporter's repro is np.random.randint(0,20,1000) (dtype not stated
+    explicitly; assumed platform-default int64) expanded to shape (1000,1)
+    via np.expand_dims(arr,1), then np.unique(mat, axis=0) is compared
+    against np.unique(arr). The claim is specific to this trivial
+    single-column "expansion of a 1-D array" shape (arr.shape[1]=1), not to
+    general N-column axis=0 unique; mganahl says explicitly that this
+    single-column case "should perform just as fast as" the 1-D case since
+    memory order is identical.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000014_unique_axis0.py
+current_numpy_result:
+  verified_speedup: 66.2
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, box contended (conditions.contended=true,
+    a foreign process was competing for CPU during the run). ravel_reshape single-
+    column fast path for np.unique(arr, axis=0) on (N,1) arrays reproduces closely
+    at the claim's own regime and grows far larger elsewhere. At N=1000 int64 (the
+    claim's exact repro shape) it lands at 10.2x (375369 ns -> 36808 ns), matching
+    the claimed ~10x almost exactly; N=1000 int32/uint32/uint64 land 9.6x-14.0x, and
+    N=1000 float32/float64 jump to 29.2x-39.3x. Best observed case: float32 N=100000,
+    66.2x (55678300 ns -> 840471 ns). Speedup shrinks at large N: N=400000 ranges only
+    2.2x (uint64) up to 6.0x (uint32), still a real win but far off the best case.
+    A second candidate, lexsort, was swept for the broader multi-column axis=0 case
+    (outside the claim's own single-column regime): it also wins but far more
+    modestly, 1.10x-4.37x, with the weakest case (8 columns, N=100000) barely above
+    parity (1.10x). All 30 cases correct on both candidates, zero correctness
+    failures. Evidence: benchmarks/results/OPP-000014/8f8198d9abab.json. Box was
+    contended during this run; absolute times may be noisy but the relative wins,
+    especially the near-exact match to the claim at N=1000, are large enough to
+    survive that.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections:
+  - "seberg (2020-03-05T18:51:26Z): This is probably expected, since the implementation has to first ensure that the \"elements\" being compared are contiguous in memory. In other words it makes \"elements\" out of the subarrays which are being compared. This requires a copy of the array in one case but not in the others where the axis is the \"slowest in memory\". NumPy may not be as fast as it could be (in some cases a copy may not be necessary in general), but memory order matters for speed, and a certain slowdown has to be expected in either case. In most cases, doing the copy is likely the fastest approach we can do... (although the copy could be optimized possible, that would be a pretty large endevour)."
+  - "seberg (2020-03-05T19:15:39Z): I am not sure whether this copies, but it mainly adds a large chunk of overhead due to using structured dtype defined comparison/sorting, which does not optimize for the trivial case you got here. As to gh-11136 there is a reason we have been careful about doing such tricks. They seem nice, but are also dangerous in general."
+  - "seberg (2020-03-17T14:50:15Z): as well as sorting being inconsistent depending on the byte-order."
+  - "eric-wieser (2020-03-17T15:12:31Z): There would be no reason to add a new routine. The original optimization was removed in the lines here: https://github.com/numpy/numpy/pull/10588/files#diff-9e06c7b7bcc8e8153f5c2df57283b4cbL238. We can almost certainly reintroduce the same optimization, but with a stricter whitelist of types than before."
+  - "rossbar (2020-03-10T03:28:51Z): I'm not sure there is anything actionable here - do you feel like your question has been sufficiently answered?"
+linked_prs:
+  - "https://github.com/numpy/numpy/pull/10588 (referenced by eric-wieser as the PR that removed the original axis=0 unique optimization; not confirmed merged/closed state from this thread alone)"
+linked_commits: []
+related_opportunities:
+  - "OPP-000001"
+notes:
+  - >
+    The one transparent fast path PyOverdrive could ship without any new
+    keyword: when np.unique(arr, axis=0) is called on a 2-D array with
+    arr.shape[1] == 1, skip the structured-dtype view/copy path seberg
+    describes and instead ravel to 1-D, run the existing sort-based
+    unique1d path, and reshape the result back to (-1, 1). Semantics are
+    identical (row-uniqueness on a single-column array is definitionally
+    the same as element-uniqueness of that column), so this needs only a
+    shape/stride predicate, not a correctness trade-off like
+    assume_sorted/assume_unique.
+  - >
+    The broader ask implied by eric-wieser (reintroducing the general
+    axis=0 optimization removed in PR #10588, "with a stricter whitelist of
+    types") is a different, riskier project: seberg flags that sorting
+    becomes byte-order-dependent for the removed approach, and separately
+    warns (re: gh-11136) that these tricks are "dangerous in general" - a
+    real correctness caveat from a maintainer, not a strawman, and out of
+    scope for a first PyOverdrive cut.
+  - >
+    Maintainer response reads as "explained, not planned": rossbar directly
+    asked whether there was "anything actionable here," and no numpy-side
+    fix PR is linked in the six-plus years since. Community demand exists
+    (DominicAntonacci's lexsort-based unique_axis0 workaround, posted a
+    year later) but its own author calls it "asymptotically worse than
+    np.unique," so it is evidence of the pain point, not a candidate
+    implementation.
+  - >
+    input_regime is thin: the only concrete numbers in the thread come from
+    a single repro at N=1000 with dtype unstated (assumed int64 default
+    from np.random.randint). The claimed "~10 times slower" needs to be
+    swept across sizes and dtypes, and both the single-column special case
+    and a general multi-column axis=0 case measured separately, before
+    trusting it as a general result.
+  - "SHIPPED (2026-08-23) as unique_axis0_column (src/pyoverdrive/fastpaths/unique_axis0_column.py): np.unique(a, axis=0) for a plain single-column int32/int64/uint32/uint64 matrix with >= 1000 rows routes to the sort-based 1-D unique reshaped to (u, 1); bit-identical (integer structured-field comparison equals numeric comparison), 45 differential tests. Public-API proof: 41.7x at 10k rows even at smoke size (MVP-BASELINE). Floats deliberately excluded: stock's axis path compares NaN fields as equal, which differs from the 1-D NaN-run collapse. The multi-column lexsort win (1.1-4.4x) stays unshipped pending its own path."

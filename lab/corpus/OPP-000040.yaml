@@ -1,0 +1,209 @@
+id: OPP-000040
+title: "np.unique(axis=0) on multi-column integer 2-D rows: void-view row trick ~doubles throughput; thread spans 2018-2026, mechanism unconfirmed"
+sources:
+  - url: https://github.com/numpy/numpy/issues/11136
+    repository: numpy/numpy
+    type: issue
+    number: 11136
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T12:00:00Z"
+claim:
+  speedup: 1.96
+  baseline: >-
+    RECENT (2026, numpy 2.3.5, author bjornmadsen, comment 2026-02-16,
+    updated 2026-02-16T14:03:28Z): np.unique(arr, axis=0, sorted=False) on
+    a 10,000-row, 2-column (int, int) array, timeit.timeit(number=20),
+    0.041082s for 20 iterations, posted throughput 4,868,304 rows/sec.
+  candidate: >-
+    Same author/comment/date/numpy version: np.unique on the array
+    reinterpreted as a void-record view of each row
+    (np.ascontiguousarray(arr).view(np.dtype((np.void, row_size)))),
+    sorted=False, 0.020968s for 20 iterations, posted throughput 9,538,260
+    rows/sec. DERIVED speedup: 0.041082 / 0.020968 = 1.959 (~1.96x). The
+    author's own qualitative summary agrees: "The void view effectively
+    doubles the throughput for row-wise uniqueness of numerical data."
+    Single-int-column comparison from the same table (not this record's
+    regime, kept for context): axis=0 4,919,132 r/s vs axis=void 8,343,113
+    r/s, ~1.70x.
+  hardware: >-
+    unknown for the 2026 numbers; the comment states only "NumPy version:
+    2.3.5", no CPU/OS. SEPARATE, OLDER (2018) claim, kept apart per the
+    thread's own age span and NOT folded into the ratio above: original
+    reporter nschloe, issue body, 2018-05-22T15:24:31Z, states "Creating a
+    view of the data and calling unique on the view is faster by a factor
+    of 3" for axis=0 vs a void-view row trick, benchmarked with perfplot
+    over np.random.randint(0, 100, (n, 2)), n_range 2**0 to 2**19; the
+    exact per-n timings live only in an attached plot image, not as text
+    in the dump, so no numeric baseline/candidate pair can be recorded for
+    2018 beyond the reporter's stated "factor of 3". Hardware for 2018 is
+    also unknown.
+affected_operations: [numpy.unique]
+input_regime:
+  dtypes: [int8, int16, int32, int64, uint8, uint16, uint32, uint64]
+  sizes: [10000]
+  notes: >-
+    This record targets np.unique(arr, axis=0) where arr is a plain 2-D
+    C-contiguous array of INTEGER dtype with >= 2 columns (multi-column
+    integer rows). It is explicitly disjoint from PyOverdrive's three
+    shipped np.unique fast paths: unique_sort (1-D integer), unique_char_view
+    (1-D U1/S1 via int32/uint8 view, OPP-000024), and unique_axis0_column
+    (axis=0, single-integer-COLUMN 2-D, i.e. shape (n, 1)) - see
+    related_opportunities. The >= 2 column, integer-only predicate here
+    must not overlap any of those three regimes. Concretely measured only
+    at n=10,000 rows x 2 (int, int) columns in the 2026 comment; the 2018
+    reporter's perfplot swept n from 1 to 524,288 but left no text numbers
+    for axis=0 (image-only). float/string dtypes and axis=None/no-axis
+    calls are out of scope for this record.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000040_unique_rows_void.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load): REPRODUCED above the 1.96x claim. The thread's
+    own raw void-view route is DEAD for a transparent layer (probe:
+    stock returns numeric-lexicographic row order; little-endian void
+    memcmp does not, on negative ints) - the shipped candidate is a
+    lexsort + adjacent-diff route instead: int64 low-cardinality
+    4.4-5.0x (k=2), 2.5-3.1x (k=4), 1.84x (k=8); hi-cardinality
+    1.40-2.46x; int32 4.0x; return_counts 4.88x; every cell
+    bit-identical, negative-salted rows included. Evidence:
+    benchmarks/results/OPP-000040/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections:
+  - author: eric-wieser
+    date: "2018-05-22"
+    quote: >-
+      There used to be an optimization in place for this for integer
+      inputs, but it was removed (#10608) because the sorting of the final
+      array ended up being dependent on the system endianness (#10495).
+  - author: eric-wieser
+    date: "2018-05-22"
+    quote: >-
+      Note that your approach also only works for types where equality
+      <=> binary equality, which is not true for floating point numbers.
+linked_prs:
+  - url: https://github.com/numpy/numpy/pull/10608
+    repository: numpy/numpy
+    type: pull_request
+    number: 10608
+    note: >-
+      Per eric-wieser's 2018-05-22 comment, this PR REMOVED a prior
+      integer-input np.unique optimization because its sorted output was
+      endianness-dependent (numpy/numpy#10495 is cited as the underlying
+      bug). Relevant precedent: any reintroduced int fast path must pin
+      native byte order or otherwise avoid the same endianness bug.
+related_opportunities: [OPP-000001, OPP-000014, OPP-000024]
+notes:
+  - >-
+    SHIPPED (2026-08-24) as unique_rows_lexsort
+    (src/pyoverdrive/fastpaths/unique_rows_lexsort.py): unique(a,
+    axis=0) on plain int64/int32 2-D, 2 <= k <= 8, rows >= 1000,
+    return_counts supported, return_index/inverse refused (stock's
+    duplicate-selection stability is not replicated). Bit-identical
+    including row order. license_review clean: lexsort +
+    adjacent-difference, standard technique.
+  - >-
+    Mechanism: the thread never states plainly how axis=0's current
+    machinery works internally. Two partial signals exist. (1) eric-wieser
+    (MEMBER), 2018-05-22, on why no native int fast path already exists:
+    "There used to be an optimization in place for this for integer
+    inputs, but it was removed (#10608) because the sorting of the final
+    array ended up being dependent on the system endianness (#10495)." (2)
+    bjornmadsen, 2026-02-16, poses an UNANSWERED inference rather than a
+    confirmed fact: "I infer that when I'm using axis=void, NumPy can no
+    longer use its highly optimized, SIMD-accelerated floating-point
+    sorting algorithms because it sees the data as \"opaque bytes.\" It
+    falls back to a generic byte-block comparison. Is this correct?" No
+    maintainer answered that question in this dump.
+  - >-
+    Float/string exclusion hazard: eric-wieser (MEMBER), 2018-05-22, on
+    the void-view trick generally: "Note that your approach also only
+    works for types where equality <=> binary equality, which is not true
+    for floating point numbers." PyOverdrive's design rationale, extending
+    this beyond the thread's own wording: float/string are EXCLUDED
+    because void-view equality is bit-pattern equality, which diverges
+    from value equality on NaN and negative zero - state this hazard
+    verbatim as the reason the regime is int-only. The NaN / negative-zero
+    specifics are PyOverdrive's elaboration, not verbatim thread text;
+    eric-wieser's own words stop at "not true for floating point numbers."
+  - >-
+    Fast-path sketch: predicate = plain 2-D C-contiguous INTEGER-dtype
+    array, ndim==2, >= 2 columns (1 column is the shipped
+    unique_axis0_column, OPP-000014 or OPP-000001 per related_opportunities
+    - disjoint from this record). Route = view each row as a void record
+    (np.ascontiguousarray(arr).view(np.dtype((np.void, itemsize*ncols)))),
+    run 1-D np.unique on the void view, view the result back to the
+    original dtype and reshape. This is exactly the "unique_row_view"
+    kernel in nschloe's original 2018 issue body and the axis=void path
+    bjornmadsen benchmarked in 2026. A second route the thread discusses
+    is byte-string casting instead of void: nschloe's own "unique_scikit"
+    kernel views rows as '|S%d' and calls np.unique(..., return_index=True)
+    then indexes the array; jakirkham (2019-02-09) notes scikit-image uses
+    this same S-string trick and it "ends up being a little faster than
+    casting to void." A THIRD, materially different variant appears in
+    HansBrende's 2024-10-09 comment: rather than a raw byte-for-byte view,
+    it rank-encodes each integer column via np.searchsorted against that
+    column's sorted unique values, bit-packs the per-column ranks into a
+    single np.uint16 via shifts, then uses np.bincount as a hash table.
+    This is NOT "row bytes fit 8/16 bytes exactly" as a memory
+    reinterpretation; it is a value remapping, and HansBrende states it
+    "has one serious limitation in that the running product of the total
+    number of unique values in each column must be less than 65536 (and it
+    will only work for integer types)." He reports it "runs a whopping
+    25X faster" than stock np.unique(axis=0, return_counts=True) on
+    ~150,000-row arrays "having many duplicates", later corrected in an
+    edit: "more than 50X faster since I just realized I was comparing it
+    to the Counter approach I mentioned above (which was already more than
+    2x faster than the built-in functionality)" - i.e. the 25X figure was
+    against Counter, not stock np.unique, and both figures are the
+    reporter's own unverified numbers with no hardware/version given.
+  - >-
+    return_index / return_inverse / return_counts passthrough for the
+    void-view route is asserted by analogy to OPP-000024's char-view
+    passthrough reasoning (positions are unaffected by reinterpretation)
+    but is NOT independently confirmed anywhere in this thread; must be
+    settled by the reproducer alongside exact-equality correctness checks
+    across dtypes and column counts.
+  - >-
+    Comparison mode: bit-identical for the int regime (void-record view of
+    integer bytes is an exact, information-preserving reinterpretation;
+    no value coercion is involved for int8 through uint64).
+  - >-
+    Thread engagement/timeline, with authors: opened by nschloe
+    2018-05-22 (issue body, "factor of 3", perfplot MVCE with unique_axis,
+    unique_row_view, unique_scikit kernels; 4 reactions total, all +1).
+    eric-wieser (MEMBER) commented twice same day (endianness-removal
+    history; float/binary-equality hazard). nschloe replied 2018-05-23:
+    "Very interesting, this indeed fails in various circumstances. Still,
+    the 3x speed up perhaps makes it worthwhile thinking about carefully
+    reintroducing the optimization again." jakirkham commented 2019-02-09
+    (scikit-image byte-string trick). pdemarti commented twice 2021-04-18
+    questioning why sorting instead of hashing and posting pandas-based
+    alternatives (perfplot images only, no text numbers). adrinjalali
+    commented 2023-07-11 ("might be worth optimizing unique a bit");
+    seberg (MEMBER) replied same day proposing a hash-table-based redesign
+    as the preferred long-term direction, not the view trick: "You
+    probably need to implement a hash based solution... I don't mind if
+    NumPy grows this... But overall it's not like hashing methods are
+    particularly complicated." adrinjalali followed up 2023-12-13: "I'll
+    see what I can come up with (looking at pandas' implementation) and
+    open a proposal PR" - no such PR is linked anywhere in this dump.
+    HansBrende commented twice in Oct 2024 (Counter-beats-numpy
+    observation; bit-packed hash workaround). bjornmadsen commented
+    2026-02-16 with the numpy 2.3.5 throughput table used as this record's
+    RECENT numbers. Issue remains open as of updated_at
+    2026-04-30T15:16:50Z; 12 total comments recorded, no linked PRs, no
+    maintainer decision or close in the dump.
+  - >-
+    license_review is pending (not yet assessed) because several
+    candidate snippets in this thread are third-party (scikit-image's
+    trick per jakirkham, pandas-internals code posted by pdemarti,
+    HansBrende's bit-packing function) alongside the reporter's own
+    void-view snippet; provenance of each must be checked line-by-line
+    before any is adapted, unlike OPP-000024 where the sole candidate was
+    the reporter's own three-line snippet.

@@ -1,0 +1,127 @@
+id: OPP-000046
+title: "np.nan_to_num(float64, default args) via copy + in-place np.copyto masking: 1.2x-2.2x depending on NaN/inf mix; original 2023 thread reports no benchmark numbers, only memory-overhead symptoms"
+sources:
+  - url: https://github.com/numpy/numpy/issues/23140
+    repository: numpy/numpy
+    type: issue
+    number: 23140
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T08:10:20Z"
+claim:
+  speedup: null
+  baseline: >-
+    pedersor (issue body, 2023-02-01T19:45:42Z): "numpy.nan_to_num is very
+    slow for large arrays (e.g. with size 1M+) whereas similar functions
+    like numpy.where are not," suspecting "a rather simple python for loop"
+    in the implementation, linking
+    numpy/lib/type_check.py lines 404-521. rkern (MEMBER,
+    2023-02-01T19:48:59Z) refuted the loop-overhead theory: "The for loop
+    is not looping over individual values. dest is a 2-item tuple in the
+    case of a complex dtype and a 1-item tuple otherwise. The iteration
+    overhead should be minimal for large arrays." pedersor then revised the
+    diagnosis (2023-02-01T20:17:20Z): "I think that the issue is that
+    nan_to_num uses more memory... for sufficiently larger arrays,
+    nan_to_num seems to saturate my memory, resulting in vast slowdowns,
+    whereas where did not." No numeric timing, array size beyond "1M+", or
+    hardware/RAM figure is given anywhere in the dump.
+  candidate: >-
+    mattip (MEMBER, 2023-02-01T20:35:54Z): "If you want, you can use
+    copy=False" (linking the nan_to_num docs). pedersor confirmed
+    2023-02-01T20:59:13Z: "Works, thanks!" and closed the issue the same
+    minute (state_reason completed). This copy=False kwarg is the thread's
+    own resolution; it is a usage workaround, not a numeric benchmark, and
+    not the copy+copyto masking technique this record measures.
+  hardware: >-
+    unknown - the dump carries no CPU/OS/RAM or numpy version from either
+    participant; pedersor's "saturate my memory" claim gives no concrete
+    memory figure.
+affected_operations: [numpy.nan_to_num]
+input_regime:
+  dtypes: [float64]
+  sizes: [10000, 1000000]
+  notes: >-
+    Targets np.nan_to_num(arr) on a float64 array with the library's own
+    stock default kwargs (nan=0.0, posinf=float64 max, neginf=float64 min).
+    Measured at n=10,000 and n=1,000,000 across three NaN/inf regimes: 1%
+    NaN only, 1% NaN plus ~1% inf mix, and clean (no NaN/inf). Non-default
+    nan=/posinf=/neginf= kwargs, copy=False, non-float64 dtypes, and
+    complex input are all out of scope and must refuse to dispatch to the
+    fast path until separately measured.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000046_nan_to_num.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy 2.5.2,
+    0% load), float64 arrays, evidence file
+    benchmarks/results/BATCH6-CAL/9bbe7063c555.json: n=1,000,000 with 1%
+    NaN only 1.87x; n=1,000,000 with 1% NaN plus ~1% inf mix 1.20x (isinf
+    branch active); n=1,000,000 clean, no NaN/inf, 2.02x (isinf branch
+    skipped entirely via an .any() probe, that probe counted as part of
+    the measured cost); n=10,000 with 1% NaN only 2.21x. Every cell
+    bit-identical (array_equal) against stock output across all four
+    regimes. CONTENDED supporting evidence only, not used for the
+    headline numbers above: dev-box AMD Zen 4 (fp 8f8198d9abab, numpy
+    2.4.5, 42-43% load, triage run) showed 1M at 1% NaN 2.11x, and a
+    full-battery rerun on that same contended box showed 2.00x.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections: []
+linked_prs: []
+linked_commits: []
+related_opportunities: []
+notes:
+  - >-
+    Mechanism, PyOverdrive's own analysis, not stated this way in the
+    thread: stock np.nan_to_num on float64 with default kwargs builds its
+    result through a chain of np.where allocations. The fast path instead
+    copies the input once, then applies in-place np.copyto boolean-mask
+    assignment: NaN to 0.0, +inf to float64 max, -inf to float64 min,
+    exactly stock's own defaults. The isinf branch (the +inf/-inf masking
+    step) is skipped entirely when an .any() probe finds no infinities in
+    the array; that probe is counted in the measured cost above, which is
+    why the clean regime (2.02x) and the inf-mix regime (1.20x) differ so
+    much.
+  - >-
+    The thread never converges on this mechanism itself. pedersor's own
+    for-loop theory was refuted by rkern same day; pedersor's revised
+    memory-overhead theory was never confirmed or refuted by a maintainer,
+    and the issue was closed on the copy=False workaround rather than on
+    any diagnosis of the internal allocation pattern.
+  - >-
+    Thread engagement: opened by pedersor 2023-02-01T19:45:42Z (NONE
+    author association), 4 total comments same day (rkern MEMBER, pedersor
+    x2, mattip MEMBER), closed by pedersor 2023-02-01T20:59:13Z,
+    state_reason completed, no labels, no linked PRs or commits anywhere
+    in the dump, no maintainer proposal to change nan_to_num's internal
+    implementation.
+  - >-
+    license_review clean: the fast path is copy() plus np.copyto
+    boolean-mask assignment, a trivial standard technique. Unlike
+    OPP-000040's void-view candidates, this thread contributes no
+    candidate code at all (only the copy=False kwarg suggestion), so there
+    is no third-party snippet provenance to check.
+  - >-
+    correctness_risk low: the fast path implements exactly three
+    documented default replacements (nan=0.0, posinf=float64 max,
+    neginf=float64 min) with no value ambiguity. The risk is bounded by
+    dispatch discipline, not semantics: non-default nan=/posinf=/neginf=
+    kwargs, copy=False, non-float64 dtypes, and complex input must all
+    fall back to stock until each is independently measured.
+  - >-
+    SHIPPED (2026-08-24) as nan_to_num_where (src/pyoverdrive/fastpaths/nan_to_num_where.py): default-args float64 calls only, size >= 10000; copy + in-place copyto masks, isinf pass skipped when no infinity exists. Bit-identical, always a fresh copy. 15 differential tests plus a property suite.
+  - >-
+    EXTENDED (2026-08-24, batch 7): the scalar-override kwargs regimes
+    (nan=/posinf=/neginf= with Python int/float/bool or np.float64 values;
+    posinf/neginf may be None) now dispatch too, same SIZE_FLOOR, still
+    bit-identical - all three replacement masks are computed from the
+    ORIGINAL values exactly as stock does, so a non-finite nan= override
+    cannot leak into the inf replacements. Array-like fills, np.float32
+    fills, and any copy= stay on stock, unmeasured. BATCH7-CAL (fp
+    9bbe7063c555, idle box): nan-override 2.19-2.59x at 1e4-1e6, clean
+    with overrides 2.33-3.27x, NaN+inf mix 1.09-1.44x - the same
+    every-cell-wins shape as the default-args regime. 26 further
+    differential tests plus a property net over the override draws.

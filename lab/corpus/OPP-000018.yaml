@@ -1,0 +1,170 @@
+id: OPP-000018
+title: "np.einsum ~20x slower than other libraries (mostly fixed via optimize=True's batched-matmul path in PR #23513; default optimize=False path remains slow)"
+sources:
+  - url: https://github.com/numpy/numpy/issues/22604
+    repository: numpy/numpy
+    type: issue
+    number: 22604
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 20.0
+  baseline: >
+    np.einsum('thd,Thd->thT', x, y) on numpy 1.21.6, x and y both shape
+    (1000, 1, 500) float64 (np.random.uniform), called with no optimize
+    keyword, i.e. numpy's default optimize=False path: 363 ms +/- 2.21 ms
+    (mean +/- std of 7 runs, 1 loop each) per the reporter's own %timeit.
+  candidate: >
+    the same 'thd,Thd->thT' contraction computed by other libraries'
+    default einsum, which route this batched-matmul-shaped contraction
+    through BLAS/XLA rather than numpy's naive C loop: torch.einsum 14 ms
+    +/- 87.7 us, tf.einsum 18.7 ms +/- 109 us, jnp.einsum 21.2 ms +/- 1.84
+    ms (same %timeit methodology, same shapes, no optimize kwarg needed
+    on any of them).
+  hardware: >
+    unknown; no CPU/OS/thread-count details were reported in the issue
+    body. The reporter's own headline figure, used as claim.speedup here,
+    was "np.einsum is ~20x slower than other libraries."
+affected_operations: [numpy.einsum]
+input_regime:
+  dtypes: [float64, float32]
+  sizes: [500000, 5000000]
+  notes: >
+    two-operand contraction 'thd,Thd->thT', equivalent to a batched matmul
+    over one batch-like singleton axis; 500000 = 1000*1*500 elements per
+    array is the original bug-report shape, 5000000 = 10000*1*500 is the
+    shape Kai-Striega used to profile (91.2% of time in C code, 6.5% array
+    setup, with optimize=True). Also reported (float32, post-PR-23513,
+    with optimize=True): numpy 2.4 ms vs torch 1.55 ms on the 500000-
+    element shape once optimize=True is passed. A separate extreme case (a many-index tensor-network
+    contraction with no batch structure, 13-15 axes) is quoted
+    qualitatively by jcmgray against a third-party library (not
+    numpy-vs-numpy) and is deliberately excluded from the size list above.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000018_einsum_optimize.py
+current_numpy_result:
+  verified_speedup: 45.05
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, box contended (foreign cpu_busy
+    ~28-29% before and after). On the batched-matmul regime the claim
+    describes, this reproduces and exceeds it: at t=1000,h=1,d=500 float64
+    (the original bug-report shape), stock numpy.einsum(optimize=False) is
+    128.4 ms; a transparent matmul-routed fast path drops that to 3.84 ms
+    (33.5x), and even bare optimize_true alone gets 17.6x (7.28 ms). At
+    t=2000,h=1,d=500 float32 the matmul path peaks at 45.0x (255.9 ms ->
+    5.68 ms); optimize_true there is 30.5x. All four batched-matmul cases
+    land at or above the claimed ~20x figure (17.6x-45.0x across
+    optimize_true and matmul). It loses badly, though, on small classic
+    inner-product contractions, exactly dgasmith's named counter-case:
+    optimize=True alone is catastrophic at len=3 and len=100 (0.15x and
+    0.18x, i.e. 5.6x-6.7x SLOWER than stock einsum). The matmul-specific
+    candidate still wins there, but only barely and near the noise floor
+    (1.52x at len=3, 2.19x at len=100, sub-microsecond either way).
+    Evidence: benchmarks/results/OPP-000018/8f8198d9abab.json (contended
+    run, cpu_busy_before 0.285 / cpu_busy_after 0.281).
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: medium
+maintainer_objections:
+  - author: rgommers
+    date: "2022-11-29"
+    quote: >
+      And I don't think we want to rewrite the whole thing in C/C++.
+  - author: dgasmith
+    date: "2023-03-30"
+    quote: >
+      I have been hesitant of methods like batched GEMM in the past in
+      NumPy proper due to the radically different performance
+      expectations for something like `einsum`. For example, I recall
+      `np.einsum('i,i->', vector, vector)` for 3-length inner products was
+      used heavily in SciPy (?) making `optimal=True` a poor choice for a
+      default.
+  - author: seberg
+    date: "2023-03-30"
+    quote: >
+      I am surprised matmul scales down well to small arrays, although I
+      also see that there may be cases where it is quite a lot slower
+      because it either fails to call out to blas, or tries too hard
+      (requiring buffering or so).
+  - author: jcmgray
+    date: "2023-03-30"
+    quote: >
+      And agreed on keeping `optimize=False` as the default to prioritize
+      low-overhead small contractions.
+linked_prs:
+  - https://github.com/numpy/numpy/pull/23513
+  - https://github.com/scipy/scipy/pull/20950
+related_opportunities: [OPP-000002, OPP-000008, OPP-000004]
+notes:
+  - >-
+    SHIPPED (2026-08-23) as einsum_optimize
+    (src/pyoverdrive/fastpaths/einsum_optimize.py): two-operand
+    subscripts-form einsum on same-dtype float64/float32 routes to stock
+    einsum optimize=True (numpy's OWN planner - nothing reimplemented,
+    exactly the "size gate" the maintainers could not ship as a default).
+    EINSUM-CAL battery set two floors: min operand 10k for
+    projected-output contractions (matmul 3.98x, thd 3.40x at the floor;
+    27.4x at 1e6) and 1e6 for scalar-output reductions (inner 2.06x,
+    frob 1.53x); dgasmith's tiny-inner counter-case (0.15-0.18x) sits far
+    below both. The 0-d-array-vs-scalar return-type difference of the
+    optimize path is normalized back to stock's scalar. float32
+    equality checked with absolute-scaled tolerance: measured at 'thd'
+    300x1x300, DEFAULT einsum is farther from the float64 truth (5.11x
+    relative at near-zero outputs) than optimize=True (0.65x).
+  - >
+    The reported "~20x" blends three different reference libraries
+    (torch 14 ms, tf 18.7 ms, jax 21.2 ms, all against numpy's 363 ms)
+    measured on numpy 1.21.6 in 2022; treat 20.0 as the reporter's own
+    approximate summary figure, not a precise or reproduced measurement.
+  - >
+    Most of the gap is already closed upstream: PR #23513 (merged, closed
+    as completed 2025-11-14) routes optimize=True einsum calls through
+    batched matmul, and jcmgray's 2025-11-13 follow-up shows numpy at 2.4
+    ms vs torch's 1.55 ms on the same shape. The remaining
+    opportunity is specifically the optimize=False default path, which
+    #23513 deliberately left alone per dgasmith and jcmgray's small-
+    contraction-overhead concern above.
+  - >
+    Proposed transparent fast path for PyOverdrive: detect a two-operand
+    einsum subscript that reduces to a batched matmul (at most one
+    contracted axis, at most one batch axis, no repeated-index diagonal
+    or trace), size-gate it on a threshold found empirically (to protect
+    exactly the np.einsum('i,i->', v, v) small-contraction case dgasmith
+    named), and silently route through tensordot/matmul even when
+    optimize is not passed, without adding a new keyword, the same
+    no-new-API shape already shipped for OPP-000007's intersect_sorted.
+  - >
+    Semantics differ only in floating-point summation order (BLAS
+    reduction vs the naive C accumulation loop), not in the mathematical
+    result; this is an assumption based on how BLAS routing generally
+    behaves, since no one in this specific thread discussed bit-exactness.
+    Correctness validation should use a numeric tolerance, not
+    bit-identity, unlike OPP-000007's intersect1d work.
+  - >
+    related_opportunities includes OPP-000002 (np.inner ndim>2 via
+    tensordot) as the closest structural precedent: same "route a
+    small-tensor contraction through BLAS/tensordot" mechanism as the fix
+    used here. OPP-000008 (threaded ufuncs) and OPP-000004 (blocked
+    transpose copy) are weaker, secondary links: seberg raised both
+    multi-threading and blocked iteration as separate, unexplored levers
+    on einsum's C code in the same thread, but neither was pursued there.
+  - >-
+    SIBLING SHIPPED (2026-08-24, batch 7): einsum_optimize_chain
+    (OPP-000049, same module) extends the same optimize=True routing to
+    three-or-more-operand contractions, which this two-operand path
+    deliberately never claimed. Gate is the naive loop volume rather
+    than min operand size; see OPP-000049 for its own evidence.
+  - >-
+    BATCH 9 ELLIPSIS ADMISSION (2026-08-24): the two-operand path now
+    serves '...ij,...jk->...ik'-class spellings (both operands carry
+    '...', equal ellipsis shapes, at least one real ellipsis dim, extents
+    pre-checked; implicit-output and mid-ellipsis 'i...j' forms too),
+    always in the projected regime under the same min-operand-size
+    PROJECTED_FLOOR = 10_000. BATCH9-CAL idle-box witness cells (fp
+    9bbe7063c555): 3.16x at min-size 10_240 (the floor cell), 4.25x
+    explicit / 4.28x implicit at B=64 n=32, 1.22x at min-size 2048 below
+    the floor - the non-ellipsis floor transfers to the ellipsis
+    spelling. Ellipsis broadcasting and '->' outputs without '...'
+    remain on stock (legal numpy, unmeasured or subtle shape classes).

@@ -1,0 +1,23 @@
+# Environments
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Claude local artifacts
+/.claude/
+
+# Lab raw data can be large; corpus records are committed, raw API dumps are not
+lab/corpus/raw/*.json
+
+# Benchmark results ARE committed (evidence), but scratch outputs are not
+benchmarks/results/_scratch/
+
+# OS noise
+Thumbs.db
+.DS_Store
+
+# Derived corpus index (rebuild with lab/cli/rebuild_index.py)
+lab/corpus/index.sqlite

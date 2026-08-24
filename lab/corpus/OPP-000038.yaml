@@ -1,0 +1,172 @@
+id: OPP-000038
+title: "histogramdd (and histogram2d) uses per-dimension searchsorted on an edges array even when bins are uniform by construction; reporter claims 4-5x via direct index-calc"
+sources:
+  - url: https://github.com/numpy/numpy/issues/17676
+    repository: numpy/numpy
+    type: issue
+    number: 17676
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T12:00:00Z"
+claim:
+  speedup: null
+  baseline: >-
+    numpy.histogram2d(xy[:, 0], xy[:, 1], bins=[100, 100], range=[[-3, 3],
+    [-3, 3]]) on xy = np.random.normal(0, 1, (int(5e6), 2)) with seed 42,
+    per the reproducing code block in the issue body (bins uniform by
+    construction: int bin counts plus an explicit range). This path goes
+    through histogramdd, which builds an explicit edges array per
+    dimension and locates samples via searchsorted. No printed timing
+    value is present in the dump; the code block times with time.time()
+    but no captured output.
+  candidate: >-
+    The reporter's own local implementation, linked as a numpy fork commit:
+    https://github.com/aminnj/numpy/commit/6601776e7e1d84047f203e62ca5f3d2e43ca1da4,
+    described in the issue as "passes unit testing." Recorded here as
+    provenance only: PyOverdrive must reimplement the direct-bin-index
+    technique from first principles rather than vendor or adapt this
+    commit. numpy's own code is BSD-licensed, but house license-review
+    policy prefers no vendoring of external implementations regardless of
+    license compatibility. The underlying technique (direct bin-index
+    computation for uniform bins, i.e. no edges array or searchsorted at
+    all) is generic and independently implementable.
+  hardware: >-
+    unknown; the issue gives no explicit CPU/OS line. The only environment
+    info is "NumPy/Python version information: 1.19.0, 3.7.3 (default, Mar
+    27 2019, 09:23:39) [Clang 10.0.0 (clang-1000.11.45.5)]", which implies
+    a Clang toolchain (likely macOS) but states no OS or CPU model.
+affected_operations: [numpy.histogram2d, numpy.histogramdd]
+input_regime:
+  dtypes: [float64]
+  sizes: [5000000]
+  notes: >-
+    Measured concretely (per the reporter's own unpublished local timings
+    and the reproducing code block) only for: 5e6 samples, 2 dimensions
+    (via histogram2d -> histogramdd), 100 bins per dimension, uniform range
+    [-3, 3] in both dimensions, drawn from a standard 2D gaussian
+    (np.random.normal(0, 1, (5_000_000, 2)), seed 42). Bins given as
+    bins=[100, 100] with range=[[-3, 3], [-3, 3]] (int bin counts plus an
+    explicit range, i.e. uniform-by-construction), compared against the
+    identical histogram2d call with bins given as an explicit edges array
+    (edges = np.linspace(-3, 3, 100 + 1), bins=[edges, edges]). No 1-D-only,
+    non-uniform-bin, weights=, or density=True case is exercised anywhere
+    in the thread.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000038_histogram_uniform.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load): REPRODUCED at the low end of the 4-5x claim:
+    1.65x at the reporter's 5e6-sample 100x100 case, 2.41x at
+    1000x1000 bins, 1.73x weighted, 1.74x on the decisive EDGE-SALTED
+    cell - which was BIT-IDENTICAL, validating the floor-then-correct
+    index logic against stock's rounded linspace edges. BATCH5-CAL:
+    1.42x at 30x30 (the floor, total bins 900), 1.09x at 10x10
+    (excluded). histogramdd 3-D measured a wash (1.03x) and is NOT
+    shipped; histogram2d only. Evidence:
+    benchmarks/results/OPP-000038/9bbe7063c555.json, BATCH5-CAL.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections:
+  - author: eric-wieser
+    date: "2020-10-29"
+    quote: >-
+      I imagine this is simply because someone decided to optimize
+      `histogram` but didn't care about `histogramdd`. I suspect I started
+      on a patch to make them share that bit of code when I cleaned then
+      to, but that's it long-lost. PR welcome with a faster implementation.
+linked_prs: []
+related_opportunities: []
+notes:
+  - >-
+    SHIPPED (2026-08-24) as hist2d_uniform
+    (src/pyoverdrive/fastpaths/hist2d_uniform.py): histogram2d with int
+    bins >= 900 total (each >= 2) plus explicit finite range, float64
+    samples, optional float64 weights; floor-then-correct indexing is
+    bit-identical on edge-salted data; the property net caught (and the
+    run now handles) bincount returning int64 for EMPTY weights arrays
+    where stock returns float64. license_review clean: reimplemented
+    from first principles, no numpy code vendored.
+  - >-
+    claim.speedup is null because the thread states only the reporter's
+    prose "In my use-case, I get a 4-5x speedup" plus an untranscribed
+    plot image; no numeric baseline/candidate pair exists in the dump to
+    derive a ratio from.
+  - >-
+    Mechanism, per the issue body: histogramdd builds an explicit array of
+    bin edges per dimension and then locates each sample via searchsorted
+    per dimension, even when the bins are uniform by construction (an int
+    bin count plus an explicit range=). See the reporter's own link,
+    https://github.com/numpy/numpy/blob/8829b807a841911ce18e79b308fee9fb92fb91b6/numpy/lib/histograms.py#L1058,
+    which is the histogramdd line that builds the edges array. Direct
+    index = floor((x - lo) * nbins / (hi - lo)) would avoid the O(log n)
+    binary search per dimension per sample. The reporter asks, rhetorically,
+    "Is there a reason to not directly calculate the bin index for the case
+    of uniform binning (as it looks like is done for the 1D histogram)?" -
+    this 1-D-already-does-index-calc claim is the reporter's own
+    characterization, not independently verified against 1-D histogram's
+    source in this dump; the single code link in the body points only at
+    the histogramdd edges-building line above, so that is the line cited
+    here for the precedent, per instruction, even though it does not itself
+    show 1-D histogram's index-calc path.
+  - >-
+    Fast-path predicate sketch for a reproducer/implementation: bins given
+    as an int, or a list of ints (one per dimension), together with an
+    explicit range= argument, i.e. bins uniform by construction; plain
+    float64 sample arrays. First cut should exclude weights= and
+    density=True; only add weights passthrough if the reproducer shows it
+    is trivially safe to carry through the direct-index path unchanged -
+    that decision belongs to the reproducer, not to this record.
+  - >-
+    THE correctness minefield, stated in full: values that fall exactly on
+    an interior bin edge. searchsorted against a linspace-generated edges
+    array and a direct floor((x - lo) * nbins / (hi - lo)) computation can
+    disagree on which bin an edge-value sample lands in, because the
+    linspace edges are rounded floating-point values while the index
+    formula rounds differently (different rounding/floating-point paths to
+    what is mathematically the same boundary). The reproducer MUST salt
+    the sample array with values placed exactly on computed bin edges
+    (including at least one interior edge) and at the rightmost edge of the
+    range (which numpy's histograms treat as inclusive, unlike interior
+    edges), and MUST demand bit-identical per-bin counts between the
+    searchsorted path and the direct-index path across all salted values.
+    Any disagreement on any salted value kills the fast path for that
+    regime, or at minimum narrows it (e.g. to a documented tie-breaking
+    rule matched to numpy's own).
+  - >-
+    Out-of-range samples: histogramdd drops samples that fall outside the
+    given range on any dimension (they are not counted in any bin). The
+    direct-index fast path must replicate this exactly, including at the
+    boundary (a sample exactly at the outer edge of range is in-range and
+    inclusive per the point above, while a sample even slightly beyond it
+    is dropped).
+  - >-
+    Age caveat: this is a 2020-10-29 thread (numpy 1.19.0 / Python 3.7.3 at
+    time of report), still open, with only 2 comments and no PR linked
+    anywhere in this dump. numpy's histogram internals may have changed
+    since; this record has not been re-verified against current numpy
+    source and must be re-checked against the present-day histogramdd
+    implementation before any reproducer is built against it.
+  - >-
+    Thread engagement: 2 comments total. eric-wieser (numpy MEMBER)
+    responded the same day (2020-10-29T20:46:45Z) with the quote recorded
+    under maintainer_objections above - encouraging, not opposed, and
+    explicitly invites a PR. The reporter (aminnj) replied 2 minutes later
+    (2020-10-29T20:49:01Z), "Ok, I'll prepare a PR then. Thanks." No PR
+    URL, number, or further update appears anywhere in the dump, so
+    linked_prs is left empty here; whether that PR was ever filed or
+    merged is unverified and would need a separate lookup.
+  - >-
+    license_review is pending, not clean: the candidate technique is
+    generic (direct bin-index arithmetic for uniform bins) and
+    independently implementable, but the reporter's own reference
+    implementation is a commit against a fork of numpy itself
+    (https://github.com/aminnj/numpy/commit/6601776e7e1d84047f203e62ca5f3d2e43ca1da4).
+    numpy is BSD-licensed, but house policy prefers no vendoring of
+    external implementations regardless of license compatibility, so
+    PyOverdrive's implementation must be written from first principles
+    against the described mechanism and the correctness minefield above,
+    not derived from or copied out of that commit.

@@ -1,0 +1,132 @@
+id: OPP-000049
+title: "numpy.einsum with three or more operands: the optimize=False default runs ONE fused C loop over the union of every index (O(prod of all extents)), while optimize=True decomposes into BLAS pairwise contractions - 2.2x to 2161x measured above a naive-loop-volume gate; the gate itself is the 'estimate the problem size' guard seberg proposed in-thread in 2018"
+sources:
+  - url: https://github.com/numpy/numpy/issues/11714
+    repository: numpy/numpy
+    type: issue
+    number: 11714
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T08:59:26Z"
+claim:
+  speedup: 30.0
+  baseline: >-
+    sajaysurya (issue body, 2018-08-11, python 3.7.0, Arch Linux):
+    "einsum is significantly slower in numpy 1.15 (when compared to numpy
+    1.14)... for this specific code, it is very slow!" - the reproducer
+    np.einsum('ij,ixy,ji->xy', b, t, p) ran 129.4s on 1.15.0 vs 4.1s on
+    1.14.5. IMPORTANT DIRECTIONALITY: the 1.15 SLOW side was
+    optimize=True (1.15 had re-enabled optimization by default for >2
+    operands; mhvk, 2018-08-11: "With optimize=False, one regains the
+    factor 30"), i.e. the 2018-era planner/buffering LOST 30x on this
+    shape. charris traced the default history to PR #10403 (optimize made
+    False for 1.14.x only) and the resolution was to make optimize=False
+    the default going forward. The issue is therefore evidence for BOTH
+    halves of this opportunity: the default multi-operand path is a
+    single naive fused loop, AND blanket optimize=True was once
+    catastrophic enough that the maintainers turned it off - so any
+    re-enabling must sit behind a measured gate.
+  candidate: >-
+    seberg (comment, 2018-08-11T21:03:13Z): "One could try to estimate
+    the problem size and skip optimization for small ones" - proposed
+    in-thread, never implemented upstream (the default simply stayed
+    False). PyOverdrive's candidate is exactly that estimate: route
+    >=3-operand contractions through numpy's OWN modern optimize=True
+    machinery only when the naive loop volume (product of the distinct
+    input labels' extents) clears a calibrated floor. No contraction code
+    is reimplemented; the gate is the contribution, as with the shipped
+    two-operand einsum_optimize (OPP-000018).
+  hardware: "sajaysurya: python 3.7.0, Arch Linux; CPU not stated."
+affected_operations: [numpy.einsum]
+input_regime:
+  dtypes: [float64, float32]
+  sizes: [65536, 331776, 1048576, 16777216]
+  notes: >-
+    Sizes here are naive loop VOLUMES, not element counts - the honest
+    cost metric for the fused default loop. Clean subscripts-form calls
+    with >= 3 operands, same-dtype plain ndarrays, no ellipsis, extents
+    consistent. Projected-output chains gate at volume >= 65_536 (0.69x
+    one measured notch below at 20_736, 1.65-2.21x at the floor);
+    scalar-output chains gate at their own measured cell, volume >=
+    262_144 (6.10x there) - BLAS pays off later on full reductions,
+    mirroring the two-operand path's projected/scalar split. The
+    2018-era planner hazard does not reproduce on the modern planner:
+    the issue's own 'ij,ixy,ji->xy' shape now WINS 64-729x under
+    optimize=True (dev-box probe at i=60..200).
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000049_einsum_chain.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno runs 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load), numeric comparison (summation order differs).
+    GUARDED end-to-end candidate (pays the _chain_volume predicate,
+    benchmarks/results/BATCH7-CAL/9bbe7063c555.json), ij,jk,kl->il grid:
+    volume 4096 (n=8): 0.23x, 20736 (n=12): 0.69x, 65536 (n=16): 1.65x,
+    331776 (n=24): 6.25x, 1.05M (n=32): 17.1x, 16.8M (n=64): 150x f64 /
+    190x f32. 4-operand cell (n=20, volume 3.2M): 231x. Scalar-output
+    cell (ij,jk,ki->, volume 262144): 6.10x.
+    RAW reproducer (benchmarks/results/OPP-000049/): chain3 n=16 2.21x,
+    n=32 22.8x, n=64 195x; chain4 n=32 2161x (90.9 ms naive loop vs
+    42.1 us decomposed).
+    Dev-box probe (AMD Zen 4, numpy 2.4.5, contended): 249x at chain3
+    n=64; the original issue's 'ij,ixy,ji->xy' shape 63.8x/247x/729x at
+    i=60/100/200 - upstream's OPTIMIZED path long ago fixed the 2018
+    regression, but the default remains the naive loop, which is what
+    this path harvests.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections:
+  - >-
+    charris (2018-08-11): "The default was made optimize=False in #10403,
+    but only for 1.14.x, might want to revisit that and disable it by
+    default in master" - i.e. the maintainers deliberately chose
+    optimize=False as the default after this issue. That decision is the
+    reason the regime exists, and it also binds this path: dispatch must
+    never fire where the planner overhead (or a planner pathology) could
+    lose, hence the measured volume gate and the refusal of any call with
+    an explicit optimize= (the user chose).
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000018, OPP-000002]
+notes:
+  - >-
+    Comparison mode: numeric, not bit-identical - optimize=True sums in a
+    different order; float32 checks use absolute-scaled tolerance,
+    identical policy to OPP-000018.
+  - >-
+    The shipped two-operand einsum_optimize (OPP-000018) deliberately
+    never claimed >=3 operands; this record covers exactly the regime it
+    left on stock. Same module, second FastPath, separate kill switch
+    (einsum_optimize_chain).
+  - >-
+    Malformed-call parity: extent mismatches and repeated output labels
+    are pre-checked in the predicate so stock raises its own errors;
+    ellipsis forms and mixed dtypes refuse to stock as unmeasured.
+  - >-
+    license_review clean: routes to numpy's own optimize machinery; no
+    third-party code.
+  - >-
+    SHIPPED (2026-08-24, batch 7) as einsum_optimize_chain
+    (src/pyoverdrive/fastpaths/einsum_optimize.py): >=3-operand clean
+    subscripts-form calls, CHAIN_VOLUME_FLOOR=65_536 projected /
+    CHAIN_SCALAR_VOLUME_FLOOR=262_144 scalar, f64/f32. 12 differential
+    tests plus a property net over 3- and 4-operand chains straddling
+    both floors.
+  - >-
+    BATCH 9 ELLIPSIS ADMISSION (2026-08-24): the chain path now serves
+    ellipsis spellings ('...ij,...jk,...kl->...il' and implicit-output
+    forms) when every operand carries '...' with equal ellipsis shapes
+    and at least one real ellipsis dimension; the batch dims multiply
+    into the naive volume (the naive loop iterates them too). The
+    ellipsis spelling crosses 1.3x LATER than the label spelling, so it
+    gates against its own floor: BATCH9-CAL idle-box cells 0.62x at
+    volume 20_736, 1.29x/1.49x across runs at 65_536 (a straddling cell
+    - bistable-cell rule applies), 2.20x at 76_832, 3.38x at 131_072,
+    6.36x at 262_144, 162.76x at 67.1M (ell 64, n=32) -
+    CHAIN_ELLIPSIS_VOLUME_FLOOR = 76_832, the first cell clearing the
+    bar in every run on both machines (dev: 2.28x there). Unequal
+    ellipsis shapes (numpy broadcasts them), '...' in only some
+    operands, and explicit outputs lacking '...' stay on stock.

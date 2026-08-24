@@ -1,0 +1,243 @@
+id: OPP-000033
+title: "datetime64 array comparison is up to ~7x slower than an int64 view, but only in a column-broadcast shape"
+sources:
+  - url: https://github.com/numpy/numpy/issues/7487
+    repository: numpy/numpy
+    type: issue
+    number: 7487
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T07:00:00Z"
+claim:
+  speedup: 6.94
+  baseline: >-
+    utc_dt > utc_dt[:, 0:1], a greater-than comparison of a 2-D datetime64
+    array against itself sliced to a single broadcast column, as timed by
+    the issue author (dmbelov) with %timeit in the issue body itself:
+    100 ms per loop (10 loops, best of 3). utc_dt is built as
+    date_d[:, None] + time_t[None, :], with date_d =
+    numpy.arange(numpy.datetime64('1990-01-02'), numpy.datetime64('2005-12-31'))
+    and time_t = numpy.arange(1440).view('m8[m]').
+  candidate: >-
+    utc_dt.view('i8') > utc_dt[:, 0:1].view('i8'), the same comparison
+    with both operands reinterpreted as int64 first, same post: 14.4 ms
+    per loop (100 loops, best of 3). The 6.94 speedup recorded above is
+    DERIVED from the reporter's own pair of numbers (100 / 14.4 =
+    6.9444..., rounded to 6.94); the reporter's own prose says the native
+    comparison "takes 7 times longer" but the thread never states this
+    precise ratio explicitly. A second, weaker DERIVED pair from the same
+    post: subtraction, utc_dt - utc_dt[:, 0:1] at 119 ms/loop (10 loops,
+    best of 3) vs utc_dt.view('i8') - utc_dt[:, 0:1].view('i8') at
+    35.2 ms/loop (10 loops, best of 3): 119 / 35.2 = 3.3806..., rounded to
+    3.38.
+  hardware: >-
+    unknown; the issue gives no CPU, OS, machine spec, or precise
+    numpy/Python version anywhere in the dump. The issue title says
+    "NumPy 1.9.3", but all timings are %timeit output from IPython
+    ("In [17]:" style prompts) with no environment banner printed, and
+    shoyer's source-code links (in maintainer_objections/notes) resolve to
+    the v1.11.0 tag of numpy/core/src/umath/loops.c.src, a version
+    discrepancy the dump does not explain. See the age/version caveat in
+    notes below.
+affected_operations: [numpy.greater, numpy.subtract]
+input_regime:
+  dtypes:
+    - "datetime64[m] (date_d is built from day-precision datetime64
+      literals via numpy.datetime64('1990-01-02') / numpy.datetime64('2005-12-31');
+      time_t is timedelta64[m] from numpy.arange(1440).view('m8[m]');
+      date_d[:, None] + time_t[None, :] resolves the broadcast-added
+      result to minute-precision datetime64)"
+    - "int64 (the .view('i8') candidate, same buffer reinterpreted;
+      npy_datetime/npy_timedelta are, per shoyer, simply aliases to
+      int64/long under the hood)"
+  sizes:
+    - "1440 (minutes-per-day axis, explicit numpy.arange(1440))"
+    - "N (unstated day count from numpy.arange(numpy.datetime64('1990-01-02'),
+      numpy.datetime64('2005-12-31')), a roughly 16-year daily date range;
+      the thread never states N directly, so it is not recorded as a
+      number here)"
+  notes: >-
+    Only measured concretely for the specific broadcast shapes in the
+    issue thread, via %timeit in IPython, with no CPU/OS/numpy-version
+    info printed anywhere in the dump. The 6.94x (comparison) and 3.38x
+    (subtraction) headline gaps hold for the column-broadcast shape,
+    utc_dt > utc_dt[:, 0:1] / utc_dt - utc_dt[:, 0:1] (an (N,1) operand
+    broadcast against an (N,1440) array along the last axis). dmbelov's
+    follow-up comment measured two more shapes on the same data: same-
+    shape contiguous comparison (utc_dt > utc_dt) narrows the gap to
+    10.5 / 8.56 = 1.2266 (DERIVED, rounds to 1.23), and row-broadcast
+    comparison (utc_dt > utc_dt[0:1, :], a (1,1440) operand) narrows it
+    further to 18.2 / 17.8 = 1.0225 (DERIVED, rounds to 1.02), i.e. almost
+    no win at all outside the column-broadcast shape. shoyer's own read:
+    "It does look like something funny is going on with the higher
+    dimensional array. Not quite sure what that is, though -- this isn't
+    part of the codebase I'm very familiar with." No maintainer ever
+    explained the column-broadcast-specific gap. The arange-generated test
+    data also contains no NaT elements anywhere, so the NaT hazard
+    described below is a correctness concern raised by shoyer's mechanism
+    explanation, not something this thread's own benchmarks exercise or
+    verify.
+status: not_reproduced
+license_review: pending
+reproducer: benchmarks/historical/opp_000033_datetime_compare.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load): NOT REPRODUCED at the claimed scale, and no
+    shippable regime exists. The i8-view mechanism survives but modern
+    numpy has closed most of the 2016 gap: unguarded view wins only
+    1.34-1.39x on the thread's 5842x1440 M8[m] shapes (vs the claimed
+    6.94x; the column-broadcast-specific pattern is gone) and 1.07x on a
+    1-D M8[ns] array at 1e6. The NaT guard a correct predicate MUST run
+    (NaT compares False natively but INT64_MIN compares normally under
+    the view) costs more than the win: isnat().any() lands at 0.34-0.73x,
+    and even the cheapest guard (SIMD int64 min-reduce) gives 0.63-0.96x
+    on 2-D and 1.22x on 1-D - all below the 1.3x min-win. Subtraction is
+    0.90x, i.e. stock is already faster. Parked: modern numpy's datetime
+    loops are close enough to the int64 loops that a value-scan guard
+    inverts the residual margin. Evidence:
+    benchmarks/results/OPP-000033/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: high
+implementation_risk: high
+maintainer_objections:
+  - author: shoyer
+    date: "2016-03-31"
+    quote: >-
+      To be clear, npy_timedelta and npy_datetime are simply aliases to
+      int64/long. Suggestions for changes and/or pull requests would be
+      appreciated! One reason datetime operations can be slower is that
+      they need to check for NaT, which is implemented under the hood as
+      the smallest int64 value. But I'm not sure that accounts for the
+      difference here, given that in NumPy 1.10 and earlier, comparisons
+      between datetimes didn't even bother to check for NaT. So it may
+      come down to vectorization and/or loop unrolling. NumPy uses some
+      tricks for integers that it doesn't bother with for datetimes.
+  - author: shoyer
+    date: "2016-03-31"
+    quote: >-
+      It does look like something funny is going on with the higher
+      dimensional array. Not quite sure what that is, though -- this isn't
+      part of the codebase I'm very familiar with.
+  - author: njsmith
+    date: "2016-03-31"
+    quote: >-
+      It's possible @juliantaylor will have some insight... Though I
+      suspect that it's just that hand optimized simd beats generic for
+      loop like @shoyer says.
+linked_prs: []
+related_opportunities: []
+notes:
+  - >-
+    Mechanism, per shoyer (MEMBER), 2016-03-31: npy_timedelta and
+    npy_datetime are plain int64/long aliases. He offers two candidate,
+    unconfirmed explanations for the gap: (1) datetime comparisons check
+    for NaT (implemented as the smallest int64 value), though he doubts
+    this fully accounts for it since "in NumPy 1.10 and earlier,
+    comparisons between datetimes didn't even bother to check for NaT";
+    and (2) "it may come down to vectorization and/or loop unrolling.
+    NumPy uses some tricks for integers that it doesn't bother with for
+    datetimes", linking the generic datetime loop
+    (loops.c.src, v1.11.0, around line 1065) against an integer
+    SIMD/unrolled fast-loop macro (around line 854). njsmith (MEMBER)
+    concurs with hypothesis (2): "I suspect that it's just that hand
+    optimized simd beats generic for loop like @shoyer says." Neither
+    maintainer confirms which explanation, or how much of each, accounts
+    for the measured gap, and neither explains the column-broadcast-
+    specific pattern dmbelov's follow-up surfaced.
+  - >-
+    The transparent fast path this record would sketch: when a comparison
+    ufunc (numpy.greater, numpy.less, numpy.greater_equal,
+    numpy.less_equal, numpy.equal, numpy.not_equal) is called on two
+    same-unit, native-byte-order datetime64 (or timedelta64) arrays,
+    reinterpret both operand buffers as int64, run the comparison as
+    int64, and return the boolean result unchanged (comparison ufuncs
+    already return bool, so the output needs no reinterpretation).
+    REACHABILITY LIMIT, stated prominently: the six comparison ufuncs
+    above are module-level patchable names (numpy.greater etc.), so a
+    patch wrapping numpy.greater intercepts explicit np.greater(a, b)
+    calls. But the thread's own reproduction is the operator form
+    utc_dt > utc_dt[:, 0:1], i.e. Python's > operator, which CPython
+    routes through ndarray.__gt__ and never through the module-level
+    numpy.greater name at all. A patch on numpy.greater does not see, and
+    cannot intercept, operator-spelled comparisons (a < b, a == b, a != b,
+    etc.). This is a hard applicability ceiling: only code that explicitly
+    spells np.greater(a, b) / np.equal(a, b) / etc. is reachable by this
+    route; the exact operator-form benchmark the reporter used to derive
+    the 6.94x number would NOT be sped up by it.
+  - >-
+    NaT hazard, in full: in real datetime64/timedelta64 semantics every
+    comparison involving NaT (Not-a-Time) must return False, including
+    NaT == NaT (NaT is not equal to itself, mirroring float NaN) and
+    NaT < x, NaT > x, etc. NaT is implemented as the smallest possible
+    int64 value (shoyer: "implemented under the hood as the smallest
+    int64 value", i.e. INT64_MIN). An int64 view comparison does not know
+    this rule: INT64_MIN compares normally against other int64 values, so
+    an int64-view np.less(a, b) would report INT64_MIN < anything as True,
+    and INT64_MIN == INT64_MIN as True, both wrong whenever either operand
+    is NaT. A dispatching int64-view route must therefore either (a) scan
+    both operands for the NaT sentinel (INT64_MIN) before dispatching and
+    refuse the fast path if any is found, falling back to native
+    comparison, or (b) special-case NaT positions in the int64 result
+    (force False) after the view comparison. PyOverdrive ships value-scan
+    guards elsewhere in the codebase, so a pre-dispatch NaT scan is an
+    acceptable cost here, provided it does not itself erase the win the
+    thread measured; this needs verification against the reproducer, not
+    assumed, since the thread's own benchmark arrays (built from
+    numpy.arange) contain no NaT and never exercise this path.
+  - >-
+    datetime64 unit-mismatch semantics: datetime64/timedelta64 dtypes
+    carry a unit (Y, M, D, h, m, s, ms, us, ns, etc.), and comparing or
+    subtracting two arrays of different units requires numpy to rescale
+    one side's int64 values to a common unit first; a raw view-and-compare
+    of mismatched units compares unscaled integers from different scales.
+    The thread's own reproducer already exercises unit mixing: date_d
+    comes from day-implied datetime64 literals and time_t is explicitly
+    timedelta64[m] (numpy.arange(1440).view('m8[m]')); utc_dt =
+    date_d[:, None] + time_t[None, :] resolves the result to the finer
+    (minute) unit during the addition, before any timed comparison runs.
+    Any int64-view fast path must confirm both operands already share one
+    unit (and native byte order) before reinterpreting; a naive view on
+    mismatched units would silently compare unscaled integers and return
+    wrong results with no error raised.
+  - >-
+    Age/version caveat: this thread is from March-April 2016, reported
+    against "NumPy 1.9.3" (issue title), with its last comment in 2019 and
+    state "open" at ingestion. shoyer's source-code links point at the
+    v1.11.0 tag of numpy/core/src/umath/loops.c.src, a file layout
+    (npy_datetime/npy_timedelta as int64 aliases, macro-based SIMD/loop-
+    unrolling tricks) reflecting numpy's C source tree from roughly a
+    decade before this record's retrieval date. numpy's ufunc loop
+    implementation, SIMD dispatch, and NaT handling have all been
+    substantially reworked since; the measured 6.94x/3.38x gaps and the
+    maintainers' two competing, unconfirmed hypotheses (NaT-check cost vs
+    missing SIMD/loop-unrolling) may not describe current numpy's actual
+    bottleneck at all, and must be re-measured against the current main
+    branch, not assumed to still hold.
+  - >-
+    Thread engagement: opened 2016-03-30 by dmbelov (CONTRIBUTOR), 4
+    comments total (shoyer x2, dmbelov x1, njsmith x1), last activity
+    2019-04-20, state_reason null (never closed), state "open" at
+    ingestion. Labeled "component: benchmarks" and "component:
+    numpy.datetime64". No linked PRs anywhere in the dump, and no
+    maintainer ever proposed or committed a concrete patch; the thread
+    ends on njsmith's speculative "It's possible @juliantaylor will have
+    some insight" with no recorded follow-up from juliantaylor in this
+    dump.
+  - >-
+    license_review is pending because this record is pre-verification.
+    The candidate technique itself is a bare .view('i8') / .view(np.int64)
+    cast, posted directly in the reporter's public issue body and comment,
+    so no external library or vendored code is implicated on the evidence
+    gathered so far, but formal review has not been run.
+  - >-
+    What a reproducer must establish (not yet built, reproducer: null):
+    all six comparison ufuncs (not just the > / numpy.greater case
+    measured here), same-unit vs mismatched-unit operand pairs, NaT-
+    containing arrays (to confirm the False-hazard and measure the cost of
+    a guard), the column-broadcast vs row-broadcast vs same-shape shape
+    dependency dmbelov's follow-up surfaced (6.94x vs 1.02x vs 1.23x on
+    the same underlying data), and both the datetime64 comparison path and
+    the timedelta-producing numpy.subtract path, all against current numpy
+    main rather than the numpy 1.9-1.11 era code this thread describes.

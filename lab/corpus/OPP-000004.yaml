@@ -1,0 +1,65 @@
+id: OPP-000004
+title: cache-blocked plus threaded relayout (order conversion / transpose copy) of large 2-D arrays
+sources:
+  - url: https://github.com/numpy/numpy/issues/21655
+    repository: numpy/numpy
+    type: issue
+    number: 21655
+    state_at_ingestion: open
+    retrieved_at: 2026-08-23T08:01:26Z
+claim:
+  speedup: 6.6
+  baseline: "numpy strided copy-assignment used to relayout a 2-D array between C and F order, e.g. result = np.empty(shape, dtype=dtype, order='F'); result[:] = a[:]"
+  candidate: "hand-written pure-Python cache-blocked tiling (block sizes chosen to fit L1/L2) over the same numpy slice assignment, optionally split across 1-4 threads with concurrent.futures.ThreadPoolExecutor"
+  hardware: unknown, not stated in the issue (author gave no CPU model or core count)
+affected_operations: [numpy.ascontiguousarray, numpy.asfortranarray, numpy.ndarray.copy, numpy.transpose]
+input_regime:
+  dtypes: [float64]
+  sizes: [1024, 2048, 4096, 8192, 16384, 32768, 65536]
+  notes: >
+    Square 2-D matrices, np.random.rand (float64), C-order to F-order relayout
+    (equivalent to materializing a transpose in contiguous order). Reported
+    ratios of naive-numpy-time / best-threaded-cache-blocked-time by side
+    length: 1024 ~1.5x (noise floor), 2048 ~10.6x, 4096 ~6.5x, 8192 ~6.9x,
+    16384 ~6.6x, 32768 ~4.6x, 65536 ~5.1x. Gains are largest in the
+    few-hundred-MB to few-GB range and shrink at the largest sizes where
+    memory bandwidth, not cache locality, dominates. No dtype other than
+    float64 was tested by the reporter.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000004_relayout.py
+current_numpy_result:
+  verified_speedup: 6.61
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Partially reproduced (Dyno 2026-08-23): the mechanism is real but smaller
+    here than claimed. Pure-Python cache-blocked + threaded relayout beats
+    numpy's strided copy at 4096x4096 (float32 2.11x, float64 1.53x) and from
+    1024 up (1.12-1.36x); it loses at 512 (0.36-0.63x, tiling overhead).
+    Reporter claimed up to 6.6x with sizes to 65536; sizes above 4096 remain
+    unmeasured here (memory budget of the sweep). A native tiled kernel
+    should beat the Python-level candidate substantially; prototype-worthy.
+    Evidence: benchmarks/results/OPP-000004/8f8198d9abab.json.
+    SHIPPED as relayout_blocked (src/pyoverdrive/fastpaths/relayout_blocked.py
+    on pyoverdrive.parallel.relayout): the same tiling on the persistent
+    PyRallel pool, tile 256, 8 threads to 2048x2048 then 16. The 189-variant
+    RELAYOUT-CAL battery (benchmarks/results/RELAYOUT-CAL/, taken at 83-99%
+    foreign load, contended) measured float64 2.0x at 512x512 rising to
+    3.8x at 2048x2048-4096x4096; float32 1.7x at 512x512, 4.4x at
+    1024x1024, 5.6x at 4096x4096 and 6.6x at 8192x1024 (the claim's
+    ceiling, reached); int64 2.0-3.4x from 1024x1024 (512x512 only 1.0-1.3x,
+    excluded); 256x256 loses everywhere. Bit-identical on all 189.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections: []
+linked_prs: []
+linked_commits: []
+related_opportunities: []
+notes:
+  - "No numpy core maintainer has triaged or commented on this issue as of retrieval (2026-08-23); it remains open, unlabeled, with only two community replies, opened 2022-06-03."
+  - "Neither commenter (baumdan1, stevengj) is a numpy core maintainer, so maintainer_objections is empty by absence of maintainer engagement, not by absence of concerns; treat this as unreviewed rather than approved."
+  - "stevengj (FFTW author) recommends a recursive cache-oblivious tiling over hand-tuned block sizes for portability, and flags that FFTW's own tiled out-of-place transpose code is GPL-licensed and must not be copied into numpy."
+  - "The reporter's proposed API, numpy.asorder(a, order, inplace=False), was never implemented; no PR followed this issue."
+  - "The reporter also flags a possibly separate bug: a.reshape(a.shape, order='F') returns a C-order (row-major) result, not F-order; unconfirmed and out of scope for this record."
+  - "The threaded candidate in the issue is Python-level (ThreadPoolExecutor over numpy slice assignments), not a native kernel; a real win likely needs a C/SIMD tiled transpose released from the GIL, which is the native-kernel angle this record is scoped to surface a baseline for."

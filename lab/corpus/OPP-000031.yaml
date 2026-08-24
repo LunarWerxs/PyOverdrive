@@ -1,0 +1,157 @@
+id: OPP-000031
+title: "np.roll with shift=0 or axis=() runs its full index machinery; the thread's 3613x estimate assumes returning the input UNCOPIED, which the copy contract forbids"
+sources:
+  - url: https://github.com/numpy/numpy/issues/12389
+    repository: numpy/numpy
+    type: issue
+    number: 12389
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T07:00:00Z"
+  - url: https://github.com/numpy/numpy/issues/12389#issuecomment-443443674
+    repository: numpy/numpy
+    type: comment
+    number: 12389
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T07:00:00Z"
+claim:
+  speedup: 3613.33
+  baseline: >-
+    np.roll(r, (), axis=()) on r = np.empty((256, 256, 256)) (a 256x256x256,
+    16,777,216-element array; np.empty's default dtype is float64, not
+    stated explicitly by the reporter), as timed by the issue author with
+    %timeit in the issue body itself: 54.2 ms +/- 3.78 ms per loop (mean
+    +/- std. dev. of 7 runs, 10 loops each).
+  candidate: >-
+    Not a %timeit-verified measurement of committed or patched code. The
+    reporter states, immediately after the baseline number, "The time is
+    reduced to 10-20 microseconds if a copy is not made" -- an estimate for
+    a fast path that returns the input rather than allocating and copying.
+    The 3613.33x speedup recorded above is DERIVED using the midpoint of
+    that stated range: 54.2 ms / 0.015 ms = 3613.33. The range itself
+    spans 2710x at the high (slow) end of the estimate (54.2 ms / 0.020 ms
+    = 2710) to 5420x at the low (fast) end (54.2 ms / 0.010 ms = 5420). The
+    thread never states a single ratio explicitly, and no benchmark of an
+    actual patched implementation appears anywhere in the dump.
+  hardware: >-
+    unknown; the issue gives no CPU, OS, or numpy/Python version anywhere
+    in the dump.
+affected_operations: [numpy.roll]
+input_regime:
+  dtypes: [float64]
+  sizes: [16777216]
+  notes: >-
+    Measured concretely only for the single call np.roll(r, (), axis=())
+    on one 256x256x256 float64 array: shift=() together with axis=(), i.e.
+    the "empty axes" degenerate case. The issue title and body also
+    mention "zero shift(s)" (a scalar shift=0 with a normal, non-empty
+    axis) as an equally inefficient case, but no separate timing for
+    scalar shift=0 appears anywhere in the thread; only the axis=() form
+    was benchmarked. No other array size, shape, or dtype is timed.
+status: not_reproduced
+license_review: pending
+reproducer: benchmarks/historical/opp_000032_roll_concat.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load; evidence in benchmarks/results/OPP-000032/, shared
+    reproducer): NOT REPRODUCED under the copy contract, exactly as this
+    record's ceiling note predicted. The transparent candidate (an
+    order-preserving a.copy(order='K')) measured 1.16x on 1-D shift=0 at
+    100k, 0.84x on the thread's own 256^3 empty-axes case (stock's
+    empty_like + copyto BEATS ndarray.copy there), and 0.97x on F-order
+    512x512. The thread's 3613x needs aliasing, which np.roll's
+    always-copy contract and seberg's objection both forbid. Parked; the
+    only shippable roll surface is the small-1-D overhead win recorded
+    in OPP-000032.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: high
+maintainer_objections:
+  - author: seberg
+    date: "2018-12-01"
+    quote: >-
+      I tend to be wary with such optimizations, they can lead to strange
+      bugs in the opposite case where most of the time you have a copy and
+      suddenly not. And then you have incorrect in-place behaviour that can
+      silently break your code. There are only very few exceptions of this
+      rule after all ravel/reshape being the most prominent ones (and
+      frankly maybe even the only ones). I personally would like to keep it
+      at few exceptions. An interesting option could be an out argument,
+      although in the non-trivial overlap case, we would have to be very
+      careful.
+linked_prs: []
+related_opportunities: []
+notes:
+  - >-
+    Mechanism, as the thread states it: numpy.roll (and functions that use
+    it such as numpy.fft.fftshift, numpy.fft.ifftshift) are inefficient
+    when shift=0 (or axis=()) because in that case the output is
+    necessarily identical to the input, yet roll still allocates a new
+    empty array and copies the old array into it rather than short-
+    circuiting. The reporter hit this in a "centered FFT" wrapper around
+    numpy.fft.fftn that called fftshift/ifftshift, sometimes with axes=()
+    to request an uncentered FFT, and found the uncentered path was not
+    actually faster because of this unnecessary copy.
+  - >-
+    Transparent fast-path sketch: numpy.roll is a patchable module-level
+    name (numpy.roll), so a predicate/route wrapper is mechanically
+    straightforward. Predicate: shift == 0 (scalar) or shift is an empty
+    sequence, OR axis == () (empty axis tuple) -- matching the two
+    degenerate cases the issue names. Route: instead of building the
+    normal index/take machinery, return a plain COPY of the input array.
+    CRITICAL SEMANTICS: np.roll ALWAYS returns a copy, never the input
+    array itself, so the fast path MUST also copy -- returning a bare
+    alias (literally `return a`) would break caller mutation patterns
+    (code that does `out = np.roll(a, 0); out[:] = 0` and expects `a` to
+    be untouched) and is exactly the aliasing hazard seberg's comment
+    warns about ("incorrect in-place behaviour that can silently break
+    your code"). The reporter raises the identical risk independently in
+    the issue body: "Obviously, the downside to changing this would be
+    potentially breaking existing code that relies on numpy.roll always
+    returning a copy (although I don't see any guarantee to that effect in
+    the docstring)." A correct fast path saves the shift/index arithmetic
+    and the take-based reassembly, not the copy itself.
+  - >-
+    numpy.fft.fftshift and numpy.fft.ifftshift ARE named in the thread as
+    surfaces that inherit np.roll's inefficiency ("numpy.roll (and
+    functions that use it such as numpy.fft.fftshift, numpy.fft.ifftshift)
+    are inefficient when shift=0 (or axis=())"), and the reporter's
+    motivating use case runs through fftshift/ifftshift specifically. No
+    separate %timeit for fftshift or ifftshift appears anywhere in the
+    dump; only bare np.roll was benchmarked, hence the single entry in
+    affected_operations.
+  - >-
+    Age/version caveat: the issue was opened 2018-11-14 and received
+    exactly one comment, from seberg on 2018-12-01 (author_association
+    MEMBER); it has had no further activity since, carries no labels, no
+    linked PRs anywhere in the dump, and its state field is still "open"
+    as of state_at_ingestion. Neither the 54.2 ms baseline nor the 10-20
+    microsecond estimate carries a numpy or Python version, and roll's
+    internal implementation may well have changed in the intervening
+    years; both figures need reverification against current main before
+    either is trusted.
+  - >-
+    Ceiling for a TRANSPARENT layer (verification note, 2026-08-24): the
+    claim.speedup above is the thread's own alias-based estimate and is
+    UNREACHABLE for PyOverdrive, whose route must return a copy. The
+    honest candidate is a plain a.copy() (C-order preserving? np.roll
+    returns a C-order copy of the input's values; the reproducer must pin
+    order semantics for F-order input too), and its headroom is only
+    whatever np.roll's per-axis index machinery costs ON TOP of the copy
+    it performs anyway. For the thread's 128 MB array the copy dominates,
+    so the realistic factor is expected to be near 1x at large sizes and
+    meaningful only for small arrays or the empty-axes path; the Dyno
+    reproducer must measure copy-vs-roll, never alias-vs-roll. If the
+    measured transparent ceiling is a wash, this record parks with that
+    reason, and the alias route stays unshippable regardless of the
+    number (seberg's objection above plus the docstring copy contract).
+  - >-
+    license_review is pending, not clean, because no candidate
+    implementation exists anywhere in the dump to review -- only the
+    reporter's prose description of what a fast path could do and an
+    unverified time estimate, plus the maintainer's explicit reluctance to
+    accept this class of optimization at all ("I personally would like to
+    keep it at few exceptions," suggesting an `out` argument instead of a
+    silent copy-elision).

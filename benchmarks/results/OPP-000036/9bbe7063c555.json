@@ -1,0 +1,355 @@
+{
+  "opp_id": "OPP-000036",
+  "title": "isin on object arrays: python set vs O(n*m)",
+  "recorded_at": "2026-08-24T07:10:47+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.0,
+    "cpu_busy_after": 0.00786163522012584,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "isin_object_str_n1000_m100",
+      "params": {
+        "kind": "str",
+        "n": 1000,
+        "m": 100
+      },
+      "baseline": "numpy.isin",
+      "variants": {
+        "numpy.isin": {
+          "median_ns": 731341.6666666666,
+          "min_ns": 729958.3333333334,
+          "mean_ns": 732129.7619047619,
+          "mad_ns": 1383.3333333332557,
+          "samples": 7,
+          "loops_per_sample": 12,
+          "role": "baseline",
+          "correct": true
+        },
+        "set_route": {
+          "median_ns": 34211.619718309856,
+          "min_ns": 33872.18309859155,
+          "mean_ns": 34301.30784708249,
+          "mad_ns": 279.9295774647835,
+          "samples": 7,
+          "loops_per_sample": 284,
+          "correct": true
+        },
+        "set_route_nan_guarded": {
+          "median_ns": 65377.333333333336,
+          "min_ns": 64940.0,
+          "mean_ns": 65417.52380952381,
+          "mad_ns": 373.33333333333576,
+          "samples": 7,
+          "loops_per_sample": 75,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "set_route": 21.376996257071596,
+        "set_route_nan_guarded": 11.186471356025534
+      }
+    },
+    {
+      "case": "isin_object_str_n30000_m3000",
+      "params": {
+        "kind": "str",
+        "n": 30000,
+        "m": 3000
+      },
+      "baseline": "numpy.isin",
+      "variants": {
+        "numpy.isin": {
+          "median_ns": 560541600.0,
+          "min_ns": 558458500.0,
+          "mean_ns": 561667742.8571428,
+          "mad_ns": 2083100.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "set_route": {
+          "median_ns": 1225160.0,
+          "min_ns": 1205680.0,
+          "mean_ns": 1222474.2857142857,
+          "mad_ns": 5620.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "correct": true
+        },
+        "set_route_nan_guarded": {
+          "median_ns": 2138233.3333333335,
+          "min_ns": 2133100.0,
+          "mean_ns": 2139114.285714286,
+          "mad_ns": 2466.666666666977,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "set_route": 457.52522119559893,
+        "set_route_nan_guarded": 262.15174521022027
+      }
+    },
+    {
+      "case": "isin_object_int_n1000_m100",
+      "params": {
+        "kind": "int",
+        "n": 1000,
+        "m": 100
+      },
+      "baseline": "numpy.isin",
+      "variants": {
+        "numpy.isin": {
+          "median_ns": 488727.2727272727,
+          "min_ns": 487572.7272727273,
+          "mean_ns": 488629.87012987013,
+          "mad_ns": 772.7272727272357,
+          "samples": 7,
+          "loops_per_sample": 11,
+          "role": "baseline",
+          "correct": true
+        },
+        "set_route": {
+          "median_ns": 34012.765957446805,
+          "min_ns": 33745.035460992905,
+          "mean_ns": 34017.83181357649,
+          "mad_ns": 177.3049645390056,
+          "samples": 7,
+          "loops_per_sample": 282,
+          "correct": true
+        },
+        "set_route_nan_guarded": {
+          "median_ns": 66957.33333333333,
+          "min_ns": 66622.66666666667,
+          "mean_ns": 66913.90476190476,
+          "mad_ns": 214.66666666667152,
+          "samples": 7,
+          "loops_per_sample": 75,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "set_route": 14.368936455762428,
+        "set_route_nan_guarded": 7.299085079960464
+      }
+    },
+    {
+      "case": "isin_object_int_n30000_m3000",
+      "params": {
+        "kind": "int",
+        "n": 30000,
+        "m": 3000
+      },
+      "baseline": "numpy.isin",
+      "variants": {
+        "numpy.isin": {
+          "median_ns": 360923700.0,
+          "min_ns": 357382600.0,
+          "mean_ns": 361459071.4285714,
+          "mad_ns": 2142600.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "set_route": {
+          "median_ns": 1166660.0,
+          "min_ns": 1155660.0,
+          "mean_ns": 1174760.0,
+          "mad_ns": 7900.0,
+          "samples": 7,
+          "loops_per_sample": 5,
+          "correct": true
+        },
+        "set_route_nan_guarded": {
+          "median_ns": 2138233.3333333335,
+          "min_ns": 2126633.3333333335,
+          "mean_ns": 2138500.0,
+          "mad_ns": 6033.333333333023,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "set_route": 309.36493922822416,
+        "set_route_nan_guarded": 168.7952827100254
+      }
+    },
+    {
+      "case": "isin_object_str_n100_m5",
+      "params": {
+        "kind": "str",
+        "n": 100,
+        "m": 5
+      },
+      "baseline": "numpy.isin",
+      "variants": {
+        "numpy.isin": {
+          "median_ns": 9714.570230607966,
+          "min_ns": 9682.809224318658,
+          "mean_ns": 9723.33033842468,
+          "mad_ns": 12.47379454926704,
+          "samples": 7,
+          "loops_per_sample": 954,
+          "role": "baseline",
+          "correct": true
+        },
+        "set_route": {
+          "median_ns": 3984.9097162510748,
+          "min_ns": 3967.4548581255376,
+          "mean_ns": 3982.9136469721166,
+          "mad_ns": 6.448839208942445,
+          "samples": 7,
+          "loops_per_sample": 2326,
+          "correct": true
+        },
+        "set_route_nan_guarded": {
+          "median_ns": 7373.45971563981,
+          "min_ns": 7348.657187993681,
+          "mean_ns": 7384.258632362898,
+          "mad_ns": 24.80252764612942,
+          "samples": 7,
+          "loops_per_sample": 1266,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "set_route": 2.437839480023965,
+        "set_route_nan_guarded": 1.3175050254906033
+      }
+    },
+    {
+      "case": "isin_object_same_nan_object_probe",
+      "params": {
+        "probe": "identity-vs-equality, same nan object"
+      },
+      "baseline": "numpy.isin",
+      "variants": {
+        "numpy.isin": {
+          "median_ns": 8925.73385518591,
+          "min_ns": 8899.021526418786,
+          "mean_ns": 8927.142857142857,
+          "mad_ns": 15.557729941290745,
+          "samples": 5,
+          "loops_per_sample": 1022,
+          "role": "baseline",
+          "correct": true
+        },
+        "set_route": {
+          "median_ns": 10552.417582417582,
+          "min_ns": 10444.065934065935,
+          "mean_ns": 10554.989010989011,
+          "mad_ns": 39.34065934065802,
+          "samples": 5,
+          "loops_per_sample": 910,
+          "correct": false
+        }
+      },
+      "speedups": {
+        "set_route": null
+      }
+    },
+    {
+      "case": "isin_object_distinct_nan_objects_probe",
+      "params": {
+        "probe": "identity-vs-equality, distinct nan objects"
+      },
+      "baseline": "numpy.isin",
+      "variants": {
+        "numpy.isin": {
+          "median_ns": 8869.54887218045,
+          "min_ns": 8845.676691729323,
+          "mean_ns": 8869.492481203008,
+          "mad_ns": 6.109022556389391,
+          "samples": 5,
+          "loops_per_sample": 1064,
+          "role": "baseline",
+          "correct": true
+        },
+        "set_route": {
+          "median_ns": 10475.727069351231,
+          "min_ns": 10437.136465324385,
+          "mean_ns": 10482.21476510067,
+          "mad_ns": 20.805369127518134,
+          "samples": 5,
+          "loops_per_sample": 894,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "set_route": 0.8466762081011097
+      }
+    },
+    {
+      "case": "isin_object_int_float_bool_mix",
+      "params": {
+        "probe": "cross-type __eq__/__hash__ agreement"
+      },
+      "baseline": "numpy.isin",
+      "variants": {
+        "numpy.isin": {
+          "median_ns": 9649.69450101833,
+          "min_ns": 9623.116089613035,
+          "mean_ns": 9650.448065173117,
+          "mad_ns": 9.266802443991764,
+          "samples": 5,
+          "loops_per_sample": 982,
+          "role": "baseline",
+          "correct": true
+        },
+        "set_route": {
+          "median_ns": 10483.660130718954,
+          "min_ns": 10460.239651416123,
+          "mean_ns": 10476.623093681916,
+          "mad_ns": 5.228758169934736,
+          "samples": 5,
+          "loops_per_sample": 918,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "set_route": 0.9204509093864118
+      }
+    }
+  ]
+}

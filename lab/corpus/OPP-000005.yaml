@@ -1,0 +1,57 @@
+id: OPP-000005
+title: CPython call-site specialization (quickening) for NumPy ufunc dispatch overhead
+sources:
+  - url: https://github.com/numpy/numpy/issues/27456
+    repository: numpy/numpy
+    type: issue
+    number: 27456
+    state_at_ingestion: open
+    retrieved_at: 2026-08-23T08:01:27Z
+claim:
+  speedup: 2.0
+  baseline: "NumPy ufunc call overhead (casting, broadcasting, override checks, work planning) redone from scratch on every call at a Python call site, for small to medium sized arrays"
+  candidate: "CPython 3.14+ adaptive bytecode specialization exposed to extension types, letting a call site cache the result of dispatch/work-planning and skip it on repeat calls (per ECOOP 2024 paper, prototype patches against CPython and NumPy forks)"
+  hardware: unknown, not reported in the thread
+affected_operations: [numpy.ufunc, numpy.add, numpy.core.multiarray]
+input_regime:
+  dtypes: [unspecified]
+  sizes: [unspecified, described only as "small to medium sized arrays"]
+  notes: "No concrete size threshold ever given in the thread; rgommers explicitly asked for a size-vs-speedup plot and none was produced. Paper used NPBench 'paper'-scale input sizes, not itemized in the issue."
+status: not_reproduced
+license_review: clean
+reproducer: benchmarks/historical/opp_000005_call_overhead.py
+current_numpy_result:
+  verified_speedup: 1.28
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23 on numpy 2.4.5 (baseline_only reproducer; the
+    CPython 3.14+ quickening mechanism itself needs a non-standard build and
+    is not testable in stock NumPy). Compared np.add(a,b) baseline against
+    operator form (a+b) and preallocated out= across n in {4,64,1024,65536}.
+    Best measured candidate: preallocated_out at n=1024, 742.6ns -> 582.0ns,
+    1.28x. operator_form tops out at 1.18x (n=4, 449.6ns -> 379.4ns). Every
+    case stays well under the claimed >2x; the addressable dispatch/
+    allocation overhead in stock NumPy is real but the ceiling measured here
+    is roughly 1.05x-1.28x, not 2x. Evidence:
+    benchmarks/results/OPP-000005/8f8198d9abab.json.
+main_branch_result: null
+correctness_risk: unknown
+implementation_risk: high
+maintainer_objections:
+  - author: rgommers
+    objection: "the single most important question ... is what 'small to medium sized' means. The results in the paper don't say at all as far as I can tell. ... this seems significant enough that [a NEP] is needed"
+  - author: seberg
+    objection: "A large chunk of the ufunc improvement may be the result cache? I am a bit worried that such a cache should not be persistent forever because it could waste memory indefinitely"
+  - author: seberg
+    objection: "for ufuncs, it may be that general useful optimizations in the ufunc code might reduce the usefulness of these optimizations a bit"
+  - author: mdboom
+    objection: "the major gains from this approach would only happen when both CPython and Numpy are participating in adaptive specialization. So that would be CPython 3.14 at the earliest"
+  - author: mdboom
+    objection: "Bytecodes are currently treated as an implementation detail that can change in arbitrary ways without any deprecation cycle ... It's hard to imagine an API that says 'replace this stretch of bytecodes' without being brittle"
+linked_prs: []
+linked_commits: []
+related_opportunities: []
+notes:
+  - "This is a design discussion, not an implementation PR: no numpy/numpy PR or commit exists yet. The referenced prototypes live in external forks (fberlakovich/cmq-numpy-ae, fberlakovich/cmq-ae), outside numpy/numpy, and are not part of this record's linked_prs per the CROSS-REFERENCES rule."
+  - "Requires CPython 3.14+ opt-in build changes plus a NumPy build flag outside the limited C API (per mdboom); not achievable as a pure-NumPy patch."
+  - "PyOverdrive's own baseline_only reproducer instead measures the addressable overhead directly in stock NumPy: per-call dispatch/allocation floor via np.add(a,b) vs operator form vs preallocated-out form, across small-to-large n, to quantify how much of the claimed >2x is attackable without CPython cooperation."

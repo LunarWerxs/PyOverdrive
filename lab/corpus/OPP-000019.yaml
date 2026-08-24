@@ -1,0 +1,97 @@
+id: OPP-000019
+title: "matmul(out=) slower than dot because of unfaulted output pages contending with OpenBLAS threads"
+sources:
+  - url: https://github.com/numpy/numpy/issues/18669
+    repository: numpy/numpy
+    type: issue
+    number: 18669
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 5.94
+  baseline: "np.matmul(a, b, out=c) where c=np.empty(...) is freshly allocated and not yet page-faulted; batch of 1000 matmuls, each 1024x32 (a) by 32x1024 (b) -> 1024x1024 (out), C-contiguous complex64, looped per outer index over OpenBLAS (36.0 GFlops measured)"
+  candidate: "np.matmul(a, b, out=c) with the same c pre-faulted (one write touching every page of c) immediately before the call (213.9 GFlops measured)"
+  hardware: "author's own machine, OS unspecified beyond Ubuntu 20.04; numpy 1.20.1, python 3.8.5, OpenBLAS backend from the pip Linux wheel; OPENBLAS_NUM_THREADS confirmed by the author to affect timings for both matmul and dot"
+affected_operations: [numpy.matmul]
+input_regime:
+  dtypes: [complex64]
+  sizes: [1024, 32, 1000]
+  notes: >
+    reporter's own repro sweeps only this one shape: batch of 1000 matrix
+    pairs, each 1024x32 times 32x1024, C-contiguous complex64, called either
+    as 1000 separate matmul(out=) calls (matmul_loop) or a single batched
+    3-D matmul call; effect requires an `out=` array that is freshly
+    allocated via np.empty (not yet page-faulted) and appears tied to
+    multi-threaded OpenBLAS, though seberg notes some difference persisted
+    even with OMP_NUM_THREADS=1. No other dtype or size was swept in the
+    thread.
+status: not_reproduced
+license_review: clean
+reproducer: benchmarks/historical/opp_000019_matmul_out.py
+current_numpy_result:
+  verified_speedup: 1.92
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, box contended (foreign load
+    measured at cpu_busy_before=0.29, cpu_busy_after=0.38 in the run's
+    conditions block). Mechanism direction reproduces (prefaulting a fresh
+    out= buffer before matmul(out=) is never worse than cold at large sizes)
+    but magnitude falls well short of the claimed 5.94x. Best case,
+    complex64_reporter_default (batch=2, 1024x32 by 32x1024, closest shape to
+    the reporter's own repro): prefaulted 1.92x (5.346 ms -> 2.788 ms), dot
+    1.59x (5.346 ms -> 3.373 ms). float64_reporter_default: prefaulted 1.64x
+    (4.306 ms -> 2.628 ms), dot 1.16x. Large-batch (batch=8) cases: complex64
+    prefaulted 1.79x (18.501 ms -> 10.342 ms), dot 1.19x; float64 prefaulted
+    1.78x (17.339 ms -> 9.732 ms), dot 1.27x. At small size (batch=4,
+    128x32 by 32x128) the effect REVERSES: complex64 prefaulted 0.95x
+    (299.3 us -> 315.7 us, slower) and dot 0.86x (299.3 us -> 346.2 us,
+    slower); float64 prefaulted 0.97x and dot 0.98x, also both slower than
+    cold. All variants correct=True, no correctness failures. Best measured
+    (1.92x) is under a third of the claimed 5.94x, and the effect is
+    direction-dependent on matrix size rather than a uniform win. Evidence:
+    benchmarks/results/OPP-000019/8f8198d9abab.json (contended run; treat
+    magnitudes as directional, not a clean isolation).
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections:
+  - author: seberg
+    quote: >
+      Consideringi that after prefaulting matmul is faster, I am not sure
+      there is much to be done?
+  - author: seberg
+    quote: >
+      I have to admit I am a bit fatalistic these days because speed
+      fluctuations do not always seem to have obvious code reasons (I blame
+      compiler optimization variations, etc.).
+  - author: seberg
+    quote: >
+      I am not immediately sure whether its reasonable to do in NumPy or
+      should definitely be only considered in BLAS (here openblas I guess).
+  - author: seberg
+    quote: >
+      If there is an argument that we should give it a shot in NumPy, that
+      seems fine by me, it doesn't sound like it should slow down things
+      measurably if its unnecessary and it seems to help BLAS a lot in some
+      cases...
+  - author: seberg
+    quote: >
+      But I expect a few code paths may need the memset anyway, which
+      probably is why its there (i.e. if the inputs have 0-size or if the
+      NumPy slow fallback is used).
+  - author: bmerry
+    quote: >
+      So far the slowdowns are generally much less significant than the
+      speedups, but we've still only sampled a tiny part of the
+      multi-dimensional problem space. If you feel that this is a risky
+      change for dubious reward I would have no objections to closing the
+      bug.
+linked_prs: []
+linked_commits: []
+related_opportunities: []
+notes:
+  - "Root cause per bmerry's own investigation, confirmed by comment-out testing: np.dot's internal cblasfuncs.c path unconditionally memsets the out buffer before the CBLAS call; np.matmul's matmul.c.src path does not, so with beta=0 GEMM calls, an out= array that is still copy-on-write/unfaulted forces page faults during the multi-threaded GEMM call itself, which the author attributes to lock contention across OpenBLAS threads during concurrent faulting."
+  - "The 5.94x figure (213.9 / 36.0 GFlops) is matmul-vs-itself with only the out buffer's fault state changed, which is the cleanest apples-to-apples number in the thread; the issue's own headline comparison (matmul 36.0 GFlops vs dot 87.7 GFlops, i.e. dot 2.44x faster) mixes two different code paths and is the more commonly quoted number but a less clean isolation of the mechanism."
+  - "This is unusually undecided for a lead: the reporter's own final comment offers to let the issue be closed ('risky change for dubious reward'), the issue carries a '57 - Close?' triage label, and it has stayed open with no resolution since 2021; treat this as weaker evidence than OPP-000007, not a settled optimization."
+  - "linked_prs is empty because no numpy PR is referenced anywhere in the thread; the only cross-reference is bmerry's own follow-up issue on the OpenBLAS tracker (https://github.com/xianyi/OpenBLAS/issues/3197), which is a bug report against OpenBLAS itself, not a fix attempt in numpy."
+  - "Proposed transparent fast path for PyOverdrive: predicate on np.matmul(a, b, out=c) calls where c is a large (multi-page), freshly-allocated ndarray about to be passed into a threaded-BLAS GEMM call; route to a one-touch-per-page prefault of c (not a full memset, per seberg's own suggestion to only touch page-size strides) immediately before dispatch. Semantics are unchanged: beta=0 in the GEMM call means c is write-only, never read, so prefaulting cannot alter the numeric result, only when the pages get zero-cost-faulted. The open question the reproducer must answer is whether the win generalizes past this one shape/dtype/thread-count, since bmerry's own later benchmarking called the effect complicated and system-dependent with occasional net losses."

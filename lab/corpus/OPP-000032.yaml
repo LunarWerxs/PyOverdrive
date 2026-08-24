@@ -1,0 +1,157 @@
+id: OPP-000032
+title: "np.roll on a 1-D array with a scalar shift is much slower than the equivalent np.concatenate of two slices"
+sources:
+  - url: https://github.com/numpy/numpy/issues/10848
+    repository: numpy/numpy
+    type: issue
+    number: 10848
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T07:00:00Z"
+claim:
+  speedup: 11.90
+  baseline: >-
+    np.roll(d, 1) on d = np.arange(99) (a 99-element 1-D array), as timed
+    by the issue author (ucyo) with %timeit in the issue body itself on
+    numpy 1.13.1, 15 us +/- 250 ns per loop (mean +/- std. dev. of 7 runs,
+    100,000 loops each).
+  candidate: >-
+    np.concatenate([d[-1:], d[:-1]]) on the same d = np.arange(99) array,
+    posted in the same issue body, 1.26 us +/- 10.4 ns per loop (mean +/-
+    std. dev. of 7 runs, 1,000,000 loops each). The 11.90 speedup recorded
+    above is DERIVED from the reporter's own pair of numbers
+    (15 / 1.26 = 11.90); the thread never states a ratio explicitly.
+  hardware: >-
+    unknown; the issue gives no CPU, OS, or machine spec anywhere in the
+    dump. numpy version is 1.13.1 per the reporter's own comment ("It's
+    1.13.1"); no Python version is given.
+affected_operations: [numpy.roll]
+input_regime:
+  dtypes: [int]
+  sizes: [99]
+  notes: >-
+    Measured concretely only for one case: d = np.arange(99), a single 1-D
+    array of 99 elements holding numpy's default integer dtype (not stated
+    explicitly by the reporter), with a scalar shift of 1, np.roll(d, 1)
+    vs np.concatenate([d[-1:], d[:-1]]). The reporter explicitly states
+    "I didn't check for other sizes", so the thread has no data on how the
+    gap scales with array size, shift magnitude, or dtype.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000032_roll_concat.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load): REPRODUCED at half the 1.13-era claim, and the win
+    region is crisply small-n. concat-of-two-slices beats np.roll on 1-D
+    at 5.35-5.54x (n=99), 4.60-4.74x (1000), 2.43-2.55x (10_000), then
+    dies at 100_000 (0.13-1.55x, bimodal stock timings) and is a wash at
+    1e6 (1.01-1.17x). int64 and float64 track each other exactly - the
+    saving is np.roll's fixed Python machinery (~3-4 us on this box),
+    not element work. shift=0 via copy: 1.16x at 100k (see OPP-000031
+    for the degenerate-args park). Evidence:
+    benchmarks/results/OPP-000032/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections:
+  - author: seberg
+    date: "2018-04-04"
+    quote: >-
+      Which numpy version are you using, roll was notoriously slow, the
+      difference should be pretty small nowadays. The other possibility is
+      that your array is so small that there is just so much overhead
+      since the roll function is implemented in python and has to do
+      extra checks and a few nano or even microseconds more just for the
+      typical call overhead is nothing strange.
+  - author: seberg
+    date: "2018-04-05"
+    quote: >-
+      As I said, the overhead is only the python call overhead, you could
+      implement np.roll in C to avoid some of it, but I doubt it is
+      useful. 10us is an expected slowdown for a function implemented in
+      python. I will close this for now, feel free to protest though.
+  - author: seberg
+    date: "2018-04-05"
+    quote: >-
+      Maybe as another point: We have many many things like this where if
+      you have small arrays and want most speed you can "specialize"
+      those numpy utility type functions to skip checks, etc. and just be
+      much faster. In other words: We would have to argue that this is
+      much more important then other python implemented type functions.
+      There used to be a real performance issue in roll, but it is fixed
+      in your version already I believe.
+linked_prs: []
+related_opportunities:
+  - id: OPP-000031
+    relation: >-
+      Sibling opportunity for numpy.roll covering the zero-shift and
+      empty-axes edge cases; this record's fast-path predicate must
+      exclude those cases and defer to stock np.roll (see semantics
+      hazards note below).
+notes:
+  - >-
+    SHIPPED (2026-08-24) as roll_concat_1d
+    (src/pyoverdrive/fastpaths/roll_concat.py): roll(a, int_shift) with
+    axis absent/None on plain 1-D int64/float64/int32/float32/bool
+    arrays of size 1..10_000 - concatenate of two slices, shift
+    normalized modulo n exactly as stock, shift 0 routed to a plain copy
+    (never an alias; OPP-000031). Measured 5.3-5.9x at n in [8, 99],
+    4.6-5.2x at 1000, 2.4-4.7x at 10_000 across all five dtypes, dead
+    above the cap (bimodal ~1x at 100k), shift=0 2.9-11.3x. Bit-identical
+    including contiguity flags. license_review clean: the reporter's own
+    snippet from the public issue body.
+  - >-
+    Mechanism, per seberg (maintainer): "the overhead is only the python
+    call overhead" - np.roll is implemented in Python and "has to do
+    extra checks" before dispatching, while
+    np.concatenate([d[-1:], d[:-1]]) reaches the C implementation more
+    directly. seberg frames the entire gap as call/dispatch overhead, not
+    an algorithmic difference, and doubts a C reimplementation of roll
+    would be useful ("I doubt it is useful").
+  - >-
+    The transparent fast path this record proposes: numpy.roll is a
+    patchable module-level name (numpy.roll / np.roll), so a wrapper can
+    intercept calls. Predicate: input is a 1-D array and shift is a
+    single scalar integer, with no axis argument (or axis=None on a 1-D
+    array). Route: np.concatenate((a[-s:], a[:-s])) is the exact
+    candidate the thread itself names, shown there as
+    np.concatenate([d[-1:], d[:-1]]) for shift=1; for a general scalar
+    shift s this generalizes to slicing a[-s:] and a[:-s]. See
+    related_opportunities OPP-000031 for the sibling zero-shift /
+    empty-axes case this predicate must exclude.
+  - >-
+    Semantics hazards a real implementation must not get wrong: the shift
+    must be normalized modulo n (s = shift % n) before slicing, since
+    np.roll accepts shift magnitudes larger than the array length and
+    negative shifts; an empty array (n=0) must not be routed through the
+    concatenate path (modulo-by-zero / empty-slice edge case) and should
+    stay on stock np.roll; and any call where axis is a tuple, or shift is
+    given as a sequence, is a multi-axis roll and must stay on stock
+    np.roll, since the thread's candidate only covers the single-axis,
+    single-scalar-shift case on a 1-D array.
+  - >-
+    Age/version caveat: the claim dates to numpy 1.13.1 (per ucyo's own
+    comment, "It's 1.13.1"), and the maintainer's own remarks cast doubt
+    on whether the gap still exists: seberg opened by noting "roll was
+    notoriously slow, the difference should be pretty small nowadays" and
+    later added "There used to be a real performance issue in roll, but
+    it is fixed in your version already I believe." Neither seberg nor
+    ucyo ever re-ran the benchmark on a newer numpy version inside this
+    thread, so the reproducer must first establish whether any
+    np.roll-vs-concatenate gap survives on current numpy before treating
+    the 11.90x figure as live.
+  - >-
+    Thread state: closed by seberg on 2018-04-05, state_reason
+    "completed", carrying the label "57 - Close?" ("Issues which may be
+    closable unless discussion continued"). Four comments total, all from
+    ucyo (reporter) and seberg (maintainer); no other participants, no
+    linked PRs anywhere in the dump. ucyo raised, but nobody in the
+    thread answered, the idea of "some kind of threshold" (use
+    concatenate below a size cutoff, np.roll above it).
+  - >-
+    license_review is pending: no candidate-code license question has
+    been assessed yet; the candidate is a plain call to
+    numpy.concatenate, numpy's own function, so no external or vendored
+    code is implicated.

@@ -1,0 +1,191 @@
+id: OPP-000030
+title: "numpy.linalg.eigh runs slower than eig when broadcasting many small (2x2) symmetric matrices"
+sources:
+  - url: https://github.com/numpy/numpy/issues/22158
+    repository: numpy/numpy
+    type: issue
+    number: 22158
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T07:00:00Z"
+claim:
+  speedup: 1.43
+  baseline: >-
+    numpy.linalg.eigh on a batch of 1000 stacked 2x2 real symmetric matrices
+    (np.random.rand(1000, 2, 2) forced symmetric via a.transpose(0,2,1) @ a),
+    per the issue author's own reproducer script, section "1.3) using 1000
+    arrays". The script times fun1=np.linalg.eig then fun2=np.linalg.eigh
+    with single perf_counter() calls (no repetition, no %timeit, no error
+    bars) and prints t1/t2; the code comment against this case reads
+    "# gives ~ 0.7", i.e. time(eig)/time(eigh) ~= 0.7, so eigh took longer
+    than eig. This is a single-shot, low-precision measurement, not a
+    calibrated benchmark.
+  candidate: >-
+    numpy.linalg.eig on the identical 1000x(2,2) batch, same reproducer
+    script, same "# gives ~ 0.7" comment. eig is not a proposed fast-path
+    implementation; it is the thread's own faster reference point,
+    demonstrating that a specialized route for this shape has headroom.
+    Speedup DERIVED from the reporter's own ratio: the comment gives
+    time(eig)/time(eigh) ~= 0.7, so eigh/eig = 1/0.7 = 1.42857... ~= 1.43.
+    A second batch point in the same script, "1.2) using 200 arrays", gives
+    "# gives ~ 0.9", i.e. eigh/eig = 1/0.9 = 1.11x, a smaller but same-
+    direction gap. Both are approximate, single-run numbers from code
+    comments, not measured output.
+  hardware: >-
+    NumPy/Python version stated in the issue's version block: "1.21.5 3.9.7
+    (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)]", i.e.
+    numpy 1.21.5, Python 3.9.7, Windows, MSVC-built, 64-bit AMD64. No CPU
+    model, core count, or OS build is given anywhere in the issue or its
+    single comment.
+affected_operations: [numpy.linalg.eigh, numpy.linalg.eigvalsh]
+input_regime:
+  dtypes: >-
+    float64 (np.random.rand default), real symmetric matrices forced via
+    a.transpose(0, 2, 1) @ a. The thread never exercises a complex/Hermitian
+    input.
+  sizes: [2, 100]
+  notes: >-
+    Matrix side length d and batch/broadcast count are both varied in the
+    reproducer, and only the crossing of the two produces the bug. For
+    d=2: single array ratio time(eig)/time(eigh) ~= 3 (eigh faster, the
+    expected case per the issue title and per seberg's framing); 200
+    arrays ~= 0.9 (eigh already slower, 1.11x DERIVED); 1000 arrays ~= 0.7
+    (eigh slower, 1.43x DERIVED). For d=100: ratio stays ~= 4 (eigh faster)
+    at 1, 200, and 1000 arrays alike, i.e. no crossover was observed for
+    the larger matrix size at any tested batch count. The regime this
+    record targets is therefore specifically small (the issue singles out
+    2x2 as "the most noticeable case") matrices broadcast in bulk, not
+    small matrices in general.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000030_eigh_small_batch.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load): REPRODUCED far above the claim's 1.43x headroom
+    signal. A closed-form quadratic on the lower triangle beats
+    numpy.linalg.eigvalsh (values-only, output mathematically unique, no
+    sign hazard) at every batch size from 100 up: 2.51x at 100, 12.6x at
+    1000, 31.2x at 10_000, 6.6x at 100_000, 5.9x at 1_000_000; batch 1
+    loses (0.46x). The 1e12-condition witness batch passed the scaled
+    tolerance at 30.7x (tolerance is scaled to each matrix's largest
+    |eigenvalue|, the same absolute-error standard LAPACK promises). Full
+    eigh via closed form clears the CONTRACT check (residual within 10x
+    of stock's, orthonormal) at 1.81x/1.40x but eigenvector SIGN freedom
+    still blocks an elementwise ship contract, so eigvalsh is the ship
+    surface and eigh stays documentation. Evidence:
+    benchmarks/results/OPP-000030/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: medium
+maintainer_objections:
+  - author: seberg
+    date: "2022-09-02"
+    quote: >-
+      Would have to dig into the code to figure this out. I suspect both
+      end up calling openblas in a tight loop on each of the small
+      matrices. For small matrices such an approach would be dominated by
+      overheads (setting things up, and just the function calls). So if
+      those differ for whatever reasons, the results are not unexpected.
+      However, I am not sure whether the overheads differ due to code in
+      NumPy or due to code in openblas (or whichever linear algebra
+      backend is used). Linear algebra backends are like not optimized
+      for these small cases.
+linked_prs: []
+related_opportunities: []
+notes:
+  - >-
+    SHIPPED (2026-08-24) as eigvalsh_2x2_closed
+    (src/pyoverdrive/fastpaths/eigvalsh_2x2.py): numpy.linalg.eigvalsh on
+    plain float64/float32 (..., 2, 2) batches of at least 100 matrices,
+    UPLO absent or 'L', all elements finite (LAPACK raises LinAlgError
+    where a closed form would return NaN, so non-finite stays on stock).
+    Floors from OPP-000030 + BATCH4-CAL (batch 10 loses 0.67x, 30
+    straddles 1.11x, 100 wins 2.51-2.55x). Comparison mode numeric at
+    the abs-error-vs-||A|| standard LAPACK itself promises. Full eigh
+    remains unshipped: eigenvector sign freedom has no honest
+    elementwise comparison contract (the np.partition blocker class);
+    the closed-form vectors clear a reconstruction-contract check at
+    1.4-1.8x, recorded for a future contract-comparison mode.
+    license_review clean: closed-form quadratic from first principles.
+  - >-
+    Mechanism, per seberg's comment (the only comment on the thread,
+    2022-09-02, author_association MEMBER): both eig and eigh likely call
+    into openblas (or whichever LAPACK backend) in a per-matrix loop over
+    the batch; for small matrices the wall time is dominated by per-call
+    setup/overhead rather than FLOPs, and seberg is explicit he does not
+    know whether that overhead differential lives in NumPy's own code or
+    in the backend, and that "linear algebra backends are like not
+    optimized for these small cases." No root cause was ever isolated in
+    the thread and no profiling was posted.
+  - >-
+    Transparent fast-path sketch: numpy.linalg.eigh is a patchable
+    module-level name, so a dispatch wrapper can check the predicate
+    "input is stacked (..., 2, 2), real or complex dtype, UPLO default
+    ('L'), no out= argument" and route matching calls to a closed-form 2x2
+    symmetric/Hermitian eigendecomposition (eigenvalues via the quadratic
+    formula on trace/determinant, eigenvectors via the standard 2x2
+    closed-form null-space construction) instead of calling into LAPACK's
+    batched syevd/heevd path. Everything else falls through to the
+    existing numpy.linalg.eigh unchanged.
+  - >-
+    Correctness hazards for that sketch, not resolved by anything in the
+    thread: (1) eigenvector SIGN is not fixed by the symmetric
+    eigenproblem itself, LAPACK's syevd/heevd picks a sign/normalization
+    convention internally that a from-scratch closed-form derivation is
+    not guaranteed to reproduce, so a bitwise or even sign-exact match
+    against current numpy.linalg.eigh output cannot be assumed without
+    an explicit sign-fixing rule matched to LAPACK's convention. (2)
+    UPLO handling: numpy.linalg.eigh reads only one triangle (upper or
+    lower per the UPLO argument) and ignores the other; a closed-form
+    route must replicate that exact triangle-selection behavior (and its
+    interaction with the implicit symmetrization LAPACK performs) rather
+    than assuming the matrix is already symmetric, or it will silently
+    diverge from LAPACK on inputs that are only symmetric in the read
+    triangle. (3) near-degenerate eigenvalues (trace^2 ~= 4*det) are a
+    known numerical-stability edge case for closed-form 2x2 solutions
+    that iterative LAPACK routines handle differently; the thread's
+    random.rand-generated test matrices do not probe this case.
+  - >-
+    Ship-surface note (verification pass, 2026-08-24): the eigenvector
+    sign hazard in the previous note does NOT apply to
+    numpy.linalg.eigvalsh, whose output (ascending eigenvalues only) is
+    mathematically unique for a given input - no sign convention, no
+    basis freedom outside exact degeneracy. eigvalsh is an equally
+    patchable module-level name and shares the same per-matrix LAPACK
+    overhead, so the closed-form quadratic route
+    ((tr +/- sqrt((a-d)^2 + 4*b^2))/2 for a real symmetric [[a, b],
+    [b, d]], reading only the UPLO triangle) is comparable against stock
+    NUMERICALLY, slice by slice. The Dyno reproducer should therefore
+    measure BOTH surfaces: eigvalsh (the likely shippable one) and full
+    eigh (headroom documentation; shippable only if a defensible
+    comparison contract for eigenvectors exists, which today it does not
+    - same class of blocker as np.partition in OPP-000022's notes).
+  - >-
+    Age/version caveat: the issue was opened 2022-08-20 against numpy
+    1.21.5 and closed 2022-09-02 (state "closed", state_reason
+    "completed", closed_by the reporter themself, not a maintainer,
+    comments=1, no linked PR anywhere in the issue or comment dump, no
+    "57 - Close?" discussion beyond the label itself). Several numpy
+    major/minor releases and at least one BLAS/LAPACK backend default
+    change (OpenBLAS version bumps) have shipped since. This record must
+    check whether the small-batch eigh-vs-eig gap still reproduces on
+    current numpy before treating it as a live opportunity; the gap
+    having closed on its own (e.g. via later openblas or numpy dispatch
+    changes) is a legitimate and expected reproducer outcome, not a
+    reproducer failure.
+  - >-
+    license_review is pending, not clean: unlike the eig-vs-eigh timing
+    comparison in the issue (pure use of existing numpy public API, no
+    licensing question), the RECOMMENDED fast path is new closed-form
+    code that has not been written or sourced yet, so there is nothing to
+    review for license provenance until an implementation exists.
+  - >-
+    Measurement-quality caveat carried into claim.speedup: every ratio in
+    this record comes from single perf_counter() calls printed as
+    approximate code comments ("gives ~ 0.7" etc.) in the reporter's own
+    script, not from repeated-trial %timeit output with error bars (contrast
+    OPP-000024, which had explicit mean +/- std over thousands of loops).
+    Treat 1.43 as a rough, unreplicated signal of direction and order of
+    magnitude, not a precise baseline.

@@ -1,0 +1,179 @@
+{
+  "opp_id": "OPP-000048",
+  "title": "batched 3x3 eigvalsh: trig closed form vs LAPACK loop",
+  "recorded_at": "2026-08-24T09:21:13+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.0,
+    "cpu_busy_after": 0.007751937984496138,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "eigvalsh_3x3_batch100",
+      "params": {
+        "batch": 100,
+        "d": 3,
+        "op": "eigvalsh"
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 44020.967741935485,
+          "min_ns": 43393.54838709677,
+          "mean_ns": 43884.58781362008,
+          "mad_ns": 161.290322580644,
+          "samples": 9,
+          "loops_per_sample": 124,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form_values": {
+          "median_ns": 32385.416666666668,
+          "min_ns": 32240.277777777777,
+          "mean_ns": 32410.185185185186,
+          "mad_ns": 89.58333333333576,
+          "samples": 9,
+          "loops_per_sample": 144,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form_values": 1.359283661378516
+      }
+    },
+    {
+      "case": "eigvalsh_3x3_batch1000",
+      "params": {
+        "batch": 1000,
+        "d": 3,
+        "op": "eigvalsh"
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 404061.53846153844,
+          "min_ns": 402600.0,
+          "mean_ns": 405475.2136752137,
+          "mad_ns": 1184.6153846154339,
+          "samples": 9,
+          "loops_per_sample": 13,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form_values": {
+          "median_ns": 89575.47169811321,
+          "min_ns": 89116.03773584905,
+          "mean_ns": 90129.55974842767,
+          "mad_ns": 459.43396226415643,
+          "samples": 9,
+          "loops_per_sample": 106,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form_values": 4.510850245068254
+      }
+    },
+    {
+      "case": "eigvalsh_3x3_batch10000",
+      "params": {
+        "batch": 10000,
+        "d": 3,
+        "op": "eigvalsh"
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 4037550.0,
+          "min_ns": 4017600.0,
+          "mean_ns": 4044022.222222222,
+          "mad_ns": 14950.0,
+          "samples": 9,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form_values": {
+          "median_ns": 995900.0,
+          "min_ns": 937133.3333333334,
+          "mean_ns": 1052694.4444444445,
+          "mad_ns": 45383.33333333337,
+          "samples": 9,
+          "loops_per_sample": 6,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form_values": 4.0541721056330955
+      }
+    },
+    {
+      "case": "eigvalsh_3x3_batch100000",
+      "params": {
+        "batch": 100000,
+        "d": 3,
+        "op": "eigvalsh"
+      },
+      "baseline": "numpy.linalg.eigvalsh",
+      "variants": {
+        "numpy.linalg.eigvalsh": {
+          "median_ns": 40617700.0,
+          "min_ns": 40413400.0,
+          "mean_ns": 40598488.88888889,
+          "mad_ns": 79300.0,
+          "samples": 9,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "closed_form_values": {
+          "median_ns": 15105400.0,
+          "min_ns": 14493400.0,
+          "mean_ns": 15322800.0,
+          "mad_ns": 187500.0,
+          "samples": 9,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "closed_form_values": 2.688952295205688
+      }
+    }
+  ]
+}

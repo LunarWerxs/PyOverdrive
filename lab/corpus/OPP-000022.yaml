@@ -1,0 +1,159 @@
+id: OPP-000022
+title: "Dense multi-quantile np.quantile requests hit an ndarray.partition density cliff and run 21x slower than a full sort"
+sources:
+  - url: https://github.com/numpy/numpy/issues/32187
+    repository: numpy/numpy
+    type: issue
+    number: 32187
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T03:32:41Z"
+claim:
+  speedup: 21.0
+  baseline: >-
+    ndarray.partition on a (2048, 300) float64 array, partitioning along the
+    length-2048 axis, with kth spacing 2 (len(kth)=1024), on unpatched numpy
+    main (scalar build), as measured by eendebakpt in the confirming comment
+    (2026-08-04) and reported as "496 ms (21x sort)". This is the dense-kth
+    regime np.quantile itself creates for many-quantile method="linear"
+    calls, since it requests two neighbor indices per quantile.
+  candidate: >-
+    full ndarray.sort on the same array and axis, from the same measurement
+    table in the same comment. The 21x is the comment's own reported
+    partition-vs-sort ratio (496 ms partition against an implied ~23.6 ms
+    sort, derived as 496/21); it is the most concrete measured number in
+    the thread. No np.quantile-level ratio is reported anywhere in the
+    dump - the issue body's part 1 script prints a quantile-vs-manual-sort
+    ratio table but its output does not appear in the thread.
+  hardware: >
+    unknown; the 21x measurement comes from eendebakpt's comment, which
+    states only "scalar build, A/B against unpatched main" and gives no
+    CPU or machine spec. The reporter's own environment block (attached to
+    the repro scripts, whose output is not shown in the thread) gives
+    numpy 2.3.5, Python 3.13.9 (Anaconda, Clang 20.1.8), Darwin arm64
+    (Apple T8103, NEON/ASIMD SIMD baseline).
+affected_operations: [numpy.quantile, numpy.partition, numpy.argpartition]
+input_regime:
+  dtypes: [float64]
+  sizes: ["(300, 2048)", "(2048, 300)"]
+  notes: >
+    The reporter's part 1 sweeps np.quantile(a, q, axis=-1,
+    method="linear") on a (300, 2048) standard-normal array with nq/m in
+    {0.05, 0.10, 0.20, 0.24, 0.25, 0.30, 0.50}; part 2 isolates
+    ndarray.partition on (2048, 300) along axis 0 with evenly spaced kth at
+    densities 0.05 through 1.00. Per eendebakpt's confirming comment, the
+    cliff is at kth spacing < 4 (len(kth) exceeding roughly a third of the
+    array length), and np.quantile hits it at nq/m of about 0.25 because
+    the linear method requests two neighbor indices per quantile, halving
+    the effective spacing. Scaling at spacing 2 is quadratic per lane on
+    unpatched numpy, "47 -> 2672 ms" from 1k to 8k rows, i.e. roughly 4x
+    per array-size doubling. Only float64 timings appear in the thread.
+status: performance_validated
+license_review: pending
+reproducer: benchmarks/historical/opp_000022_quantile_density.py
+current_numpy_result:
+  verified_speedup: 173.39
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24 on the idle Intel box (fp 9bbe7063c555,
+    i7-12700K, numpy 2.5.2, 0% foreign load): REPRODUCED far beyond the
+    claim. The partition density cliff is real and sharp: kth spacing 4
+    costs 5.27x vs full sort, spacing 3 jumps to 64.15x, and it scales
+    with rows (37.0x at 1024x300, 98.2x at 4096x300, 173.39x at
+    8192x300). numpy.quantile inherits it: nq 492 is 6.13x but nq 512 is
+    34.53x (the cliff between them), 44.25x at nq 614; NaN-bearing and
+    duplicate-heavy variants match (33.2-33.7x). The sort-once-then-
+    interpolate candidate is exact (checks passed everywhere). Evidence:
+    benchmarks/results/OPP-000022/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections:
+  - author: eendebakpt
+    date: "2026-08-04"
+    quote: >
+      I can confirm the issue. Claude can not only create the bug report,
+      but also find the problem and suggest a fix, @johannfaouzi Would you
+      like to create a PR to address the issue. The suggestion by Claude
+      seems reasonable, but I think we should add some asv benchmarks and
+      explore some more options.
+linked_prs: []
+related_opportunities: [OPP-000013]
+notes:
+  - >-
+    SIBLING SHIPPED (2026-08-24) as percentile_dense
+    (src/pyoverdrive/fastpaths/percentile_dense.py): numpy.percentile
+    with a dense q array in [0, 100], sharing this record's predicate
+    floors and sort+lerp run with numpy's own q/100 scaling. Its OWN
+    battery (PERCENTILE-CAL, fp 9bbe7063c555, 0% load) measured 1.83x
+    at nq=4 up to 805.8x at nq=16384 of 65536, every cell BIT-EXACT
+    against stock percentile.
+  - >-
+    SHIPPED (2026-08-24) as quantile_dense_sort
+    (src/pyoverdrive/fastpaths/quantile_dense_sort.py): quantile(a, q)
+    with a 1-D float64 q ARRAY (4-16384 entries), float64 a, 1-D or
+    2-D last-axis, reduced length 512-65536, method linear - sorted once
+    then numpy's own virtual-index/lerp arithmetic replicated exactly,
+    bit-identical including NaN-salted and inf-salted slices (probed and
+    battery-checked). The QUANTILE-CAL battery justified dispatching far
+    below the cliff: the sort route wins at EVERY measured cell (1.80x
+    at nq=4, 918x at nq=16384 of 65536, 1-D 2.7-790x), so the floor is
+    min-win-derived, not cliff-derived. np.partition/argpartition
+    surfaces from the record stay unshipped: returning a fully-sorted
+    array satisfies partition's documented contract but is not
+    elementwise-identical to stock's output, which needs a new
+    comparison mode before it can ship honestly.
+  - >
+    The transparent fast-path shape: intercept np.quantile/np.percentile
+    calls where the number of distinct kth indices the interpolating
+    method will request (up to 2*len(q)) crosses the density threshold
+    (kth spacing < 4, i.e. roughly len(kth) > m/4 for linear), and route
+    to one full np.sort along the axis plus numpy's exact interpolation
+    arithmetic, replicating _quantile's lerp (including its gamma >= 0.5
+    stability rewrite) the way OPP-000013's shipped nanquantile path
+    already does. The order statistics a sorted array yields are by
+    definition the ones partition would have placed, so the only
+    correctness surface is matching the interpolation bit-for-bit, which
+    is why correctness_risk is low. The reporter's own manual_quantile
+    baseline in the issue body is exactly this route, minus the exact-lerp
+    discipline.
+  - >
+    Root cause per the thread (from the Claude-generated analysis posted
+    by eendebakpt): introselect in numpy/_core/src/npysort/selection.cpp
+    has a dumb_select fast path for kth - low < 3, an O(range * (kth -
+    low)) selection scan that neither partitions the data nor stores
+    pivots. Multi-kth partitions process sorted kth values left to right,
+    and once consecutive kth values are less than 4 apart every kth takes
+    this path, each re-scanning essentially the whole remaining tail, so
+    the overall partition degrades to O(n^2) per lane.
+  - >
+    Upstream-fix risk: eendebakpt already has a branch
+    (https://github.com/eendebakpt/numpy/tree/fix/partition-dense-kth, one
+    condition change in introselect_ plus threading the nkth argument)
+    that takes the spacing-2 case from 496 ms (21x sort) to 41 ms (1.7x
+    sort). No PR is filed in the dump and the issue is open at retrieval.
+    If that fix merges, the headline win collapses from ~21x to the
+    residual ~1.7x at that shape; but the same comment notes that even
+    fixed, the multi-kth path stays scalar while sort uses SIMD
+    (x86-simd-sort) on x86, so a sort-instead-of-partition heuristic in
+    _quantile "could still be a small follow-up win on SIMD hardware".
+    The Dyno run must therefore test the numpy actually installed and
+    report which side of the fix it is on.
+  - >
+    Provenance flag: the issue body carries the reporter's own disclaimer
+    ("This issue was written by Claude, but I reviewed it and ran the
+    code"), and the root-cause/fix analysis in the confirming comment is
+    explicitly marked by eendebakpt as generated by Claude. Every number
+    in this record traces to that confirming comment; treat all of them
+    as single-machine, single-run figures until the Dyno reproducer
+    replaces them.
+  - >
+    Semantics hazards for the quantile-level route: method= variants other
+    than linear map virtual indices differently and some (nearest,
+    lower/higher, inverted_cdf) request only one index per quantile,
+    shifting the density threshold; weights= is only accepted for
+    inverted_cdf; NaN propagation, out=, overwrite_input=, keepdims and
+    tuple axis must all behave identically. A partition-level route (for
+    ndarray.partition itself) is stricter: a fully sorted array satisfies
+    partition's documented guarantee, but the bytes in the unspecified
+    regions would differ from stock output, an observable divergence to
+    weigh before routing anything other than quantile.

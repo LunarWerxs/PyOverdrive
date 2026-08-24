@@ -1,0 +1,170 @@
+id: OPP-000045
+title: "numpy.linalg.det/slogdet/solve on 2x2/3x3 batched stacks: per-matrix LAPACK dispatch (BLAS thread contention) is the reported bottleneck; closed-form cofactor/Cramer vectorization measured 2x-92x depending on op/batch size; sibling of shipped inv_small_batch (OPP-000035)"
+sources:
+  - url: https://github.com/numpy/numpy/issues/20052
+    repository: numpy/numpy
+    type: issue
+    number: 20052
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T08:10:24Z"
+claim:
+  speedup: 22.05
+  baseline: >-
+    Original report (YutoMinami, issue body, 2021-10-06, numpy 1.20.3, Python
+    3.7.8): slogdet on a (52,484,484) float array took 1210.36s versus a
+    single (484,484) matrix at 3.86s (would predict ~200.7s at 3.86*52,
+    actual was ~3x longer); a later re-run of the same shapes could not
+    reproduce that ratio either and just showed generally slow, inconsistent
+    timings ((1,484,484): 3.99s; two (26,484,484) halves: 126.19s and
+    533.30s; full (52,484,484): >1200s). Reproduction attempt without
+    OMP_NUM_THREADS pinned (YutoMinami, comment 2021-10-07T04:58:35Z,
+    ipython %timeit on a (52,484,484) array, 7 runs of 1 loop each): "3.88 s
+    plusminus 367 ms per loop". Two other commenters could NOT reproduce any
+    slowness at all on their own (unstated) hardware: rossbar (2021-10-06,
+    np.random.random((52,484,484)), %timeit, 7 runs of 1 loop each): "1.31 s
+    plusminus 33.1 ms per loop"; bashtage (2021-10-08, positive-definite
+    cov_t tiled to (52,484,484)): 0.11s/0.06s/0.07s/0.11s across full array
+    and two slices, and on rossbar's exact array: "94.2 ms plusminus 1.35 ms
+    per loop" (7 runs, 10 loops each). rossbar's diagnosis (2021-10-06):
+    "Whenever there's a case where linalg has poor performance, the first
+    thing I suspect is a BLAS threading problem."
+  candidate: >-
+    YutoMinami, same comment 2021-10-07T04:58:35Z, after setting
+    `export OMP_NUM_THREADS=1` in the shell (not via os.environ, which the
+    reporter says did not have the same effect): "176 ms plusminus 10.9 ms
+    per loop (mean plusminus std. dev. of 7 runs, 10 loops each)". DERIVED
+    speedup vs the no-pin case above: 3.88 / 0.176 = 22.045 (~22.05x). This
+    is the THREAD'S OWN resolution (an OMP_NUM_THREADS environment
+    workaround for BLAS thread oversubscription across many small per-matrix
+    LAPACK calls), NOT PyOverdrive's candidate. It is cited here only as
+    corroborating evidence that a 3-D stack of small slogdet/det/solve calls
+    pays a per-matrix LAPACK dispatch cost that scales badly under threaded
+    BLAS; PyOverdrive's actual candidate (closed-form cofactor
+    expansion/Cramer's rule, vectorized over the whole stack, never calling
+    LAPACK at all) is measured separately under current_numpy_result below.
+  hardware: >-
+    YutoMinami (comment 2021-10-08T11:39:23Z): OS CentOS Linux release
+    7.9.2009 (Core); CPU Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz; numpy
+    installed via conda, linked against libopenblas.so per ldd output,
+    "libopenblas version 0.3.17". Issue body states numpy/Python versions as
+    "1.20.3 3.7.8". rossbar's and bashtage's non-reproducing hardware is
+    unstated in the dump.
+affected_operations: [numpy.linalg.det, numpy.linalg.slogdet, numpy.linalg.solve]
+input_regime:
+  dtypes: [float64]
+  sizes: [100, 1000, 5000, 20000]
+  notes: >-
+    Targets stacked 2x2 and 3x3 matrices only (d=2 and d=3); single matrices
+    and d>3 are out of scope. Standard-normal stacks (dtype not stated
+    beyond "standard-normal" in the evidence naming; taken as float64, the
+    default of np.random.standard_normal, matching the sibling OPP-000035
+    regime). Batch-size behavior differs by operation: det and slogdet (both
+    dims) win from batch=100 upward. solve has a floor near batch~1000: at
+    batch=100 the 3x3 solve path LOSES to stock (0.81x, see
+    current_numpy_result), only turning net-positive by batch=1000 (3.47x
+    for 3x3, 9.40x for 2x2); the 2x2 solve does not exhibit the same
+    sub-1x floor at batch=100 (2.29x) in the measured data.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000045_small_batch_linalg.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy 2.5.2,
+    0% load), standard-normal stacks, numeric comparison mode (NOT
+    bit-identical): det/solve checked via allclose (rtol 1e-9 for det, rtol
+    1e-8 for solve); slogdet checked by exact sign equality plus logdet
+    allclose. Results by op/dim/batch:
+    det 3x3 - batch=100: 2.06x, batch=1000: 10.45x, batch=5000: 20.61x,
+    batch=20000: 11.66x.
+    solve 3x3 - batch=100: 0.81x (LOSES to stock; this is the floor
+    evidence behind the input_regime note above), batch=1000: 3.47x,
+    batch=5000: 6.22x, batch=20000: 2.69x.
+    slogdet 3x3 - batch=100: 1.58x, batch=1000: 6.65x, batch=5000: 11.26x,
+    batch=20000: 6.66x.
+    det 2x2 - batch=100: 6.22x, batch=1000: 33.36x, batch=5000: 69.72x,
+    batch=20000: 91.92x.
+    solve 2x2 - batch=100: 2.29x, batch=1000: 9.40x, batch=5000: 16.42x,
+    batch=20000: 13.78x.
+    slogdet 2x2 - batch=100: 3.00x, batch=1000: 9.88x, batch=5000: 13.66x,
+    batch=20000: 11.74x.
+    Evidence: benchmarks/results/BATCH6-CAL/9bbe7063c555.json.
+    Supporting, CONTENDED triage-only evidence (dev-box AMD Zen 4, fp
+    8f8198d9abab, numpy 2.4.5, 42% load, not fingerprinted as primary
+    evidence per this record's current_numpy_result.fingerprints): det 3x3
+    batch=5000: 19.76x with max relerr 2.65e-13; Cramer solve 3x3
+    batch=5000: 6.25x with relerr 3.18e-13; slogdet batch=5000: 10.10x with
+    signs exactly equal and logdet max abs diff 3.57e-13. Consistent
+    direction and rough magnitude with the idle-box numbers above despite
+    the load.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections: []
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000035]
+notes:
+  - >-
+    Comparison mode: numeric, NOT bit-identical. det and solve checked via
+    allclose (rtol 1e-9 and rtol 1e-8 respectively); slogdet checked by
+    exact sign equality plus logdet allclose. Measured max relative error on
+    the contended dev-box triage run was ~2.65e-13 to 3.18e-13 across
+    det/solve/slogdet - closed forms (cofactor expansion, sign/log of the
+    closed-form determinant, Cramer's rule) are algebraically exact but
+    accumulate different floating-point rounding than per-matrix LAPACK
+    factorization, so exact bit-identity is not the correctness bar here;
+    slogdet signs must still match exactly.
+  - >-
+    This issue (numpy/numpy#20052, "BUG: numpy.linalg.slogdet is very
+    slow") is used as THREAD EVIDENCE for the underlying pain point, not as
+    a prior claim of the closed-form technique itself: nobody in the thread
+    proposes cofactor/Cramer vectorization. The reporter's own inconsistent,
+    slow batched-slogdet timings on a (52,484,484) stack, and rossbar's
+    diagnosis that "the first thing I suspect is a BLAS threading problem,"
+    point at the same root mechanism this opportunity targets: numpy's
+    stock 3-D linalg gufunc loop dispatches one LAPACK call per matrix in
+    the stack, and under threaded BLAS that per-matrix dispatch pattern
+    causes thread oversubscription/contention that scales worse than
+    linearly with batch size. The reporter's own fix was an
+    OMP_NUM_THREADS=1 environment workaround (~22.05x per the claim above),
+    not a code change; the issue was closed by the reporter as resolved
+    without any maintainer patch or linked PR. A closed-form batched
+    vectorization sidesteps the mechanism entirely by never calling LAPACK,
+    so it is not subject to BLAS thread contention at all.
+  - >-
+    Two of five commenters (rossbar, bashtage) could NOT reproduce the
+    reported slowness on their own hardware at all, underscoring that the
+    behavior is threading/contention-dependent rather than a fixed
+    per-call numpy cost - consistent with this being a dispatch-overhead
+    problem rather than an algorithmic bug, and consistent with why no
+    maintainer fix was ever proposed in this thread.
+  - >-
+    Sibling of the SHIPPED inv_small_batch adjugate path (OPP-000035,
+    numpy/numpy#17166): same family of small-matrix batched linalg ops
+    (2x2/3x3), same reasoning that pay-per-matrix LAPACK dispatch loses to
+    a closed-form vectorized route once batch size is large enough. The
+    same det-magnitude well-conditioning guard that OPP-000035's shipped
+    path uses must apply here: near-singular matrices lose accuracy under
+    Cramer's rule, and stock numpy raises LinAlgError on an exactly
+    singular matrix while the closed forms (cofactor det, Cramer solve)
+    would instead divide by a near-zero determinant, so a det-magnitude
+    guard must refuse ill-conditioned stacks (falling back to stock) exactly
+    as the shipped inv_small_batch path does.
+  - >-
+    license_review clean: cofactor expansion (for det), sign/log of the
+    closed-form determinant (for slogdet), and Cramer's rule (for solve) are
+    textbook linear-algebra formulas with no third-party or reporter-owned
+    code to review, unlike threads with posted third-party snippets.
+  - >-
+    correctness_risk medium: near-singular input matrices lose accuracy
+    under Cramer's rule (ill-conditioning amplifies rounding error in the
+    closed forms), and the divide-by-determinant failure mode differs from
+    stock's LinAlgError-on-exactly-singular behavior - both reasons a
+    det-magnitude well-conditioning guard is required before dispatching to
+    the fast path, per the OPP-000035 precedent above. implementation_risk
+    low: the formulas are fixed-size, branch-free, and directly vectorizable
+    with no iterative/data-dependent control flow.
+  - >-
+    SHIPPED (2026-08-24) as det_small_batch + slogdet_small_batch + solve_small_batch (src/pyoverdrive/fastpaths/linalg_small_batch.py): float64 (...,2,2)/(...,3,3) stacks, batch floors one measured notch above the 1.3x crossing (det 2x2 100 / 3x3 300, slogdet same, solve 300/1000) because the predicate re-derives det for inv_small_batch's DET_RTOL=1e-8 conditioning guard. slogdet returns stock's namedtuple type with exactly-equal signs. Numeric mode. 23 differential tests plus a property suite.

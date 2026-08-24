@@ -1,0 +1,157 @@
+id: OPP-000013
+title: "nanquantile axis-reduction is tens to hundreds of times slower than quantile on many-small-slice inputs"
+sources:
+  - url: https://github.com/numpy/numpy/issues/16575
+    repository: numpy/numpy
+    type: issue
+    number: 16575
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 70.07
+  baseline: "np.nanquantile(a, 0.8, axis=0) on a (27, 100) float64 array (np.random.uniform), reducing along axis 0 across many small 1-D slices"
+  candidate: "np.quantile(a, 0.8, axis=0) on the same array and axis (same reduction shape, no NaN-handling), as timed by the issue author in the same post"
+  hardware: >
+    unknown; the issue's environment block gives numpy 1.18.5, Python 3.6.4,
+    and a "GCC 4.2.1 Compatible Apple LLVM 9.0.0 (clang-900.0.39.2)" toolchain
+    string, implying macOS, but no CPU or machine spec is given. Reporter's
+    own %timeit numbers: np.quantile 147 us +/- 11.4 us (mean +/- std. dev.
+    of 7 runs, 10000 loops each); np.nanquantile 10.3 ms +/- 953 us (mean
+    +/- std. dev. of 7 runs, 100 loops each). 10300/147
+    = 70.07x is the most concrete, reporter-sourced number in the thread;
+    the issue title's "hundreds of times slower" is the reporter's own
+    qualitative framing, not a second measured figure.
+affected_operations: [numpy.nanquantile]
+input_regime:
+  dtypes: [float64]
+  sizes: ["(27, 100)", "(50, 100, 100)"]
+  notes: >
+    axis-reduction calls (axis is not None, not a full-array reduction) on
+    a 2-D or higher array, producing many small 1-D slices along the
+    non-reduced axes; per commenter cakedev0, the slowdown "is only
+    significant when the number of reductions is greater than the size of
+    the reduced dimension." The (27, 100) shape is the original reporter's
+    repro (axis=0 reduces 100 slices of length 27 each). The (50, 100, 100)
+    shape is lbferreira's fastnanquantile benchmark (axis=0 reduces 10000
+    slices of length 50 each), timed at 0.2658s stock vs 0.0099s for their
+    Numba-JIT replacement, a 26.85x ratio on that shape/size.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000013_nanquantile.py
+current_numpy_result:
+  verified_speedup: 102.29450758794681
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5, box contended (conditions.contended
+    = true, cpu_busy_before 0.37, cpu_busy_after 0.42): reproduces. 17 cases,
+    all variants correct=true, zero losses anywhere. Claim regime (27, 100),
+    the reporter's own shape: skip_to_quantile (0% NaN, the zero-NaN fast
+    path routed straight to np.quantile) and masked_route2 (1%/10% NaN) land
+    52.99x-70.35x (e.g. q=0.6 nan10%: 2.554 ms -> 36.3 us, 70.35x), bracketing
+    the claimed 70.07x closely. Best case overall is the larger (50, 100,
+    100) shape: masked_route2 at q=0.8 nan10% hits 102.29x (397.36 ms ->
+    3.88 ms); skip_to_quantile there is 44.26x-44.77x. Worst case is the
+    (500, 500) shape, fewer/larger slices than the claim's many-small-slice
+    regime: wins shrink to 5.35x-9.87x (e.g. q=0.8 nan0%: 17.86 ms -> 3.34
+    ms, 5.35x) but never go negative, consistent with cakedev0's comment
+    that the slowdown is only large when the reduction count exceeds the
+    reduced dimension's size. Evidence:
+    benchmarks/results/OPP-000013/8f8198d9abab.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: medium
+maintainer_objections:
+  - author: seberg
+    date: "2020-06-12"
+    quote: >
+      @ashaffer the reason is that these are functions written in Python.
+      They should be fairly efficient on 1-D slices, but will have quite
+      significant overheads associated to each individual slice. Your
+      examples have many small 1-D slices on which the operation has to be
+      performed, so those overheads will be large. We do not have a good
+      solution for this at the time. For `np.quantile` speficially, it is
+      itself implemented in Python to significantly reduce the overheads in
+      this case, it would probably be required to move this to C. There may
+      be small performance improvements which are easier though (and e.g.
+      general small-array performance improvements could have a large
+      impact here).
+  - author: mdhaber
+    date: "2025-10-23"
+    quote: >
+      Thanks, but I'd rather not get involved. Not trying to convince
+      anyone; just explaining: I am not a fan of overloading the meaning of
+      `nan`s, so I think that array API compatible masked arrays (e.g.
+      [`marray`](https://mdhaber.github.io/marray/tutorial.html)) are the
+      better alternative to `nan`-flavored functions and `nan_policy`
+      arguments. I'd rather not spend time making `nanquantile`
+      less worse. I understand that there is short-term pain, but if
+      obvious issues like this encourage users to make the change away from
+      nanquantile and such, I think it's for the better in the long term.
+  - author: cakedev0
+    date: "2025-10-24"
+    quote: >
+      That and the fact that the impact of this issue is really not big.
+      The slowdown compared to `quantile` is only significant when the number
+      of reductions is greater than the size of the reduced dimension,
+      which isn't the common use case I think.
+linked_prs:
+  - "https://github.com/numpy/numpy/pull/30066"
+related_opportunities: [OPP-000005, OPP-000008]
+notes:
+  - >-
+    SHIPPED (2026-08-23) as nanquantile_masked
+    (src/pyoverdrive/fastpaths/nanquantile_masked.py): nanquantile(a, q,
+    axis=<int>) on 2-D+ float64 with scalar q routes to the vectorized
+    masked sort with numpy's own lerp (including its gamma >= 0.5
+    stability rewrite) replicated exactly - 0.0 worst-case difference
+    across a 140-case probe, All-NaN-slice RuntimeWarning parity included.
+    FASTNANQ-CAL battery: wins 22.6x at (10, 30) up to 229x at (5, 500),
+    51.9-63.4x at the reporter's (27, 100); LOSES only in the few-long-
+    slices anti-regime the thread predicted ((10000, 3) 0.88x,
+    (100000, 5) 0.85x), so the guard requires reduced length <= 1000 or
+    slice count >= reduced length. 109 differential tests.
+  - >
+    The transparent fast path this record recommends: a cheap O(n) "does
+    this array contain any NaN" check (np.isnan(a).any(), or a fused
+    any-isnan scan) run once over the whole input before dispatching. If
+    zero NaNs are present, route straight to numpy's existing np.quantile
+    C-level path instead of nanquantile's per-slice Python logic; the
+    result is bit-identical by definition (nanquantile with no NaNs present
+    equals quantile), so this changes zero semantics and needs no new
+    keyword. This alone would erase the entire gap in the reporter's own
+    benchmark, since their repro array has no NaNs in it at all.
+  - >
+    A second, harder-to-ship tier exists for arrays that genuinely contain
+    NaNs: both fastnanquantile (Numba JIT, PyPI) and numbagg's nanquantile
+    claim large wins there (26.85x and "5x faster on 2D arrays where
+    parallelization is possible" respectively, per lbferreira and
+    max-sixty), by vectorizing the masked per-slice reduction instead of
+    looping in Python per slice. That path changes nothing about the public
+    contract either, but it is real reimplementation work: it must match
+    numpy's interpolation/method semantics exactly for a variable count of
+    valid (non-NaN) elements per slice, which is where the correctness risk
+    in this record comes from.
+  - >
+    Root-cause attribution comes directly from seberg (numpy issue
+    responder): the overhead is per-slice Python call overhead, because
+    np.quantile has its own Python-level optimization to amortize that cost
+    that nanquantile does not share. That is the same mechanism class as
+    OPP-000005 (call overhead), which is why it is listed as related; the
+    "5x from parallelization" angle in numbagg's numbers also loosely
+    echoes OPP-000008 (threaded ufuncs).
+  - >
+    mdhaber (2025-10-23) is on record as not wanting numpy itself to invest
+    further in nanquantile, preferring the array-API masked-array direction
+    long term. That is an argument against numpy accepting an upstream fix,
+    not an argument against PyOverdrive shipping a transparent, semantics-
+    preserving fast path of its own; it should be read as a signal that
+    upstream is unlikely to fix this itself, which raises the value of a
+    PyOverdrive-side fix rather than lowering it.
+  - >
+    Demand signal beyond this one issue: the cross-references list four
+    other trackers independently wanting the same thing (xarray x2,
+    bottleneck, pythran) plus numbagg already shipping a competing
+    nanquantile, which is corroborating evidence of real-world want even
+    though cakedev0 argues the specific slow regime is uncommon.
+  - >-
+    SIBLING SHIPPED (2026-08-24): nanpercentile_masked (src/pyoverdrive/fastpaths/nanpercentile_masked.py) routes numpy.nanpercentile through this record's masked run at numpy's own q/100 scaling. Its OWN battery (benchmarks/results/NANPERCENTILE-CAL/, fp 9bbe7063c555, 0% load) measured 3.26-178x across the admitted grid and 0.84x at the refused anti-regime row. 11 differential tests.

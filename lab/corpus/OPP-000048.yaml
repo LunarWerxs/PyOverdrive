@@ -1,0 +1,133 @@
+id: OPP-000048
+title: "numpy.linalg.eigvalsh on 3x3 batched stacks: per-matrix LAPACK syevd dispatch loses to the vectorized trigonometric closed form (2.5-4.5x from batch 300, f64 and f32); d=3 sibling of the shipped eigvalsh_2x2_closed (OPP-000030), with a mid-run bail to stock on near-degenerate spectra where the trig form degrades to sqrt(eps)"
+sources:
+  - url: https://github.com/numpy/numpy/issues/22158
+    repository: numpy/numpy
+    type: issue
+    number: 22158
+    state_at_ingestion: closed
+    retrieved_at: "2026-08-24T09:08:03Z"
+claim:
+  speedup: null
+  baseline: >-
+    Same source thread as OPP-000030 (numpy/numpy#22158, "BUG:
+    numpy.linalg.eigh slower than numpy.linalg.eig when broadcasting small
+    matrices", javierttgg, 2022-08-20, closed 2022-09-02): batched
+    small-matrix eigh routes each matrix through a per-matrix LAPACK call
+    whose setup overhead dominates the actual eigen-work at d=2/d=3
+    (seberg's in-thread analysis). The thread reports the eigh-vs-eig
+    anomaly; it contains no closed-form candidate and no 3x3-specific
+    numbers, so no prior speedup is claimed here.
+  candidate: >-
+    PyOverdrive's candidate (not from the thread): the classical
+    trigonometric solution of the symmetric 3x3 characteristic cubic
+    (Smith 1961 form) - shift by q = tr(A)/3, scale by
+    p = sqrt(tr((A-qI)^2)/6), roots q + 2p*cos(arccos(det(B)/2)/3 +
+    2k*pi/3) - vectorized across the whole stack, never calling LAPACK.
+    Values-only surface (eigvalsh), for the same reason OPP-000030 stayed
+    values-only: eigenvectors carry a LAPACK sign convention that blocks
+    a comparison contract.
+  hardware: unknown (none stated in the thread for the d=3 case)
+affected_operations: [numpy.linalg.eigvalsh]
+input_regime:
+  dtypes: [float64, float32]
+  sizes: [300, 1000, 10000, 100000]
+  notes: >-
+    Stacked symmetric 3x3 only, UPLO='L' (stock's default read triangle),
+    all-finite, batch >= 300. Two carve-outs measured and enforced:
+    batches under 300 lose to the dispatch-plus-guard cost (1.20-1.21x at
+    100, under the 1.3x bar), and NEAR-DEGENERATE spectra (any matrix
+    whose scaled cubic has 1 - r^2 < 1e-12, i.e. a coalescing eigenvalue
+    pair) bail to stock mid-run because the arccos derivative amplifies
+    the ~eps error of r without bound as r -> +/-1, degrading delivered
+    accuracy to ~sqrt(eps)*scale (measured 1.6e-8 absolute on
+    diag(1, 1+1e-9, 5)) where LAPACK keeps eps-grade.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000048_eigvalsh_3x3.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno runs 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load), symmetric standard-normal stacks, numeric
+    comparison at the scaled absolute tolerance (1e-9 f64 / 1e-3 f32).
+    GUARDED end-to-end candidate (isfinite scan included,
+    benchmarks/results/BATCH7-CAL/9bbe7063c555.json):
+    float64 - batch=100: 1.21x, 300: 2.57x, 1000: 4.36x, 10000: 3.73x,
+    100000: 2.85x. float32 - 100: 1.20x, 300: 2.50x, 1000: 4.28x,
+    10000: 3.38x, 100000: 2.84x.
+    Ill-conditioned witness (eigenvalue spread 1e12, which contains a
+    coalesced pair): 0.85x - the DEGENERACY_MIN bail fires, pays its
+    wasted partial compute, and returns stock's own result; correctness
+    check passes at the full 1e-9 tolerance because the output IS
+    stock's.
+    RAW algorithm (reproducer, benchmarks/results/OPP-000048/): 1.36x at
+    100, 4.51x at 1000, 4.05x at 10000, 2.69x at 100000. Dev-box probe
+    (AMD Zen 4, numpy 2.4.5, contended): 1.41x at 100, 7.06x at 1000,
+    5.38x at 10000, 4.30x at 100000; max error 9.3e-14 of scale on
+    random stacks.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections: []
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000030, OPP-000045, OPP-000047]
+notes:
+  - >-
+    Comparison mode: numeric at the absolute-error-vs-||A|| standard,
+    same as OPP-000030. Random-stack battery cells measured ~1e-15 of
+    scale; float32 input is computed in float64 and cast back, so its
+    delivered accuracy is at least stock's own f32 LAPACK path.
+  - >-
+    The near-degenerate bail is the load-bearing correctness decision of
+    this record. The trig form's root separation enters through
+    phi = arccos(r)/3 with d(phi)/d(r) = 1/(3*sqrt(1-r^2)); as a pair of
+    eigenvalues coalesces r -> +/-1 and the ~eps error in
+    r = det(B)/2 is amplified without bound, measured at 1.6e-8*scale on
+    diag(1, 1+1e-9, 5) against LAPACK's ~1e-15. Rather than shipping a
+    weaker promise for that input class, _run detects
+    1 - r^2 < DEGENERACY_MIN = 1e-12 (keeping amplification under ~3e2,
+    a 10x margin against the 1e-9 contract) and hands the WHOLE stack to
+    stock via the graceful-fallback/StockRaised pattern. Exactly-equal
+    spectra (p == 0, e.g. c*I) are NOT degenerate for this purpose: all
+    roots collapse to q exactly and stay on the fast path.
+  - >-
+    The final 3-element in-place sort exists because the roots emerge
+    mathematically ordered but rounding near (admitted) close pairs can
+    invert one by an ulp, and stock's ascending order is documented
+    contract.
+  - >-
+    license_review clean: the trigonometric cubic solution is classical
+    textbook mathematics (Smith 1961 form); no third-party code.
+  - >-
+    correctness_risk medium: the sqrt(eps) degradation described above is
+    real and was CAUGHT by this project's own property net (the clustered
+    hazard failed on the second machine before the bail existed) - the
+    bail turns it from a silent accuracy regression into a refusal.
+    implementation_risk low: branch-free vectorized formulas plus one
+    any() reduction for the bail.
+  - >-
+    SHIPPED (2026-08-24, batch 7) as eigvalsh_3x3_trig
+    (src/pyoverdrive/fastpaths/eigvalsh_3x3.py): float64/float32
+    (...,3,3) stacks, BATCH_MIN=300, UPLO='L' only, isfinite-guarded,
+    DEGENERACY_MIN bail. 22 differential tests plus a property net with
+    UPLO / clustered / identity-multiple / NaN / asymmetric-upper
+    hazards.
+  - >-
+    BATCH 9 SPLIT-AND-RECOMBINE (2026-08-24): the near-degenerate bail no
+    longer punishes a whole stack for a few coalesced pairs - cells
+    failing the 1 - r^2 >= DEGENERACY_MIN test are gathered, served by
+    stock, and scattered back into the trig result; only past
+    DEGEN_FRAC_MAX = 0.25 degenerate does the whole stack go to stock in
+    one batched call (the gathered subset pays stock's per-matrix LAPACK
+    dispatch, so past ~a quarter the one batched call is cheaper).
+    BATCH9-CAL idle-box cells (fp 9bbe7063c555, 0% load, n=10_000): 3.90x
+    at 0% degenerate, 3.76x at 0.1%, 3.70x at 1%, 3.03x at 10%, 2.33x at
+    25%, 0.92x at 50% (the ceiling protects exactly this loss);
+    n=100_000: 2.86-2.92x at 0-1%, 2.47x at 10%. Dev box agrees
+    (3.2-3.8x at 0.1-10%, ~1.2x at 50%). float32 degenerate cells are
+    served by stock's own float32 route and survive the f32->f64->f32
+    roundtrip exactly. Previously any single degenerate cell collapsed
+    the stack to ~1.0x (whole-batch stock).

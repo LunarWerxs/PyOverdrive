@@ -1,0 +1,271 @@
+{
+  "opp_id": "OPP-000008",
+  "title": "threaded chunked ufunc dispatch: np.sin vs np.add contrast",
+  "recorded_at": "2026-08-23T08:11:25+00:00",
+  "fingerprint": {
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "machine": "AMD64",
+    "system": "Windows 11",
+    "logical_cores": 32,
+    "python": "3.14.2",
+    "numpy": "2.4.5",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "AVX512BF16",
+      "AVX512BITALG",
+      "AVX512BW",
+      "AVX512CD",
+      "AVX512DQ",
+      "AVX512F",
+      "AVX512IFMA",
+      "AVX512VBMI",
+      "AVX512VBMI2",
+      "AVX512VL",
+      "AVX512VNNI",
+      "AVX512VPOPCNTDQ",
+      "AVX512_CLX",
+      "AVX512_CNL",
+      "AVX512_ICL",
+      "AVX512_SKX",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3",
+      "X86_V4"
+    ],
+    "fingerprint": "8f8198d9abab"
+  },
+  "cases": [
+    {
+      "case": "sin_float64_n100000",
+      "params": {
+        "dtype": "float64",
+        "n": 100000,
+        "op": "sin"
+      },
+      "baseline": "numpy.sin",
+      "variants": {
+        "numpy.sin": {
+          "median_ns": 405653.3333333333,
+          "min_ns": 342720.0,
+          "mean_ns": 446043.63636363635,
+          "mad_ns": 57473.333333333314,
+          "samples": 11,
+          "loops_per_sample": 15,
+          "role": "baseline",
+          "correct": true
+        },
+        "threaded_chunks_4t": {
+          "median_ns": 272407.6923076923,
+          "min_ns": 207142.3076923077,
+          "mean_ns": 264556.993006993,
+          "mad_ns": 19461.53846153844,
+          "samples": 11,
+          "loops_per_sample": 26,
+          "correct": true
+        },
+        "threaded_chunks_8t": {
+          "median_ns": 359983.3333333333,
+          "min_ns": 303883.3333333333,
+          "mean_ns": 365258.3333333333,
+          "mad_ns": 31783.333333333372,
+          "samples": 11,
+          "loops_per_sample": 12,
+          "correct": true
+        },
+        "threaded_chunks_16t": {
+          "median_ns": 543055.5555555555,
+          "min_ns": 457655.55555555556,
+          "mean_ns": 538176.7676767677,
+          "mad_ns": 18000.0,
+          "samples": 11,
+          "loops_per_sample": 9,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "threaded_chunks_4t": 1.489140522783535,
+        "threaded_chunks_8t": 1.1268669845826196,
+        "threaded_chunks_16t": 0.7469831202046037
+      }
+    },
+    {
+      "case": "sin_float64_n1000000",
+      "params": {
+        "dtype": "float64",
+        "n": 1000000,
+        "op": "sin"
+      },
+      "baseline": "numpy.sin",
+      "variants": {
+        "numpy.sin": {
+          "median_ns": 5079500.0,
+          "min_ns": 4414900.0,
+          "mean_ns": 5051300.0,
+          "mad_ns": 514800.0,
+          "samples": 11,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "threaded_chunks_4t": {
+          "median_ns": 1354020.0,
+          "min_ns": 1201440.0,
+          "mean_ns": 1368367.2727272727,
+          "mad_ns": 70120.0,
+          "samples": 11,
+          "loops_per_sample": 5,
+          "correct": true
+        },
+        "threaded_chunks_8t": {
+          "median_ns": 891700.0,
+          "min_ns": 814316.6666666666,
+          "mean_ns": 914448.4848484849,
+          "mad_ns": 40766.66666666663,
+          "samples": 11,
+          "loops_per_sample": 6,
+          "correct": true
+        },
+        "threaded_chunks_16t": {
+          "median_ns": 980200.0,
+          "min_ns": 865950.0,
+          "mean_ns": 1023884.8484848485,
+          "mad_ns": 35550.0,
+          "samples": 11,
+          "loops_per_sample": 6,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "threaded_chunks_4t": 3.751421692441766,
+        "threaded_chunks_8t": 5.69642256364248,
+        "threaded_chunks_16t": 5.182105692715773
+      }
+    },
+    {
+      "case": "sin_float64_n10000000",
+      "params": {
+        "dtype": "float64",
+        "n": 10000000,
+        "op": "sin"
+      },
+      "baseline": "numpy.sin",
+      "variants": {
+        "numpy.sin": {
+          "median_ns": 51759600.0,
+          "min_ns": 44316800.0,
+          "mean_ns": 50875900.0,
+          "mad_ns": 2887600.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "threaded_chunks_4t": {
+          "median_ns": 12033500.0,
+          "min_ns": 11968600.0,
+          "mean_ns": 12721420.0,
+          "mad_ns": 64900.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        },
+        "threaded_chunks_8t": {
+          "median_ns": 8238800.0,
+          "min_ns": 7908900.0,
+          "mean_ns": 8513520.0,
+          "mad_ns": 329900.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        },
+        "threaded_chunks_16t": {
+          "median_ns": 7182700.0,
+          "min_ns": 5715800.0,
+          "mean_ns": 6814200.0,
+          "mad_ns": 298500.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "threaded_chunks_4t": 4.301292225869448,
+        "threaded_chunks_8t": 6.282419769869398,
+        "threaded_chunks_16t": 7.206148105865482
+      }
+    },
+    {
+      "case": "add_float64_n10000000",
+      "params": {
+        "dtype": "float64",
+        "n": 10000000,
+        "op": "add"
+      },
+      "baseline": "numpy.add",
+      "variants": {
+        "numpy.add": {
+          "median_ns": 19215600.0,
+          "min_ns": 17467700.0,
+          "mean_ns": 20593120.0,
+          "mad_ns": 1136700.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "threaded_chunks_4t": {
+          "median_ns": 8071500.0,
+          "min_ns": 7088600.0,
+          "mean_ns": 8088720.0,
+          "mad_ns": 490700.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        },
+        "threaded_chunks_8t": {
+          "median_ns": 6984900.0,
+          "min_ns": 6688300.0,
+          "mean_ns": 12753640.0,
+          "mad_ns": 296600.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        },
+        "threaded_chunks_16t": {
+          "median_ns": 7041700.0,
+          "min_ns": 6345800.0,
+          "mean_ns": 7074260.0,
+          "mad_ns": 177600.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "threaded_chunks_4t": 2.3806727374094034,
+        "threaded_chunks_8t": 2.751020057552721,
+        "threaded_chunks_16t": 2.7288296860133205
+      }
+    }
+  ]
+}

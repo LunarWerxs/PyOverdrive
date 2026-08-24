@@ -1,0 +1,133 @@
+id: OPP-000011
+title: "3-multiply (Gauss) trick for complex128 matmul: trade 4 real matmuls for 3"
+sources:
+  - url: https://github.com/numpy/numpy/issues/13229
+    repository: numpy/numpy
+    type: issue
+    number: 13229
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T09:18:57Z"
+claim:
+  speedup: 2.21
+  baseline: >-
+    A @ B for two complex128 matrices (m,n,k)=(2048,4096,2048), computed via
+    NumPy's built-in matmul on numpy 1.13.1; reporter's own measurement:
+    Wall time 7.45 s (CPU total 13.9 s).
+  candidate: >-
+    3-multiply / Gauss complex-multiplication trick applied to matmul:
+    C1 = A.real @ B.real; C2 = A.imag @ B.imag;
+    C3 = (A.real + A.imag) @ (B.real + B.imag);
+    C = (C1 - C2) + 1j*(C3 - C1 - C2). Trades 4 real matmuls (the naive
+    complex expansion) for 3 real matmuls plus O(mn + nk + mk) elementwise
+    adds/subtracts, saving 25% of the floating-point multiplications.
+    Reporter's own measurement: Wall time 3.37 s (CPU total 7.57 s).
+  hardware: >-
+    unknown; reporter's version string names "Apple LLVM 8.0.0
+    (clang-800.0.42.1)" (a macOS build) but no CPU model, core count, or
+    BLAS backend is given.
+affected_operations: [numpy.matmul]
+input_regime:
+  dtypes: [complex128]
+  sizes: [2048, 4096, 2048]
+  notes: >-
+    sizes are (m, n, k) for A(m,n) @ B(n,k), i.e. one large, roughly
+    out-of-cache matmul on numpy 1.13.1, not a sweep; seberg speculates in
+    thread that array size / lack of blocked iteration is the relevant
+    variable for how large the win is. A second, smaller and much noisier
+    repro on numpy 1.16.2 (same reporter, working around a hang bug) used
+    the same (2048,4096,2048) shapes but only measured a 1.09x wall-time
+    gap (2.28 s vs 2.09 s), so the win the reporter observed is not stable
+    across the two numpy versions they tried it on. A separate, related
+    complaint later folded into this thread (rgommers copying comments from
+    pj1989, gh-1710) uses different shapes, (200,1000)x(1000,50000) and
+    (200,100)x(100,5000), but tests a different thing: A.real @ B where A
+    is a strided view into a complex128 array, not the 3-multiply trick.
+status: not_reproduced
+license_review: clean
+reproducer: benchmarks/historical/opp_000011_complex_matmul.py
+current_numpy_result:
+  verified_speedup: 1.28
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5 (contended box: cpu_busy_before
+    0.50, cpu_busy_after 0.28): the gauss3 3-multiply candidate LOSES to
+    stock numpy.matmul on every practically-sized case tested, complex128
+    and complex64 alike, from 256^3 up to 4096^3 and on the reporter's own
+    (2048,4096,2048) shape. Worst loss: square_256_complex64 at 0.24x
+    (baseline 350 us vs gauss3 1.47 ms, gauss3 ~4.2x slower). Best
+    (still-losing) result at practical scale: square_4096 at 0.77-0.78x
+    for both dtypes (complex128 baseline 826 ms vs gauss3 1068 ms;
+    complex64 baseline 417 ms vs gauss3 534 ms). The reporter's exact
+    shape, (2048,4096,2048) complex128, gives 0.62x (baseline 207.6 ms vs
+    gauss3 335.2 ms) against a claimed 2.21x. Only two tiny 64x64x64
+    edge-case inputs edge above 1.0x: magnitude-skew (real 1e4x imag) at
+    1.28x (64.6 us vs 50.6 us) and near-zero (~1e-8) at 1.03x (51.4 us vs
+    49.7 us); both are microsecond-scale and on a contended box, so they
+    read as noise rather than a real win. All 12 cases correct=true, no
+    correctness failures at any magnitude regime tested. This confirms the
+    thread's own suspicion (notes: the reporter's second measurement on
+    numpy 1.16.2 already shrank 2.21x to ~1.09x): modern numpy's BLAS-
+    backed complex matmul has outrun the 3-multiply trick, which now costs
+    more (3 real BLAS calls + O(mn+nk+mk) elementwise combine) than it
+    saves. Evidence: benchmarks/results/OPP-000011/8f8198d9abab.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: medium
+maintainer_objections:
+  - author: mattip
+    quote: "Does this replicate on a more recent numpy? `matmul` was rewritten as a gufunc."
+  - author: seberg
+    quote: "Hmmm, the multiplication goes the `DOUBLE_matmul_inner_noblas` route here, although I am still a bit surprised it is so massively slower, but I suppose I cannot get much worse with iteration order/cache misses (note that copy+BLAS call is fast). OTOH, a factor of 10 faster for blas is not odd, and with all the bad memory order it could be substantially more I suppose. I suppose the `einsum` version of it is quite a lot faster (maybe due to hand SIMD usage)."
+  - author: rgommers
+    quote: "I agree with @seberg that this isn't all that surprising because of the non-contiguous memory layout of the view that `.real` gives, it makes sense that a `.real.copy()` is faster. Could be optimized, but maybe a good first step is adding a note to the `matmul` docstring."
+  - author: seberg
+    quote: "I would guess that the relevant code change is probably array size. NumPy doesn't have blocked iteration, so if you have out-of-cache sized arrays that makes a massive difference?"
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000004]
+notes:
+  - >-
+    No maintainer directly answered the reporter's original question ("Is
+    there a design-related reason for that or I can try to contribute it?")
+    about the 3-multiply trick itself; mattip's opening reply instead asked
+    whether the gap still replicates after matmul's gufunc rewrite, and that
+    question was never answered in the thread as retrieved, so it is
+    unknown whether current numpy still shows anything close to 2.21x.
+  - >-
+    The reporter's own second measurement (numpy 1.16.2, worked around a
+    hang bug in that version) shrank the gap from 2.21x to about 1.09x on
+    identical shapes, which is itself evidence the win is version- and
+    BLAS-path-sensitive rather than a stable constant; treat 2.21x as an
+    upper bound from one older numpy build, not a current number.
+  - >-
+    The reporter's own correctness check on the original run was
+    np.linalg.norm(C - A@B) / np.linalg.norm(A@B) = 3.97e-16, i.e.
+    double-precision-epsilon-level relative error for that one input; the
+    3-multiply/Karatsuba reformulation is a known technique with a real,
+    if usually small, larger rounding-error profile than direct complex
+    multiply-accumulate (extra subtraction in C3-C1-C2 can lose relative
+    precision when Re and Im parts differ greatly in magnitude), so
+    correctness validation needs an error sweep across magnitude ratios and
+    special values, not just one random-uniform input.
+  - >-
+    The transparent fast-path shape PyOverdrive could ship: intercept
+    numpy.matmul (and @) when both operands are ndarrays of dtype
+    complex128 or complex64 with ndim >= 2 and the contracted dimension
+    large enough that the extra O(mn+nk+mk) real adds are cheap relative to
+    three BLAS calls versus the stock path's BLAS-backed complex matmul
+    (predicate: dtype in {complex64, complex128}, min(m,n,k) above a
+    calibrated threshold); route to C1/C2/C3 decomposition, three real
+    dgemm/sgemm calls, and the final combine. Semantics differ from stock:
+    NOT bit-identical (different summation order and an extra
+    subtraction), so acceptance criteria must be a relative-error bound
+    (informed by the reporter's 3.97e-16 single-sample number) rather than
+    OPP-000007's bit-identical bar, and results need to be checked against
+    NaN/Inf/overflow inputs where the C3-C1-C2 cancellation could behave
+    differently from a direct complex multiply.
+  - >-
+    Related_opportunities includes OPP-000004 (blocked transpose copy) on a
+    thin thread: seberg's closing comment in this same thread ties the slow
+    case to numpy lacking blocked/cache-tiled iteration for large
+    out-of-cache arrays, which is the same memory-layout theme OPP-000004
+    is scoped around; this is an analyst-judgment link, not something either
+    thread states directly.

@@ -1,0 +1,163 @@
+id: OPP-000027
+title: "A.dot(B) 10-50x slower when A is real and B is complex than every other real/complex pairing of the same product"
+sources:
+  - url: https://github.com/numpy/numpy/issues/10468
+    repository: numpy/numpy
+    type: issue
+    number: 10468
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T03:32:50+00:00"
+claim:
+  speedup: 43.31
+  baseline: >-
+    Ar.dot(B), a real-by-complex matrix-vector product with Ar =
+    A.real.copy() a (10000, 1000) float64 matrix and B a (1000,) complex128
+    vector, timed by the reporter (dbstein) at 110 ms per loop on their 16
+    core Intel MKL machine and 116 ms per loop on their 2 core macOS
+    Accelerate laptop. The reporter's headline framing is that this case is
+    "very slow ... (10-50x compared to A real/B real, A complex/B complex,
+    and A complex/B real)" and that "The behavior persists across different
+    installations on different operating systems with different BLAS/LAPACK
+    setups."
+  candidate: >-
+    A.dot(B), the identical product with the left operand already complex128
+    (i.e. the result of upcasting Ar to complex before the dot), timed by
+    the reporter at 2.54 ms per loop on the same MKL machine. The 43.31
+    figure is DERIVED, not quoted: 110 / 2.54 = 43.31, from the reporter's
+    own two timings on the MKL box, and it excludes the one-time upcast cost
+    (the reporter never timed the astype; seberg later timed
+    A.astype(np.complex128) at 23.1 ms per loop on a third, different
+    machine). It sits inside the reporter's own 10-50x headline range. The
+    same derivation gives 116 / 18.8 = 6.17x on the reporter's macOS laptop
+    and 23.2 / 5.54 = 4.19x on seberg's machine, so 43.31 is the largest
+    thread-supported ratio for this comparison, not a universal figure.
+  hardware: >-
+    Two machines, both the reporter's (dbstein, 2018-01-25): a "2 core
+    laptop with MAC OSX 10.12.6, python version 2.7.14 (Anaconda), and
+    numpy version 1.14.0 linked against the Accelerate framework" (5.01 /
+    18.8 / 18.8 / 116 ms per loop for real-real, complex-real,
+    complex-complex, real-complex respectively), and a "16 core machine
+    with CentOS 7.4.1708, python version 2.7.14 (Intel Corporation), and
+    numpy version 1.13.3 linked against Intel MKL" (1.29 / 2.41 / 2.54 /
+    110 ms per loop, same order). No CPU model is given for either.
+    seberg's follow-up machine (2018-01-26) is entirely unspecified
+    (2.57 / 5.54 / 5.54 / 23.2 ms per loop, same four cases).
+affected_operations: [numpy.dot]
+input_regime:
+  dtypes: [float64, complex128]
+  sizes: ["(10000, 1000) x (1000,)"]
+  notes: >-
+    Matrix-vector product (GEMV shape) only; no matrix-matrix case was
+    timed in the thread. All three measurement sets cover the same four
+    dtype pairings on the same shapes, and all three agree on the
+    asymmetry: complex.dot(real) (A.dot(Br)) is roughly as fast as the
+    all-complex product (2.41 vs 2.54 ms on the MKL box), while
+    real.dot(complex) (Ar.dot(B)) is the one slow case (110 ms there).
+    So the slow regime is specifically a real left operand with a complex
+    right operand, where the operand that would need upcasting is the
+    large matrix rather than the small vector.
+status: performance_validated
+license_review: pending
+reproducer: benchmarks/historical/opp_000027_dot_real_complex.py
+current_numpy_result:
+  verified_speedup: 43.84
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load): REPRODUCED, and the winning route is NOT the
+    thread's. Upcasting the real operand first (the issue's own
+    suggestion) measures ~1x here (0.88-1.13x: numpy 2.5 already
+    upcasts internally). The win is viewing the complex vector as an
+    interleaved real matrix and doing one real GEMV: 43.84x at 200x100
+    (smoke) and 12.05x at 10000x1000 for real-matrix @ complex-vector.
+    The reverse direction (complex @ real) shows no gap (0.96-1.05x),
+    so any fast path is one-sided. Evidence:
+    benchmarks/results/OPP-000027/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections:
+  - author: seberg
+    date: "2018-01-26"
+    quote: >-
+      I am a bit surprised the casting is that much slower though, sounds
+      like there might be some performance bug, since it also seems like
+      caching can't fully explain it away I think.
+linked_prs: []
+related_opportunities: [OPP-000002]
+notes:
+  - >-
+    SHIPPED (2026-08-24) as dot_mixed_view
+    (src/pyoverdrive/fastpaths/dot_mixed_view.py): dot(A f64 2-D,
+    b complex128 1-D contiguous), A.size >= 20k, all-finite both
+    operands, routed through the view-as-real GEMV (b viewed as (m,2)
+    real, one real matmul via the unpatchable @ operator, result viewed
+    back). 34.9x end-to-end at 200x100 smoke. The finiteness guards are
+    measured necessities, found by the differential battery: stock's
+    complex GEMV multiplies by A's zero imaginary part (0*inf -> NaN in
+    both components) and BLAS's complex multiply mixes components (a
+    lone inf in A became NaN on stock); the clean real route produces
+    neither, so non-finite inputs stay on stock for exact parity.
+  - >-
+    Demand signal is thin in the dump: one maintainer comment (seberg,
+    MEMBER, 2018-01-26), zero reactions, no labels, no linked PRs, and no
+    activity recorded after 2018-01-26, though the issue is still open at
+    retrieval (2026-08-24). Counterweight: the reporter states the behavior
+    "persists across different installations on different operating systems
+    with different BLAS/LAPACK setups", and seberg's independent timings
+    confirm the same slow-case pattern on a third machine.
+  - >-
+    Full derivation table from the thread's verbatim per-loop timings
+    (Ar.dot(Br) / A.dot(Br) / A.dot(B) / Ar.dot(B)). Reporter MKL box:
+    1.29 / 2.41 / 2.54 / 110 ms, so the slow case is 85.27x the real-real
+    product (110 / 1.29) and 43.31x the complex-complex product
+    (110 / 2.54). Reporter macOS Accelerate box: 5.01 / 18.8 / 18.8 /
+    116 ms, so 23.15x real-real and 6.17x complex-complex. seberg's box:
+    2.57 / 5.54 / 5.54 / 23.2 ms, so 9.03x and 4.19x. The reporter's
+    "10-50x" headline is their own summary across pairings and machines,
+    not a single measured ratio.
+  - >-
+    The thread does not diagnose the mechanism beyond seberg's casting
+    observation. seberg's added timings show the pieces of a
+    cast-then-complex-dot route on his machine: A.astype(np.complex128)
+    23.1 ms, Ac[...] = A (assignment into a preallocated complex array)
+    12 ms, complex dot 5.54 ms. On his box astype + dot (28.6 ms) would
+    actually LOSE to the 23.2 ms slow path, while assign + dot (17.5 ms)
+    would win modestly; on the reporter's MKL box even a pessimistic
+    upcast cost plus the 2.54 ms complex dot is several times faster than
+    the 110 ms slow path. The obvious inference (ours, not the thread's)
+    is that numpy is not reaching BLAS at all for real-left-complex-right
+    dot and is instead in a buffered non-BLAS fallback loop, but the
+    thread never establishes this; the Dyno reproducer must profile which
+    it is on current numpy before any fast path is designed.
+  - >-
+    The transparent fast-path shape this record recommends measuring, not
+    the only one: for np.dot with a real float left operand and a complex
+    right operand (the measured slow direction), view the contiguous
+    complex operand's buffer as a real array with a trailing axis of 2
+    (interleaved re/im), run ONE real BLAS product against it (DGEMM on
+    (n, m) x (m, 2) for the thread's matvec case), and view the (n, 2)
+    result as complex128. Same multiplications as the upcast route, no
+    complex arithmetic, no upcast copy of the large matrix, and roughly
+    twice the real-real work, which against the thread's MKL numbers
+    predicts ~2.6 ms vs 110 ms. The fallback candidate is the simpler
+    upcast-then-complex-dot, which the thread itself measures as 43.31x
+    (upcast cost excluded).
+  - >-
+    Correctness risk is rated low because the split-real route performs
+    algebraically identical component arithmetic to the upcast route
+    (real times complex is componentwise scaling); the residual hazards
+    are summation-order differences versus whatever loop stock numpy uses
+    (tolerance-level, same class as any BLAS rerouting), sign-of-zero and
+    NaN/inf propagation patterns when the implicit zero imaginary part is
+    eliminated, mixed-precision pairings (float64 with complex64) whose
+    promotion must match numpy exactly, and non-contiguous complex
+    operands whose buffers cannot be reinterpreted without a copy. All
+    are differential-testable. Implementation risk is medium because
+    np.dot dispatch is core-path interception.
+  - >-
+    Related to OPP-000002 (np.inner ndim>2 routed via tensordot to BLAS)
+    as the same mechanism class: an input regime that BLAS could serve
+    directly but where numpy's dispatch falls back to a slower
+    direct-computation path, fixable by rerouting rather than by new
+    kernels.

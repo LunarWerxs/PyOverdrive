@@ -1,0 +1,340 @@
+{
+  "opp_id": "OPP-000019",
+  "title": "np.matmul(out=) cold-page contention vs prefaulted vs np.dot",
+  "recorded_at": "2026-08-23T09:46:06+00:00",
+  "fingerprint": {
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "machine": "AMD64",
+    "system": "Windows 11",
+    "logical_cores": 32,
+    "python": "3.14.2",
+    "numpy": "2.4.5",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "AVX512BF16",
+      "AVX512BITALG",
+      "AVX512BW",
+      "AVX512CD",
+      "AVX512DQ",
+      "AVX512F",
+      "AVX512IFMA",
+      "AVX512VBMI",
+      "AVX512VBMI2",
+      "AVX512VL",
+      "AVX512VNNI",
+      "AVX512VPOPCNTDQ",
+      "AVX512_CLX",
+      "AVX512_CNL",
+      "AVX512_ICL",
+      "AVX512_SKX",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3",
+      "X86_V4"
+    ],
+    "fingerprint": "8f8198d9abab"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.28612716763005785,
+    "cpu_busy_after": 0.375,
+    "contended": true
+  },
+  "cases": [
+    {
+      "case": "complex64_small_default",
+      "params": {
+        "dtype": "complex64",
+        "batch": 4,
+        "M": 128,
+        "K": 32,
+        "N": 128,
+        "threads": "default"
+      },
+      "baseline": "numpy.matmul_loop(out=cold)",
+      "variants": {
+        "numpy.matmul_loop(out=cold)": {
+          "median_ns": 299255.55555555556,
+          "min_ns": 261838.88888888888,
+          "mean_ns": 293986.41975308646,
+          "mad_ns": 9727.777777777752,
+          "samples": 9,
+          "loops_per_sample": 18,
+          "role": "baseline",
+          "correct": true
+        },
+        "prefaulted": {
+          "median_ns": 315715.0,
+          "min_ns": 257925.0,
+          "mean_ns": 313561.1111111111,
+          "mad_ns": 17925.0,
+          "samples": 9,
+          "loops_per_sample": 20,
+          "correct": true
+        },
+        "dot": {
+          "median_ns": 346153.3333333333,
+          "min_ns": 314013.3333333333,
+          "mean_ns": 347468.14814814815,
+          "mad_ns": 16360.0,
+          "samples": 9,
+          "loops_per_sample": 15,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "prefaulted": 0.9478661310218253,
+        "dot": 0.8645173301491311
+      }
+    },
+    {
+      "case": "float64_small_default",
+      "params": {
+        "dtype": "float64",
+        "batch": 4,
+        "M": 128,
+        "K": 32,
+        "N": 128,
+        "threads": "default"
+      },
+      "baseline": "numpy.matmul_loop(out=cold)",
+      "variants": {
+        "numpy.matmul_loop(out=cold)": {
+          "median_ns": 60379.76190476191,
+          "min_ns": 59413.09523809524,
+          "mean_ns": 61473.14814814815,
+          "mad_ns": 515.4761904761835,
+          "samples": 9,
+          "loops_per_sample": 84,
+          "role": "baseline",
+          "correct": true
+        },
+        "prefaulted": {
+          "median_ns": 62216.049382716046,
+          "min_ns": 61074.07407407407,
+          "mean_ns": 62448.01097393691,
+          "mad_ns": 906.7901234567908,
+          "samples": 9,
+          "loops_per_sample": 162,
+          "correct": true
+        },
+        "dot": {
+          "median_ns": 61351.25,
+          "min_ns": 61150.0,
+          "mean_ns": 61498.194444444445,
+          "mad_ns": 196.25,
+          "samples": 9,
+          "loops_per_sample": 80,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "prefaulted": 0.970485308916701,
+        "dot": 0.984165145857043
+      }
+    },
+    {
+      "case": "complex64_reporter_default",
+      "params": {
+        "dtype": "complex64",
+        "batch": 2,
+        "M": 1024,
+        "K": 32,
+        "N": 1024,
+        "threads": "default"
+      },
+      "baseline": "numpy.matmul_loop(out=cold)",
+      "variants": {
+        "numpy.matmul_loop(out=cold)": {
+          "median_ns": 5346100.0,
+          "min_ns": 4987400.0,
+          "mean_ns": 5551160.0,
+          "mad_ns": 358700.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "prefaulted": {
+          "median_ns": 2788300.0,
+          "min_ns": 2673950.0,
+          "mean_ns": 2759860.0,
+          "mad_ns": 44350.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        },
+        "dot": {
+          "median_ns": 3372750.0,
+          "min_ns": 3272650.0,
+          "mean_ns": 3372070.0,
+          "mad_ns": 18300.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "prefaulted": 1.9173331420578847,
+        "dot": 1.58508635386554
+      }
+    },
+    {
+      "case": "float64_reporter_default",
+      "params": {
+        "dtype": "float64",
+        "batch": 2,
+        "M": 1024,
+        "K": 32,
+        "N": 1024,
+        "threads": "default"
+      },
+      "baseline": "numpy.matmul_loop(out=cold)",
+      "variants": {
+        "numpy.matmul_loop(out=cold)": {
+          "median_ns": 4305550.0,
+          "min_ns": 4168650.0,
+          "mean_ns": 4307710.0,
+          "mad_ns": 77350.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "role": "baseline",
+          "correct": true
+        },
+        "prefaulted": {
+          "median_ns": 2627800.0,
+          "min_ns": 2466133.3333333335,
+          "mean_ns": 2599746.666666667,
+          "mad_ns": 41833.33333333349,
+          "samples": 5,
+          "loops_per_sample": 3,
+          "correct": true
+        },
+        "dot": {
+          "median_ns": 3701950.0,
+          "min_ns": 3405350.0,
+          "mean_ns": 4190300.0,
+          "mad_ns": 296600.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "prefaulted": 1.6384618311895882,
+        "dot": 1.1630492037979983
+      }
+    },
+    {
+      "case": "complex64_large_batch_default",
+      "params": {
+        "dtype": "complex64",
+        "batch": 8,
+        "M": 1024,
+        "K": 32,
+        "N": 1024,
+        "threads": "default"
+      },
+      "baseline": "numpy.matmul_loop(out=cold)",
+      "variants": {
+        "numpy.matmul_loop(out=cold)": {
+          "median_ns": 18501400.0,
+          "min_ns": 17882000.0,
+          "mean_ns": 18694920.0,
+          "mad_ns": 603900.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "prefaulted": {
+          "median_ns": 10342000.0,
+          "min_ns": 10149700.0,
+          "mean_ns": 10446100.0,
+          "mad_ns": 192300.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        },
+        "dot": {
+          "median_ns": 15609600.0,
+          "min_ns": 13867900.0,
+          "mean_ns": 16005160.0,
+          "mad_ns": 1581700.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "prefaulted": 1.7889576484239025,
+        "dot": 1.1852577900779009
+      }
+    },
+    {
+      "case": "float64_large_batch_default",
+      "params": {
+        "dtype": "float64",
+        "batch": 8,
+        "M": 1024,
+        "K": 32,
+        "N": 1024,
+        "threads": "default"
+      },
+      "baseline": "numpy.matmul_loop(out=cold)",
+      "variants": {
+        "numpy.matmul_loop(out=cold)": {
+          "median_ns": 17339200.0,
+          "min_ns": 16492300.0,
+          "mean_ns": 17444560.0,
+          "mad_ns": 562700.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "prefaulted": {
+          "median_ns": 9731700.0,
+          "min_ns": 9239000.0,
+          "mean_ns": 10009340.0,
+          "mad_ns": 379000.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        },
+        "dot": {
+          "median_ns": 13618700.0,
+          "min_ns": 13156200.0,
+          "mean_ns": 14733220.0,
+          "mad_ns": 462500.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "prefaulted": 1.7817236454062497,
+        "dot": 1.2731905394788048
+      }
+    }
+  ]
+}

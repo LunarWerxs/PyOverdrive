@@ -1,0 +1,35 @@
+id: OPP-000000
+title: Gearbox dispatch overhead (internal gate metric, not an external lead)
+sources: []
+claim:
+  speedup: null
+  baseline: direct stock NumPy call
+  candidate: same call routed through the Gearbox wrapper (no-op fast path)
+  hardware: n/a
+affected_operations: [numpy.positive]
+input_regime:
+  dtypes: [float64]
+  sizes: [8, 1024, 1000000]
+  notes: measures the fixed per-call dispatch tax on both routes (path taken,
+    fallback taken); relevant bound for any fast path on microsecond-scale ops
+status: monitored
+license_review: clean
+reproducer: benchmarks/historical/opp_000000_noop_overhead.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: []
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections: []
+linked_prs: []
+linked_commits: []
+related_opportunities: []
+notes:
+  - >-
+    Phase 3 gate says dispatch overhead must not erase gains; this record is
+    the standing measurement of that overhead.
+  - >-
+    Found during Phase 0: a fast path that calls its own public name recurses
+    into the wrapper; the fallback catch masked it as a silent 600x slowdown.
+    Fast paths must call GEARBOX.stock_fn(op). Covered by unit test now.

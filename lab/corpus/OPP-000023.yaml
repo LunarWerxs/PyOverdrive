@@ -1,0 +1,157 @@
+id: OPP-000023
+title: "np.isin on StringDType falls back to the slow object-array path, ~144x slower than the U-dtype sorting path"
+sources:
+  - url: https://github.com/numpy/numpy/issues/32161
+    repository: numpy/numpy
+    type: issue
+    number: 32161
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T03:32:43Z"
+claim:
+  speedup: 143.53
+  baseline: >
+    np.isin(a, a) with a = np.array(['abcd'*5, 'defg'*5, 'abhoj'*6] * 10**4,
+    dtype='T'), i.e. a 30000-element StringDType array holding only 3
+    distinct strings, tested against itself; the reporter's own script times
+    it with timeit at number=1 and prints 2.9416205829475075 s. The 143.53
+    figure is DERIVED, not quoted from the thread; the derivation is
+    2.9416205829475075 / 0.020494583994150162 = 143.53. The thread's own
+    framing of the gap is qualitative only ("So `StringDType` is
+    orders-of-magnitude slower."); no explicit ratio appears in the dump.
+  candidate: >
+    the identical call after casting both arguments to fixed-width unicode,
+    np.isin(a.astype('U30'), a.astype('U30')), which takes the sorting path
+    instead of the hasobject fallback; the same script prints
+    0.020494583994150162 s for it. The astype('U30') casts run inside the
+    timed lambda, so the candidate timing already pays the conversion cost;
+    the sort-path advantage net of conversion is understated if anything.
+  hardware: >
+    unknown; the reporter says only "On my laptop, this outputs". No CPU,
+    OS, RAM, or numpy version appears anywhere in the dump.
+affected_operations: [numpy.isin]
+input_regime:
+  dtypes: [StringDType]
+  sizes: [30000]
+  notes: >
+    The one measured configuration is a 30000-element 1-D StringDType array
+    (3 distinct strings of lengths 20, 20, and 30, tiled 10**4 times) passed
+    as BOTH element and test_elements arguments (np.isin(a, a)), so the
+    slow-path work scales with the full 30000-element test array even though
+    unique cardinality is 3. The comparison dtype is fixed-width 'U30'. No
+    other size, cardinality, string length, or disjoint element/test
+    configuration is measured in the thread.
+status: performance_validated
+license_review: pending
+reproducer: benchmarks/historical/opp_000023_isin_stringdtype.py
+current_numpy_result:
+  verified_speedup: 2318.54
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0% load): REPRODUCED and the claim was conservative. At the
+    reporter's own shape (n=30000, cardinality 3, self-isin) the
+    U-cast route measures 577.4x and a plain Python hashset-membership
+    candidate 2318.5x (8.34 s -> 3.60 ms). The hashset dominates every
+    swept regime: 208-299x at n=3000 across cardinalities, 12.8x on the
+    disjoint small-needle case, 90.5x on 2000-char strings (where the
+    U-cast route collapses to 2.7x because the fixed-width copy explodes).
+    Evidence: benchmarks/results/OPP-000023/9bbe7063c555.json.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections: []
+linked_prs:
+  - https://github.com/numpy/numpy/pull/32217
+linked_commits: []
+related_opportunities: []
+notes:
+  - >-
+    GUARD HARDENED (2026-08-24, post-ship): numpy 2.5 fixed
+    np.strings.str_len's NUL handling (pure-NUL strings now report their
+    true length instead of 0) WITHOUT fixing the isin miss itself, which
+    silently blinded the shipped 2.4-era pure-NUL detector - on 2.5.2
+    the predicate accepted pure-NUL inputs and the hash route diverged
+    from stock (True where stock says False; reproduced in a fresh
+    numpy 2.5.2 venv and caught independently by the property net on
+    the Docker Linux leg). The detector is now chosen at import by
+    probing the running numpy against a known-answer array
+    (count-with-np-scalar-needle on 2.5+, zero-len-but-not-empty on
+    2.4.x, a Python scan as the unfoolable fallback). Extra upstream
+    facet found while fixing: a PYTHON "\x00" scalar C-truncates to ""
+    inside np.strings.count/replace/strip on BOTH 2.4.5 and 2.5.2,
+    while a 0-d StringDType array needle works - drafted for upstream in
+    docs/research/upstream-nul-stringdtype.md.
+  - >-
+    SHIPPED (2026-08-24) as isin_string_hash
+    (src/pyoverdrive/fastpaths/isin_string_hash.py): both operands plain
+    1-D default StringDType (na_object-carrying dtypes refused), kind
+    absent, combined size >= 300, routed to a Python hash set - exact
+    string equality, bit-identical, invert/assume_unique accepted.
+    End-to-end 240x at n=3000 card-3 self-isin even at smoke size.
+    DISCOVERED IN TESTING, guarded and recorded: stock numpy 2.4.5 isin
+    MISSES strings made only of NUL characters even when present
+    (embedded NULs match fine; np.strings.str_len reports 0 for pure-NUL
+    strings, the same C-truncation likely causing it) - the fast path
+    would answer correctly, so pure-NUL inputs are refused to stay
+    bug-for-bug faithful while stock's behavior is in flux. Upstream
+    report candidate.
+  - >
+    maintainer_objections is empty because the thread has zero comments in
+    the dump, not because objections were filtered out. The reporter
+    ngoldbaum carries author_association MEMBER, so the diagnosis and the
+    proposed fixes are themselves maintainer-sourced even with no replies.
+    ikrommyd is @-mentioned in the body but had not responded as of
+    retrieval.
+  - >
+    Root cause per the issue body: "both object arrays and stringdtype fall
+    back to the `hasobject` path in the `_isin` helper" (the body links
+    numpy/lib/_arraysetops_impl.py lines 910-926 at commit 30483388), and
+    "This slow path is much much slower than the sorting path." The
+    reporter calls it "more-or-less the same issue as"
+    numpy/numpy#14997, the long-standing object-array isin complaint. The
+    O(n*m) characterization used in this record's lead is derived from the
+    shape of that linked fallback (a per-test-element comparison loop over
+    the full element array); the thread itself does not use big-O language.
+  - >
+    The reporter proposes three upstream routes in the body: (1) "an easy
+    fix ... to change the predicate in `_is_in` to allow stringdtype to use
+    the sorting path if it has no `na_object` or `na_object` is a string",
+    with "nan-like or None-like missing data" still falling back to the
+    slow object path; (2) "implement a hash-based `isin` for stringdtype
+    that uses the existing hash-based unique infrastructure", which he
+    thinks cannot be done for object arrays except perhaps opt-in "via a
+    keyword argument"; (3) borrowing from numpy/numpy#31969, "use
+    HyperLogLog to switch between sorting and hashing to determine set
+    membership with an optimal choice for the dataset's estimated
+    cardinality".
+  - >
+    Upstream is already moving: draft PR numpy/numpy#32217 "ENH: speed up
+    StringDType isin" by ngoldbaum (opened 2026-08-06, still marked draft
+    at its last recorded update 2026-08-20) says "Fixes #32161. Opening as
+    a draft for now while I test it." Before any PyOverdrive ship, check
+    whether the installed numpy already contains the merged fix; this
+    opportunity is likely version-bounded to numpy releases predating that
+    merge, and the Dyno run must record which side of it the measured
+    numpy sits on.
+  - >
+    The transparent fast path this record recommends: intercept np.isin
+    when either argument is StringDType and the dtype instance either has
+    no na_object or has a string na_object (the reporter's own predicate),
+    then route to a semantics-preserving fast membership test - either the
+    sorting path the U cast already reaches, or a hash-set membership pass -
+    returning the same boolean array stock returns. Configured nan-like or
+    None-like na_object must fall back to stock, exactly as the reporter
+    says upstream would have to. Hazards concentrating the correctness
+    risk: na_object equality semantics on the fallback boundary, the
+    invert/assume_unique/kind keyword surface of np.isin passing through
+    unchanged, and a U-cast route needing the max string length first
+    (memory blowup on long-string arrays argues for the hash route
+    instead).
+  - >
+    The measured regime is a best case for any set-based method: extreme
+    low cardinality (3 unique values among 30000) and element ==
+    test_elements. The Dyno reproducer must sweep cardinality (3, ~100,
+    ~n distinct values), element count, string length, and disjoint
+    element/test arrays before the claim number is treated as
+    representative; the 143.53 figure comes from that single
+    low-cardinality self-isin point.

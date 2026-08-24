@@ -1,0 +1,58 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python }}, numpy ${{ matrix.numpy }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, python: "3.12", numpy: "latest" }
+          # the oldest numpy the package claims (pyproject: numpy>=2.0);
+          # if this job breaks, the claim is wrong and the floor moves
+          - { os: ubuntu-latest, python: "3.12", numpy: "==2.0.2" }
+          # the middle numpy line both benchmark boxes actually run; the one
+          # shipped bug this project ever had lived in exactly this kind of
+          # between-floor-and-latest blind spot
+          - { os: ubuntu-latest, python: "3.13", numpy: "==2.4.5" }
+          - { os: ubuntu-latest, python: "3.14", numpy: "latest" }
+          - { os: windows-latest, python: "3.13", numpy: "latest" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: |
+          python -m pip install -e .[dev]
+          if [ "${{ matrix.numpy }}" != "latest" ]; then python -m pip install "numpy${{ matrix.numpy }}"; fi
+        shell: bash
+      - name: Self-check (every fast path vs stock on this runner)
+        run: python -m pyoverdrive --selfcheck
+      - name: Tests
+        run: python -m pytest tests compatibility -q
+
+  wheel:
+    name: wheel builds and installs clean
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build wheel
+        run: |
+          python -m pip install build
+          python -m build --wheel
+      - name: Install wheel into a fresh venv and self-check
+        run: |
+          python -m venv fresh
+          fresh/bin/python -m pip install dist/*.whl
+          cd /tmp
+          $GITHUB_WORKSPACE/fresh/bin/python -m pyoverdrive --selfcheck

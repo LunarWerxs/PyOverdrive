@@ -1,0 +1,748 @@
+{
+  "opp_id": "OPP-000022",
+  "title": "dense multi-kth partition/quantile density cliff vs one full sort",
+  "recorded_at": "2026-08-24T03:51:04+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.0,
+    "cpu_busy_after": 0.0015822784810126667,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "partition_2048x300_spacing20",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          2048,
+          300
+        ],
+        "axis": 0,
+        "kth_spacing": 20,
+        "len_kth": 103,
+        "kth_density": 0.0503
+      },
+      "baseline": "numpy.partition",
+      "variants": {
+        "numpy.partition": {
+          "median_ns": 18183100.0,
+          "min_ns": 18113000.0,
+          "mean_ns": 18206200.0,
+          "mad_ns": 70100.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "full_sort": {
+          "median_ns": 4759750.0,
+          "min_ns": 4730950.0,
+          "mean_ns": 4761820.0,
+          "mad_ns": 26250.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "full_sort": 3.8201796312831555
+      }
+    },
+    {
+      "case": "partition_2048x300_spacing10",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          2048,
+          300
+        ],
+        "axis": 0,
+        "kth_spacing": 10,
+        "len_kth": 205,
+        "kth_density": 0.1001
+      },
+      "baseline": "numpy.partition",
+      "variants": {
+        "numpy.partition": {
+          "median_ns": 20813700.0,
+          "min_ns": 20726200.0,
+          "mean_ns": 20977900.0,
+          "mad_ns": 87500.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "full_sort": {
+          "median_ns": 4695800.0,
+          "min_ns": 4635400.0,
+          "mean_ns": 4687610.0,
+          "mad_ns": 16000.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "full_sort": 4.432407683461817
+      }
+    },
+    {
+      "case": "partition_2048x300_spacing4",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          2048,
+          300
+        ],
+        "axis": 0,
+        "kth_spacing": 4,
+        "len_kth": 512,
+        "kth_density": 0.25
+      },
+      "baseline": "numpy.partition",
+      "variants": {
+        "numpy.partition": {
+          "median_ns": 24650000.0,
+          "min_ns": 24593200.0,
+          "mean_ns": 24771580.0,
+          "mad_ns": 56800.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "full_sort": {
+          "median_ns": 4678900.0,
+          "min_ns": 4581200.0,
+          "mean_ns": 4700470.0,
+          "mad_ns": 57900.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "full_sort": 5.268332300327
+      }
+    },
+    {
+      "case": "partition_2048x300_spacing3",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          2048,
+          300
+        ],
+        "axis": 0,
+        "kth_spacing": 3,
+        "len_kth": 683,
+        "kth_density": 0.3335
+      },
+      "baseline": "numpy.partition",
+      "variants": {
+        "numpy.partition": {
+          "median_ns": 306831000.0,
+          "min_ns": 304886600.0,
+          "mean_ns": 306676080.0,
+          "mad_ns": 517200.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "full_sort": {
+          "median_ns": 4782800.0,
+          "min_ns": 4663650.0,
+          "mean_ns": 4752470.0,
+          "mad_ns": 31800.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "full_sort": 64.15300660700845
+      }
+    },
+    {
+      "case": "partition_2048x300_spacing2",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          2048,
+          300
+        ],
+        "axis": 0,
+        "kth_spacing": 2,
+        "len_kth": 1024,
+        "kth_density": 0.5
+      },
+      "baseline": "numpy.partition",
+      "variants": {
+        "numpy.partition": {
+          "median_ns": 305182300.0,
+          "min_ns": 304793700.0,
+          "mean_ns": 306062220.0,
+          "mad_ns": 388600.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "full_sort": {
+          "median_ns": 4661200.0,
+          "min_ns": 4577650.0,
+          "mean_ns": 4658100.0,
+          "mad_ns": 26750.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "full_sort": 65.47290397322578
+      }
+    },
+    {
+      "case": "partition_2048x300_spacing1",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          2048,
+          300
+        ],
+        "axis": 0,
+        "kth_spacing": 1,
+        "len_kth": 2048,
+        "kth_density": 1.0
+      },
+      "baseline": "numpy.partition",
+      "variants": {
+        "numpy.partition": {
+          "median_ns": 307815100.0,
+          "min_ns": 306468300.0,
+          "mean_ns": 308014200.0,
+          "mad_ns": 636900.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "full_sort": {
+          "median_ns": 4776250.0,
+          "min_ns": 4669050.0,
+          "mean_ns": 4839130.0,
+          "mad_ns": 96300.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "full_sort": 64.44702433917823
+      }
+    },
+    {
+      "case": "partition_scaling_1024x300_spacing2",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          1024,
+          300
+        ],
+        "axis": 0,
+        "kth_spacing": 2,
+        "len_kth": 512
+      },
+      "baseline": "numpy.partition",
+      "variants": {
+        "numpy.partition": {
+          "median_ns": 82834800.0,
+          "min_ns": 82803000.0,
+          "mean_ns": 82858720.0,
+          "mad_ns": 31800.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "full_sort": {
+          "median_ns": 2236300.0,
+          "min_ns": 2172400.0,
+          "mean_ns": 2234740.0,
+          "mad_ns": 41400.0,
+          "samples": 5,
+          "loops_per_sample": 3,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "full_sort": 37.04100523185619
+      }
+    },
+    {
+      "case": "partition_scaling_4096x300_spacing2",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          4096,
+          300
+        ],
+        "axis": 0,
+        "kth_spacing": 2,
+        "len_kth": 2048
+      },
+      "baseline": "numpy.partition",
+      "variants": {
+        "numpy.partition": {
+          "median_ns": 1165184100.0,
+          "min_ns": 1162210800.0,
+          "mean_ns": 1164868233.3333333,
+          "mad_ns": 2025700.0,
+          "samples": 3,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "full_sort": {
+          "median_ns": 11860400.0,
+          "min_ns": 11713400.0,
+          "mean_ns": 11831533.333333334,
+          "mad_ns": 60400.0,
+          "samples": 3,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "full_sort": 98.24155171832317
+      }
+    },
+    {
+      "case": "partition_scaling_8192x300_spacing2",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          8192,
+          300
+        ],
+        "axis": 0,
+        "kth_spacing": 2,
+        "len_kth": 4096
+      },
+      "baseline": "numpy.partition",
+      "variants": {
+        "numpy.partition": {
+          "median_ns": 4543805200.0,
+          "min_ns": 4537226000.0,
+          "mean_ns": 4543749933.333333,
+          "mad_ns": 6413400.0,
+          "samples": 3,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "full_sort": {
+          "median_ns": 26206300.0,
+          "min_ns": 26202000.0,
+          "mean_ns": 26205300.0,
+          "mad_ns": 1300.0,
+          "samples": 3,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "full_sort": 173.38598733892232
+      }
+    },
+    {
+      "case": "quantile_300x2048_nq102",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          300,
+          2048
+        ],
+        "axis": -1,
+        "method": "linear",
+        "nq": 102,
+        "nq_over_m": 0.05
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 18622400.0,
+          "min_ns": 18596300.0,
+          "mean_ns": 18659380.0,
+          "mad_ns": 26100.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_exact_lerp": {
+          "median_ns": 4374050.0,
+          "min_ns": 4311750.0,
+          "mean_ns": 5150030.0,
+          "mad_ns": 46850.0,
+          "samples": 5,
+          "loops_per_sample": 2,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_exact_lerp": 4.257473051291138
+      }
+    },
+    {
+      "case": "quantile_300x2048_nq205",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          300,
+          2048
+        ],
+        "axis": -1,
+        "method": "linear",
+        "nq": 205,
+        "nq_over_m": 0.1
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 23241000.0,
+          "min_ns": 22851500.0,
+          "mean_ns": 23333660.0,
+          "mad_ns": 232800.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_exact_lerp": {
+          "median_ns": 4993100.0,
+          "min_ns": 4949600.0,
+          "mean_ns": 5035840.0,
+          "mad_ns": 43500.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_exact_lerp": 4.654623380264765
+      }
+    },
+    {
+      "case": "quantile_300x2048_nq410",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          300,
+          2048
+        ],
+        "axis": -1,
+        "method": "linear",
+        "nq": 410,
+        "nq_over_m": 0.2
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 28038600.0,
+          "min_ns": 27713300.0,
+          "mean_ns": 27980420.0,
+          "mad_ns": 127100.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_exact_lerp": {
+          "median_ns": 6245500.0,
+          "min_ns": 6151700.0,
+          "mean_ns": 6218860.0,
+          "mad_ns": 35700.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_exact_lerp": 4.489408374029301
+      }
+    },
+    {
+      "case": "quantile_300x2048_nq492",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          300,
+          2048
+        ],
+        "axis": -1,
+        "method": "linear",
+        "nq": 492,
+        "nq_over_m": 0.24
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 42905800.0,
+          "min_ns": 42621700.0,
+          "mean_ns": 42999840.0,
+          "mad_ns": 69300.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_exact_lerp": {
+          "median_ns": 7000800.0,
+          "min_ns": 6813400.0,
+          "mean_ns": 6960200.0,
+          "mad_ns": 26900.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_exact_lerp": 6.1286995771911785
+      }
+    },
+    {
+      "case": "quantile_300x2048_nq512",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          300,
+          2048
+        ],
+        "axis": -1,
+        "method": "linear",
+        "nq": 512,
+        "nq_over_m": 0.25
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 225336300.0,
+          "min_ns": 224532400.0,
+          "mean_ns": 225311840.0,
+          "mad_ns": 70500.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_exact_lerp": {
+          "median_ns": 6524900.0,
+          "min_ns": 6351500.0,
+          "mean_ns": 6491740.0,
+          "mad_ns": 33600.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_exact_lerp": 34.53482811997119
+      }
+    },
+    {
+      "case": "quantile_300x2048_nq614",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          300,
+          2048
+        ],
+        "axis": -1,
+        "method": "linear",
+        "nq": 614,
+        "nq_over_m": 0.3
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 310330400.0,
+          "min_ns": 308048900.0,
+          "mean_ns": 309529920.0,
+          "mad_ns": 136100.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_exact_lerp": {
+          "median_ns": 7013600.0,
+          "min_ns": 6898300.0,
+          "mean_ns": 7005800.0,
+          "mad_ns": 27100.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_exact_lerp": 44.24694878521729
+      }
+    },
+    {
+      "case": "quantile_300x2048_nq1024",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          300,
+          2048
+        ],
+        "axis": -1,
+        "method": "linear",
+        "nq": 1024,
+        "nq_over_m": 0.5
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 312802100.0,
+          "min_ns": 310151300.0,
+          "mean_ns": 314189780.0,
+          "mad_ns": 1572300.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_exact_lerp": {
+          "median_ns": 8960900.0,
+          "min_ns": 8798900.0,
+          "mean_ns": 9153080.0,
+          "mad_ns": 162000.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_exact_lerp": 34.907442332801395
+      }
+    },
+    {
+      "case": "quantile_nan_300x2048_nq512",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          300,
+          2048
+        ],
+        "axis": -1,
+        "method": "linear",
+        "nq": 512,
+        "nq_over_m": 0.25,
+        "input": "nan"
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 224991700.0,
+          "min_ns": 224177800.0,
+          "mean_ns": 225315033.33333334,
+          "mad_ns": 813900.0,
+          "samples": 3,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_exact_lerp": {
+          "median_ns": 6685300.0,
+          "min_ns": 6613500.0,
+          "mean_ns": 6662400.0,
+          "mad_ns": 3100.0,
+          "samples": 3,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_exact_lerp": 33.65469014105575
+      }
+    },
+    {
+      "case": "quantile_dups_300x2048_nq512",
+      "params": {
+        "dtype": "float64",
+        "shape": [
+          300,
+          2048
+        ],
+        "axis": -1,
+        "method": "linear",
+        "nq": 512,
+        "nq_over_m": 0.25,
+        "input": "dups"
+      },
+      "baseline": "numpy.quantile",
+      "variants": {
+        "numpy.quantile": {
+          "median_ns": 208396900.0,
+          "min_ns": 208183500.0,
+          "mean_ns": 208362833.33333334,
+          "mad_ns": 111200.0,
+          "samples": 3,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        },
+        "sort_exact_lerp": {
+          "median_ns": 6272400.0,
+          "min_ns": 6233500.0,
+          "mean_ns": 6364700.0,
+          "mad_ns": 38900.0,
+          "samples": 3,
+          "loops_per_sample": 1,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sort_exact_lerp": 33.22442765129775
+      }
+    }
+  ]
+}

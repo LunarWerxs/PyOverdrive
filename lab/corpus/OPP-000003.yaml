@@ -1,0 +1,66 @@
+id: OPP-000003
+title: ufunc.at (np.add.at) reported 10-25x slower than alternatives for grouped/indexed accumulation
+sources:
+  - url: https://github.com/numpy/numpy/issues/5922
+    repository: numpy/numpy
+    type: issue
+    number: 5922
+    state_at_ingestion: closed
+    retrieved_at: 2026-08-23T08:01:21+00:00
+  - url: https://github.com/numpy/numpy/issues/11156
+    repository: numpy/numpy
+    type: issue
+    number: 11156
+    state_at_ingestion: closed
+    retrieved_at: 2026-08-23T08:01:23+00:00
+claim:
+  speedup: 25.0
+  baseline: np.add.at(out, idx, vals) for grouped/indexed accumulation (also generalized to ufunc.at for min, max, prod, any, all, mean, std, var via sort-split-loop comparisons)
+  candidate: np.bincount(idx, weights=vals) and hand-vectorized accumarray-style alternatives (numpy-groupies); a maintainer (mhvk) separately measured np.bincount roughly 60x faster than np.add.at on a 1e5-element case, and nschloe's pybind11 extension (fastfunc) measured about 40x faster than np.add.at
+  hardware: unknown (claims span 2015-2023 across multiple unspecified machines)
+affected_operations: [numpy.ufunc.at, numpy.add.at]
+input_regime:
+  dtypes: [float64, int64]
+  sizes: [100000]
+  notes: grouped/indexed accumulation where index cardinality (number of distinct groups) is much smaller than n, e.g. 100000 indices drawn uniformly from [0, 1000); slowdown is attributed to per-element buffered casting/iteration in ufunc.at's generic fancy-indexing machinery rather than the normal bulk-buffer ufunc inner loop, and worsens further when dtype casting is required (e.g. int weights against a float output) or when indices are multi-dimensional
+status: not_reproduced
+license_review: clean
+reproducer: benchmarks/historical/opp_000003_ufunc_at.py
+current_numpy_result:
+  verified_speedup: 1.0
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23 on numpy 2.4.5: np.add.at is at parity with
+    bincount across n in {1e4,1e5,1e6} x k in {10,1e3,1e5} (bincount 0.86x to
+    1.21x). The 2015-2018 claim is stale; upstream PR #23136 (2023) fixed it.
+    Evidence: benchmarks/results/OPP-000003/8f8198d9abab.json. Residual gaps
+    tracked upstream in numpy/numpy#23176 (multi-dim indices, casting paths)
+    remain unmeasured here.
+main_branch_result: null
+correctness_risk: unknown
+implementation_risk: unknown
+maintainer_objections:
+  - author: jaimefrio
+    quote: "It's what you pay for flexibility: bincount only does addition over 1D np.intp indices and np.double values, while ufunc.at works on multidimensional indices, any dtype, and almost any ufunc."
+  - author: jaimefrio
+    quote: "In all its generality, there's no easy way out of the current slowness of ufunc.at."
+  - author: seberg
+    quote: "I think it is silly to expect it to be as fast as bincount. Bincount is pretty specialized and I think even limited to contiguous arrays."
+  - author: seberg
+    quote: "I don't think doing this is impossibly complicated, but doing it does require quite a bit of time and spare brain cycles, which unfortunately a lot of us are notoriously short on."
+  - author: mattip
+    quote: "Only if things are limited to int64 data with no overflow or divide-by-0 handling and no broadcasting."
+    context: on the fastfunc 40x comparison, noting the narrower semantics behind that number
+linked_prs:
+  - https://github.com/mattip/numpy/pull/72
+  - https://github.com/numpy/numpy/pull/22889
+  - https://github.com/numpy/numpy/pull/23136
+  - https://github.com/numpy/numpy/pull/22907
+linked_commits: []
+related_opportunities: []
+notes:
+  - "PR numpy/numpy#23136 (create and use indexed inner loops) merged and closed both #5922 and #11156 on 2023-02-08; this is the fix the community had been asking for since 2015."
+  - "nschloe re-ran the benchmark right after the fix landed (comment on #5922, 2023-02-08) and reported add.at leveling off to match bincount at large n, i.e. becoming memory-bound rather than iterator-bound; seberg called this expected but noted there is still additional overhead at smaller n."
+  - "Installed venv numpy is 2.4.5, well after the #23136 fix, so the original 2015-2018 slowdown numbers (10-60x) are very unlikely to hold on current NumPy; the reproducer exists to measure the actual current gap, if any, especially at small/medium n and small k where per-call overhead could still dominate."
+  - "Follow-up issue numpy/numpy#23176 (make ufunc.at faster for more cases) remains open, implying the 2023 fix did not cover every case (likely multi-dimensional indices or non-trivial casting)."
+  - "numpy-groupies (d1manson, ml31415) and fastfunc (nschloe) are external packages built specifically to route around slow ufunc.at; their continued existence and adoption is one signal of real-world demand for fast grouped accumulation."

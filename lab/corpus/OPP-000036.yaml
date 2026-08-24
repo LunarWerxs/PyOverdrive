@@ -1,0 +1,200 @@
+id: OPP-000036
+title: "numpy.isin/numpy.in1d always take the O(n*m) broadcast-equality path on object-dtype arrays, ~100-150x slower than a Python set membership test"
+sources:
+  - url: https://github.com/numpy/numpy/issues/14997
+    repository: numpy/numpy
+    type: issue
+    number: 14997
+    state_at_ingestion: open
+    retrieved_at: "2026-08-24T12:00:00Z"
+claim:
+  speedup: 100.0
+  baseline: >-
+    np.isin(arr1, arr2) with arr1 = np.arange(1000000, dtype=object) and
+    arr2 = np.array([-1]*1000 + [0], dtype=object) (1001 elements, 2
+    distinct values), timed with time.time() around the call in the issue
+    body. The reporter states only "This will take around 10/15 seconds"
+    (a prose estimate, not a printed timeit/time.time() figure captured in
+    the dump). A code comment on the same line adds a second, larger data
+    point at 10x the arr2 length: "# Increasing to 10000 slows to ~120
+    seconds" (arr2 = 1001 -> 10001 elements, still 2 distinct values).
+  candidate: >-
+    np.isin(arr1, arr3) with arr3 = np.array([n for n in set(arr2)],
+    dtype=object), i.e. arr2 deduplicated through a Python set before the
+    isin call. The reporter states "This will take no longer than ~0.1
+    seconds, regardless of how large arr2 is" (also prose, not a printed
+    figure). The 3-way speedup claim here is DERIVED from the reporter's
+    own pair of estimates: low end 10 / 0.1 = 100, high end 15 / 0.1 = 150;
+    100.0 (the conservative low end) is recorded as claim.speedup. The
+    auxiliary 10000-length data point gives a further DERIVED ratio of
+    120 / 0.1 = 1200, not used as the headline number because it is the
+    comment aside rather than the reproducing example's primary pair.
+  hardware: >-
+    unknown; the issue body gives no CPU, OS, RAM, Python, or numpy version
+    anywhere in the dump. The reporter says only "Numpy is lacking an
+    optimization" with no environment details.
+affected_operations: [numpy.isin, numpy.in1d]
+input_regime:
+  dtypes: [object]
+  sizes: [1000000, 1001, 10001]
+  notes: >-
+    Measured concretely only for arr1 = np.arange(1000000, dtype=object)
+    against arr2 in {1001, 10001} elements, both built as
+    [-1]*N + [0] (exactly 2 distinct values, -1 and 0), object dtype
+    throughout. The candidate's "regardless of how large arr2 is" framing
+    is confounded by this specific example: because arr2 always contains
+    only 2 distinct values, set(arr2) always collapses arr3 to length 2
+    regardless of arr2's raw length, so growing arr2 from 1001 to 10001
+    elements does not grow the candidate's actual working set at all. The
+    thread does not test a case where arr2's raw length AND its distinct-
+    value cardinality both grow, so the size-invariance claim is
+    unverified for high-cardinality arr2.
+    The issue body also states numpy's general in1d size-relationship
+    condition: "they meet a specific size relationship (namely,
+    len(ar2) < 10 * len(ar1) ** 0.145)" triggers the same O(n*m) path
+    independent of dtype. For the reporter's own arr1 (len 1,000,000)
+    this evaluates to 10 * 1000000**0.145 = 10 * 10**(6*0.145) =
+    10 * 10**0.87 ~= 10 * 7.413 = 74.13, i.e. len(ar2) < ~74.13. Both of
+    the reporter's arr2 sizes (1001 and 10001) exceed that threshold, so
+    in this example it is the object-dtype OR-clause alone, not the size-
+    relationship clause, that forces the slow path; on non-object dtypes
+    the same O(n*m) path would trigger separately whenever ar2 is smaller
+    than ~74 elements relative to a million-element ar1.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000036_isin_object.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555]
+  detail: >
+    Full Dyno run 2026-08-24, idle Intel box (fp 9bbe7063c555, numpy
+    2.5.2, 0-1% load): REPRODUCED far above the ~100x claim at scale:
+    the raw set route hits 457x (strings) / 309x (ints) at
+    30_000 x 3_000, and the route AS SHIPPED (NaN-like scan included)
+    262x / 169x there, 11.2x at 1_000 x 100, 5.8x at 550 combined,
+    2.96x at 300 combined (the floor; 105 combined straddles 1.32x).
+    The same-NaN-object probe measured the predicted identity-vs-
+    equality divergence (hence the scan); distinct NaN objects and
+    int/float/bool cross-type equality agree exactly. Evidence:
+    benchmarks/results/OPP-000036/9bbe7063c555.json, BATCH5-CAL.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections:
+  - author: seberg
+    date: "2019-11-28"
+    quote: >-
+      Not sure, but I feel it would likely be best thing would be to
+      document that sets are preferable for object arrays. I do not think
+      all ordered types are hashable, so "just using a hashtable" has its
+      problem as well.
+linked_prs: []
+linked_commits: []
+related_opportunities: [OPP-000023]
+notes:
+  - >-
+    SHIPPED (2026-08-24) as isin_object_hash
+    (src/pyoverdrive/fastpaths/isin_object_hash.py): 1-D object pairs,
+    combined >= 300; NaN-like objects and unhashable members are
+    answered BY STOCK inside the run (stock_fn, never the dispatcher's
+    warning path), so the result is always stock's. license_review
+    clean: standard hash-set technique.
+  - >-
+    Mechanism, per the issue body: "If numpy detects that either array has
+    an object dtype, or that they meet a specific size relationship
+    (namely, len(ar2) < 10 * len(ar1) ** 0.145), it will proceed to
+    evaluate at a O(n*m) speed, where n = len(arr1) and m = len(arr2)."
+    For object dtype specifically this branch is unconditional (the OR is
+    dtype-triggered regardless of the size relationship above): every
+    object-dtype isin/in1d call takes the O(n*m) broadcast-equality path,
+    "only optimized for dealing with non-object arrays that don't meet a
+    specific size relationship" per the reporter.
+  - >-
+    The transparent fast-path sketch this record proposes: numpy.isin is
+    already a patched op in PyOverdrive for StringDType via
+    isin_string_hash (OPP-000023, SHIPPED, verified_speedup 2318.54x on
+    the Dyno run). This record proposes an object-dtype sibling route:
+    when either operand is a plain object-dtype array, build a Python set
+    from test_elements (ar2) and probe membership of each element (ar1)
+    against that set, returning the same boolean array stock returns -
+    mirroring both the reporter's own reproducer snippet and
+    chaburkland's proposed dispatch code in the second comment.
+  - >-
+    HAZARD (a), hashability: seberg's comment above is explicit that "not
+    all ordered types are hashable, so 'just using a hashtable' has its
+    problem as well." Mitigation: attempt the set(test_elements) build and
+    fall back to stock INTERNALLY (calling stock_fn directly) on TypeError,
+    never by routing back through the dispatcher's warning/reporting path.
+    Separately, chaburkland's own proposed fallback code in the second
+    comment catches ValueError around the set() build ("except ValueError:
+    # Fallback if some element was unhashable"), but CPython's set()
+    raises TypeError, not ValueError, on an unhashable element - the
+    reporter's own mitigation snippet would not actually catch the failure
+    it is written to catch. This record's fallback must catch TypeError.
+  - >-
+    HAZARD (b), NaN semantics: Python's `in` operator on a set/list checks
+    identity before equality, so a single float('nan') object matches
+    itself via `nan_obj in {nan_obj}` (identity short-circuit), while
+    stock's broadcast-equality object path compares via `==`, where
+    nan != nan is False. A set-membership dispatch route therefore
+    diverges from stock on NaN-containing object arrays unless NaN-like
+    objects (x != x) are refused from the fast path or special-cased. The
+    thread does not test or discuss NaN objects at all; this hazard is
+    not thread-sourced and must be probed empirically against stock's
+    ACTUAL object-path semantics in the reproducer before any dispatch
+    threshold is set.
+  - >-
+    HAZARD (c), eq/hash contract violations: an object whose __eq__ and
+    __hash__ disagree (violates the Python data model's hash/eq contract)
+    can silently break set-membership lookups - a value considered equal
+    by __eq__ can land in a different hash bucket and be missed, with no
+    exception raised, differing silently from stock's pairwise ==
+    comparison. This is unguardable in general (no runtime check proves
+    an object's __eq__/__hash__ are consistent), so the route must be
+    scoped to a probe-verified contract (well-behaved builtins and
+    documented-hashable user types) and lean on the differential
+    correctness battery to catch violations in practice rather than a
+    static guarantee.
+  - >-
+    Numeric/bit mode: bit-identical (bool array) output is the target, but
+    only conditional on hazards (b) NaN semantics and (c) eq/hash
+    consistency being guarded per above; without those guards a dispatch
+    route can silently diverge from stock rather than merely being slower.
+  - >-
+    In1d/isin relationship and deprecation status: the issue body states
+    in1d "is used by isin" and the reporter reproduces only against
+    np.isin directly. Nothing in the issue or its three comments mentions
+    numpy.in1d's deprecation status in numpy 2.x; that claim is NOT
+    sourced from this thread and is not asserted here. Both operations are
+    listed in affected_operations solely because the issue title
+    ("isin() and in1d() perform slowly on object arrays") and body name
+    both explicitly as sharing the same underlying _isin/O(n*m) code path.
+  - >-
+    Community follow-up, unquantified: a third comment (randomseed42,
+    2023-09-19, author_association NONE, no numbers given) reports a
+    similar set-based workaround for the string case ("subset =
+    set(arr1).intersection(set(arr2)); result = [item in subset for item
+    in arr1]") being "so much faster than np.isin", with no timing data,
+    3.5 years after the second comment and with zero further replies in
+    the dump.
+  - >-
+    Relation to OPP-000023: that record ships isin_string_hash for plain
+    StringDType arrays (na_object-carrying dtypes refused), a narrower
+    dtype than the generic object dtype this issue is about, but the same
+    hash-set-membership mechanism and the same class of hazards
+    (unhashable/na_object edge cases forcing an internal, non-dispatcher
+    fallback). OPP-000023's notes independently flag a stock NUL-string
+    isin bug found during Dyno testing, underscoring that this hash-route
+    family needs the same differential-battery discipline here.
+  - >-
+    Thread engagement: 3 comments total, opened 2019-11-27 by chaburkland
+    (author_association NONE), open as of state_at_ingestion with no
+    linked PRs anywhere in the dump. Labeled "01 - Enhancement" and
+    "04 - Documentation" and "component: numpy.lib"; the Documentation
+    label is consistent with seberg's suggestion to document the
+    set-preference workaround rather than change code.
+  - >-
+    license_review is pending because no candidate implementation has been
+    drafted or reviewed yet; status is unverified because no Dyno
+    reproducer has been run (current_numpy_result, main_branch_result, and
+    reproducer are all null pending that work).

@@ -1,0 +1,59 @@
+id: OPP-000007
+title: "assume_sorted fast path for set operations (intersect1d, isin) on sorted unique arrays"
+sources:
+  - url: https://github.com/numpy/numpy/issues/27042
+    repository: numpy/numpy
+    type: issue
+    number: 27042
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T08:01:32Z"
+claim:
+  speedup: 1000.0
+  baseline: "np.intersect1d(small, large) on sorted, unique integer arrays (no assume_sorted / assume_unique hint used)"
+  candidate: "sortednp.intersect(small, large), a merge-based intersection specialized for pre-sorted unique arrays"
+  hardware: unknown
+affected_operations: [numpy.intersect1d, numpy.isin, numpy.in1d]
+input_regime:
+  dtypes: [int64]
+  sizes: [100, 1000, 10000, 100000, 1000000, 10000000]
+  notes: >
+    both arrays sorted and unique (set semantics); claim is strongest when one
+    array is much smaller than the other (small-in-large / point-query and
+    OLAP-style filtering shapes) and the operation is repeated many times;
+    author's own microbenchmark sweeps size 10^2 to 10^7 with a shrinking
+    small-array size per outer size.
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000007_sorted_setops.py
+current_numpy_result:
+  verified_speedup: 86.4
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Full Dyno run 2026-08-23, numpy 2.4.5: intersect1d on sorted unique int64
+    reproduces spectacularly. searchsorted-based candidate up to 86.4x
+    (1e6 x 1e5: 564 ms -> 6.5 ms); even just assume_unique=True gives 35-39x
+    at 1e6 (stock intersect1d without it pays np.unique on both inputs, i.e.
+    the OPP-000001 hash-path tax twice). The isin half does NOT reproduce:
+    the searchsorted candidate LOSES to np.isin everywhere (0.13x-0.70x),
+    numpy's existing isin path is already good. Evidence:
+    benchmarks/results/OPP-000007/8f8198d9abab.json.
+    SHIPPED as intersect_sorted (src/pyoverdrive/fastpaths/intersect_sorted.py):
+    O(n) strict-monotonicity precheck per input (0.38 ms at 1e6, ~3% of a
+    sort), sort-based dedup (the unique_sort routine) only for inputs that
+    need it, then searchsorted of the smaller set into the larger; int32/
+    int64/uint32/uint64, bit-identical, 44 differential tests. isin stays on
+    stock. Shipped-path sweep: benchmarks/results/INTERSECT-CAL/.
+    Original fast-path note: an O(n) is-strictly-increasing precheck (~0.5 ms at 1e6)
+    is far cheaper than the win, enabling a TRANSPARENT intersect1d path
+    without any assume_sorted API change.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: medium
+maintainer_objections: []
+linked_prs: []
+linked_commits: []
+related_opportunities: []
+notes:
+  - "Feature request (enhancement), not a PR: as retrieved, the issue has zero comments and zero timeline events, so there is no recorded maintainer response yet to summarize as objections; this record should be re-checked on a future re-fetch in case discussion has started."
+  - "Reporter's own benchmark compares against the third-party sortednp package, not against any numpy-internal alternative; the claimed 10x-1000x range is the reporter's estimate from that comparison, not a numpy maintainer's."
+  - "assume_unique already exists as a parameter on np.intersect1d and np.isin/np.in1d today; the ask is specifically for an assume_sorted hint that a merge-based (O(n+m)) path can exploit, distinct from assume_unique's existing dedup-skip behavior."

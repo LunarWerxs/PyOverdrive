@@ -1,0 +1,70 @@
+id: OPP-000001
+title: np.unique/_unique_hash loses badly to SIMD sort path for numeric arrays
+sources:
+  - url: https://github.com/numpy/numpy/issues/31969
+    repository: numpy/numpy
+    type: issue
+    number: 31969
+    state_at_ingestion: open
+    retrieved_at: "2026-08-23T08:01:17+00:00"
+claim:
+  speedup: 46.0
+  baseline: numpy 2.x hash-based _unique_hash (std::unordered_set), 712 ms at 1M int64
+  candidate: sort-based unique via x86-simd-sort, 15.2 ms at 1M int64
+  hardware: unstated (AVX-capable x86 implied)
+affected_operations: [numpy.unique, numpy.unique_values]
+input_regime:
+  dtypes: [int64, int32, other fixed-width numerics]
+  sizes: [100000, 1000000]
+  notes: >
+    Claimed to hold from medium sizes up across cardinalities: even at 10
+    uniques x 100k repeats, sorting was reported 3x faster. Hash reported to
+    win only below ~50 elements. Cardinality and CPU sort quality (AVX-512 vs
+    ARM) shift the crossover (FreddieWitherden).
+status: performance_validated
+license_review: clean
+reproducer: benchmarks/historical/opp_000001_unique.py
+current_numpy_result:
+  verified_speedup: 37.0
+  fingerprints: [8f8198d9abab]
+  detail: >
+    Reproduced and exceeded. Candidate-level (Dyno, numpy 2.4.5, Zen 4
+    AVX-512): int64 1M high-card 37-40x; int32 1M 66-101x; uint32 82-88x;
+    uint64 34x; wins at every measured size >= 64 (1.8x at n=64) and every
+    cardinality (1.2-2.3x low-card). End-to-end through pyoverdrive.enable():
+    37-55x (benchmarks/results/MVP-BASELINE/). EXCLUDED by measurement:
+    float64 (0.84-1.07x), float32 (parity), int16 (0.38x, sort loses),
+    int8 (0.14x). Shipped as fast paths unique_sort/unique_values_sort with
+    SIZE_THRESHOLD=64, dtypes {int32,int64,uint32,uint64}; differential +
+    property tests in compatibility/differential/.
+main_branch_result: null
+correctness_risk: low
+implementation_risk: low
+maintainer_objections:
+  - "hiSandog: an adaptive choice needs data across cardinality ratios, dtypes,
+    sizes, CPU features, and return_index/return_inverse options; report peak
+    memory too; a cardinality-sampling heuristic must budget its own overhead."
+  - "FreddieWitherden: the hash-vs-sort tradeoff is about cardinality and how
+    good the platform's sort is, not array size; ARM with a poor sort favors
+    hashing; proper fix is a single pass with HyperLogLog cardinality estimate."
+  - "ngoldbaum: performance work in NumPy has a very high quality bar; the
+    drive-by fix PR (#31970) was rejected as low quality; a contributor
+    (ikrommyd) is slated to work on it."
+linked_prs:
+  - "https://github.com/numpy/numpy/pull/31970 (closed, adaptive threshold, rejected as low quality)"
+linked_commits: []
+related_opportunities:
+  - "numpy/numpy#32096 (better hash function for _unique_hash, closed)"
+  - "numpy/numpy#30496 (earlier hash-vs-sort discussion)"
+  - "numpy/numpy#32161 (np.isin slow for StringDType, open)"
+notes:
+  - The upstream introduction was PR numpy/numpy#26018.
+  - PyOverdrive angle is pure dispatch (Gearbox routes large numeric inputs to
+    the sort path); no new kernel required, so implementation risk is low and
+    the win is available today regardless of upstream timeline.
+  - NaN semantics matter for float dtypes; np.unique collapses the NaN run to
+    one element, so the sort candidate must special-case trailing NaNs (see
+    sort_unique_nansafe in the reproducer).
+  - numpy.unique_values documents unsorted output on the hash path; a
+    sort-based route returns sorted output, which is a strictly-compatible
+    superset of that contract.

@@ -1,0 +1,355 @@
+{
+  "opp_id": "OPP-000028",
+  "title": "argsort ordered-input regression re-measure + sorted-scan arange fast path",
+  "recorded_at": "2026-08-24T03:52:26+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "conditions": {
+    "cpu_busy_before": 0.03797468354430378,
+    "cpu_busy_after": 0.0015576323987538387,
+    "contended": false
+  },
+  "cases": [
+    {
+      "case": "ordered_int64_quick_n10000",
+      "params": {
+        "dtype": "int64",
+        "n": 10000,
+        "kind": "quick",
+        "pattern": "ordered"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 6658.411214953271,
+          "min_ns": 6541.0046728971965,
+          "mean_ns": 6650.567423230975,
+          "mad_ns": 54.55607476635487,
+          "samples": 7,
+          "loops_per_sample": 856,
+          "role": "baseline",
+          "correct": true
+        },
+        "sorted_scan_arange": {
+          "median_ns": 6531.334332833583,
+          "min_ns": 6476.6116941529235,
+          "mean_ns": 6620.71107303491,
+          "mad_ns": 54.72263868065966,
+          "samples": 7,
+          "loops_per_sample": 1334,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sorted_scan_arange": 1.0194564962753263
+      }
+    },
+    {
+      "case": "random_int64_quick_n10000",
+      "params": {
+        "dtype": "int64",
+        "n": 10000,
+        "kind": "quick",
+        "pattern": "random"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 162748.14814814815,
+          "min_ns": 162170.37037037036,
+          "mean_ns": 173015.34391534392,
+          "mad_ns": 577.777777777781,
+          "samples": 7,
+          "loops_per_sample": 27,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "ordered_int64_quick_n100000",
+      "params": {
+        "dtype": "int64",
+        "n": 100000,
+        "kind": "quick",
+        "pattern": "ordered"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 230819.04761904763,
+          "min_ns": 163307.14285714287,
+          "mean_ns": 230062.92517006802,
+          "mad_ns": 1161.9047619047342,
+          "samples": 7,
+          "loops_per_sample": 42,
+          "role": "baseline",
+          "correct": true
+        },
+        "sorted_scan_arange": {
+          "median_ns": 108759.61538461539,
+          "min_ns": 107469.23076923077,
+          "mean_ns": 109571.97802197802,
+          "mad_ns": 923.076923076922,
+          "samples": 7,
+          "loops_per_sample": 52,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sorted_scan_arange": 2.1222863542021884
+      }
+    },
+    {
+      "case": "random_int64_quick_n100000",
+      "params": {
+        "dtype": "int64",
+        "n": 100000,
+        "kind": "quick",
+        "pattern": "random"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 2365333.3333333335,
+          "min_ns": 2135700.0,
+          "mean_ns": 2350028.5714285714,
+          "mad_ns": 20166.66666666651,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "ordered_int64_quick_n1000000",
+      "params": {
+        "dtype": "int64",
+        "n": 1000000,
+        "kind": "quick",
+        "pattern": "ordered"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 1814800.0,
+          "min_ns": 1782200.0,
+          "mean_ns": 1803560.0,
+          "mad_ns": 8766.666666666744,
+          "samples": 5,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        },
+        "sorted_scan_arange": {
+          "median_ns": 1672250.0,
+          "min_ns": 1655875.0,
+          "mean_ns": 1671085.0,
+          "mad_ns": 6750.0,
+          "samples": 5,
+          "loops_per_sample": 4,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sorted_scan_arange": 1.0852444311556286
+      }
+    },
+    {
+      "case": "random_int64_quick_n1000000",
+      "params": {
+        "dtype": "int64",
+        "n": 1000000,
+        "kind": "quick",
+        "pattern": "random"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 32719900.0,
+          "min_ns": 29952400.0,
+          "mean_ns": 32334860.0,
+          "mad_ns": 167300.0,
+          "samples": 5,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "ordered_int32_quick_n100000",
+      "params": {
+        "dtype": "int32",
+        "n": 100000,
+        "kind": "quick",
+        "pattern": "ordered"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 113582.75862068965,
+          "min_ns": 111636.20689655172,
+          "mean_ns": 113419.70443349754,
+          "mad_ns": 1329.3103448275942,
+          "samples": 7,
+          "loops_per_sample": 58,
+          "role": "baseline",
+          "correct": true
+        },
+        "sorted_scan_arange": {
+          "median_ns": 87500.0,
+          "min_ns": 68877.77777777778,
+          "mean_ns": 83247.08994708995,
+          "mad_ns": 10575.925925925927,
+          "samples": 7,
+          "loops_per_sample": 54,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sorted_scan_arange": 1.2980886699507388
+      }
+    },
+    {
+      "case": "random_int32_quick_n100000",
+      "params": {
+        "dtype": "int32",
+        "n": 100000,
+        "kind": "quick",
+        "pattern": "random"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 1754166.6666666667,
+          "min_ns": 1715233.3333333333,
+          "mean_ns": 1746042.857142857,
+          "mad_ns": 18500.0,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "ordered_int64_stable_n100000",
+      "params": {
+        "dtype": "int64",
+        "n": 100000,
+        "kind": "stable",
+        "pattern": "ordered"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 93089.09090909091,
+          "min_ns": 80500.0,
+          "mean_ns": 89813.63636363637,
+          "mad_ns": 564.5454545454559,
+          "samples": 7,
+          "loops_per_sample": 110,
+          "role": "baseline",
+          "correct": true
+        },
+        "sorted_scan_arange": {
+          "median_ns": 44940.77669902913,
+          "min_ns": 44822.330097087375,
+          "mean_ns": 44939.459084604714,
+          "mad_ns": 116.0194174757271,
+          "samples": 7,
+          "loops_per_sample": 206,
+          "correct": true
+        }
+      },
+      "speedups": {
+        "sorted_scan_arange": 2.071372542858209
+      }
+    },
+    {
+      "case": "random_int64_stable_n100000",
+      "params": {
+        "dtype": "int64",
+        "n": 100000,
+        "kind": "stable",
+        "pattern": "random"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 5824700.0,
+          "min_ns": 5761600.0,
+          "mean_ns": 5825414.285714285,
+          "mad_ns": 8300.0,
+          "samples": 7,
+          "loops_per_sample": 1,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    },
+    {
+      "case": "almost_sorted_int64_quick_n100000",
+      "params": {
+        "dtype": "int64",
+        "n": 100000,
+        "kind": "quick",
+        "pattern": "almost_sorted_inversion_at_n_minus_2"
+      },
+      "baseline": "ndarray.argsort",
+      "variants": {
+        "ndarray.argsort": {
+          "median_ns": 2013400.0,
+          "min_ns": 2008000.0,
+          "mean_ns": 2016809.5238095238,
+          "mad_ns": 1066.6666666667443,
+          "samples": 7,
+          "loops_per_sample": 3,
+          "role": "baseline",
+          "correct": true
+        }
+      },
+      "speedups": {}
+    }
+  ]
+}
