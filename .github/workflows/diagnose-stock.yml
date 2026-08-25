@@ -1,14 +1,18 @@
 name: diagnose-stock
 
-# TEMPORARY. Minimal STOCK-NUMPY repro for the Linux hang, with no
-# PyOverdrive in the process at all. The faulthandler stack named
-# np.linalg.pinv -> np.linalg.svd on a batch holding +inf. On Windows the
-# same calls return in ~2ms. Delete once reported and worked around.
+# TEMPORARY. Minimal STOCK-NUMPY repro for the Linux hang, no PyOverdrive in
+# the process at all. Established so far on ubuntu-latest / numpy 2.5.2:
+#   nan batch  -> LinAlgError, fine
+#   svd(compute_uv=False) with +inf -> [nan nan nan], fine
+#   norm(ord=2) with +inf -> nan, fine
+#   pinv(eye(3) with one +inf) -> NEVER RETURNS
+# This run pins the exact boundary: which svd spelling spins, and whether the
+# batch forms of svd/norm are safe. Delete once reported and worked around.
 
 on: pull_request
 
 jobs:
-  stock:
+  boundary:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -19,83 +23,64 @@ jobs:
       - name: Install numpy only
         run: python -m pip install numpy
 
-      - name: Environment
+      - name: Boundary probe
         run: |
-          python -c "
-          import numpy as np, os
-          print('numpy', np.__version__, flush=True)
-          print('cpu_count', os.cpu_count(), flush=True)
-          "
-        continue-on-error: true
+          set +e
+          probe () {
+            echo "=== $1"
+            timeout -s KILL 45 python -c "$2"
+            rc=$?
+            if [ "$rc" -eq 0 ]; then echo "--> $1 RETURNED"; else echo "--> $1 WEDGED_OR_FAILED rc=$rc"; fi
+          }
 
-      - name: G1 - nan batch (expected FINE, raises LinAlgError)
-        run: |
-          timeout -s KILL 60 python -c "
+          probe "H1 batch svd compute_uv=False + inf" "
           import numpy as np
-          a = np.random.default_rng(1240).uniform(-1.0, 1.0, size=(100, 3, 3))
-          a[7, 0, 0] = np.nan
-          try:
-              np.linalg.pinv(a)
-              print('returned', flush=True)
-          except np.linalg.LinAlgError as e:
-              print('LinAlgError:', e, flush=True)
-          "
-          echo "G1 exit=$? (124 = wedged)"
-        continue-on-error: true
+          a = np.random.default_rng(1240).uniform(-1.0, 1.0, size=(100, 3, 3)); a[7,0,0] = np.inf
+          print(np.linalg.svd(a, compute_uv=False)[7], flush=True)"
 
-      - name: G2 - inf batch, pinv (SUSPECTED HANG)
-        run: |
-          timeout -s KILL 60 python -c "
+          probe "H2 batch norm ord=2 + inf" "
           import numpy as np
-          a = np.random.default_rng(1240).uniform(-1.0, 1.0, size=(100, 3, 3))
-          a[7, 0, 0] = np.inf
-          print('calling pinv on a 100x3x3 batch with one +inf', flush=True)
-          r = np.linalg.pinv(a)
-          print('returned', np.isnan(r).sum(), 'nans', flush=True)
-          "
-          echo "G2 exit=$? (124 = wedged)"
-        continue-on-error: true
+          a = np.random.default_rng(1240).uniform(-1.0, 1.0, size=(100, 3, 3)); a[7,0,0] = np.inf
+          print(np.linalg.norm(a, ord=2, axis=(-2,-1))[7], flush=True)"
 
-      - name: G3 - the single offending 3x3 matrix alone
-        run: |
-          timeout -s KILL 60 python -c "
+          probe "H3 single svd full_matrices=False + inf" "
           import numpy as np
-          a = np.random.default_rng(1240).uniform(-1.0, 1.0, size=(100, 3, 3))
-          a[7, 0, 0] = np.inf
-          print('matrix', a[7].tolist(), flush=True)
-          r = np.linalg.pinv(a[7])
-          print('returned', r, flush=True)
-          "
-          echo "G3 exit=$? (124 = wedged)"
-        continue-on-error: true
+          m = np.eye(3); m[0,0] = np.inf
+          print(np.linalg.svd(m, full_matrices=False)[1], flush=True)"
 
-      - name: G4 - smallest possible case, identity with one +inf
-        run: |
-          timeout -s KILL 60 python -c "
+          probe "H4 single svd default (compute_uv=True) + inf" "
           import numpy as np
-          m = np.eye(3)
-          m[0, 0] = np.inf
-          print('calling pinv on', m.tolist(), flush=True)
-          print('pinv ->', np.linalg.pinv(m), flush=True)
-          "
-          echo "G4 exit=$? (124 = wedged)"
-        continue-on-error: true
+          m = np.eye(3); m[0,0] = np.inf
+          print(np.linalg.svd(m)[1], flush=True)"
 
-      - name: "G5 - which entry point spins - svd, then norm"
-        run: |
-          timeout -s KILL 60 python -c "
+          probe "H5 single pinv + inf (known wedge, control)" "
           import numpy as np
-          m = np.eye(3); m[0, 0] = np.inf
-          print('svd compute_uv=False ->', np.linalg.svd(m, compute_uv=False), flush=True)
-          " ; echo "G5-svd exit=$?"
-          timeout -s KILL 60 python -c "
+          m = np.eye(3); m[0,0] = np.inf
+          print(np.linalg.pinv(m), flush=True)"
+
+          probe "H6 single pinv + NEGATIVE inf" "
           import numpy as np
-          m = np.eye(3); m[0, 0] = np.inf
-          print('norm ord=2 ->', np.linalg.norm(m, ord=2), flush=True)
-          " ; echo "G5-norm exit=$?"
-          timeout -s KILL 60 python -c "
+          m = np.eye(3); m[0,0] = -np.inf
+          print(np.linalg.pinv(m), flush=True)"
+
+          probe "H7 single pinv + inf, 2x2" "
           import numpy as np
-          m = np.eye(2); m[0, 0] = np.inf
-          print('2x2 svd ->', np.linalg.svd(m, compute_uv=False), flush=True)
-          " ; echo "G5-2x2 exit=$?"
-        continue-on-error: true
+          m = np.eye(2); m[0,0] = np.inf
+          print(np.linalg.pinv(m), flush=True)"
+
+          probe "H8 single pinv + inf, 4x4" "
+          import numpy as np
+          m = np.eye(4); m[0,0] = np.inf
+          print(np.linalg.pinv(m), flush=True)"
+
+          probe "H9 single pinv, inf OFF the diagonal" "
+          import numpy as np
+          m = np.eye(3); m[0,1] = np.inf
+          print(np.linalg.pinv(m), flush=True)"
+
+          probe "H10 eig/eigvals + inf, for contrast" "
+          import numpy as np
+          m = np.eye(3); m[0,0] = np.inf
+          print(np.linalg.eigvals(m), flush=True)"
+
+          echo '=== probe sweep complete ==='
