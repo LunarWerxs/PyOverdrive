@@ -9,6 +9,11 @@ jobs:
   test:
     name: test (${{ matrix.os }}, py${{ matrix.python }}, numpy ${{ matrix.numpy }})
     runs-on: ${{ matrix.os }}
+    # The gate installs in ~20s and runs in ~40s. Without this a wedged test
+    # sits until the runner's 6-hour ceiling, which is how a hang first showed
+    # up here - as four jobs stuck "in progress", indistinguishable from a
+    # queue. Fail in minutes instead; faulthandler_timeout dumps the stacks.
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -41,6 +46,7 @@ jobs:
   wheel:
     name: wheel builds and installs clean
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

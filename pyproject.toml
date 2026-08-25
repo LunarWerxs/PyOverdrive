@@ -56,3 +56,8 @@ pyoverdrive = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "compatibility"]
+# No test in this suite legitimately takes minutes - the whole gate runs in
+# well under a minute. A test that blows past this is wedged, not slow, so
+# dump every thread's stack (pytest's faulthandler plugin exits after the
+# dump) instead of letting a CI job sit at a hang until its 6-hour ceiling.
+faulthandler_timeout = 180
