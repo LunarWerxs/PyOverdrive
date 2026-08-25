@@ -49,15 +49,19 @@ First, this catches gross losses, not the difference between 0.98x and
 1.02x. Run it on an idle machine, and settle anything within a few percent
 of 1.0 with a dedicated probe.
 
-Second, and easier to mistake for coverage: it probes ONE canonical input
-per path. A path whose calibration table spans several dtypes is judged on
-whichever one its selfcheck input picks - float64 where there is one - so a
-loss confined to another dtype does not appear here. That is not
-hypothetical: pyrallel_subtract measured 1.13x at its float64 floor while
-its float32 row was running at 0.97x, and it took the full
-tools/calibrate_dispatch.py sweep (every op x dtype x size) to see it. Treat
-a green here as "no path is grossly slow on its headline input", never as
-"every dispatched cell pays".
+Second, coverage is per CELL, not per path, and the difference matters. It
+used to probe one canonical input per path, which is not coverage where a
+path's table spans several dtypes: the selfcheck input picks float64 when
+there is one, and pyrallel_subtract passed at 1.13x on its float64 floor
+while its float32 row was running at 0.97x. The two PyRallel families are
+the only modules here with a dtype-keyed threshold table, so they now
+contribute one cell per dtype, each at that dtype's own floor.
+
+What is still NOT covered, and should not be mistaken for covered: every
+other path is judged on a single input, and no path is judged at more than
+one SIZE. A loss that only appears at some shape inside a regime will not
+show up here. The instrument for that is a full sweep
+(tools/calibrate_dispatch.py), not this.
 
 Usage:
     .venv/Scripts/python tools/verify_no_pessimization.py [--min 1.0] [-v]
@@ -148,12 +152,56 @@ def _measure(op: str, args, kwargs, rounds: int) -> float | None:
     return s / c if c > 0 else None
 
 
-def _measure_one(name: str, fast_under: float | None = None) -> str:
-    """Measure a single path. Runs as its own process; prints one line."""
+def cells() -> list[str]:
+    """Every cell to judge, as "path" or "path@dtype".
+
+    One canonical input per path is not coverage where a path's table spans
+    several dtypes: the selfcheck input picks float64 when there is one, and
+    pyrallel_subtract passed at 1.13x on float64 while its float32 row was
+    running at 0.97x. The two PyRallel families are the only modules here
+    with a dtype-keyed threshold table, so they get one cell PER DTYPE, each
+    at that dtype's own floor - the weakest size its predicate admits.
+    """
+    from pyoverdrive.fastpaths import parallel_binary, parallel_ufunc
+
+    tabled: dict[str, list[str]] = {}
+    for mod in (parallel_ufunc, parallel_binary):
+        for op, row in mod.SUPPORTED.items():
+            tabled[f"pyrallel_{op}"] = [np.dtype(d).name for d in row]
+
+    out = []
+    for name in sorted(D._selfcheck_inputs()):
+        dtypes = tabled.get(name)
+        out.extend([f"{name}@{d}" for d in dtypes] if dtypes else [name])
+    return out
+
+
+def _inputs_for(cell: str):
+    """(path name, maker) for a cell, expanding a "path@dtype" cell onto the
+    row's own floor rather than whatever the selfcheck input would pick."""
+    if "@" not in cell:
+        return cell, D._selfcheck_inputs().get(cell)
+    name, dtype_name = cell.split("@", 1)
+    from pyoverdrive.fastpaths import parallel_binary, parallel_ufunc
+
+    op = name[len("pyrallel_"):]
+    for mod, builder in ((parallel_ufunc, D._inputs_ufunc),
+                         (parallel_binary, D._inputs_binary)):
+        row = mod.SUPPORTED.get(op)
+        if row is None:
+            continue
+        want = {d: n for d, n in row.items() if np.dtype(d).name == dtype_name}
+        if want:
+            return name, builder(op, want)
+    return name, None
+
+
+def _measure_one(cell: str, fast_under: float | None = None) -> str:
+    """Measure a single cell. Runs as its own process; prints one line."""
     if fast_under is not None and cpuclass.probe_us() > fast_under:
         return "SLOW-CORE"
     pyoverdrive.enable()
-    make = D._selfcheck_inputs().get(name)
+    name, make = _inputs_for(cell)
     if make is None:
         return "SKIP no-input"
     try:
@@ -204,12 +252,13 @@ def main(argv: list[str]) -> int:
     # re-measuring inside that process escapes it. A per-path subprocess is
     # slower and is the only way the number means anything.
     pyoverdrive.enable()
-    names = sorted(
+    live = {
         p.name
         for lst in GEARBOX._paths.values()
         for p in (lst if isinstance(lst, list) else [lst])
         if p.enabled
-    )
+    }
+    names = [c for c in cells() if c.split("@", 1)[0] in live]
     pyoverdrive.disable()
 
     classes = cpuclass.classify()

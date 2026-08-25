@@ -88,7 +88,7 @@ import math
 import numpy as np
 
 from ..dispatcher.gearbox import GEARBOX, FastPath, StockRaised
-from .inv_small_batch import DET_RTOL, _det_and_scale
+from .inv_small_batch import DET_RTOL, _det_and_scale, _scale
 
 _F64 = np.dtype(np.float64)
 
@@ -99,22 +99,34 @@ _F64 = np.dtype(np.float64)
 # into the run. The previous floors came from a candidate-level measurement
 # and were BELOW break-even: det 2x2 at its own floor of 100 measured 0.70x
 # end to end, i.e. the path dispatched and made the call 30% slower. Each
-# floor below is the first measured size at or above 1.5x, which leaves
-# room for a busier machine; the 4x4 caps are where the margin decays back
-# towards 1.0x (1.09x at 100_000).
+# floor below is the first measured size with real headroom, which leaves
+# room for a busier machine; each cap is the last measured size still
+# holding it. Floors and caps needed separate passes - see the note inside
+# the table.
 _WINDOWS = {
-    ("det", 2): (200, None),       # 1.08x at 100, 1.54x at 200, peak 4.31x
-    ("det", 3): (300, None),       # 1.23x at 200, 1.52x at 300, peak 3.00x
-    ("det", 4): (500, 30_000),     # 1.11x at 300, 1.55x at 500, peak 2.64x
-    ("slogdet", 2): (300, None),   # 1.25x at 200, 1.51x at 300, peak 3.16x
-    ("slogdet", 3): (500, None),   # 1.27x at 300, 1.64x at 500, peak 2.52x
-    ("slogdet", 4): (1_000, 30_000),  # 1.37x at 500, 1.82x at 1000, peak 2.52x
-    ("solve", 2): (300, None),        # 1.27x at 200, 1.55x at 300, peak 3.82x
+    # UPPER CAPS RE-MEASURED 2026-08-25, one cell per process, two runs, the
+    # worse kept. Three cells were dispatching into a LOSS at the top of
+    # their window and nothing caught it: the pessimization sweep judges one
+    # canonical input per path, and for these that input sits near the FLOOR.
+    # A path can be honest where it is checked and lose where it is not.
+    #   det 3x3     1.99x at 30k but 1.01x at 100k  -> capped, was uncapped
+    #   det 4x4     1.42x at 10k, 1.09x at 15k, 0.85x at 30k -> cap 30k->10k
+    #   slogdet 3x3 1.75x at 30k but 0.84x at 100k  -> capped, was uncapped
+    #   slogdet 4x4 1.37x at 10k, 1.00x at 15k, 0.85x at 30k -> cap 30k->10k
+    # Each cap is the last measured size with real headroom, not the
+    # crossing itself, which is the same rule the solve cap already used.
+    ("det", 2): (200, None),          # 1.37x at 200, 4.90x at 20k, 2.50x at 100k
+    ("det", 3): (300, 30_000),        # 1.23x at 300, 2.98x at 3k, 1.99x at 30k
+    ("det", 4): (500, 10_000),        # 1.15x at 500, 2.33x at 5k, 1.42x at 10k
+    ("slogdet", 2): (300, None),      # 1.41x at 300, 2.76x at 30k
+    ("slogdet", 3): (500, 30_000),    # 1.19x at 500, 2.66x at 5k, 1.75x at 30k
+    ("slogdet", 4): (1_000, 10_000),  # 1.28x at 1k, 1.37x at 10k
+    ("solve", 2): (300, None),        # 1.75x at 300, 3.10x at 30k
     # CAPPED: Cramer's rule builds every cofactor as a full-array temporary,
     # so past L2 it loses to LAPACK outright - 1.36x at 10k, 1.13x at 30k,
     # 0.96x at 100k and 0.66x at 300k. The cap sits at the last size with
     # real headroom rather than at the crossing itself.
-    ("solve", 3): (1_000, 10_000),    # 1.25x at 500, 1.62x at 1000, peak 2.13x
+    ("solve", 3): (1_000, 10_000),    # 1.53x at 1000, peak 2.13x
 }
 
 # stock's return type for slogdet (a namedtuple in modern numpy)
@@ -145,7 +157,7 @@ def _shape_ok(a, kind: str) -> bool:
     return batch >= lo and (hi is None or batch <= hi)
 
 
-def _admissible(a, det) -> bool:
+def _admissible(a, det, scale=None) -> bool:
     """Finite and well-conditioned, judged from a determinant ALREADY computed.
 
     Takes the determinant rather than computing one, so a caller that needs
@@ -159,15 +171,21 @@ def _admissible(a, det) -> bool:
     """
     if not bool(np.isfinite(det).all()):
         return False
-    scale = np.abs(a).max(axis=(-2, -1))
+    # `scale` is passed in wherever the caller already has it. It was being
+    # computed twice on the det/slogdet route - once inside _det_and_scale,
+    # whose second return value was discarded, and again here - which is a
+    # whole extra pass over the stack on the guard path of every dispatched
+    # call.
+    if scale is None:
+        scale = _scale(a)
     d = a.shape[-1]
     return bool((np.abs(det) >= DET_RTOL * np.maximum(scale, 1e-100) ** d).all())
 
 
 def _det_if_safe(a):
     """The determinant, computed ONCE and guarded, or None if refused."""
-    det, _ = _det_and_scale(a)
-    return det if _admissible(a, det) else None
+    det, scale = _det_and_scale(a)
+    return det if _admissible(a, det, scale) else None
 
 
 def _hand_to_stock(op: str, *args):

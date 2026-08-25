@@ -38,17 +38,17 @@ the reference machines include:
   to 2.6x, `nan_to_num` ~2x) via a single isnan scan
 - batched `np.linalg.det`/`slogdet` closed forms on 2x2/3x3/4x4 stacks
   and `solve` on 2x2/3x3, joining the shipped `inv` adjugate family.
-  det/slogdet peak at 4.3x/3.2x measured END TO END with the result
-  consumed; the previously advertised "up to 91.9x" was a candidate-level
-  figure that excluded the guard, and the floors derived from it put the
-  2x2 path at 0.70x - a dispatched REGRESSION - at its own floor. The
-  guard is fused into the run now and every window was re-derived from
-  end-to-end measurements.
+  Measured END TO END with the result consumed: det 1.23-4.9x, slogdet
+  1.19-2.8x, Cramer solve 1.53-3.1x, inv 1.3-11.5x. The previously
+  advertised "up to 91.9x" was a candidate-level figure that excluded the
+  guard, and the floors derived from it put the 2x2 path at 0.70x - a
+  dispatched REGRESSION - at its own floor. The guard is fused into the run
+  and every window was re-derived from end-to-end measurements.
 - batched small-matrix linear algebra: `np.linalg.eigvalsh` on 2x2
   stacks (26-31x) and 3x3 stacks via the trigonometric closed form
   (2.7-4.4x; near-degenerate cells are split out and served by stock,
   so a few coalesced pairs no longer cost the stack its speedup),
-  `np.linalg.inv` on 2x2/3x3 stacks (3-16.5x), `np.linalg.cholesky`
+  `np.linalg.inv` on 2x2/3x3 stacks (1.3-11.5x end-to-end), `np.linalg.cholesky`
   on 2x2/3x3 stacks via a fused guard-in-run Cholesky-Crout pass in
   cache-sized chunks (1.6-2.3x from batch 1000 up, no cap), and
   `np.linalg.qr` on 2x2/3x3 stacks via unrolled Householder
@@ -127,7 +127,7 @@ the reference machines include:
 
 ### Verification
 
-- 2194 tests: hand-written differential suites per path plus a
+- 2196 tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
 - The threaded-ufunc thresholds were re-derived from scratch after the old
   ones were found to rest on a measurement artifact, and 15 of their 16 rows
@@ -163,6 +163,31 @@ the reference machines include:
   int64, at 1e7-2e7 elements. Every float32 row is gone, and `np.divide`
   left the family entirely. This is the strongest candidate in the project
   for per-machine calibration rather than a shipped table.
+- An audit of all 44 fast-path modules against the measurement defects
+  already found in three of them turned up two more, both confirmed by
+  measurement rather than by reading:
+  - `np.linalg.inv` computed the determinant in its PREDICATE for the
+    conditioning check and again in the run, plus a separate finiteness
+    scan of the whole stack. At batch 4096 that guard cost 128.5us against
+    25.8us for the entire 2x2 inverse it was protecting. Fused into the run
+    (the pattern det/slogdet/solve already use), and the finiteness test now
+    falls out of the conditioning scale for free: 2x2 went 3.2x -> 11.5x at
+    batch 10k, 3x3 1.38x -> 1.5x.
+  - The det/slogdet/solve guard computed that same conditioning scale TWICE
+    per call, once in the shared helper and again in the check, and computed
+    it with a multi-axis reduction that numpy does badly on a tiny trailing
+    shape. Threaded through and folded over the entry views instead, with a
+    measured per-dimension crossover because folding loses on small batches
+    where per-call overhead is the whole cost. det 2x2 at its own floor went
+    0.97x -> 1.37x, slogdet 3x3 1.01x -> 1.19x.
+- Three det/slogdet cells were dispatching into a LOSS at the TOP of their
+  window - det 3x3 1.01x at 1e5, slogdet 3x3 0.84x at 1e5, slogdet 4x4
+  0.85x at 3e4 - and nothing caught them, because the pessimization sweep
+  judges one canonical input per path and for these it sits near the floor.
+  A path can be honest where it is checked and lose where it is not. det 3x3
+  and slogdet 3x3 gained upper caps (they had none) and the two 4x4 caps
+  came down from 3e4 to 1e4. Every cell inside every window now measures at
+  least 1.22x.
 - `tools/verify_no_pessimization.py` inherited the same defect and could
   return a false green on threaded paths; it now rejects measurements taken
   on a slow core too. Its other limit is now stated rather than implied: it

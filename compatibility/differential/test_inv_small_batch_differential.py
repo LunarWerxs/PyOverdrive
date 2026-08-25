@@ -11,12 +11,14 @@ near-singular batches - stays on stock. Comparison mode is numeric: per-matrix
 scaled tolerance against the maximum absolute entry of the stock inverse.
 """
 
+import warnings
+
 import numpy as np
 import pytest
 
 import pyoverdrive
 from pyoverdrive.dispatcher.gearbox import GEARBOX
-from pyoverdrive.fastpaths.inv_small_batch import DET_RTOL, _FLOORS
+from pyoverdrive.fastpaths.inv_small_batch import _scale, DET_RTOL, _FLOORS
 
 OP = "numpy.linalg.inv"
 PATH = "inv_small_batch"
@@ -76,16 +78,40 @@ def _assert_refused_close(args, kwargs):
     return got
 
 
+def _assert_guarded_at_run(args, kwargs):
+    """Parity for a refusal the guard now makes MID-RUN, not in the predicate.
+
+    The predicate used to prove finiteness and non-singularity, which meant
+    computing the determinant there and again in the run, plus a full
+    isfinite scan of the stack. Measured at batch 4096 that guard cost
+    128.5 us against 25.8 us for the entire 2x2 inverse it was protecting -
+    the dispatched call ran at 5.0x where the work alone is far more. The
+    guard now runs once, inside the run, against the determinant the run
+    already computed, and hands the whole call to stock on refusal.
+
+    So the DECISION is the path and the BEHAVIOUR is stock's. The second
+    half is the part that matters and it is asserted exactly as strictly as
+    it was when the predicate refused.
+    """
+    decision, reason = GEARBOX.decide(OP, args, kwargs)
+    assert decision == PATH, (args, kwargs, decision, reason)
+    _assert_parity_with_stock(args, kwargs)
+
+
 def _assert_refused_raise_parity(args, kwargs):
     """Refusal parity that tolerates either side raising (or not).
 
-    Used for inputs where stock's behavior (raise vs. NaN/garbage output) is
-    itself not part of the contract we assert on: only that the fast path
-    stays out of the way and whatever stock does, the wrapped call does too.
+    Used for inputs the PREDICATE still refuses (shape, dtype, floor), where
+    stock's behavior (raise vs. NaN/garbage output) is itself not part of
+    the contract we assert on: only that the fast path stays out of the way
+    and whatever stock does, the wrapped call does too.
     """
     decision, reason = GEARBOX.decide(OP, args, kwargs)
     assert decision == "stock", (args, kwargs, decision, reason)
+    _assert_parity_with_stock(args, kwargs)
 
+
+def _assert_parity_with_stock(args, kwargs):
     def _call(fn):
         try:
             return ("ok", fn(*args, **kwargs))
@@ -164,21 +190,21 @@ def test_refusal_all_zero_matrix_in_batch():
     floor = _FLOORS[(3, np.dtype(np.float64))]
     a = _well_conditioned_batch((floor,), 7, d=3, dtype=np.float64)
     a[42] = 0.0
-    _assert_refused_raise_parity((a,), {})
+    _assert_guarded_at_run((a,), {})
 
 
 def test_refusal_nan_element():
     floor = _FLOORS[(3, np.dtype(np.float64))]
     a = _well_conditioned_batch((floor,), 8, d=3, dtype=np.float64)
     a[42, 0, 0] = np.nan
-    _assert_refused_raise_parity((a,), {})
+    _assert_guarded_at_run((a,), {})
 
 
 def test_refusal_inf_element():
     floor = _FLOORS[(3, np.dtype(np.float64))]
     a = _well_conditioned_batch((floor,), 9, d=3, dtype=np.float64)
     a[42, 1, 2] = np.inf
-    _assert_refused_raise_parity((a,), {})
+    _assert_guarded_at_run((a,), {})
 
 
 def test_refusal_near_singular_matrix():
@@ -195,7 +221,7 @@ def test_refusal_near_singular_matrix():
     scale = np.max(np.abs(a[42]))
     assert abs(det) < DET_RTOL * max(scale, 1e-100) ** 3
 
-    _assert_refused_raise_parity((a,), {})
+    _assert_guarded_at_run((a,), {})
 
 
 def test_refusal_4x4_batch():
@@ -254,3 +280,36 @@ def test_kill_switch_restores_stock_routing():
         assert np.array_equal(got, stock)
     finally:
         pyoverdrive.enable_path(PATH)
+
+
+def test_refused_call_emits_no_warning_stock_would_not():
+    """A call that ends up on stock must be indistinguishable from never
+    having taken this path - warnings included.
+
+    Fusing the guard into the run means non-finite input now reaches the
+    closed form BEFORE the guard can refuse it, so inf-inf and inf*0 raise
+    "invalid value encountered" on exactly the inputs about to be handed
+    back to stock, which would not have warned. That is a real difference a
+    caller can see (and -W error turns it into a crash), so the guard path
+    suppresses it and this test is what keeps it suppressed.
+    """
+    floor = _FLOORS[(3, np.dtype(np.float64))]
+    for seed, bad in ((21, np.inf), (22, -np.inf), (23, np.nan)):
+        a = _well_conditioned_batch((floor,), seed, d=3, dtype=np.float64)
+        a[7, 1, 2] = bad
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            try:
+                np.linalg.inv(a)
+            except np.linalg.LinAlgError:
+                pass  # stock's own refusal is fine; a WARNING is not
+
+
+def test_folded_scale_matches_the_reduction_it_replaced():
+    """_scale folds max|entry| over the entry views instead of reducing over
+    the last two axes, because the reduction cost 4.6-11x more. Same values,
+    or the conditioning guard means something different than it did."""
+    rng = np.random.default_rng(99)
+    for d in (2, 3, 4):
+        a = rng.standard_normal((257, d, d)) * rng.choice([1e-8, 1.0, 1e8], (257, 1, 1))
+        assert np.array_equal(_scale(a), np.abs(a).max(axis=(-2, -1)))
