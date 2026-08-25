@@ -81,7 +81,7 @@ jobs:
           echo "G4 exit=$? (124 = wedged)"
         continue-on-error: true
 
-      - name: G5 - which entry point spins: svd, then norm
+      - name: "G5 - which entry point spins - svd, then norm"
         run: |
           timeout -s KILL 60 python -c "
           import numpy as np
