@@ -109,3 +109,51 @@ exactly; research, not a probe); object-dtype __array__ construction
 4. pad narrow core; ma.apply_along_axis after its own verify pass.
 5. det4x4 extension, genfromtxt routing, ma fused-mask arithmetic as
    the sub-10x tail.
+
+## Re-measured 2026-08-25, after batch 13 (READ THIS BEFORE USING ANY NUMBER ABOVE)
+
+Batch 13 found that this document's headline for `np.pad` - "13.9x dev /
+15.2x idle at n=64" - had **no committed evidence behind it**: no results
+cell, no bench script. It reproduced exactly, as a BARE timing of a raw
+route, which is neither what ships nor what a user experiences. The honest
+figure for the shipped path is 4.46x.
+
+So the remaining three leads were re-measured on the idle box (fp
+9bbe7063c555, numpy 2.5.2, 0% load), consumed rather than bare, with the
+candidate checked against stock. Treat every figure ABOVE this section as a
+lead; the ones below are measurements.
+
+**det/slogdet 4x4 - BETTER than advertised, build it.** Claimed 1.6-3.8x;
+measured 1.54x at n=300, 3.45x at 1000, **6.83x at 4000**, 3.74x at 10_000,
+1.95x at 30_000, 1.71x at 100_000, via Laplace expansion on complementary
+2x2 minors. Accuracy is numeric, not bit-identical: max relative error
+1.9e-14 at n=300 rising to 4.4e-12 at 100_000, so it needs a documented
+tolerance like the shipped det 2x2/3x3 family. The margin is non-monotone
+(it peaks at n=4000 and halves by 10_000), which is the L2 effect this
+document already predicted; the cholesky chunking treatment is the obvious
+answer and would want its own measured switch point.
+
+**genfromtxt -> loadtxt - DECLINE.** Claimed "3.8x, bit-equal". Measured
+**1.59x** at 1000 rows and 1.58x at 20_000 - well under half the claim, and
+below the bar on its own. Worse, the two functions genuinely disagree on
+exactly the inputs people reach for genfromtxt to handle:
+
+    empty field      "1,,3"     genfromtxt returns (2,3); loadtxt RAISES
+    trailing delim   "1,2,3,"   genfromtxt returns (2,4); loadtxt RAISES
+
+Both are ordinary in real CSVs, a trailing comma especially. Values do
+agree bit-for-bit on clean input, and nan literals, leading spaces,
+comments, single row, single column and empty file all behave identically -
+but a predicate would have to prove the absence of empty and trailing
+fields, which means scanning the file, which is the cost being avoided.
+Not worth it for 1.6x.
+
+**np.ma fused-mask arithmetic - real headroom, still needs a semantics
+pass.** Measured against the equivalent PLAIN ndarray operation, i.e. the
+ceiling a perfectly fused path could approach, at n=1e6: divide **13.10x**,
+add 2.93x, multiply 2.74x, sqrt 2.22x. The divide figure is twice the 6.2x
+this document claimed, so the headroom is larger than thought - but it is
+headroom, not a speedup, since any real path still has to compute the mask.
+The blocker is unchanged and is not performance: the ma.apply_along_axis
+decline (batch 12) showed how many ways masked semantics diverge, and this
+family would need the same adversarial pass before any of it ships.
