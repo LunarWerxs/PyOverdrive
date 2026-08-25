@@ -40,7 +40,7 @@ efficiency core has a slow stock side and a normal patched side, which
 flatters the ratio by the class ratio - 1.44x on the box this was found on.
 A threaded path that genuinely runs at 0.9x reports 1.3x and passes. Every
 process here probes the core it was given and re-draws if it is a slow one
-(lab/dyno/cpuclass.py); the fast class is also the honest one to judge on,
+(src/pyoverdrive/_cpuclass.py); the fast class is also the honest one to judge on,
 since stock is quickest there and a fast path has the least to offer.
 
 Two limits worth stating even so.
@@ -80,7 +80,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 import numpy as np  # noqa: E402
 
-from lab.dyno import cpuclass  # noqa: E402
+from pyoverdrive import _cpuclass as cpuclass  # noqa: E402
 
 import pyoverdrive  # noqa: E402
 from pyoverdrive import diagnostics as D  # noqa: E402

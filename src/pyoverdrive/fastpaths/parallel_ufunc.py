@@ -126,6 +126,15 @@ SUPPORTED: dict[str, dict[np.dtype, int]] = {
     "tanh": {_F64: 3_000_000, _F32: 3_000_000},
 }
 
+# The table AS SHIPPED, captured before anything can edit SUPPORTED.
+# `pyoverdrive --calibrate` may drop rows that do not pay on the host
+# machine, and it rewrites SUPPORTED in place to do it. Without a
+# pristine copy that would be one-way: a row dropped by one calibration
+# could never be re-probed, because the probe would no longer find it.
+SHIPPED: dict[str, dict[np.dtype, int]] = {
+    op: dict(row) for op, row in SUPPORTED.items()
+}
+
 # THREAD_SCHEDULE / threads_for live in _pyrallel_common (shared with the
 # binary family); re-exported here because this module is the documented
 # home of the unary calibration.

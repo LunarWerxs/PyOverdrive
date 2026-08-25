@@ -45,7 +45,7 @@ Fifteen runs at 344, ten at 497, **1.44x apart, with essentially no spread
 inside either group**. A process is placed on one class of core and stays
 there.
 
-`lab/dyno/cpuclass.py` times a fixed kernel pinned to each logical CPU in turn
+`src/pyoverdrive/_cpuclass.py` times a fixed kernel pinned to each logical CPU in turn
 and finds the classes directly rather than assuming a vendor layout:
 
 ```

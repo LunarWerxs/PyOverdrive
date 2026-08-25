@@ -63,7 +63,7 @@ METHOD, and every clause of it was forced by a wrong number:
   calls idle) is a run that drew an E-core; re-measured with the candidate
   unchanged at ~302 us and stock at 344 us the same cell is 1.10x.
   Affinity is NOT the fix - pinning to the fast class costs the candidate
-  its parallelism outright (the measured table in lab/dyno/cpuclass.py), so
+  its parallelism outright (the measured table in src/pyoverdrive/_cpuclass.py), so
   a pinned ratio is wrong in the other direction. Instead each cell probes
   the core it was handed and declines if it is a slow one, and the parent
   re-draws. The fast class is also the conservative choice: stock is
@@ -90,7 +90,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 import numpy as np  # noqa: E402
 
-from lab.dyno import cpuclass  # noqa: E402
+from pyoverdrive import _cpuclass as cpuclass  # noqa: E402
 
 DOMAINS = {
     "sin": (0.0, 2 * np.pi),
@@ -188,7 +188,7 @@ def measure_one(op: str, n: int, dtype: str, order: str, rounds: int,
     # On a hybrid CPU a fresh process is given a P-core or an E-core and
     # stays there, a 1.44x fork in the denominator of every ratio. Affinity
     # cannot be used to settle it (pinning strips the candidate of its
-    # parallelism - the table in lab/dyno/cpuclass.py), so instead this
+    # parallelism - the table in src/pyoverdrive/_cpuclass.py), so instead this
     # process asks which class it drew and declines the cell if it is the
     # slow one. The parent then retries and gets a new draw.
     if fast_under is not None:

@@ -129,3 +129,126 @@ def test_calibrate_refuses_while_patched():
             pyoverdrive.calibrate(verbose=False)
     finally:
         pyoverdrive.disable()
+
+
+# --- pyrallel: an ALWAYS-ON gate that calibration can only narrow ----------
+#
+# The threaded tables ship enabled and were derived on one machine, so the
+# calibration entry for them is the opposite of argmax's: it never turns a
+# path on, it only removes rows that do not pay on the host. These check the
+# directions it must fail in.
+
+from pyoverdrive.fastpaths import parallel_binary, parallel_ufunc  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _restore_pyrallel_tables():
+    saved = {
+        mod: {op: dict(row) for op, row in mod.SUPPORTED.items()}
+        for mod in (parallel_ufunc, parallel_binary)
+    }
+    yield
+    for mod, tables in saved.items():
+        for op, row in tables.items():
+            mod.SUPPORTED[op].clear()
+            mod.SUPPORTED[op].update(row)
+
+
+def test_shipped_snapshot_matches_the_live_table_before_any_calibration():
+    # SHIPPED is the pristine copy the probe measures against; if it ever
+    # drifts from SUPPORTED at import, a dropped row could never be re-probed
+    for mod in (parallel_ufunc, parallel_binary):
+        assert mod.SHIPPED == mod.SUPPORTED
+        assert mod.SHIPPED is not mod.SUPPORTED
+        for op in mod.SHIPPED:
+            assert mod.SHIPPED[op] is not mod.SUPPORTED[op]
+
+
+def test_drop_removes_only_the_named_dtype():
+    f32 = np.dtype(np.float32)
+    assert f32 in parallel_ufunc.SUPPORTED["sin"]
+    calibration._apply_pyrallel({"drop": {"pyrallel_sin": ["float32"]}})
+    assert f32 not in parallel_ufunc.SUPPORTED["sin"]
+    assert np.dtype(np.float64) in parallel_ufunc.SUPPORTED["sin"]
+    # untouched ops keep every row
+    assert parallel_ufunc.SUPPORTED["tanh"] == parallel_ufunc.SHIPPED["tanh"]
+
+
+def test_apply_is_rebuilt_from_shipped_not_cumulative():
+    calibration._apply_pyrallel({"drop": {"pyrallel_sin": ["float32"]}})
+    assert np.dtype(np.float32) not in parallel_ufunc.SUPPORTED["sin"]
+    # a later calibration that drops nothing must RESTORE the row, not leave
+    # the previous verdict in place
+    calibration._apply_pyrallel({"drop": {}})
+    assert parallel_ufunc.SUPPORTED["sin"] == parallel_ufunc.SHIPPED["sin"]
+
+
+def test_dropped_row_stops_dispatching_but_the_other_dtype_still_does():
+    pyoverdrive.enable(["numpy.sin"])
+    try:
+        n32 = parallel_ufunc.SHIPPED["sin"][np.dtype(np.float32)]
+        n64 = parallel_ufunc.SHIPPED["sin"][np.dtype(np.float64)]
+        x32 = np.linspace(0.0, 6.0, n32, dtype=np.float32)
+        x64 = np.linspace(0.0, 6.0, n64, dtype=np.float64)
+        assert GEARBOX.decide("numpy.sin", (x32,), {})[0] == "pyrallel_sin"
+        calibration._apply_pyrallel({"drop": {"pyrallel_sin": ["float32"]}})
+        assert GEARBOX.decide("numpy.sin", (x32,), {})[0] == "stock"
+        assert GEARBOX.decide("numpy.sin", (x64,), {})[0] == "pyrallel_sin"
+    finally:
+        pyoverdrive.disable()
+
+
+def test_apply_reads_the_stored_entry_for_an_always_on_gate(tmp_path):
+    calibration.save({"pyrallel": {"drop": {"pyrallel_tanh": ["float64"]}}})
+    calibration.apply(GEARBOX)
+    assert np.dtype(np.float64) not in parallel_ufunc.SUPPORTED["tanh"]
+
+
+def test_probe_cell_reports_a_ratio_for_a_shipped_row():
+    dtype, floor = next(iter(parallel_ufunc.SHIPPED["sin"].items()))
+    got = calibration.probe_cell(f"unary:sin:{np.dtype(dtype).name}:{floor}")
+    assert "ratio" in got and got["ratio"] > 0
+    pyoverdrive.disable()
+
+
+def test_probe_cell_declines_a_slow_core_draw():
+    # fast_under=0 makes every draw "slow", which is how the parent learns
+    # to re-spawn rather than trusting a coin-flipped baseline
+    got = calibration.probe_cell("unary:sin:float64:300000", fast_under=0.0)
+    assert got == {"slow_core": True}
+
+
+# --- the CPU classifier must not invent a core class ------------------------
+
+from pyoverdrive import _cpuclass  # noqa: E402
+
+
+def test_classifier_calls_a_uniform_machine_uniform():
+    times = {c: 100.0 + (c % 3) for c in range(32)}  # ordinary jitter only
+    got = _cpuclass.classify(times)
+    assert got["hybrid"] is False
+    assert got["outlier_cpus"] == []
+
+
+def test_classifier_finds_a_real_hybrid_split():
+    # the Intel reference box: 16 P-core threads at ~136us, 4 E-cores at ~325
+    times = {c: (136.0 if c < 16 else 325.0) for c in range(20)}
+    got = _cpuclass.classify(times)
+    assert got["hybrid"] is True
+    assert got["slow"] == [16, 17, 18, 19]
+    assert got["class_ratio"] > 2.0
+
+
+@pytest.mark.parametrize("n_busy", [1, 2])
+def test_a_couple_of_busy_cpus_are_outliers_not_a_core_class(n_busy):
+    # what the AMD box actually produced while another session had work
+    # pinned to it: a real gap, but on far too few CPUs to be a design
+    times = {c: (200.0 if c < n_busy else 136.0) for c in range(32)}
+    got = _cpuclass.classify(times)
+    assert got["hybrid"] is False, "contention must not be reported as hardware"
+    assert got["outlier_cpus"] == list(range(n_busy))
+    assert "contended" in _cpuclass.describe(got)
+
+
+def test_fast_cutoff_is_none_when_there_is_no_split():
+    assert _cpuclass.fast_cutoff({"hybrid": False, "fast": [0, 1]}) is None

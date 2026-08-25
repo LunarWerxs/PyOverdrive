@@ -100,6 +100,16 @@ SUPPORTED: dict[str, dict[np.dtype, int]] = {
 }
 
 
+# The table AS SHIPPED, captured before anything can edit SUPPORTED.
+# `pyoverdrive --calibrate` may drop rows that do not pay on the host
+# machine, and it rewrites SUPPORTED in place to do it. Without a
+# pristine copy that would be one-way: a row dropped by one calibration
+# could never be re-probed, because the probe would no longer find it.
+SHIPPED: dict[str, dict[np.dtype, int]] = {
+    op: dict(row) for op, row in SUPPORTED.items()
+}
+
+
 def _make_applicable(table: dict[np.dtype, int]):
     floor = min(table.values())
 

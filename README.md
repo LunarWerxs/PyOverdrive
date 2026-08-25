@@ -39,10 +39,10 @@ load. Every number in this repository ships with the machine that produced it
 and the JSON it came from, under
 [`benchmarks/results/`](benchmarks/results). Nothing is admitted on one
 machine's word: a fast path ships only if it wins on both benchmark machines,
-and the slower one's number is the one quoted. The one current exception is
-stated where it applies - the THREADED ufunc thresholds were re-derived on
-2026-08-24 on the Intel box alone, and the second machine has not been idle
-enough to re-confirm them; see "Baselining a machine" below.
+and the slower one's number is the one quoted. The THREADED ufunc thresholds
+are the exception and say so: they come from the one box here that is
+reliably idle, and `python -m pyoverdrive --calibrate` re-checks them on
+yours (see "Baselining a machine").
 
 ## Why it is safe
 
@@ -57,7 +57,12 @@ wonder. So:
 - **Verify it on your own machine**, not on our claims:
   ```bash
   python -m pyoverdrive --selfcheck   # every path vs stock NumPy, here
+  python -m pyoverdrive --calibrate   # re-measure the hardware-dependent ones
   ```
+  `--calibrate` re-times the threaded paths at their own thresholds on your
+  CPU and switches off any that do not pay there. It never speeds a
+  threshold up on a guess, and on a busy machine it keeps the shipped
+  setting rather than judging from unstable numbers.
 - **Kill any path, or all of them**, without touching your code:
   `pyoverdrive.disable_path("qr_small_batch")`, `PYOVERDRIVE_DISABLE=...`,
   or `pyoverdrive.disable()` to restore stock NumPy exactly.
@@ -110,6 +115,7 @@ docs/          Architecture, decisions (ADRs), research reports
 python -m pip install git+https://github.com/LunarWerxs/PyOverdrive.git   # or a built wheel
 python -m pyoverdrive --selfcheck     # every fast path vs stock NumPy on THIS machine
 python -m pyoverdrive --demo          # headline ops timed live, stock vs PyOverdrive (~20s)
+python -m pyoverdrive --calibrate     # re-measure the hardware-dependent paths HERE (~2 min)
 ```
 
 How this compares to numexpr, Numba, Cython/Pythran, bottleneck, JAX and
@@ -166,10 +172,10 @@ shipped one:
 
 Dyno samples foreign CPU load before and after every suite and stamps it
 into the result JSON. Evidence exists for two machines: fingerprint
-`8f8198d9abab` (AMD Zen 4 AVX-512, 16C/32T, numpy 2.4.5, the dev box whose
-thresholds ship as defaults) and `9bbe7063c555` (Intel i7-12700K hybrid
-8P+4E, numpy 2.5.2, Python 3.13, a fully idle box: 0-1% load on every
-suite). The full correctness gate (differential, property fuzz, and the
+`8f8198d9abab` (AMD Zen 4 AVX-512, 16C/32T, numpy 2.4.5, a working machine
+and so rarely quiet) and `9bbe7063c555` (Intel i7-12700K hybrid 8P+4E, numpy
+2.5.2, Python 3.13, kept idle: 0-1% load on every suite, and the box every
+threading number comes from). The full correctness gate (differential, property fuzz, and the
 all-paths self-check; 2065 tests and 67 paths at that run, 2026-08-25)
 additionally runs green on a third environment - Linux x86-64 under
 Docker (python:3.13-slim, numpy 2.5.2) - and on a clean-venv wheel
@@ -180,17 +186,26 @@ strength or better (intersect1d sorted 83x, correlate int64 15.4x,
 unique(axis=0) 37.9x on Intel).
 
 The THREADED ufunc thresholds are a different story and are stated
-narrowly on purpose. They were re-derived on 2026-08-24 on the Intel box
-only, after the previous numbers turned out to rest on a per-process
+narrowly on purpose. They were re-derived on 2026-08-24 on the Intel box -
+the only reliably idle machine here, and threading numbers taken under load
+are worthless - after the previous ones turned out to rest on a per-process
 P-core/E-core coin flip in the single-threaded baseline
 (`docs/research/hybrid-cpu-baseline-coin-flip.md`); 15 of 16 rows moved and
-`np.sqrt` left the threaded family altogether. Re-deriving them on the Zen 4
-box is outstanding - it has not been idle enough to calibrate on, and
-threading numbers taken under load are worthless. Raising a floor is the
-safe direction (the worst case is a win left unclaimed, never a
-pessimization), so the table ships as measured. A run flagged CONTENDED
-understates every multi-thread number; do not move a threshold on its
-say-so.
+`np.sqrt` left the threaded family altogether.
+
+One machine is not enough for numbers this hardware-dependent, and the
+honest answer to that is not to promise a second box some day: it is to let
+the threshold be checked where it matters, on yours. `python -m pyoverdrive
+--calibrate` now re-measures every threaded row at its own floor and drops
+the ones that do not pay on the machine it is run on. Each cell is measured
+in a fresh process that re-draws until it lands on a fast core, and a row is
+only removed when two independent readings agree - a busy machine produces
+disagreement, and disagreement keeps the shipped row rather than guessing.
+It never lowers a floor: finding where a row starts paying needs the full
+sweep in `tools/calibrate_dispatch.py`, not a probe.
+
+A run flagged CONTENDED understates every multi-thread number; do not move a
+threshold on its say-so.
 
 ## Status
 

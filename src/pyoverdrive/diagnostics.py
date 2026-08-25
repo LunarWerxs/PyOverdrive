@@ -430,7 +430,7 @@ def _inputs_nan_to_num():
     return (a,), {}
 
 
-def _inputs_ufunc(op_name: str) -> Callable[[], tuple[tuple, dict]]:
+def _inputs_ufunc(op_name: str, want: dict | None = None) -> Callable[[], tuple[tuple, dict]]:
     from .fastpaths import parallel_ufunc
 
     domains = {
@@ -439,8 +439,14 @@ def _inputs_ufunc(op_name: str) -> Callable[[], tuple[tuple, dict]]:
     }
 
     def make():
-        table = parallel_ufunc.SUPPORTED[op_name]
-        dtype = np.dtype(np.float64) if np.dtype(np.float64) in table else next(iter(table))
+        # `table` is read at CALL time, not closure time: --calibrate can drop
+        # rows from SUPPORTED, and a stale capture would build an input for a
+        # row that no longer dispatches.
+        table = want if want is not None else parallel_ufunc.SUPPORTED[op_name]
+        dtype = (
+            np.dtype(np.float64) if np.dtype(np.float64) in table
+            else next(iter(table))
+        )
         n = table[dtype]
         lo, hi = domains[op_name]
         return (np.linspace(lo, hi, n, dtype=dtype),), {}
@@ -448,12 +454,15 @@ def _inputs_ufunc(op_name: str) -> Callable[[], tuple[tuple, dict]]:
     return make
 
 
-def _inputs_binary(op_name: str) -> Callable[[], tuple[tuple, dict]]:
+def _inputs_binary(op_name: str, want: dict | None = None) -> Callable[[], tuple[tuple, dict]]:
     from .fastpaths import parallel_binary
 
     def make():
-        table = parallel_binary.SUPPORTED[op_name]
-        dtype = np.dtype(np.int64) if np.dtype(np.int64) in table else next(iter(table))
+        table = want if want is not None else parallel_binary.SUPPORTED[op_name]
+        dtype = (
+            np.dtype(np.int64) if np.dtype(np.int64) in table
+            else next(iter(table))
+        )
         n = table[dtype]
         rng = np.random.default_rng(4)
         if dtype.kind == "f":

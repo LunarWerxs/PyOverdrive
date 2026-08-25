@@ -103,6 +103,19 @@ the reference machines include:
   paths whose wins are architecture-dependent: verdicts persist per
   machine fingerprint; foreign or stale calibration files are ignored;
   with no file, gated paths stay off.
+- That now covers the THREADED families too, which ship enabled and whose
+  thresholds are the least transferable numbers here (core count, cache,
+  memory channels). `--calibrate` re-times every threaded row at its own
+  floor - the weakest cell its predicate admits - and switches off the ones
+  that do not pay on the host. It only ever removes rows: finding where a
+  row starts paying needs the full sweep, not a probe. Two guards make it
+  trustworthy where an ordinary probe would not be. Each cell runs in a
+  FRESH process that re-draws until it lands on a fast core, because a
+  threaded candidate measured against a single-threaded baseline inherits
+  the P-core/E-core coin flip; and a row is removed only when two
+  independent readings AGREE, since there is no portable way to ask whether
+  the machine is busy and disagreement is exactly what a busy one produces.
+  Disagreement keeps the shipped row.
 - Bit-identical results on 43 of the 67 always-on paths. Two more (the
   FFT convolve/correlate pair) are bit-identical for integer dtypes
   and numeric for floats, and the remaining 22 run in documented
@@ -114,7 +127,7 @@ the reference machines include:
 
 ### Verification
 
-- 2182 tests: hand-written differential suites per path plus a
+- 2194 tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
 - The threaded-ufunc thresholds were re-derived from scratch after the old
   ones were found to rest on a measurement artifact, and 15 of their 16 rows

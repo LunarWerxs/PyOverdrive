@@ -47,8 +47,13 @@ which class this one is on, and a cell measured on a fast one is both
 reproducible and conservative. ``pin_to`` remains because CLASSIFYING the
 CPUs requires it; measuring a candidate does not.
 
-Not used by the shipped library. PyOverdrive never sets affinity for a
-caller; this is measurement equipment.
+Used by the lab tools AND by ``pyoverdrive --calibrate``, which has the same
+problem in the user's hands: its probes compare a threaded candidate against
+a single-threaded baseline, so on a hybrid machine a probe process that drew
+an efficiency core would enable or refuse a path on a coin flip. Nothing
+here runs during normal import or dispatch, and PyOverdrive NEVER sets
+affinity for a caller - ``pin_to`` exists only so ``measure_cpus`` can time
+one CPU at a time while classifying.
 """
 
 from __future__ import annotations
@@ -102,8 +107,17 @@ def _probe_us() -> float:
     return min(timeit.timeit(fn, number=40) / 40 for _ in range(_ROUNDS)) * 1e6
 
 
-def measure_cpus() -> dict[int, float]:
-    """Time the probe pinned to each logical CPU in turn.
+def measure_cpus(passes: int = 2) -> dict[int, float]:
+    """Time the probe pinned to each logical CPU in turn, best of `passes`.
+
+    Two passes, keeping the BEST time per CPU, because one pass cannot tell
+    a slow core from a busy one. Measured on the AMD reference box while it
+    was loaded: a single pass reported CPU 1 as 1.52x slower than the other
+    31 and the machine as HYBRID, which is false - it is a uniform Zen 4 and
+    reports `spread 1.061x` when idle. A genuinely slower CORE is slow in
+    every pass; a contended one recovers in whichever pass the interference
+    is not there, and taking the best of two is the estimator that separates
+    them. Cheap insurance: the whole classification is a couple of seconds.
 
     Must run in a process that is free to change its own affinity, and it
     restores the original mask before returning.
@@ -113,10 +127,13 @@ def measure_cpus() -> dict[int, float]:
     if hasattr(os, "sched_getaffinity"):
         original = sorted(os.sched_getaffinity(0))
     out: dict[int, float] = {}
-    for cpu in range(n):
-        if not pin_to([cpu]):
-            continue
-        out[cpu] = _probe_us()
+    for _ in range(max(1, passes)):
+        for cpu in range(n):
+            if not pin_to([cpu]):
+                continue
+            t = _probe_us()
+            if cpu not in out or t < out[cpu]:
+                out[cpu] = t
     pin_to(original)
     return out
 
@@ -136,11 +153,25 @@ def classify(times: dict[int, float] | None = None) -> dict:
     vals = [v for _, v in ordered]
     gaps = [(vals[i + 1] / vals[i], i) for i in range(len(vals) - 1)]
     ratio, idx = max(gaps) if gaps else (1.0, 0)
-    if ratio <= 1.15:
+    n_slow = len(vals) - (idx + 1)
+    # A CLASS of cores is a design decision, so it comes in plausible sizes.
+    # One slow CPU out of 32 is not a class, it is a busy CPU: the AMD
+    # reference box reported exactly that (CPU 1, 1.47x slower, "HYBRID")
+    # while another session had work pinned there, and it is a uniform Zen 4.
+    # Every real hybrid layout has at least two efficiency cores and they are
+    # a real fraction of the machine - 4 of 20 on the Intel box, 4 of 8 on an
+    # M1 - so anything smaller is treated as interference and the machine is
+    # reported uniform. Erring this way is safe: a missed class costs some
+    # measurement noise, an invented one tells the user a false thing about
+    # their hardware and makes every probe re-draw away from a good CPU.
+    implausible = n_slow < 2 or n_slow * 8 < len(vals)
+    if ratio <= 1.15 or implausible:
         return {
             "hybrid": False,
             "fast": sorted(times),
             "spread": round(vals[-1] / vals[0], 3),
+            "outlier_cpus": (sorted(c for c, _ in ordered[idx + 1:])
+                             if ratio > 1.15 else []),
             "probe_us": {c: round(t, 1) for c, t in ordered},
         }
     fast = sorted(c for c, _ in ordered[: idx + 1])
@@ -177,8 +208,12 @@ def describe(info: dict) -> str:
     if not info.get("fast"):
         return "cpu classes: affinity unavailable; measurements are unpinned"
     if not info["hybrid"]:
+        note = ""
+        if info.get("outlier_cpus"):
+            note = (f"; {len(info['outlier_cpus'])} slow outlier(s) "
+                    f"{info['outlier_cpus']} look contended, not a core class")
         return (f"cpu classes: uniform ({len(info['fast'])} logical CPUs, "
-                f"spread {info.get('spread', 1.0)}x)")
+                f"spread {info.get('spread', 1.0)}x{note})")
     return (f"cpu classes: HYBRID - {len(info['fast'])} fast CPUs "
             f"{info['fast']}, {len(info['slow'])} slow CPUs {info['slow']}, "
             f"{info['class_ratio']}x apart")
