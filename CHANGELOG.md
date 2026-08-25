@@ -208,6 +208,17 @@ the reference machines include:
   losses: upward the three det/slogdet cells, downward np.inner and
   np.histogram2d. A red is re-measured in a second process
   and only reported if it reproduces.
+- ...and a `--shapes` mode, closing the aspect-ratio class the size sweep
+  can never reach: each 2-D-or-deeper cell is re-judged at roughly constant
+  volume with its trailing axis grown 4x and 16x while the leading axis
+  shrinks by the same factor, and the reverse - np.inner's 0.38x corner had
+  the same element count as its canonical input, so no size multiple would
+  ever have produced it. Operand coupling is handled by a shared-trailing
+  rule plus a chain variant for (m,k)x(k,n) products. On the idle Intel
+  box, 33 aspect cells dispatch and none is below 1.0x; the refused cells
+  were spot-checked to be genuine predicate refusals (valid shapes, the
+  gate declining), including the long-contraction corner np.inner used to
+  lose in (docs/research/batch15-notes.md).
 - Two more audit findings were REFUTED by measuring them, which is the point
   of measuring: `np.vectorize` needs no floor (it wins 3.1x even at size 1,
   because stock is slow at every size), and `intersect1d`'s 1.19x at its

@@ -72,12 +72,23 @@ with a real floor simply reports NODISPATCH as the cells shrink, which
 costs nothing; a path without one keeps accepting, and that is the case
 worth finding.
 
-What is STILL not covered: only the leading axis is scaled, and only
-uniformly across the operands that share it. A loss that needs a particular
-aspect ratio - a long contraction against few rows, say, which is exactly
-what np.inner's bad corner looked like - will not appear from scaling
-alone. The instrument for that is a shape sweep of the specific path
-(tools/calibrate_dispatch.py, or a targeted probe), not this.
+--shapes closes the aspect-ratio class that scaling can never reach. At
+roughly constant volume, each cell with a 2-D-or-deeper input is re-judged
+with its trailing axis grown 4x and 16x while the leading axis shrinks by
+the same factor (long rows / long contraction, few of them - exactly the
+regime where np.inner ran at 0.38x), and the reverse. Operands that share
+their trailing length move together; matmul-shaped pairs get a chain
+variant that grows the shared inner dimension instead, so (m,k)x(k,n)
+stays a valid product. A path whose predicate refuses the reshaped input
+reports NODISPATCH, which costs nothing and is the correct answer for a
+path with a real shape gate.
+
+What is STILL not covered even so: regimes that live on a KEYWORD axis
+rather than a shape (histogram bin counts - that one bit already and now
+has a sample floor), per-dimension cells for the small-matrix linalg
+families (the selfcheck input picks one d; other d's have their own
+calibration rows but only one is swept), and layout - every reshape here
+lands C-contiguous, so an F-contiguity-gated path skips its shape cells.
 
 Usage:
     .venv/Scripts/python tools/verify_no_pessimization.py [--min 1.0] [-v]
@@ -169,8 +180,10 @@ def _measure(op: str, args, kwargs, rounds: int) -> float | None:
     return s / c if c > 0 else None
 
 
-def cells(mults: tuple = (), divs: tuple = ()) -> list[str]:
-    """Every cell to judge, as "path", "path@dtype", optionally "*mult".
+def cells(mults: tuple = (), divs: tuple = (), shapes: tuple = ()) -> list[str]:
+    """Every cell to judge, as "path", "path@dtype", optionally "*mult",
+    "/div", ">f" (trailing axis f-fold longer, leading f-fold shorter) or
+    "<f" (the reverse).
 
     One canonical input per path is not coverage where a path's table spans
     several dtypes: the selfcheck input picks float64 when there is one, and
@@ -190,7 +203,7 @@ def cells(mults: tuple = (), divs: tuple = ()) -> list[str]:
     for name in sorted(D._selfcheck_inputs()):
         dtypes = tabled.get(name)
         out.extend([f"{name}@{d}" for d in dtypes] if dtypes else [name])
-    if not mults:
+    if not (mults or divs or shapes):
         return out
     scaled = []
     for c in out:
@@ -198,6 +211,9 @@ def cells(mults: tuple = (), divs: tuple = ()) -> list[str]:
             scaled.append(c if m == 1 else f"{c}*{m}")
         for d in divs:
             scaled.append(f"{c}/{d}")
+        for f in shapes:
+            scaled.append(f"{c}>{f}")
+            scaled.append(f"{c}<{f}")
     return scaled
 
 
@@ -213,6 +229,13 @@ SIZE_MULTS = (1, 3, 10, 30, 100)
 # which reports as NODISPATCH and costs nothing; a path WITHOUT one keeps
 # accepting, and that is exactly what needs finding.
 SIZE_DIVS = (3, 10, 30, 100)
+
+# Aspect-ratio factors for --shapes. Scaling moves volume; these move SHAPE
+# at (roughly) constant volume, which is the axis scaling can never sample.
+# np.inner's 0.38x corner was exactly this class - a long contraction
+# against few rows has the same element count as its canonical input, so no
+# multiple or fraction of that input would ever have produced it.
+ASPECT_FACTORS = (4, 16)
 
 # A scaled cell that would allocate more than this is skipped rather than
 # risking an OOM on someone's machine; the skip is printed, not silent.
@@ -250,10 +273,72 @@ def _scaled(args: tuple, mult: int, div: int = 1) -> tuple | None:
     return None if total > MAX_ELEMENTS else tuple(out)
 
 
+def _reshaped(args: tuple, f: int, trail_heavy: bool) -> list[tuple]:
+    """Candidate reshapes of `args` at ~constant volume, aspect moved by `f`.
+
+    trail_heavy grows every trailing axis f-fold and shrinks the leading
+    axis f-fold (long rows / long contraction, few of them); the reverse
+    direction does the opposite. Two rules, tried in turn, because operand
+    coupling is not knowable in general:
+
+    - shared-trailing: every array whose last axis matches the longest last
+      axis moves together. That keeps np.inner's stacked operands and a
+      matrix-vector product valid, and leaves small parameter arrays (a
+      quantile vector beside its sample) alone.
+    - chain: two 2-D operands with a.shape[-1] == b.shape[0] are a product
+      chain, so the SHARED inner dimension is what grows while the outer
+      dimensions shrink - the shared-trailing rule would break the chain.
+
+    A rule that produces an input the op cannot run, or that the path's
+    predicate refuses, costs a printed skip and nothing else.
+    """
+    arrays = [a for a in args if isinstance(a, np.ndarray) and a.ndim >= 1]
+    if not any(a.ndim >= 2 for a in arrays):
+        return []
+
+    def grow(a, axis):
+        return np.concatenate([a] * f, axis=axis)
+
+    def cut(a, axis):
+        idx = [slice(None)] * a.ndim
+        idx[axis] = slice(0, max(1, a.shape[axis] // f))
+        return np.ascontiguousarray(a[tuple(idx)])
+
+    variants = []
+    t = max(a.shape[-1] for a in arrays)
+    out = []
+    for a in args:
+        if isinstance(a, np.ndarray) and a.ndim >= 1 and a.shape[-1] == t:
+            if trail_heavy:
+                a = grow(a, -1)
+                if a.ndim >= 2:
+                    a = cut(a, 0)
+            else:
+                a = cut(a, -1)
+                if a.ndim >= 2:
+                    a = grow(a, 0)
+        out.append(a)
+    variants.append(tuple(out))
+
+    two = [a for a in args if isinstance(a, np.ndarray) and a.ndim == 2]
+    if len(two) == 2 and two[0].shape[-1] == two[1].shape[0]:
+        a, b = two
+        if trail_heavy:
+            na, nb = cut(grow(a, -1), 0), cut(grow(b, 0), -1)
+        else:
+            na, nb = grow(cut(a, -1), 0), grow(cut(b, 0), -1)
+        repl = {id(a): na, id(b): nb}
+        variants.append(tuple(repl.get(id(x), x) for x in args))
+
+    return [v for v in variants
+            if sum(x.size for x in v if isinstance(x, np.ndarray))
+            <= MAX_ELEMENTS]
+
+
 def _inputs_for(cell: str):
     """(path name, maker) for a cell, expanding a "path@dtype" cell onto the
     row's own floor rather than whatever the selfcheck input would pick."""
-    cell = cell.split("*", 1)[0].split("/", 1)[0]
+    cell = re.split(r"[*/><]", cell, maxsplit=1)[0]
     if "@" not in cell:
         return cell, D._selfcheck_inputs().get(cell)
     name, dtype_name = cell.split("@", 1)
@@ -284,13 +369,21 @@ def _measure_one(cell: str, fast_under: float | None = None) -> str:
     except Exception as exc:  # noqa: BLE001
         return f"SKIP input-error {exc!r}"
 
-    mult = int(cell.split("*", 1)[1]) if "*" in cell else 1
-    div = int(cell.split("/", 1)[1]) if "/" in cell else 1
-    if mult != 1 or div != 1:
-        scaled = _scaled(call_args, mult, div)
-        if scaled is None:
-            return "SKIP too-big"
-        call_args = scaled
+    variants = [call_args]
+    marker = re.search(r"([*/><])(\d+)$", cell)
+    if marker:
+        kind, val = marker.group(1), int(marker.group(2))
+        if kind in "*/":
+            scaled = _scaled(call_args,
+                             val if kind == "*" else 1,
+                             val if kind == "/" else 1)
+            if scaled is None:
+                return "SKIP too-big"
+            variants = [scaled]
+        else:
+            variants = _reshaped(call_args, val, kind == ">")
+            if not variants:
+                return "SKIP not-shaped"
 
     paths = [
         p
@@ -301,13 +394,20 @@ def _measure_one(cell: str, fast_under: float | None = None) -> str:
     if not paths:
         return "SKIP unknown"
     op = paths[0].op
-    if GEARBOX.decide(op, call_args, call_kwargs)[0] != name:
-        return "SKIP no-dispatch"
 
-    ratio = _measure(op, call_args, call_kwargs, rounds=9)
-    if ratio is None:
-        return "SKIP unmeasurable"
-    return f"RATIO {ratio:.4f} {op}"
+    dispatched = False
+    for cargs in variants:
+        try:
+            if GEARBOX.decide(op, cargs, call_kwargs)[0] != name:
+                continue
+        except Exception:
+            continue
+        dispatched = True
+        ratio = _measure(op, cargs, call_kwargs, rounds=9)
+        if ratio is None:
+            continue
+        return f"RATIO {ratio:.4f} {op}"
+    return "SKIP unmeasurable" if dispatched else "SKIP no-dispatch"
 
 
 def main(argv: list[str]) -> int:
@@ -324,6 +424,11 @@ def main(argv: list[str]) -> int:
                          "BOTTOM of what its path accepts, so upward is the "
                          "axis nothing was sampling - and three shipped losses "
                          "were hiding up there.")
+    ap.add_argument("--shapes", action="store_true",
+                    help="also judge each 2-D-or-deeper cell with its aspect "
+                         "ratio moved 4x and 16x in both directions at ~constant "
+                         "volume. Scaling moves volume; this moves SHAPE, which "
+                         "is the axis np.inner's 0.38x corner lived on.")
     ap.add_argument("--fast-under", type=float, help=argparse.SUPPRESS)
     ap.add_argument("--one", help=argparse.SUPPRESS)  # internal: one path, own process
     args = ap.parse_args(argv[1:])
@@ -348,8 +453,28 @@ def main(argv: list[str]) -> int:
         if p.enabled
     }
     names = [c for c in cells(SIZE_MULTS if args.sizes else (),
-                              SIZE_DIVS if args.sizes else ())
-             if re.split(r"[@*/]", c)[0] in live]
+                              SIZE_DIVS if args.sizes else (),
+                              ASPECT_FACTORS if args.shapes else ())
+             if re.split(r"[@*/><]", c)[0] in live]
+
+    # A shape cell needs a 2-D-or-deeper input to have an aspect ratio at
+    # all; filtering the 1-D cells here saves a subprocess each, and the
+    # count printed below stays a count of cells that could ever judge.
+    shaped_ok: dict[str, bool] = {}
+
+    def _has_matrix(cell: str) -> bool:
+        base = re.split(r"[*/><]", cell, maxsplit=1)[0]
+        if base not in shaped_ok:
+            try:
+                a, _ = _inputs_for(base)[1]()
+                shaped_ok[base] = any(
+                    isinstance(x, np.ndarray) and x.ndim >= 2 for x in a)
+            except Exception:
+                shaped_ok[base] = False
+        return shaped_ok[base]
+
+    names = [c for c in names if (">" not in c and "<" not in c)
+             or _has_matrix(c)]
     pyoverdrive.disable()
 
     classes = cpuclass.classify()
