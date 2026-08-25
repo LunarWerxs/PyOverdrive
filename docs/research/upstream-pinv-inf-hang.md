@@ -1,7 +1,20 @@
 # Upstream: np.linalg.svd with vectors never returns on an infinite diagonal entry (Linux)
 
-STATUS: confirmed on Linux x86-64, minimal repro in hand, not yet filed.
-Found 2026-08-25 while diagnosing why batch 12's public CI wedged.
+STATUS: **already reported upstream as numpy/numpy#7461, open since
+2016-03-25** and never fixed. Independently hit here on 2026-08-25 while
+diagnosing why batch 12's public CI wedged; this is a re-confirmation on
+current versions plus a much sharper boundary, not a new discovery. A
+comment adding that boundary is drafted and awaiting the owner's go-ahead
+(posting to a public tracker is his call, not mine).
+
+The original report is a 2x2 case on numpy 1.10.4 / Ubuntu 15.10, with the
+observation that some inf arrangements hang and others return. What is
+added below and is NOT in that issue: it still reproduces ten years later
+on numpy 2.0.2 / 2.4.5 / 2.5.2 and CPython 3.12-3.14; it is
+**platform-split** (Linux hangs, Windows returns instantly), which points
+at the LAPACK build rather than numpy's Python layer; and the trigger is
+exactly **`compute_uv=True`** - the values-only SVD is healthy on the very
+same matrix, which is the most useful clue for whoever fixes it.
 
 ## The bug
 

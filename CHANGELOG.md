@@ -95,11 +95,16 @@ the reference machines include:
 
 ### Verification
 
-- 2100+ tests: hand-written differential suites per path plus a
+- 2164 tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
-- Full gate green on Windows x86-64 (AMD Zen 4 + Intel Alder Lake) and
-  Linux x86-64 (Docker), numpy 2.4 and 2.5 lines, plus a clean-venv
-  wheel-install check.
+- Full gate green on Windows x86-64 (AMD Zen 4 + Intel Alder Lake) and on
+  Linux x86-64 in CI across CPython 3.12/3.13/3.14 against numpy 2.0.2,
+  2.4.5 and latest, plus a clean-venv wheel-install check.
 - Two genuine upstream numpy findings made along the way and FILED:
   StringDType NUL-handling defects (numpy/numpy#32414) and a uint64
-  searchsorted promotion case added to numpy/numpy#29727.
+  searchsorted promotion case added to numpy/numpy#29727. A third bug was
+  hit independently while getting the Linux gate green - np.linalg.pinv
+  never returns for a matrix 3x3 or larger carrying an infinity on the
+  diagonal - and turned out to be numpy/numpy#7461, open upstream since
+  2016; it is narrowed here to compute_uv=True on Linux only
+  (docs/research/upstream-pinv-inf-hang.md).
