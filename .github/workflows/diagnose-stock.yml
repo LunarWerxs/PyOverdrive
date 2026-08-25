@@ -1,75 +1,101 @@
 name: diagnose-stock
 
-# TEMPORARY. The svd differential file wedges on Linux even when run alone,
-# so the cause is not state left by other tests. This asks the only question
-# that matters next: is STOCK NumPy on its own enough to wedge, with no
-# PyOverdrive in the process at all? Delete once the cause is fixed.
+# TEMPORARY. Minimal STOCK-NUMPY repro for the Linux hang, with no
+# PyOverdrive in the process at all. The faulthandler stack named
+# np.linalg.pinv -> np.linalg.svd on a batch holding +inf. On Windows the
+# same calls return in ~2ms. Delete once reported and worked around.
 
 on: pull_request
 
 jobs:
   stock:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - name: Install numpy only (no pyoverdrive import anywhere below)
+      - name: Install numpy only
         run: python -m pip install numpy
 
-      - name: F1 - stock svd, compute_uv=False, the exact wedging input
-        run: |
-          timeout -s KILL 90 python -c "
-          import numpy as np
-          print('numpy', np.__version__, flush=True)
-          a = np.random.default_rng(230).uniform(-1.0, 1.0, size=(100, 3, 3))
-          print('calling svd(compute_uv=False) on', a.shape, flush=True)
-          s = np.linalg.svd(a, compute_uv=False)
-          print('OK', s.shape, s[0], flush=True)
-          "
-          echo "F1 exit=$? (124 = wedged)"
-        continue-on-error: true
-
-      - name: F2 - same but d=2 (the size that passes) and compute_uv=True
-        run: |
-          timeout -s KILL 90 python -c "
-          import numpy as np
-          a2 = np.random.default_rng(220).uniform(-1.0, 1.0, size=(100, 2, 2))
-          print('d=2 svdvals', np.linalg.svd(a2, compute_uv=False).shape, flush=True)
-          a3 = np.random.default_rng(230).uniform(-1.0, 1.0, size=(100, 3, 3))
-          print('d=3 full svd', np.linalg.svd(a3)[1].shape, flush=True)
-          print('d=3 pinv', np.linalg.pinv(a3).shape, flush=True)
-          "
-          echo "F2 exit=$? (124 = wedged)"
-        continue-on-error: true
-
-      - name: F3 - one matrix at a time, to name the culprit if there is one
-        run: |
-          timeout -s KILL 120 python -c "
-          import numpy as np
-          a = np.random.default_rng(230).uniform(-1.0, 1.0, size=(100, 3, 3))
-          for i in range(a.shape[0]):
-              print(i, flush=True)
-              np.linalg.svd(a[i], compute_uv=False)
-          print('ALL 100 SINGLY OK', flush=True)
-          "
-          echo "F3 exit=$? (124 = wedged)"
-        continue-on-error: true
-
-      - name: F4 - thread and BLAS environment of this runner
+      - name: Environment
         run: |
           python -c "
           import numpy as np, os
           print('numpy', np.__version__, flush=True)
-          try:
-              print(np.show_config('dicts'), flush=True)
-          except Exception as e:
-              print('show_config failed', e, flush=True)
           print('cpu_count', os.cpu_count(), flush=True)
-          for k, v in sorted(os.environ.items()):
-              if 'THREAD' in k.upper() or 'BLAS' in k.upper() or 'OMP' in k.upper():
-                  print('env', k, v, flush=True)
           "
+        continue-on-error: true
+
+      - name: G1 - nan batch (expected FINE, raises LinAlgError)
+        run: |
+          timeout -s KILL 60 python -c "
+          import numpy as np
+          a = np.random.default_rng(1240).uniform(-1.0, 1.0, size=(100, 3, 3))
+          a[7, 0, 0] = np.nan
+          try:
+              np.linalg.pinv(a)
+              print('returned', flush=True)
+          except np.linalg.LinAlgError as e:
+              print('LinAlgError:', e, flush=True)
+          "
+          echo "G1 exit=$? (124 = wedged)"
+        continue-on-error: true
+
+      - name: G2 - inf batch, pinv (SUSPECTED HANG)
+        run: |
+          timeout -s KILL 60 python -c "
+          import numpy as np
+          a = np.random.default_rng(1240).uniform(-1.0, 1.0, size=(100, 3, 3))
+          a[7, 0, 0] = np.inf
+          print('calling pinv on a 100x3x3 batch with one +inf', flush=True)
+          r = np.linalg.pinv(a)
+          print('returned', np.isnan(r).sum(), 'nans', flush=True)
+          "
+          echo "G2 exit=$? (124 = wedged)"
+        continue-on-error: true
+
+      - name: G3 - the single offending 3x3 matrix alone
+        run: |
+          timeout -s KILL 60 python -c "
+          import numpy as np
+          a = np.random.default_rng(1240).uniform(-1.0, 1.0, size=(100, 3, 3))
+          a[7, 0, 0] = np.inf
+          print('matrix', a[7].tolist(), flush=True)
+          r = np.linalg.pinv(a[7])
+          print('returned', r, flush=True)
+          "
+          echo "G3 exit=$? (124 = wedged)"
+        continue-on-error: true
+
+      - name: G4 - smallest possible case, identity with one +inf
+        run: |
+          timeout -s KILL 60 python -c "
+          import numpy as np
+          m = np.eye(3)
+          m[0, 0] = np.inf
+          print('calling pinv on', m.tolist(), flush=True)
+          print('pinv ->', np.linalg.pinv(m), flush=True)
+          "
+          echo "G4 exit=$? (124 = wedged)"
+        continue-on-error: true
+
+      - name: G5 - which entry point spins: svd, then norm
+        run: |
+          timeout -s KILL 60 python -c "
+          import numpy as np
+          m = np.eye(3); m[0, 0] = np.inf
+          print('svd compute_uv=False ->', np.linalg.svd(m, compute_uv=False), flush=True)
+          " ; echo "G5-svd exit=$?"
+          timeout -s KILL 60 python -c "
+          import numpy as np
+          m = np.eye(3); m[0, 0] = np.inf
+          print('norm ord=2 ->', np.linalg.norm(m, ord=2), flush=True)
+          " ; echo "G5-norm exit=$?"
+          timeout -s KILL 60 python -c "
+          import numpy as np
+          m = np.eye(2); m[0, 0] = np.inf
+          print('2x2 svd ->', np.linalg.svd(m, compute_uv=False), flush=True)
+          " ; echo "G5-2x2 exit=$?"
         continue-on-error: true
