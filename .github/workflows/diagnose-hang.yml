@@ -1,0 +1,70 @@
+name: diagnose-hang
+
+# TEMPORARY. Exists to capture stacks from the Linux-only wedge that stops
+# the suite at exactly test 1800 on every ubuntu leg, across three Python
+# and three numpy versions, while the windows leg passes in 41s on the same
+# commit. Delete once the cause is known and fixed.
+
+on: pull_request
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install
+        run: |
+          python -m pip install -e .[dev]
+          python -m pip install py-spy
+
+      - name: Confirm the suite alone is fine (svd file in isolation)
+        run: python -m pytest compatibility/differential/test_svd_small_batch_differential.py -q
+
+      - name: Run the full suite, dump every stack when it wedges
+        run: |
+          set +e
+          python -u -X faulthandler -m pytest tests compatibility -q > pytest.out 2>&1 &
+          PID=$!
+          echo "pytest pid $PID"
+          for i in $(seq 1 18); do
+            sleep 10
+            if ! kill -0 "$PID" 2>/dev/null; then echo "=== pytest exited on its own ==="; break; fi
+          done
+
+          if kill -0 "$PID" 2>/dev/null; then
+            echo "=== STILL RUNNING AFTER 180s - WEDGED ==="
+            echo "--- last pytest output ---"
+            tail -c 3000 pytest.out
+
+            echo "--- py-spy dump (python frames) ---"
+            py-spy dump --pid "$PID" || echo "py-spy plain failed"
+
+            echo "--- py-spy dump --native (python + C frames) ---"
+            py-spy dump --pid "$PID" --native || echo "py-spy native failed"
+
+            echo "--- process status ---"
+            head -20 "/proc/$PID/status"
+
+            echo "--- per-thread state / wait channel ---"
+            for t in /proc/$PID/task/*; do
+              printf '%s comm=%s state=%s wchan=%s\n' \
+                "$(basename "$t")" \
+                "$(cat "$t/comm" 2>/dev/null)" \
+                "$(awk '{print $3}' "$t/stat" 2>/dev/null)" \
+                "$(cat "$t/wchan" 2>/dev/null)"
+            done
+
+            echo "--- SIGABRT for the in-process faulthandler dump ---"
+            kill -ABRT "$PID"
+            sleep 5
+            tail -c 6000 pytest.out
+            kill -9 "$PID" 2>/dev/null
+            exit 1
+          fi
+
+          echo "--- pytest finished, tail ---"
+          tail -20 pytest.out
