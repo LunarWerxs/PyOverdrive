@@ -1,5 +1,14 @@
 """Derive the parallel_ufunc dispatch table from PYRALLEL-CAL evidence.
 
+SUPERSEDED for the unary family - use tools/calibrate_dispatch.py. The
+evidence this reads measures a single-threaded baseline, which on a hybrid
+CPU lands on a P-core or an E-core per process and stays there (1.44x apart
+on the reference box, measured over 25 processes). A threaded candidate
+averages over that split, so every ratio in the input is inflated by up to
+1.44x. Thresholds derived here were wrong in 15 of 16 rows. Kept because the
+binary family still reads it and because the scaling question it answers is
+a real one; see docs/research/hybrid-cpu-baseline-coin-flip.md.
+
 Reads benchmarks/results/PYRALLEL-CAL/<fingerprint>.json (default: this
 machine's fingerprint) and prints, for each (op, dtype), the smallest
 measured size from which the byte-scheduled thread count wins by at least

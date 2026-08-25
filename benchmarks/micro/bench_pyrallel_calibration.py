@@ -1,5 +1,23 @@
 """PyRallel calibration battery: which ops, dtypes, sizes and thread counts win.
 
+SUPERSEDED for setting thresholds - use tools/calibrate_dispatch.py.
+
+This battery is still the right instrument for the QUESTION it asks (how does
+chunking scale across thread counts), but its numbers must not be turned into
+dispatch thresholds again, for a reason that has nothing to do with its
+design: on a hybrid CPU the single-threaded BASELINE it measures against is a
+coin flip. A process is placed on a P-core or an E-core and stays there, so
+the same np.sin float64 n=1e5 baseline came back 344 us in 15 of 25 fresh
+processes and 497 us in the other 10. The threaded candidate spans cores and
+averages over the split, so the flip moves the denominator of every ratio here
+and never the numerator - up to 1.44x, always flattering the candidate.
+
+Thresholds derived from this file were wrong in 15 of 16 rows, and one op
+(sqrt) was dispatching at 1.05x against a promised 1.3x. See
+docs/research/hybrid-cpu-baseline-coin-flip.md, and note that re-running it on
+an idle machine does NOT fix this: it is reproducible within a process and
+only visible across processes.
+
 Extends the OPP-000008 evidence (np.sin only, float64 only, 4/8/16 threads)
 into the full table the parallel_ufunc fast path is calibrated from:
 

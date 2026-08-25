@@ -30,6 +30,20 @@ weakest cells its predicate admits) against stock, and enables only if
 every probed cell clears MIN_WIN. Interior cells only get faster, so a
 machine that wins the edges wins the regime. Probes run in-process on
 unpatched stock functions and take a few seconds total.
+
+DO NOT ADD A THREADED CANDIDATE TO A PROBE without solving this first.
+Every probe here compares a single-threaded candidate against a
+single-threaded baseline, so both run on whatever core this process was
+given and the core's speed cancels out of the ratio. That cancellation is
+what makes an in-process probe trustworthy, and it fails the moment one
+side uses more than one thread: on a hybrid CPU a process is placed on a
+P-core or an E-core and stays there, while a threaded candidate spans
+cores and averages over both. Measured on the reference box, the same
+single-threaded np.sin baseline came back 344 us in 15 of 25 fresh
+processes and 497 us in the other 10 - so a threaded probe would enable
+or refuse a path on a 1.44x coin flip. Handling it needs the probe cells
+run in re-drawn subprocesses, the way tools/calibrate_dispatch.py does.
+See docs/research/hybrid-cpu-baseline-coin-flip.md.
 """
 
 from __future__ import annotations

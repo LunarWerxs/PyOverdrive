@@ -148,15 +148,30 @@ def main(argv: list[str]) -> int:
 
     plan: list[tuple[Path, str, int, int]] = []
     problems: list[str] = []
+    foreign: list[Path] = []
 
     for path in files:
         raw = path.read_text(encoding="utf-8")
         original = json.loads(raw)
+        # Not every file under results/ is a Dyno suite - tools/calibrate_dispatch.py
+        # writes its own shape. Skip those LOUDLY rather than crashing on the
+        # missing key, and never silently: a malformed Dyno suite would look
+        # exactly like a foreign one, so both get named.
+        if "cases" not in original:
+            foreign.append(path)
+            continue
         compacted = dict(original)
         compacted["cases"] = [compact_case(c) for c in original["cases"]]
         problems += _verify(original, compacted, path)
         text = json.dumps(compacted, separators=(",", ":"))
         plan.append((path, text, len(raw.encode()), len(text.encode())))
+
+    for path in foreign:
+        print(f"skipped (no 'cases' key, not a Dyno suite): "
+              f"{path.relative_to(RESULTS.parent.parent)}")
+    if not plan:
+        print("no Dyno suite files found")
+        return 1
 
     if problems:
         print(f"VERIFICATION FAILED ({len(problems)} problems), nothing written:")

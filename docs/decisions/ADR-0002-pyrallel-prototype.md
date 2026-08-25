@@ -48,8 +48,9 @@ compute-bound ufunc loops release the GIL.
 5. **Thresholds are a table of measured crossovers, per (op, dtype), with a
    shared size-to-thread-count schedule.** Both live in
    `src/pyoverdrive/fastpaths/parallel_ufunc.py` as literals with their
-   evidence path, regenerated from
-   `benchmarks/micro/bench_pyrallel_calibration.py`. A pair with no measured
+   evidence path, regenerated from `tools/calibrate_dispatch.py` (the
+   battery named here was superseded for this purpose; see the note at the
+   end of this ADR). A pair with no measured
    win is absent from the table and runs on stock; that is the automatic
    single-thread selection the Phase 4 gate asks for. The battery measured
    float32 needing roughly 3x more elements than float64 to break even (its
@@ -85,10 +86,15 @@ compute-bound ufunc loops release the GIL.
   1e7 float64 in another took 0.85-1.17x the wall time of running the two
   sequentially. No catastrophe; a proper Dyno case sweeping BLAS thread
   counts is still worth adding.
-- Windows thread wake-up latency puts the crossover at ~1e5 elements for
-  float64 transcendentals here; Linux is expected to cross lower. Hardware
-  decides: the table is per fingerprint, and a second machine's battery is
-  the next evidence to collect.
+- SUPERSEDED 2026-08-24: this ADR recorded the crossover as ~1e5 elements
+  for float64 transcendentals. It is not; that number came from a battery
+  whose single-threaded BASELINE is a per-process coin flip on a hybrid CPU
+  (P-core vs E-core, 1.44x apart, always inflating a threaded candidate).
+  Re-derived end to end the float64 crossovers are 3e5 to 3e6, `np.sqrt`
+  has no crossover at all and left the family, and 15 of the 16 rows moved.
+  The reasoning in this ADR still stands; the numbers in it do not. See
+  `docs/research/hybrid-cpu-baseline-coin-flip.md` and
+  `tools/calibrate_dispatch.py`.
 - Exceptions inside a chunk surface as a Gearbox fallback plus a one-time
   RuntimeWarning; the half-written buffer is private to the failed call,
   except in the `out=` form where the caller's buffer may be partially

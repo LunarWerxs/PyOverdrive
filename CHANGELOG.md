@@ -6,7 +6,7 @@ First public release candidate. MIT licensed.
 
 ### Fast paths
 
-Forty-five always-on fast-path families (69 always-on paths of 71
+Forty-five always-on fast-path families (67 always-on paths of 69
 registered; the remaining two are one calibration-gated path and a
 disabled dispatch-overhead test artifact) behind `pyoverdrive.enable()`.
 Every threshold comes from committed, machine-fingerprinted benchmark
@@ -77,7 +77,9 @@ the reference machines include:
 - channel-style reductions (`np.mean`/`np.sum` over leading axes with a
   tiny trailing axis, 2.2-14.4x), small-array `np.median` (1.5-3.4x),
   small 1-D `np.roll` (2.4-5.9x), uniform-bin `np.histogram2d`
-  (1.4-2.4x), threaded elementwise ufuncs (5.8-9.7x at size)
+  (1.4-2.4x), threaded elementwise ufuncs (1.34-1.63x at their floors,
+  1.8-2.2x at 1e7, measured end-to-end as the worst of sorted/shuffled
+  input and bare/consumed result)
 - 1-D constant-mode `np.pad` as one allocation plus one assignment
   (1.5-4.6x, bit-identical). Quoted CONSUMED, i.e. with the padded array
   summed before the clock stops: the no-constant route allocates with
@@ -101,7 +103,7 @@ the reference machines include:
   paths whose wins are architecture-dependent: verdicts persist per
   machine fingerprint; foreign or stale calibration files are ignored;
   with no file, gated paths stay off.
-- Bit-identical results on 45 of the 69 always-on paths. Two more (the
+- Bit-identical results on 43 of the 67 always-on paths. Two more (the
   FFT convolve/correlate pair) are bit-identical for integer dtypes
   and numeric for floats, and the remaining 22 run in documented
   numeric mode, each with a measured tolerance. Every path's
@@ -112,8 +114,44 @@ the reference machines include:
 
 ### Verification
 
-- 2263 tests: hand-written differential suites per path plus a
+- 2128 tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
+- The threaded-ufunc thresholds were re-derived from scratch after the old
+  ones were found to rest on a measurement artifact, and 15 of their 16 rows
+  moved. On a hybrid CPU (P-cores + E-cores) a single-threaded process is
+  placed on one class of core and stays there, so the BASELINE of every
+  threading speedup is a per-process coin flip - the same np.sin float64
+  n=1e5 baseline measured 344 us in 15 of 25 fresh processes and 497 us in
+  the other 10, 1.44x apart. The threaded candidate spans cores and averages
+  over the split, so the flip moves only the denominator, always in the
+  candidate's favour, and it is invisible to re-runs, larger sample counts,
+  medians and idle-machine checks alike because it is perfectly reproducible
+  *within* a process. Thresholds now come from `tools/calibrate_dispatch.py`:
+  end to end through the patched name, one cell per process, sides
+  interleaved, only on processes that drew a fast core, and each threshold
+  must clear 1.3x on the worst of {sorted, shuffled} x {bare, consumed}
+  input at that size and every larger measured one. `np.sqrt` left the
+  threaded family entirely - it is memory-bandwidth bound and reaches 1.3x
+  at no measured size, having shipped at 1.05x at its own advertised floor.
+  Write-up: `docs/research/hybrid-cpu-baseline-coin-flip.md`.
+- The threaded BINARY family (`np.add` and friends) came from the same
+  battery and was corrected the same way, with one extra rule: its wins are
+  bandwidth, they cross the 1.3x bar only between 1e7 and 3e7 elements, and
+  the run-to-run spread there is as wide as the margin being measured - one
+  sweep read `subtract` float64 at 1.23x, 1.14x, 1.33x on consecutive sizes.
+  So its floors come from TWO independent sweeps with the worse reading kept
+  per cell; a row ships only if it cleared the bar twice. At the old 1e6
+  floors the family actually delivered 1.04-1.20x, and `subtract` float32 at
+  its 3e6 floor ran at 0.97x - a dispatched loss. What survives is `np.add`,
+  `maximum` and `minimum` on float64/int64 and `subtract`/`multiply` on
+  int64, at 1e7-2e7 elements. Every float32 row is gone, and `np.divide`
+  left the family entirely. This is the strongest candidate in the project
+  for per-machine calibration rather than a shipped table.
+- `tools/verify_no_pessimization.py` inherited the same defect and could
+  return a false green on threaded paths; it now rejects measurements taken
+  on a slow core too. Its other limit is now stated rather than implied: it
+  probes ONE canonical input per path, so a loss confined to another dtype
+  does not appear there - which is exactly how `subtract` float32 hid.
 - Full gate green on Windows x86-64 (AMD Zen 4 + Intel Alder Lake) and on
   Linux x86-64 in CI across CPython 3.12/3.13/3.14 against numpy 2.0.2,
   2.4.5 and latest, plus a clean-venv wheel-install check.

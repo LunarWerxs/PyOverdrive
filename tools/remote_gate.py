@@ -10,8 +10,8 @@ The second box is a plain COPY of the tree, not a clone, so nothing here
 touches git on the far side. `git archive HEAD` means what is verified is
 what is committed, never a dirty working tree.
 
-No host name lives in this file: pass the ssh alias. Set one up in
-~/.ssh/config with its own IdentityFile, because a box with a dedicated key
+No host name lives in this file: pass the ssh alias. Define one in your ssh
+client config with its own IdentityFile, because a box with a dedicated key
 will refuse the default one and the failure reads as "the box is down".
 
 Usage:

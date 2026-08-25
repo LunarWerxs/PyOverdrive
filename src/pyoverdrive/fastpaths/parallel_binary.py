@@ -50,29 +50,53 @@ _I64 = np.dtype(np.int64)
 
 # ---------------------------------------------------------------------------
 # CALIBRATION TABLE: op name -> {operand dtype: minimum element count}.
-# Derived by `lab/cli/calibrate_pyrallel.py --suite PYRALLEL-BIN-CAL` from
-# benchmarks/results/PYRALLEL-BIN-CAL/ (fingerprint 8f8198d9abab). A pair
-# absent here measured no >= 1.3x win at any size and stays on stock.
+# Derived by `tools/calibrate_dispatch.py --family binary` (fingerprint
+# 9bbe7063c555), evidence in benchmarks/results/PYRALLEL-DISPATCH-CAL/.
+# A pair absent here measured no >= 1.3x win at any size and stays on stock.
 # Bandwidth-bound wins are the most machine dependent numbers in the
 # project: recalibrate on every new box before trusting this table there.
 # ---------------------------------------------------------------------------
-# 2026-08-23 battery rerun on a QUIET box (5-7% foreign load, the first
-# uncontended calibration; log:
-# benchmarks/results/_scratch/baseline-20260823-131020.log): wins at the
-# threshold are 1.4-1.6x and top out at 1.6-2.1x at 1e7 on 16 threads. The
-# quiet run moved six rows DOWN from the contended table (add/multiply f32
-# 10M -> 3M; add/multiply/divide f64 3M -> 1M; maximum i64 3M -> 1M): the
-# contended run had slowed stock as much as the candidate at mid sizes.
+# RE-DERIVED 2026-08-24 by tools/calibrate_dispatch.py --family binary, and
+# almost nothing of the old table survived. The previous rows came from
+# benchmarks/micro/bench_pyrallel_binary_calibration.py, whose
+# single-threaded baseline is a per-process coin flip on this hybrid CPU
+# (P-core or E-core, 1.44x apart, always inflating a threaded candidate);
+# the "quiet rerun" that moved six rows DOWN to 1e6 was reading that flip.
+# Measured end to end at those 1e6 floors the family actually delivered
+# 1.04-1.20x against a promised 1.3x, and subtract float32 at its 3e6 floor
+# ran at 0.97x - a dispatched loss.
+# Full write-up: docs/research/hybrid-cpu-baseline-coin-flip.md.
+#
+# THESE FLOORS COME FROM TWO INDEPENDENT SWEEPS WITH THE WORSE READING KEPT
+# PER CELL, which for this family is not pedantry. Bandwidth-bound wins here
+# cross the 1.3x bar somewhere between 1e7 and 3e7 elements and the
+# run-to-run spread is about as wide as the margin: one sweep read
+# subtract float64 at 1.23x, 1.14x, 1.33x on consecutive sizes - non
+# monotone. A threshold read off a single sweep is fitting noise, so a row
+# ships only if it cleared 1.3x TWICE at its floor and at every larger size.
+#
+# What that leaves, and what it removed:
+#   - EVERY float32 row is gone. Best any of them managed on the worse
+#     reading is 1.28x (add, multiply at 2e7); float32 halves the bytes per
+#     element, so a given element count carries half the bandwidth pressure.
+#   - divide is gone entirely: float64 peaks at 1.32x but dips to 1.29x at
+#     2e7, so no size clears the bar and stays clear above it.
+#   - multiply float64 misses by a hair (1.31x at 2e7, 1.2996x at 3e7).
+#     Kept out rather than rounded in.
 # Below ~1e6 a binary op finishes in tens of microseconds and threading
-# LOSES by 4-10x (0.10-0.24x at 1e5), which is why every threshold here is
-# >= 1e6.
+# LOSES by 4-10x (0.50-0.92x at 3e5 here), which is what the floors prevent.
+#
+# This family is the strongest candidate in the project for per-machine
+# calibration (src/pyoverdrive/calibration.py) rather than a shipped table:
+# the numbers are bandwidth, and bandwidth is the least transferable thing
+# measured here. Doing that needs the probe cells run in re-drawn
+# subprocesses first - see the warning in calibration.py.
 SUPPORTED: dict[str, dict[np.dtype, int]] = {
-    "add": {_F64: 1_000_000, _F32: 3_000_000, _I64: 1_000_000},
-    "subtract": {_F64: 1_000_000, _F32: 3_000_000, _I64: 1_000_000},
-    "multiply": {_F64: 1_000_000, _F32: 3_000_000, _I64: 1_000_000},
-    "divide": {_F64: 1_000_000, _F32: 3_000_000},
-    "maximum": {_F64: 1_000_000, _F32: 3_000_000, _I64: 1_000_000},
-    "minimum": {_F64: 1_000_000, _F32: 3_000_000, _I64: 1_000_000},
+    "add": {_F64: 20_000_000, _I64: 20_000_000},
+    "subtract": {_I64: 20_000_000},
+    "multiply": {_I64: 10_000_000},
+    "maximum": {_F64: 20_000_000, _I64: 20_000_000},
+    "minimum": {_F64: 20_000_000, _I64: 20_000_000},
 }
 
 

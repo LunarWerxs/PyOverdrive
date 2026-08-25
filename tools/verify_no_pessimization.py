@@ -32,9 +32,32 @@ The two sides are also timed INTERLEAVED rather than in separate blocks, so
 anything that drifts across a measurement cannot land on one side only.
 That alone fixed two earlier false reds.
 
-A limit worth stating even so: this catches gross losses, not the
-difference between 0.98x and 1.02x. Run it on an idle machine, and settle
-anything within a few percent of 1.0 with a dedicated probe.
+AND, on a hybrid CPU, ONLY ON A FAST CORE - because otherwise this tool
+returns FALSE GREENS. A single-threaded stock call runs on whatever core
+class the process was handed and stays there; a threaded fast path spans
+cores and averages over the difference. So a process that draws an
+efficiency core has a slow stock side and a normal patched side, which
+flatters the ratio by the class ratio - 1.44x on the box this was found on.
+A threaded path that genuinely runs at 0.9x reports 1.3x and passes. Every
+process here probes the core it was given and re-draws if it is a slow one
+(lab/dyno/cpuclass.py); the fast class is also the honest one to judge on,
+since stock is quickest there and a fast path has the least to offer.
+
+Two limits worth stating even so.
+
+First, this catches gross losses, not the difference between 0.98x and
+1.02x. Run it on an idle machine, and settle anything within a few percent
+of 1.0 with a dedicated probe.
+
+Second, and easier to mistake for coverage: it probes ONE canonical input
+per path. A path whose calibration table spans several dtypes is judged on
+whichever one its selfcheck input picks - float64 where there is one - so a
+loss confined to another dtype does not appear here. That is not
+hypothetical: pyrallel_subtract measured 1.13x at its float64 floor while
+its float32 row was running at 0.97x, and it took the full
+tools/calibrate_dispatch.py sweep (every op x dtype x size) to see it. Treat
+a green here as "no path is grossly slow on its headline input", never as
+"every dispatched cell pays".
 
 Usage:
     .venv/Scripts/python tools/verify_no_pessimization.py [--min 1.0] [-v]
@@ -52,9 +75,12 @@ import timeit
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "src"))
 
 import numpy as np  # noqa: E402
+
+from lab.dyno import cpuclass  # noqa: E402
 
 import pyoverdrive  # noqa: E402
 from pyoverdrive import diagnostics as D  # noqa: E402
@@ -122,8 +148,10 @@ def _measure(op: str, args, kwargs, rounds: int) -> float | None:
     return s / c if c > 0 else None
 
 
-def _measure_one(name: str) -> str:
+def _measure_one(name: str, fast_under: float | None = None) -> str:
     """Measure a single path. Runs as its own process; prints one line."""
+    if fast_under is not None and cpuclass.probe_us() > fast_under:
+        return "SLOW-CORE"
     pyoverdrive.enable()
     make = D._selfcheck_inputs().get(name)
     if make is None:
@@ -155,11 +183,16 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--min", type=float, default=1.0)
     ap.add_argument("-v", "--verbose", action="store_true")
+    ap.add_argument("--any-core", action="store_true",
+                    help="accept measurements taken on a slow core too; on a "
+                         "hybrid CPU that can hide a threaded pessimization")
+    ap.add_argument("--retries", type=int, default=6)
+    ap.add_argument("--fast-under", type=float, help=argparse.SUPPRESS)
     ap.add_argument("--one", help=argparse.SUPPRESS)  # internal: one path, own process
     args = ap.parse_args(argv[1:])
 
     if args.one:
-        print(_measure_one(args.one))
+        print(_measure_one(args.one, args.fast_under))
         return 0
 
     # EVERY PATH GETS A FRESH PROCESS. Measuring 69 paths in one process
@@ -179,14 +212,25 @@ def main(argv: list[str]) -> int:
     )
     pyoverdrive.disable()
 
+    classes = cpuclass.classify()
+    print(cpuclass.describe(classes))
+    cutoff = None if args.any_core else cpuclass.fast_cutoff(classes)
+    if cutoff is not None:
+        print(f"measuring only on the fast class (probe <= {cutoff:.0f} us), "
+              f"up to {args.retries} re-draws per path")
+
     losses: list[tuple[str, str, float]] = []
     judged = skipped = 0
     for name in names:
-        proc = subprocess.run(
-            [sys.executable, str(Path(__file__)), "--one", name],
-            capture_output=True, text=True, cwd=str(REPO),
-        )
-        line = (proc.stdout or "").strip().splitlines()[-1:] or [""]
+        cmd = [sys.executable, str(Path(__file__)), "--one", name]
+        if cutoff is not None:
+            cmd += ["--fast-under", f"{cutoff:.3f}"]
+        for _ in range(max(1, args.retries)):
+            proc = subprocess.run(cmd, capture_output=True, text=True,
+                                  cwd=str(REPO))
+            line = (proc.stdout or "").strip().splitlines()[-1:] or [""]
+            if line[0].strip() != "SLOW-CORE":
+                break
         parts = line[0].split()
         if not parts or parts[0] != "RATIO":
             skipped += 1

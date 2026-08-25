@@ -1,5 +1,21 @@
 """PyRallel BINARY ufunc calibration: memory-bound arithmetic, does it scale?
 
+SUPERSEDED for setting thresholds - use tools/calibrate_dispatch.py --family
+binary, for the same reason as the unary battery beside it: on a hybrid CPU
+the single-threaded BASELINE this measures against is a per-process coin
+flip (P-core or E-core, 1.44x apart, measured over 25 fresh processes),
+while the threaded candidate spans cores and averages over both. Every ratio
+here is inflated by up to that factor, never deflated, and re-running on an
+idle machine does not help: the split is reproducible WITHIN a process and
+only visible across them. See docs/research/hybrid-cpu-baseline-coin-flip.md.
+
+Worth stressing for this family in particular: its wins sit within about
+0.1x of the 1.3x bar across the sizes where they cross it, and consecutive
+sizes in one sweep can read 1.23x, 1.14x, 1.33x. That is non-monotone, so
+the run-to-run spread is as large as the margin being measured, and a
+threshold read off a single sweep is fitting noise. The shipped table is
+derived from two independent sweeps with the WORSE reading kept per cell.
+
 OPP-000008's control case measured np.add at 1e7 float64 gaining 2.4-2.75x
 on 4-16 threads, against the issue reporter's prediction of no gain: one Zen
 4 core cannot saturate dual-channel DDR5. That is a bandwidth effect, far

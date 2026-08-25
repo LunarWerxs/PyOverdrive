@@ -39,14 +39,17 @@ load. Every number in this repository ships with the machine that produced it
 and the JSON it came from, under
 [`benchmarks/results/`](benchmarks/results). Nothing is admitted on one
 machine's word: a fast path ships only if it wins on both benchmark machines,
-and the slower one's number is the one quoted.
+and the slower one's number is the one quoted. The one current exception is
+stated where it applies - the THREADED ufunc thresholds were re-derived on
+2026-08-24 on the Intel box alone, and the second machine has not been idle
+enough to re-confirm them; see "Baselining a machine" below.
 
 ## Why it is safe
 
 The point of an accelerator you can leave switched on is that you never have to
 wonder. So:
 
-- **Results match stock NumPy.** Bit-identical on 45 of the 69 always-on paths;
+- **Results match stock NumPy.** Bit-identical on 43 of the 67 always-on paths;
   the other 23 run in a documented numeric mode with a measured tolerance.
 - **Every fast path is conservative.** It runs only when a predicate proves the
   input is in its calibrated regime. Anything else - odd dtypes, edge shapes,
@@ -120,7 +123,7 @@ pyoverdrive.enable()                      # patch every supported operation
 pyoverdrive.enable(["numpy.sin"])         # or just some
 pyoverdrive.report()                      # what is registered, enabled, patched
 pyoverdrive.explain("numpy.sin", x)       # which path a call would take, and why
-pyoverdrive.configure(threads=8, disable=["pyrallel_sqrt"])
+pyoverdrive.configure(threads=8, disable=["pyrallel_sin"])
 pyoverdrive.disable()                     # restore stock NumPy exactly
 ```
 
@@ -171,21 +174,30 @@ all-paths self-check; 2065 tests and 67 paths at that run, 2026-08-25)
 additionally runs green on a third environment - Linux x86-64 under
 Docker (python:3.13-slim, numpy 2.5.2) - and on a clean-venv wheel
 install, so the compatibility claims hold across two OSes, two
-architectures, and both supported numpy minor lines. Every family wins on both benchmark machines; the
-single-threaded algorithmic
-families transfer at full strength or better (intersect1d sorted 83x,
-correlate int64 15.4x, unique(axis=0) 37.9x on Intel), while the threaded
-ufunc wins are narrower on the hybrid CPU (E-cores drag 16-thread runs;
-its own calibration table drops several float32 binary rows), which is
-exactly what per-machine calibration exists to absorb. A run flagged CONTENDED understates every
-multi-thread number; do not move a threshold on its say-so.
+architectures, and both supported numpy minor lines. The single-threaded
+algorithmic families win on both benchmark machines and transfer at full
+strength or better (intersect1d sorted 83x, correlate int64 15.4x,
+unique(axis=0) 37.9x on Intel).
+
+The THREADED ufunc thresholds are a different story and are stated
+narrowly on purpose. They were re-derived on 2026-08-24 on the Intel box
+only, after the previous numbers turned out to rest on a per-process
+P-core/E-core coin flip in the single-threaded baseline
+(`docs/research/hybrid-cpu-baseline-coin-flip.md`); 15 of 16 rows moved and
+`np.sqrt` left the threaded family altogether. Re-deriving them on the Zen 4
+box is outstanding - it has not been idle enough to calibrate on, and
+threading numbers taken under load are worthless. Raising a floor is the
+safe direction (the worst case is a win left unclaimed, never a
+pessimization), so the table ships as measured. A run flagged CONTENDED
+understates every multi-thread number; do not move a threshold on its
+say-so.
 
 ## Status
 
 Phases 0-4 prototyped on the first machine (Zen 4 AVX-512, 16C/32T, numpy
 2.4.5, fingerprint `8f8198d9abab`). Forty-five fast-path families are live behind
 `enable()` (plus one calibration-gated), every threshold calibrated from
-committed Dyno evidence. Results are bit-identical to stock on 45 of the 69 always-on paths
+committed Dyno evidence. Results are bit-identical to stock on 43 of the 67 always-on paths
 registered paths; the other 23 run in documented numeric mode
 (`inner_tensordot`, float fftconvolve,
 `nanquantile_masked`, `nanpercentile_masked`, `einsum_optimize`,
@@ -199,10 +211,10 @@ det/slogdet/solve, `cholesky_small_batch`, `qr_small_batch`,
 | `unique_sort` | `np.unique`/`unique_values`, {int32,int64,uint32,uint64} n >= 64; {int8,uint8,uint16} n >= 1000, int16 n >= 10k via radix (`kind='stable'`) | 37-55x (1M int64); small ints 1.6-27.8x; up to 101x candidate-level |
 | `inner_tensordot` | `np.inner`, float32/float64, ndim > 2 | 18-24x on the reported shape; floor 3.1x |
 | `intersect_sorted` | `np.intersect1d`, same int dtype, combined size >= 400 (32/64-bit) or >= 12k (8/16-bit) | 21.6x random inputs, 90.7x already-sorted (1e6 x 1e5); small ints 1.9-10.1x; up to 433x candidate-level |
-| `pyrallel_<op>` | `np.sin cos tan exp log log10 tanh sqrt`, float64/float32, C-contiguous, op/dtype-calibrated size floor (1e5 float64 transcendentals) | 5.8-7.8x at 1e7 on 16 threads (`exp`, `sin`); 9.7x with `out=` (`sin`) |
+| `pyrallel_<op>` | `np.sin cos tan exp log log10 tanh`, float64/float32, C-contiguous, op/dtype-calibrated size floor (3e5-3e6 elements) | 1.34-1.63x at the floor, 1.8-2.2x at 1e7, measured end-to-end as the WORST of sorted/shuffled input and bare/consumed result. `np.sqrt` is not in this family: bandwidth bound, never reaches 1.3x |
 | `relayout_blocked` | `np.ascontiguousarray` of a transposed/F-ordered 2-D float64/float32/int64 array, >= 512x512 (int64 1024x1024) | 2.8-3.3x at 2048x2048 end-to-end; up to 6.6x candidate-level (float32 8192x1024) |
 | `unique_axis0_column` | `np.unique(a, axis=0)`, single int column (8- to 64-bit), >= 1000 rows | 42x at 10k rows int64; 40-298x small ints |
-| `pyrallel_<op>` (binary) | `np.add subtract multiply divide maximum minimum`, same-shape same-dtype float64/float32/int64, floors of 1e6-1e7 | 1.3-2.2x at 1e6-1e7 (bandwidth bound; `a + b` is not reachable, only explicit `np.add`) |
+| `pyrallel_<op>` (binary) | `np.add maximum minimum` float64/int64, `np.subtract` int64, `np.multiply` int64; same-shape same-dtype C-contiguous; floors of 1e7-2e7 elements | 1.31-1.38x at the floor, worst of two independent sweeps (bandwidth bound; `a + b` is not reachable, only explicit `np.add`). `np.divide` and every float32 row left the family: they clear 1.3x at no measured size |
 | `fftconvolve` / `fftcorrelate` | `np.convolve`/`np.correlate`, all three modes (full/same/valid), 1-D same-dtype float64/int64/int32, min length 1000, per-mode naive-work floors; floats all-finite and non-overflowing, ints under the 2^52 exactness bound | 3.6x float64 / 13.5x int64 full-mode end-to-end (10k x 1k); same-mode (the smoothing idiom) 2.9-4.9x, valid 1.6-3.3x, int modes ~13-14x; 1518x candidate-level at 20k x 20k. Ints bit-identical, floats ~1e-12 |
 | `nanquantile_masked` | `np.nanquantile(a, q, axis=<int>)`, 2-D+ float64, scalar q, >= 300 elements, guarded against the few-long-slices anti-regime | 22.6-229x across the many-slice region (51.9-63.4x at the reporter's 27x100); results bit-exact vs stock in every probe |
 | `einsum_optimize` | two-operand subscripts-form `np.einsum`, float64/float32, min operand >= 10k (matmul-shaped) or >= 1e6 (scalar output); label and ellipsis (`...ij,...jk`) spellings; routes through numpy's own `optimize=True` | 3.4-27.4x float64 from the floor up (45x candidate-level; ellipsis 3.2-4.3x measured); tiny contractions (the reason optimize is off by default) stay on stock |
@@ -267,24 +279,32 @@ the probe cells), and both are correct.
 `pyrallel_<op>` is the Phase 4 PyRallel prototype (`docs/decisions/ADR-0002`):
 one persistent thread pool, a byte-keyed thread schedule, the caller's
 `np.errstate` mirrored into every chunk, `PYOVERDRIVE_THREADS` as the cap and
-`=1` as the whole-core kill switch. Its calibration battery ran under
-27-44% foreign CPU load and is recorded as contended (Dyno now stamps the
-load on every result), so its thresholds are conservative by construction.
+`=1` as the whole-core kill switch. Its thresholds were re-derived from
+scratch on 2026-08-24 and 15 of the 16 rows moved, because the old ones
+rested on a measurement artifact rather than on the code: on a hybrid CPU a
+single-threaded process is placed on a P-core or an E-core and stays there,
+so the BASELINE of a threading speedup is a per-process coin flip - the same
+`np.sin` float64 n=1e5 baseline measured 344 us in 15 of 25 fresh processes
+and 497 us in the other 10. The threaded candidate spans cores and averages
+over the split, so the flip inflates every ratio by up to 1.44x and never
+deflates one. `np.sqrt` left the family altogether over it. Details and the
+measurements in `docs/research/hybrid-cpu-baseline-coin-flip.md`.
 
 Honest numbers from the same runs: float64/float32/int16/int8 unique show no
 win (int8 would LOSE 7x, so the predicate excludes them); tiny patched calls
 pay ~300 ns dispatch tax (a 10-element `np.add` or `np.sin` in a hot loop
 drops to ~0.5x; under 1% from 1e5 elements up; documented in
-`benchmarks/results/MVP-BASELINE/`); threading any of the eight ufuncs
-below ~1e5 elements LOSES, by up to 50x at 1e4, which is exactly why the
+`benchmarks/results/MVP-BASELINE/`); threading any of these ufuncs
+below its floor LOSES, by up to 50x at 1e4, which is exactly why the
 size floors exist. `np.isin` stays on stock: the searchsorted approach lost
 to NumPy's table method at every size. Rejected as stale after measurement:
 the classic `ufunc.at` slowness, fixed upstream in 2023 (OPP-000003).
 
 Full evidence, including losses: `docs/research/opportunities/` and
-`benchmarks/results/`. Recalibrate on new hardware with
-`benchmarks/micro/bench_pyrallel_calibration.py` then
-`lab/cli/calibrate_pyrallel.py`.
+`benchmarks/results/`. Recalibrate the threaded ufuncs on new hardware with
+`tools/calibrate_dispatch.py`, which measures end-to-end through the patched
+name, one cell per process, and refuses to trust a process that drew a slow
+core on a hybrid CPU.
 
 ## About
 

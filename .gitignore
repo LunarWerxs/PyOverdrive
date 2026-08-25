@@ -15,6 +15,12 @@ lab/corpus/raw/*.json
 # Benchmark results ARE committed (evidence), but scratch outputs are not
 benchmarks/results/_scratch/
 
+# Test-run caches. Not merely noise: tools/assemble_release.py runs the gate
+# INSIDE the staged public tree, so without this the staging directory grows
+# a .hypothesis/ and a .pytest_cache/ that a careless sync would publish.
+.hypothesis/
+.pytest_cache/
+
 # OS noise
 Thumbs.db
 .DS_Store

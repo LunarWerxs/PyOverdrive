@@ -52,40 +52,71 @@ _F32 = np.dtype(np.float32)
 
 # ---------------------------------------------------------------------------
 # CALIBRATION TABLE. Every entry below is a measured crossover, fingerprint
-# 8f8198d9abab (Zen 4 AVX-512, 16C/32T, numpy 2.4.5), evidence in
-# benchmarks/results/PYRALLEL-CAL/ and benchmarks/results/OPP-000008/.
+# 9bbe7063c555 (i7-12700K, 8P+4E, numpy 2.5.2), evidence in
+# benchmarks/results/PYRALLEL-DISPATCH-CAL/.
 # An (op, dtype) pair absent from this table has either no evidence or
 # measured no win, and stays on stock. Regenerate with
-# benchmarks/micro/bench_pyrallel_calibration.py, then edit by hand with the
-# numbers in front of you; never extrapolate a row.
+# tools/calibrate_dispatch.py, then edit by hand with the numbers in front
+# of you; never extrapolate a row.
 # ---------------------------------------------------------------------------
 
 # op name -> {dtype: minimum element count at which the path dispatches}.
-# Derived by lab/cli/calibrate_pyrallel.py (min win 1.3x at the scheduled
-# thread count, at that size and every larger measured size) from the
-# PYRALLEL-CAL battery of 2026-08-23 rerun on a QUIET box (5-11% foreign
-# load, the first uncontended calibration; log:
-# benchmarks/results/_scratch/baseline-20260823-131020.log). The quiet run
-# confirmed every contended threshold except two float64 rows: log dropped
-# 300k -> 100k (1.41x there) and log10 rose 100k -> 300k (only 1.16x at
-# 100k once the baseline ran unloaded; the contended run had understated
-# stock, not the candidate).
 #
-# Measured at the threshold / at 1e7 (16 threads), float64:
-#   sin 1.63x / 4.63x   cos 1.33x / 5.26x   tan 1.70x / 4.92x
-#   exp 1.42x / 4.60x   log 1.41x / 6.07x   log10 1.92x / 5.97x
-#   tanh 1.46x / 6.90x  sqrt 1.60x / 2.26x (memory bound, late crossover)
-# float32 kernels are ~2-3x faster per element, so the crossover sits 3-10x
-# higher in elements; sqrt float32 only pays from 3M elements (1.77x).
+# RE-DERIVED 2026-08-24 by tools/calibrate_dispatch.py, and the table it
+# replaced was wrong in 15 of its 16 rows. The old one came from
+# benchmarks/micro/bench_pyrallel_calibration.py, which times the CANDIDATE
+# (parallel_unary against the bare ufunc). Two things about that were fine
+# and one was fatal:
+#
+#   - candidate vs dispatched: measured, and they agree; the predicate here
+#     is cheap enough not to show up.
+#   - blocked vs interleaved timing: measured, and they agree too.
+#   - THE BASELINE WAS A COIN FLIP. This is a hybrid CPU (8 P-cores + 4
+#     E-cores). A single-threaded process is placed on one class and stays
+#     there, so asked for the same np.sin float64 n=1e5 in 25 fresh
+#     processes the box answered 344 us fifteen times and 497 us ten times,
+#     1.44x apart, with almost no spread inside either group. A THREADED
+#     candidate spans cores and averages over the split, so the flip moves
+#     the denominator of every ratio and never the numerator - up to 1.44x,
+#     always in our favour. The old evidence for sin float64 1e5 (stock
+#     490.8 us, pyrallel_4t 307.8 us, 1.59x) is simply a run that drew an
+#     E-core: the candidate is unchanged today at ~302 us and stock is
+#     344 us, making the same cell 1.10x.
+#     Full write-up: docs/research/hybrid-cpu-baseline-coin-flip.md.
+#
+# The numbers below are measured END TO END through the patched public name,
+# one cell per process, both sides interleaved, only on processes that drew
+# a fast core, and each threshold is the smallest size clearing 1.3x on the
+# WORST of {sorted, shuffled} x {bare result, consumed result} at that size
+# and every larger measured size. Sorted input is measured because it is not
+# a corner case for these ops - np.sin(np.linspace(...)) is close to the
+# canonical call - and because NumPy's own trig kernels run ~2.2x FASTER on
+# sorted data (sin at n=1e5: 338 us sorted, 753 us shuffled), which leaves
+# threading much less to win back there.
+#
+# Measured worst-case at the threshold / at 1e7, float64:
+#   sin 1.36x / 1.94x   cos 1.35x / 1.90x   tan 1.37x / 1.90x
+#   exp 1.41x / 2.04x   log 1.34x / 1.82x   log10 1.41x / 1.91x
+#   tanh 1.63x / 2.16x
+#
+# sqrt is GONE, not merely raised: it clears 1.3x at no measured size on
+# either dtype (best 1.19x at 1e7 float64, 1.17x at 1e7 float32), and at its
+# old shipped floor of 1e6 float64 it ran at 1.05x. It is memory-bandwidth
+# bound, so threads cannot help it; it stays on stock.
+#
+# Three float32 rows (cos, exp, log) do clear 1.3x, but only at 1e7, the
+# LARGEST size measured - one point, with nothing above it to show the win
+# persists. House rule is that hardware decides and nobody extrapolates, so
+# they stay on stock until the sweep is extended past 1e7. All three ran at
+# 1.06-1.15x at their old thresholds, so nothing of value is lost.
 SUPPORTED: dict[str, dict[np.dtype, int]] = {
-    "sin": {_F64: 100_000, _F32: 300_000},
-    "cos": {_F64: 100_000, _F32: 1_000_000},
-    "tan": {_F64: 100_000, _F32: 300_000},
-    "exp": {_F64: 300_000, _F32: 1_000_000},
-    "log": {_F64: 100_000, _F32: 1_000_000},
-    "log10": {_F64: 300_000, _F32: 300_000},
-    "tanh": {_F64: 100_000, _F32: 1_000_000},
-    "sqrt": {_F64: 1_000_000, _F32: 3_000_000},
+    "sin": {_F64: 300_000, _F32: 3_000_000},
+    "cos": {_F64: 300_000},
+    "tan": {_F64: 1_000_000, _F32: 1_000_000},
+    "exp": {_F64: 300_000},
+    "log": {_F64: 1_000_000},
+    "log10": {_F64: 1_000_000, _F32: 1_000_000},
+    "tanh": {_F64: 3_000_000, _F32: 3_000_000},
 }
 
 # THREAD_SCHEDULE / threads_for live in _pyrallel_common (shared with the
