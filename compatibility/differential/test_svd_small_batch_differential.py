@@ -481,10 +481,37 @@ def test_refusal_batch_below_min(op):
 
 
 @pytest.mark.parametrize("op", OPS)
-@pytest.mark.parametrize("bad_value", [np.nan, np.inf])
-def test_refusal_non_finite_entry(op, bad_value):
+def test_refusal_nan_entry(op):
     a = _random_batch((BATCH_MIN,), 3, seed=1240)
-    a[7, 0, 0] = bad_value
+    a[7, 0, 0] = np.nan
+    _assert_refused_raise_parity(op, (a,), _OP_KWARGS[op])
+
+
+@pytest.mark.parametrize("op", OPS)
+def test_refusal_inf_entry(op):
+    """Infinite entry: full parity for svd/norm, DECISION ONLY for pinv.
+
+    pinv is the one spelling that must not be executed here. On Linux,
+    np.linalg.svd with compute_uv=True - which is what pinv calls - never
+    returns for a matrix 3x3 or larger carrying an infinite entry on the
+    DIAGONAL; the thread spins in LAPACK rather than blocking. Measured on
+    GitHub's ubuntu runners, numpy 2.0.2/2.4.5/2.5.2, py3.12/3.13/3.14.
+    The same call on Windows returns in well under a millisecond.
+    compute_uv=False, 2x2, and an infinity off the diagonal are all
+    unaffected, so SVD_OP (compute_uv=False) and NORM_OP (which reaches
+    stock's own _multi_svd_norm, also compute_uv=False) keep their full
+    raise-parity check. See docs/research/upstream-pinv-inf-hang.md.
+
+    What PyOverdrive owns either way is the refusal itself: a non-finite
+    batch must go to stock rather than through the closed form, and
+    decide() reports that without running anything.
+    """
+    a = _random_batch((BATCH_MIN,), 3, seed=1240)
+    a[7, 0, 0] = np.inf
+    if op == PINV_OP:
+        decision, reason = GEARBOX.decide(op, (a,), _OP_KWARGS[op])
+        assert decision == "stock", (op, decision, reason)
+        return
     _assert_refused_raise_parity(op, (a,), _OP_KWARGS[op])
 
 

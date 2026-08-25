@@ -127,10 +127,30 @@ def test_convolve_correlate_float64(a, v, mode, data):
     # which an output-scaled atol wrongly flags. (The absolute error bound
     # is ~eps * log2(fft_len) * ||a||_2 * ||v||_2 on both routes.)
     fin_a, fin_v = a[np.isfinite(a)], v[np.isfinite(v)]
-    norm_bound = float(np.linalg.norm(fin_a) * np.linalg.norm(fin_v)) if fin_a.size and fin_v.size else 1.0
-    # clamp: norm itself overflows to inf near 1e213-scale draws, and numpy
-    # rejects a non-finite atol; overflow-scale draws are refused by the
-    # predicate anyway, so both routes are stock (exact) there
+
+    def _scaled_norm(x):
+        """Overflow- and underflow-safe 2-norm, ||x|| == m * ||x/m||.
+
+        np.linalg.norm squares first, so a 1e152-scale draw overflows the
+        sum of squares to inf and a 1e-191-scale draw underflows it to 0.
+        inf * 0 is nan, and a nan atol makes np.allclose reject arrays that
+        are in fact bit-identical - the comparator fails, not the code under
+        test. Hypothesis found precisely that pair (a ~4.2e+152 against
+        v ~8.1e-191) and it looked like a convolve divergence for a while.
+        """
+        if x.size == 0:
+            return 0.0
+        m = float(np.abs(x).max())
+        if m == 0.0:
+            return 0.0
+        return m * float(np.linalg.norm(x / m))
+
+    norm_bound = _scaled_norm(fin_a) * _scaled_norm(fin_v)
+    # clamp: the product can still overflow for genuinely huge draws, and
+    # numpy rejects a non-finite atol; overflow-scale draws are refused by
+    # the predicate anyway, so both routes are stock (exact) there
+    if not np.isfinite(norm_bound):
+        norm_bound = 1e280
     atol = min(1e-11 * (1.0 + norm_bound), 1e280)
 
     def eq(g, e):
@@ -1114,7 +1134,15 @@ def test_svd_small_batch(batch, d, dtype, op, hazard, kwarg_twist, data):
     elif hazard == "all_singular":
         a[...] = 0.0
     elif hazard == "nonfinite" and batch:
-        a[rng.integers(0, batch), 0, 0] = data.draw(st.sampled_from([np.nan, np.inf]))
+        # infinity is withheld from pinv ONLY. compare() has to execute
+        # stock, and stock pinv on a matrix 3x3 or larger with an infinite
+        # DIAGONAL entry never returns on Linux - it calls svd with
+        # compute_uv=True, which spins in LAPACK there (upstream, see
+        # docs/research/upstream-pinv-inf-hang.md). svdvals and norm(ord=2)
+        # both go through compute_uv=False and are unaffected, so they keep
+        # the full hazard.
+        bad = [np.nan] if op == "pinv" else [np.nan, np.inf]
+        a[rng.integers(0, batch), 0, 0] = data.draw(st.sampled_from(bad))
     elif hazard == "rectangular":
         a = a[..., : max(d - 1, 1)]
     a = np.ascontiguousarray(a).astype(dtype)

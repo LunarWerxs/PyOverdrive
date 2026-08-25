@@ -93,6 +93,48 @@ to reproduce nomask-collapsing and an any/all fill_value quirk that is
 arguably a NumPy bug - matching a bug on purpose, for a win that only
 reaches np.ma users. Not worth the contract risk.
 
+## Two defects found AFTER the batch shipped, both in the tests
+
+Batch 12 went out green on both Windows boxes and passed the all-paths
+selfcheck on Linux, and the public CI still wedged - four ubuntu jobs
+sitting "in progress" for over an hour while windows passed the same commit
+in 41 seconds. Neither defect was in the shipped code; both were in how the
+suite checks it, which is its own lesson.
+
+**1. Stock numpy never returns on an infinite diagonal entry (Linux).**
+`test_refusal_non_finite_entry` asserts that PyOverdrive refuses a
+non-finite batch and that both routes then behave identically - which means
+executing stock. On Linux, stock `pinv` on a matrix 3x3 or larger with an
+infinity on the diagonal spins forever inside LAPACK. Full boundary map and
+the diagnosis trail in [upstream-pinv-inf-hang.md](upstream-pinv-inf-hang.md).
+The refusal is now asserted at `decide()` for pinv, which is the part
+PyOverdrive owns; svd(compute_uv=False) and norm(ord=2) are unaffected and
+keep their full raise-parity check.
+
+Two process notes from that hunt, both of which cost real time. Piped pytest
+output LAGS - the progress counter pointed about fifty tests before the real
+one, and only `python -u` moved the answer from "a well-conditioned random
+batch" (wrong, and it survived a whole round of hypotheses) to the actual
+test. And pytest's own `faulthandler_timeout` did not fire on a C-level
+spin even though it fires correctly on a sleeping test; the answer came from
+`kill -ABRT` into a `-X faulthandler` process, with
+`/proc/<pid>/task/*/stat` showing the main thread in `R` and every other
+thread idle, which is what proved "spin" rather than "deadlock".
+
+**2. A comparator that fails on arrays that are bit-identical.** Hypothesis
+then found a convolve draw where the test's own atol went NaN:
+`np.linalg.norm` squares first, so an operand at ~4.2e+152 overflows the sum
+of squares to inf while one at ~8.1e-191 underflows it to 0, and inf * 0 is
+NaN. `min(nan, 1e280)` is nan, a nan atol makes `np.allclose` return False
+for every element, and the failure reads exactly like a real divergence in
+the fast path. It was not - the two outputs were identical. The norm is
+computed scale-safe now (`m * ||x/m||`).
+
+This is the same shape as the vacuous-compare trap already recorded for
+dispatch (a test that passes without proving anything), inverted: a test
+that FAILS without disproving anything. Both come from trusting the
+harness while scrutinising only the subject.
+
 ## Bench after batch 12
 
 Still queued from the batch-11 shortlist: the pad narrow core
