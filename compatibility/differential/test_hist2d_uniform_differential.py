@@ -15,7 +15,7 @@ import pytest
 
 import pyoverdrive
 from pyoverdrive.dispatcher.gearbox import GEARBOX
-from pyoverdrive.fastpaths.hist2d_uniform import BINS_MIN_TOTAL
+from pyoverdrive.fastpaths.hist2d_uniform import SAMPLES_MIN, BINS_MIN_TOTAL
 
 OP = "numpy.histogram2d"
 PATH = "hist2d_uniform"
@@ -49,8 +49,8 @@ def _edge_salted(seed=100):
     just_outside = np.array(
         [np.nextafter(-3.0, -np.inf), np.nextafter(3.0, np.inf)] * 25
     )
-    random_x = rng.uniform(-3, 3, size=500)
-    random_y = rng.uniform(-3, 3, size=500)
+    random_x = rng.uniform(-3, 3, size=SAMPLES_MIN)
+    random_y = rng.uniform(-3, 3, size=SAMPLES_MIN)
     x = np.concatenate([on_edges_x, endpoints, just_outside, random_x])
     y = np.concatenate([on_edges_y, endpoints, just_outside, random_y])
     return x.astype(np.float64), y.astype(np.float64)
@@ -143,16 +143,20 @@ def test_dispatch_edge_salted_data():
 
 
 def test_dispatch_samples_exactly_at_outer_edges():
-    x = np.array([-3.0, 3.0, -3.0, 3.0, 0.0], dtype=np.float64)
-    y = np.array([-3.0, -3.0, 3.0, 3.0, 0.0], dtype=np.float64)
+    # tiled above SAMPLES_MIN: this test is about the EDGE semantics, and it
+    # must still take the dispatched route to assert them
+    x = np.tile(np.array([-3.0, 3.0, -3.0, 3.0, 0.0]), SAMPLES_MIN).astype(np.float64)
+    y = np.tile(np.array([-3.0, -3.0, 3.0, 3.0, 0.0]), SAMPLES_MIN).astype(np.float64)
     _assert_dispatched_equal((x, y), {"bins": [30, 30], "range": [[-3, 3], [-3, 3]]})
 
 
 def test_dispatch_samples_just_outside_edges():
     just_below = np.nextafter(-3.0, -np.inf)
     just_above = np.nextafter(3.0, np.inf)
-    x = np.array([just_below, just_above, just_below, just_above], dtype=np.float64)
-    y = np.array([just_below, just_below, just_above, just_above], dtype=np.float64)
+    x = np.tile([just_below, just_above, just_below, just_above],
+                SAMPLES_MIN).astype(np.float64)
+    y = np.tile([just_below, just_below, just_above, just_above],
+                SAMPLES_MIN).astype(np.float64)
     got, stock = _assert_dispatched_equal(
         (x, y), {"bins": [30, 30], "range": [[-3, 3], [-3, 3]]}
     )
@@ -161,28 +165,33 @@ def test_dispatch_samples_just_outside_edges():
 
 
 def test_dispatch_negative_range():
-    x, y = _xy(1500, lo=-7.0, hi=9.0, seed=7)
+    x, y = _xy(SAMPLES_MIN * 2, lo=-7.0, hi=9.0, seed=7)
     _assert_dispatched_equal(
         (x, y), {"bins": [35, 35], "range": [[-7, -1], [2, 9]]}
     )
 
 
-def test_dispatch_empty_x_and_y():
+def test_empty_x_and_y_stays_on_stock_and_matches():
+    """An empty input cannot reach SAMPLES_MIN, so it is stock's now.
+
+    It used to dispatch. The sample floor exists because this path's cost
+    scales with BINS while stock's scales with SAMPLES, so few samples into
+    many bins was measured losing (0.75x at 200 samples) - and zero samples
+    is the extreme of that. What the test has to prove is unchanged: the
+    answer is exactly stock's.
+    """
     x = np.array([], dtype=np.float64)
     y = np.array([], dtype=np.float64)
-    decision, reason = GEARBOX.decide(
-        OP, (x, y), {"bins": [40, 40], "range": [[-3, 3], [-3, 3]]}
-    )
-    assert decision == PATH, (decision, reason)
-    got, stock = _assert_dispatched_equal(
-        (x, y), {"bins": [40, 40], "range": [[-3, 3], [-3, 3]]}
-    )
-    assert got[0].sum() == 0.0
+    kwargs = {"bins": [40, 40], "range": [[-3, 3], [-3, 3]]}
+    decision, reason = GEARBOX.decide(OP, (x, y), kwargs)
+    assert decision == "stock", (decision, reason)
+    _assert_arrays_exactly_equal(np.histogram2d(x, y, **kwargs),
+                                 _stock(x, y, **kwargs))
 
 
 def test_dispatch_all_out_of_range_samples():
-    x = np.full(500, 1000.0, dtype=np.float64)
-    y = np.full(500, -1000.0, dtype=np.float64)
+    x = np.full(SAMPLES_MIN * 2, 1000.0, dtype=np.float64)
+    y = np.full(SAMPLES_MIN * 2, -1000.0, dtype=np.float64)
     got, stock = _assert_dispatched_equal(
         (x, y), {"bins": [40, 40], "range": [[-3, 3], [-3, 3]]}
     )
@@ -305,3 +314,23 @@ def test_kill_switch_restores_stock_routing():
         _assert_arrays_exactly_equal(got, stock)
     finally:
         pyoverdrive.enable_path(PATH)
+
+
+@pytest.mark.parametrize("n", [0, 1, 200, 500, SAMPLES_MIN - 1])
+def test_below_the_sample_floor_stays_on_stock(n):
+    """Few samples into many bins is this path's losing corner and it was
+    shipping: measured end to end on the idle box, 200 samples ran at
+    0.75-0.81x and 500 at 0.82-0.98x, across every bin count tried.
+
+    The gate was on BIN count alone, which is the wrong axis by itself -
+    this path's cost scales with the bins it allocates and clears, stock's
+    with the samples it walks. Nothing had ever looked below the canonical
+    input, because the canonical input is one somebody picked while the path
+    was working.
+    """
+    x, y = _xy(n, seed=11)
+    kwargs = {"bins": [40, 40], "range": [[-3, 3], [-3, 3]]}
+    decision, reason = GEARBOX.decide(OP, (x, y), kwargs)
+    assert decision == "stock", (n, decision, reason)
+    _assert_arrays_exactly_equal(np.histogram2d(x, y, **kwargs),
+                                 _stock(x, y, **kwargs))

@@ -57,11 +57,27 @@ while its float32 row was running at 0.97x. The two PyRallel families are
 the only modules here with a dtype-keyed threshold table, so they now
 contribute one cell per dtype, each at that dtype's own floor.
 
-What is still NOT covered, and should not be mistaken for covered: every
-other path is judged on a single input, and no path is judged at more than
-one SIZE. A loss that only appears at some shape inside a regime will not
-show up here. The instrument for that is a full sweep
-(tools/calibrate_dispatch.py), not this.
+--sizes closes the other half: every cell is also judged at 3x, 10x, 30x
+and 100x its canonical size AND at a third, a tenth, a thirtieth and a
+hundredth of it. Both directions were needed and both found real losses.
+Upward, three det/slogdet cells were losing at the TOP of their window
+(1.01x, 0.84x, 0.85x) while passing at their canonical input. Downward,
+np.inner had no size gate at all and ran at 0.38x on operands smaller than
+its canonical one - which was, it turned out, the smallest shape in the
+sweep that wins.
+
+That is the pattern to distrust: a hand-picked canonical input is evidence
+about whoever picked it, and they picked one where the path works. A path
+with a real floor simply reports NODISPATCH as the cells shrink, which
+costs nothing; a path without one keeps accepting, and that is the case
+worth finding.
+
+What is STILL not covered: only the leading axis is scaled, and only
+uniformly across the operands that share it. A loss that needs a particular
+aspect ratio - a long contraction against few rows, say, which is exactly
+what np.inner's bad corner looked like - will not appear from scaling
+alone. The instrument for that is a shape sweep of the specific path
+(tools/calibrate_dispatch.py, or a targeted probe), not this.
 
 Usage:
     .venv/Scripts/python tools/verify_no_pessimization.py [--min 1.0] [-v]
@@ -73,6 +89,7 @@ dispatches into a loss.
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 import sys
 import timeit
@@ -152,7 +169,7 @@ def _measure(op: str, args, kwargs, rounds: int) -> float | None:
     return s / c if c > 0 else None
 
 
-def cells(mults: tuple = ()) -> list[str]:
+def cells(mults: tuple = (), divs: tuple = ()) -> list[str]:
     """Every cell to judge, as "path", "path@dtype", optionally "*mult".
 
     One canonical input per path is not coverage where a path's table spans
@@ -175,7 +192,13 @@ def cells(mults: tuple = ()) -> list[str]:
         out.extend([f"{name}@{d}" for d in dtypes] if dtypes else [name])
     if not mults:
         return out
-    return [c if m == 1 else f"{c}*{m}" for c in out for m in mults]
+    scaled = []
+    for c in out:
+        for m in mults:
+            scaled.append(c if m == 1 else f"{c}*{m}")
+        for d in divs:
+            scaled.append(f"{c}/{d}")
+    return scaled
 
 
 # Scaling factors for the deep sweep. Each path's canonical input sits near
@@ -184,12 +207,19 @@ def cells(mults: tuple = ()) -> list[str]:
 # 0.84x, both far above their canonical cell, both passing the shallow sweep.
 SIZE_MULTS = (1, 3, 10, 30, 100)
 
+# ...and DOWNWARD, which is the half that actually bit. np.inner had no size
+# gate at all and ran at 0.38x on operands smaller than its canonical input,
+# for months. A path with a floor simply stops dispatching as these shrink,
+# which reports as NODISPATCH and costs nothing; a path WITHOUT one keeps
+# accepting, and that is exactly what needs finding.
+SIZE_DIVS = (3, 10, 30, 100)
+
 # A scaled cell that would allocate more than this is skipped rather than
 # risking an OOM on someone's machine; the skip is printed, not silent.
 MAX_ELEMENTS = 120_000_000
 
 
-def _scaled(args: tuple, mult: int) -> tuple | None:
+def _scaled(args: tuple, mult: int, div: int = 1) -> tuple | None:
     """Every array argument on the SIZE axis, grown by `mult`.
 
     Which axis is the size axis is not knowable in general, so the rule is:
@@ -199,7 +229,7 @@ def _scaled(args: tuple, mult: int) -> tuple | None:
     parameter arrays alone - a 128-element quantile vector beside a
     1e6-element sample must not be "scaled" into something else entirely.
     """
-    if mult == 1:
+    if mult == 1 and div == 1:
         return args
     arrays = [a for a in args if isinstance(a, np.ndarray) and a.ndim >= 1]
     if not arrays:
@@ -209,7 +239,10 @@ def _scaled(args: tuple, mult: int) -> tuple | None:
     out = []
     for a in args:
         if isinstance(a, np.ndarray) and a.ndim >= 1 and a.shape[0] == lead:
-            grown = np.concatenate([a] * mult, axis=0)
+            if div > 1:
+                grown = np.ascontiguousarray(a[: max(1, a.shape[0] // div)])
+            else:
+                grown = np.concatenate([a] * mult, axis=0)
             total += grown.size
             out.append(grown)
         else:
@@ -220,7 +253,7 @@ def _scaled(args: tuple, mult: int) -> tuple | None:
 def _inputs_for(cell: str):
     """(path name, maker) for a cell, expanding a "path@dtype" cell onto the
     row's own floor rather than whatever the selfcheck input would pick."""
-    cell = cell.split("*", 1)[0]
+    cell = cell.split("*", 1)[0].split("/", 1)[0]
     if "@" not in cell:
         return cell, D._selfcheck_inputs().get(cell)
     name, dtype_name = cell.split("@", 1)
@@ -252,8 +285,9 @@ def _measure_one(cell: str, fast_under: float | None = None) -> str:
         return f"SKIP input-error {exc!r}"
 
     mult = int(cell.split("*", 1)[1]) if "*" in cell else 1
-    if mult != 1:
-        scaled = _scaled(call_args, mult)
+    div = int(cell.split("/", 1)[1]) if "/" in cell else 1
+    if mult != 1 or div != 1:
+        scaled = _scaled(call_args, mult, div)
         if scaled is None:
             return "SKIP too-big"
         call_args = scaled
@@ -313,8 +347,9 @@ def main(argv: list[str]) -> int:
         for p in (lst if isinstance(lst, list) else [lst])
         if p.enabled
     }
-    names = [c for c in cells(SIZE_MULTS if args.sizes else ())
-             if c.split("@", 1)[0].split("*", 1)[0] in live]
+    names = [c for c in cells(SIZE_MULTS if args.sizes else (),
+                              SIZE_DIVS if args.sizes else ())
+             if re.split(r"[@*/]", c)[0] in live]
     pyoverdrive.disable()
 
     classes = cpuclass.classify()

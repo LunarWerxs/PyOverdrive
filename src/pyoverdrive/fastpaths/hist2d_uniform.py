@@ -48,6 +48,27 @@ _F64 = np.dtype(np.float64)
 BINS_MIN_EACH = 2
 BINS_MIN_TOTAL = 900  # 30x30 measured 1.42x; 10x10 measured 1.09x
 
+# SAMPLE floor, added 2026-08-25. The gate above is on BINS only, and that is
+# the wrong axis on its own: this path's cost scales with the number of bins
+# it allocates and clears, while stock's scales with the number of samples it
+# walks. Few samples into many bins is therefore the losing corner, and it was
+# shipping - measured end to end on the idle box, 200 samples ran at
+# 0.75-0.81x and 500 at 0.82-0.98x, across 30x30, 60x60 and 100x100 bins
+# alike. The floor is the first sample count with real headroom:
+#
+#   samples   30x30   60x60   100x100
+#      200    0.75x   0.78x    0.81x
+#      500    0.82x   0.89x    0.98x
+#     1000    1.08x   1.25x    1.37x
+#     2000    1.57x   1.84x    2.02x
+#     5000    2.47x   2.89x    3.10x
+#
+# Found by sweeping every path DOWNWARD from its canonical input
+# (tools/verify_no_pessimization.py --sizes). Nothing had looked below the
+# canonical cell before, and the canonical cell is always one somebody chose
+# because the path worked there.
+SAMPLES_MIN = 2_000
+
 
 def _norm_bins(bins):
     if isinstance(bins, bool):
@@ -103,7 +124,7 @@ def _applicable(args: tuple, kwargs: dict) -> bool:
     for a in (x, y):
         if type(a) is not np.ndarray or a.ndim != 1 or a.dtype != _F64:
             return False
-    if x.size != y.size:
+    if x.size != y.size or x.size < SAMPLES_MIN:
         return False
     w = kwargs.get("weights", None)
     if w is not None:

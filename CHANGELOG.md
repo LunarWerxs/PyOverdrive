@@ -128,7 +128,7 @@ the reference machines include:
 
 ### Verification
 
-- 2202 tests: hand-written differential suites per path plus a
+- 2207 tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
 - The threaded-ufunc thresholds were re-derived from scratch after the old
   ones were found to rest on a measurement artifact, and 15 of their 16 rows
@@ -193,10 +193,20 @@ the reference machines include:
   measured cell won (1.27x-6.98x) and leaves the rest on stock, forfeiting
   real wins mixed in with the losses. Confirmed to hold outside the
   measuring grid too, including the operand orientation the grid never used.
+- `np.histogram2d`'s uniform-bin path gated on BIN count alone, which is the
+  wrong axis by itself: its cost scales with the bins it allocates and
+  clears, stock's with the samples it walks. Few samples into many bins was
+  therefore its losing corner and it was shipping - 0.75-0.81x at 200
+  samples and 0.82-0.98x at 500, across 30x30, 60x60 and 100x100 bins
+  alike. It has a sample floor now (2000, the first count with real
+  headroom: 1.57-2.02x).
 - The pessimization sweep grew a `--sizes` mode: every cell also judged at
   3x, 10x, 30x and 100x its canonical size, since each canonical input sits
-  near the BOTTOM of what its path accepts and upward was the axis nothing
-  sampled. 313 cells, all clear. A red is re-measured in a second process
+  near the BOTTOM of what its path accepts - and at a third, a tenth, a
+  thirtieth and a hundredth of it, since downward is where a path with no
+  floor at all keeps accepting. 693 cells. Both directions found real
+  losses: upward the three det/slogdet cells, downward np.inner and
+  np.histogram2d. A red is re-measured in a second process
   and only reported if it reproduces.
 - Two more audit findings were REFUTED by measuring them, which is the point
   of measuring: `np.vectorize` needs no floor (it wins 3.1x even at size 1,
