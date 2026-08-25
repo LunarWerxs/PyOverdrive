@@ -45,11 +45,29 @@ def _int_pair(n, m, dtype):
     )
 
 
+def _scaled_norm(x):
+    # Overflow- and underflow-safe 2-norm, ||x|| == m * ||x/m||. np.linalg.norm
+    # squares first, so a 1e152-scale operand overflows the sum of squares to
+    # inf and a 1e-191-scale one underflows it to 0 - and inf * 0 is nan, which
+    # poisons the atol below and makes np.allclose reject arrays that are
+    # bit-identical. The property suite hit exactly that; these fixtures are all
+    # standard_normal so they cannot today, but the tolerance should not be one
+    # extreme fixture away from lying.
+    x = np.asarray(x)
+    if x.size == 0:
+        return 0.0
+    m = float(np.abs(x).max())
+    if m == 0.0 or not np.isfinite(m):
+        return 0.0 if m == 0.0 else float("inf")
+    return m * float(np.linalg.norm(x / m))
+
+
 def _atol(a, v):
     # FFT rounding error scales with operand energy (the L2 norm), not with
     # any single element's magnitude: edge lags are single products and can
     # be tiny even when the arrays carry a lot of energy overall.
-    return 1e-12 * float(np.linalg.norm(a)) * float(np.linalg.norm(v))
+    bound = 1e-12 * _scaled_norm(a) * _scaled_norm(v)
+    return bound if np.isfinite(bound) else 1e280
 
 
 def _assert_close(got, stock, a, v):
