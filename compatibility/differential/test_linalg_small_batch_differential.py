@@ -15,6 +15,7 @@ import pytest
 
 import pyoverdrive
 from pyoverdrive.dispatcher.gearbox import GEARBOX
+from pyoverdrive.fastpaths.linalg_small_batch import _WINDOWS
 
 OP_DET = "numpy.linalg.det"
 OP_SLOGDET = "numpy.linalg.slogdet"
@@ -23,8 +24,13 @@ PATH_DET = "det_small_batch"
 PATH_SLOGDET = "slogdet_small_batch"
 PATH_SOLVE = "solve_small_batch"
 
-DET_FLOOR = {2: 100, 3: 300}
-SOLVE_FLOOR = {2: 300, 3: 1_000}
+# Derived from the module, never a second copy: a hardcoded mirror of the
+# windows drifts the moment they are re-measured, and these were re-measured
+# once already when the old floors turned out to sit below break-even.
+DET_FLOOR = {d: lo for (kind, d), (lo, _hi) in _WINDOWS.items() if kind == "det"}
+SLOGDET_FLOOR = {d: lo for (kind, d), (lo, _hi) in _WINDOWS.items() if kind == "slogdet"}
+SOLVE_FLOOR = {d: lo for (kind, d), (lo, _hi) in _WINDOWS.items() if kind == "solve"}
+DET_CAP = {d: hi for (kind, d), (_lo, hi) in _WINDOWS.items() if kind == "det"}
 
 _DISPATCH_FN = {
     OP_DET: lambda: np.linalg.det,
@@ -105,6 +111,40 @@ def _assert_dispatched_solve(a, b):
     assert np.allclose(got, stock, rtol=1e-9, atol=1e-12)
 
 
+def _assert_guarded_at_run(op, args, kwargs=None):
+    """For det/slogdet, whose guard was FUSED INTO THE RUN.
+
+    The predicate deliberately accepts these calls now: asking it to prove
+    finiteness and non-singularity meant computing the determinant in the
+    predicate and again in the run, which cost the entire margin (the 2x2
+    path measured 0.70x end to end at its own floor - slower than stock
+    while still dispatching). The guard runs once, mid-run, and hands the
+    whole call to stock on refusal.
+
+    So the DECISION is the path and the BEHAVIOUR is stock's. That second
+    half is the part that matters, and it is asserted exactly as strictly
+    as before.
+    """
+    kwargs = kwargs or {}
+    decision, reason = GEARBOX.decide(op, args, kwargs)
+    assert decision != "stock", (decision, reason)
+    dispatched_fn = _DISPATCH_FN[op]()
+    got_tag, got = _call(dispatched_fn, args, kwargs)
+    stock_tag, stock = _call(_stock(op), args, kwargs)
+    assert got_tag == stock_tag, (got_tag, got, stock_tag, stock)
+    if got_tag == "err":
+        assert type(got) is type(stock) and str(got) == str(stock), (got, stock)
+        return
+    if op == OP_SLOGDET:
+        assert type(got) is type(stock)
+        for g, s in zip(got, stock):
+            assert g.dtype == s.dtype and g.shape == s.shape
+            assert np.array_equal(g, s, equal_nan=True)
+        return
+    assert got.dtype == stock.dtype and got.shape == stock.shape
+    assert np.array_equal(got, stock, equal_nan=True)
+
+
 def _assert_refused(op, args, kwargs=None):
     kwargs = kwargs or {}
     decision, reason = GEARBOX.decide(op, args, kwargs)
@@ -173,7 +213,7 @@ def test_dispatch_det_multidim_batch():
 def test_refusal_exactly_singular_det():
     a = _well_conditioned((300,), 3, seed=10)
     a[150] = _bad_singular_3x3()
-    _assert_refused(OP_DET, (a,))
+    _assert_guarded_at_run(OP_DET, (a,))
 
 
 def test_refusal_exactly_singular_solve():
@@ -186,7 +226,7 @@ def test_refusal_exactly_singular_solve():
 def test_refusal_near_singular_det():
     a = _well_conditioned((300,), 3, seed=13)
     a[100] = _bad_near_singular_3x3()
-    _assert_refused(OP_DET, (a,))
+    _assert_guarded_at_run(OP_DET, (a,))
 
 
 def test_refusal_near_singular_solve():
@@ -199,7 +239,7 @@ def test_refusal_near_singular_solve():
 def test_refusal_inf_entry_det():
     a = _well_conditioned((300,), 3, seed=16)
     a[42, 0, 0] = np.inf
-    _assert_refused(OP_DET, (a,))
+    _assert_guarded_at_run(OP_DET, (a,))
 
 
 def test_refusal_nan_entry_solve():
@@ -217,23 +257,41 @@ def test_refusal_single_matrix_ndim2():
     _assert_refused(OP_DET, (a,))
 
 
-def test_refusal_4x4_stack():
-    a = _well_conditioned((500,), 4, seed=20)
+def test_agreement_4x4_stack():
+    """4x4 is served now, by Laplace expansion on complementary 2x2 minors."""
+    a = _well_conditioned((DET_FLOOR[4],), 4, seed=20)
+    decision, reason = GEARBOX.decide(OP_DET, (a,), {})
+    assert decision == PATH_DET, (decision, reason)
+    got, stock = np.linalg.det(a), _stock(OP_DET)(a)
+    assert got.dtype == stock.dtype and got.shape == stock.shape
+    assert np.allclose(got, stock, rtol=1e-9, atol=0.0)
+
+
+def test_refusal_4x4_above_its_cap():
+    """The 4x4 margin decays to ~1.09x by 100_000, so the window has a cap."""
+    cap = DET_CAP[4]
+    assert cap is not None
+    a = _well_conditioned((cap + 1,), 4, seed=201)
+    _assert_refused(OP_DET, (a,))
+
+
+def test_refusal_5x5_stack():
+    a = _well_conditioned((1000,), 5, seed=202)
     _assert_refused(OP_DET, (a,))
 
 
 def test_refusal_below_floor_det_2x2():
-    a = _well_conditioned((DET_FLOOR[2] - 50,), 2, seed=21)  # 50 < 100
+    a = _well_conditioned((DET_FLOOR[2] - 50,), 2, seed=21)  # below the 2x2 floor
     _assert_refused(OP_DET, (a,))
 
 
 def test_refusal_below_floor_det_3x3():
-    a = _well_conditioned((DET_FLOOR[3] - 100,), 3, seed=22)  # 200 < 300
+    a = _well_conditioned((DET_FLOOR[3] - 100,), 3, seed=22)  # below the 3x3 floor
     _assert_refused(OP_DET, (a,))
 
 
 def test_refusal_below_floor_solve_3x3():
-    n = SOLVE_FLOOR[3] - 500  # 500 < 1000
+    n = SOLVE_FLOOR[3] - 500  # below the 3x3 solve floor
     a = _well_conditioned((n,), 3, seed=23)
     b = _rhs((n,), 3, seed=24)
     _assert_refused(OP_SOLVE, (a, b))
@@ -272,7 +330,7 @@ def test_refusal_kwargs():
 
 
 def test_kill_switch_restores_stock_routing():
-    a_det = _well_conditioned((350,), 3, seed=40)
+    a_det = _well_conditioned((600,), 3, seed=40)  # clears det AND slogdet 3x3
     a_solve = _well_conditioned((1100,), 3, seed=41)
     b_solve = _rhs((1100,), 3, seed=42)
 

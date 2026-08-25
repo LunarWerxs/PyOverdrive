@@ -36,8 +36,14 @@ the reference machines include:
   2^53 bound (2.6-28.5x, bit-exact), and the nan-family wrappers
   (`nanmean` up to 12.4x, `nanargmax` up to 5.3x, `nanmedian` 2-D up
   to 2.6x, `nan_to_num` ~2x) via a single isnan scan
-- batched 2x2/3x3 `np.linalg.det/slogdet/solve` closed forms (det 2x2
-  up to 91.9x), joining the shipped `inv` adjugate family
+- batched `np.linalg.det`/`slogdet` closed forms on 2x2/3x3/4x4 stacks
+  and `solve` on 2x2/3x3, joining the shipped `inv` adjugate family.
+  det/slogdet peak at 4.3x/3.2x measured END TO END with the result
+  consumed; the previously advertised "up to 91.9x" was a candidate-level
+  figure that excluded the guard, and the floors derived from it put the
+  2x2 path at 0.70x - a dispatched REGRESSION - at its own floor. The
+  guard is fused into the run now and every window was re-derived from
+  end-to-end measurements.
 - batched small-matrix linear algebra: `np.linalg.eigvalsh` on 2x2
   stacks (26-31x) and 3x3 stacks via the trigonometric closed form
   (2.7-4.4x; near-degenerate cells are split out and served by stock,
@@ -106,7 +112,7 @@ the reference machines include:
 
 ### Verification
 
-- 2261 tests: hand-written differential suites per path plus a
+- 2263 tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
 - Full gate green on Windows x86-64 (AMD Zen 4 + Intel Alder Lake) and on
   Linux x86-64 in CI across CPython 3.12/3.13/3.14 against numpy 2.0.2,

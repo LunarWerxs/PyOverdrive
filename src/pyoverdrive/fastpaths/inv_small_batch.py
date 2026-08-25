@@ -60,16 +60,47 @@ DET_RTOL = 1e-8  # |det| >= DET_RTOL * scale^d, between the measured
 #                  cond-1e6 pass (~3e-8) and cond-1e8 fail (~3e-10)
 
 
+def _det4(a):
+    """4x4 determinant by Laplace expansion on complementary 2x2 minors.
+
+    The six ways to choose two columns for the top row-pair, each paired
+    with the complementary two columns on the bottom row-pair. Twelve 2x2
+    minors rather than the twenty-four terms of a full cofactor expansion,
+    and every operation is a whole-array multiply, so the batch never
+    leaves vectorized code.
+    """
+    def m2(r0, r1, c0, c1):
+        return (a[..., r0, c0] * a[..., r1, c1]
+                - a[..., r0, c1] * a[..., r1, c0])
+
+    return (
+        m2(0, 1, 0, 1) * m2(2, 3, 2, 3)
+        - m2(0, 1, 0, 2) * m2(2, 3, 1, 3)
+        + m2(0, 1, 0, 3) * m2(2, 3, 1, 2)
+        + m2(0, 1, 1, 2) * m2(2, 3, 0, 3)
+        - m2(0, 1, 1, 3) * m2(2, 3, 0, 2)
+        + m2(0, 1, 2, 3) * m2(2, 3, 0, 1)
+    )
+
+
 def _det_and_scale(a):
+    # Explicit per-dimension, NOT an else branch. This helper is shared by
+    # det, slogdet and inv, and an else that quietly means "3" would return
+    # a 3x3 determinant for a 4x4 stack the moment any caller widened its
+    # floors - a silently wrong answer rather than a refusal.
     d = a.shape[-1]
     if d == 2:
         det = a[..., 0, 0] * a[..., 1, 1] - a[..., 0, 1] * a[..., 1, 0]
-    else:
+    elif d == 3:
         det = (
             a[..., 0, 0] * (a[..., 1, 1] * a[..., 2, 2] - a[..., 1, 2] * a[..., 2, 1])
             + a[..., 0, 1] * (a[..., 1, 2] * a[..., 2, 0] - a[..., 1, 0] * a[..., 2, 2])
             + a[..., 0, 2] * (a[..., 1, 0] * a[..., 2, 1] - a[..., 1, 1] * a[..., 2, 0])
         )
+    elif d == 4:
+        det = _det4(a)
+    else:
+        raise ValueError(f"_det_and_scale has no closed form for d={d}")
     scale = np.abs(a).max(axis=(-2, -1))
     return det, scale
 
