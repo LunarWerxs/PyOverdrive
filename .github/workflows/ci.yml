@@ -40,6 +40,8 @@ jobs:
         shell: bash
       - name: Self-check (every fast path vs stock on this runner)
         run: python -m pyoverdrive --selfcheck
+      - name: Advertised counts still match the registry
+        run: python tools/verify_claims.py
       - name: Tests
         run: python -m pytest tests compatibility -q
 

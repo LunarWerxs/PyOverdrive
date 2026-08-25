@@ -42,6 +42,11 @@ def register(gearbox) -> None:
             provenance={
                 "opportunity": "OPP-000000",
                 "note": "Phase 0 gate artifact; measures dispatch overhead.",
+                # trivially true - the candidate IS stock - but declared
+                # rather than left blank, because this was the one
+                # registered path with no comparison mode recorded, which
+                # contradicted the claim that every path records one
+                "comparison_mode": "bit-identical",
             },
             enabled=False,
         )

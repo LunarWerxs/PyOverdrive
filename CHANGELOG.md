@@ -6,9 +6,10 @@ First public release candidate. MIT licensed.
 
 ### Fast paths
 
-Forty-five always-on fast-path families (71 registered paths) behind
-`pyoverdrive.enable()`, plus one calibration-gated family. Every
-threshold comes from committed, machine-fingerprinted benchmark
+Forty-five always-on fast-path families (69 always-on paths of 71
+registered; the remaining two are one calibration-gated path and a
+disabled dispatch-overhead test artifact) behind `pyoverdrive.enable()`.
+Every threshold comes from committed, machine-fingerprinted benchmark
 evidence under `benchmarks/results/`; the headline end-to-end wins on
 the reference machines include:
 
@@ -94,10 +95,14 @@ the reference machines include:
   paths whose wins are architecture-dependent: verdicts persist per
   machine fingerprint; foreign or stale calibration files are ignored;
   with no file, gated paths stay off.
-- Bit-identical results on 48 of the 71 registered paths; the other 23
-  run in documented numeric mode, each with a measured tolerance.
-  Every path's comparison mode is recorded in its provenance and
-  checked by the differential suite.
+- Bit-identical results on 45 of the 69 always-on paths. Two more (the
+  FFT convolve/correlate pair) are bit-identical for integer dtypes
+  and numeric for floats, and the remaining 22 run in documented
+  numeric mode, each with a measured tolerance. Every path's
+  comparison mode is recorded in its provenance, checked by the
+  differential suite, and the counts above are re-derived from the
+  live registry by tools/verify_claims.py rather than maintained by
+  hand - they had drifted before that check existed.
 
 ### Verification
 
