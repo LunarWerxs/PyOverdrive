@@ -1,16 +1,15 @@
 name: diagnose-hang
 
-# TEMPORARY. Exists to capture stacks from the Linux-only wedge that stops
-# the suite at exactly test 1800 on every ubuntu leg, across three Python
-# and three numpy versions, while the windows leg passes in 41s on the same
-# commit. Delete once the cause is known and fixed.
+# TEMPORARY. The svd differential file wedges on Linux even run ALONE, so
+# this dumps every stack while running just that file - a ~10 second repro
+# rather than the 1800-test one. Delete once the cause is known and fixed.
 
 on: pull_request
 
 jobs:
   dump:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,22 +20,21 @@ jobs:
           python -m pip install -e .[dev]
           python -m pip install py-spy
 
-      - name: Confirm the suite alone is fine (svd file in isolation)
-        run: python -m pytest compatibility/differential/test_svd_small_batch_differential.py -q
-
-      - name: Run the full suite, dump every stack when it wedges
+      - name: Run the svd file alone, dump every stack when it wedges
         run: |
           set +e
-          python -u -X faulthandler -m pytest tests compatibility -q > pytest.out 2>&1 &
+          python -u -X faulthandler -m pytest \
+            compatibility/differential/test_svd_small_batch_differential.py -q \
+            > pytest.out 2>&1 &
           PID=$!
           echo "pytest pid $PID"
-          for i in $(seq 1 18); do
-            sleep 10
+          for i in $(seq 1 12); do
+            sleep 5
             if ! kill -0 "$PID" 2>/dev/null; then echo "=== pytest exited on its own ==="; break; fi
           done
 
           if kill -0 "$PID" 2>/dev/null; then
-            echo "=== STILL RUNNING AFTER 180s - WEDGED ==="
+            echo "=== STILL RUNNING AFTER 60s - WEDGED ==="
             echo "--- last pytest output ---"
             tail -c 3000 pytest.out
 
@@ -61,10 +59,10 @@ jobs:
             echo "--- SIGABRT for the in-process faulthandler dump ---"
             kill -ABRT "$PID"
             sleep 5
-            tail -c 6000 pytest.out
+            tail -c 8000 pytest.out
             kill -9 "$PID" 2>/dev/null
             exit 1
           fi
 
           echo "--- pytest finished, tail ---"
-          tail -20 pytest.out
+          tail -30 pytest.out
