@@ -104,8 +104,15 @@ in **15 of its 16 rows**, and `sqrt` never reached the 1.3x it is supposed to
 guarantee at any measured size on either dtype - at its own shipped floor of
 1e6 float64 it runs at **1.05x**, a dispatch that cannot pay for itself. Only
 `exp` float64 survived unchanged. Per-row detail is in
-`docs/research/opportunities/OPP-000008.md`; the 96 raw cells are in
-`benchmarks/results/PYRALLEL-DISPATCH-CAL/9bbe7063c555.json`.
+`docs/research/opportunities/OPP-000008.md`; the 166 raw cells are in
+`benchmarks/results/PYRALLEL-DISPATCH-CAL/9bbe7063c555-run{1,2}.json`.
+
+A second, independent sweep then re-measured every one of those rows and
+moved **none** of them, which is the evidence that the corrected method is
+itself stable - the coin flip was the whole error, not the start of a
+sequence of them. That sweep also reached 3e7 elements, which restored three
+float32 rows (`cos`, `exp`, `log` at 1e7) that the first pass had to drop for
+having no measured size above them.
 
 The threaded BINARY family (`np.add` and friends) came from the same battery
 and fared worse. At its old 1e6 floors it delivered **1.04-1.20x** against a

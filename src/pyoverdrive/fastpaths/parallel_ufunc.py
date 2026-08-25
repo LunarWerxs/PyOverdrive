@@ -94,27 +94,34 @@ _F32 = np.dtype(np.float32)
 # sorted data (sin at n=1e5: 338 us sorted, 753 us shuffled), which leaves
 # threading much less to win back there.
 #
-# Measured worst-case at the threshold / at 1e7, float64:
-#   sin 1.36x / 1.94x   cos 1.35x / 1.90x   tan 1.37x / 1.90x
-#   exp 1.41x / 2.04x   log 1.34x / 1.82x   log10 1.41x / 1.91x
-#   tanh 1.63x / 2.16x
+# EVERY ROW BELOW CLEARED 1.3x ON TWO INDEPENDENT SWEEPS, with the WORSE
+# reading kept per cell. That is not ceremony: several margins here are
+# 0.01-0.06x over the bar, which is inside the run-to-run spread, and a
+# threshold is a green - a green whose margin is inside the noise has to
+# reproduce, exactly as a red does. The second sweep moved no float64 or
+# float32 floor, which is the evidence that the first one was sound.
+#
+# Measured worst-case at the threshold / at 1e7 / at 3e7, float64:
+#   sin 1.36x / 1.94x / 2.43x    cos 1.35x / 1.88x / 2.28x
+#   tan 1.31x / 1.90x / 2.47x    exp 1.41x / 2.03x / 2.19x
+#   log 1.34x / 1.82x / 2.12x    log10 1.41x / 1.89x / 2.27x
+#   tanh 1.63x / 2.04x / 2.79x
 #
 # sqrt is GONE, not merely raised: it clears 1.3x at no measured size on
 # either dtype (best 1.19x at 1e7 float64, 1.17x at 1e7 float32), and at its
 # old shipped floor of 1e6 float64 it ran at 1.05x. It is memory-bandwidth
 # bound, so threads cannot help it; it stays on stock.
 #
-# Three float32 rows (cos, exp, log) do clear 1.3x, but only at 1e7, the
-# LARGEST size measured - one point, with nothing above it to show the win
-# persists. House rule is that hardware decides and nobody extrapolates, so
-# they stay on stock until the sweep is extended past 1e7. All three ran at
-# 1.06-1.15x at their old thresholds, so nothing of value is lost.
+# The float32 rows sit 3-30x higher in ELEMENTS than their float64 twins,
+# and that is expected rather than suspicious: a float32 kernel is roughly
+# twice as fast per element, so a given element count carries half the work
+# to divide and the fixed thread cost weighs twice as much.
 SUPPORTED: dict[str, dict[np.dtype, int]] = {
     "sin": {_F64: 300_000, _F32: 3_000_000},
-    "cos": {_F64: 300_000},
+    "cos": {_F64: 300_000, _F32: 10_000_000},
     "tan": {_F64: 1_000_000, _F32: 1_000_000},
-    "exp": {_F64: 300_000},
-    "log": {_F64: 1_000_000},
+    "exp": {_F64: 300_000, _F32: 10_000_000},
+    "log": {_F64: 1_000_000, _F32: 10_000_000},
     "log10": {_F64: 1_000_000, _F32: 1_000_000},
     "tanh": {_F64: 3_000_000, _F32: 3_000_000},
 }

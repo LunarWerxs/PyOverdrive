@@ -53,10 +53,20 @@ to be decided, not papered over.
    ufuncs, uninstall leaves nothing.
 
 5. **Bandwidth-bound wins get their own table and their own caveat.** The
-   binary family's 1.3-2.2x at 1e6-1e7 elements is a property of how many
-   cores it takes to saturate this machine's memory channels, so it lives
-   in `parallel_binary.py` with its own battery and a "recalibrate on every
-   new box" note, separate from the compute-bound transcendental table.
+   binary family's win is a property of how many cores it takes to saturate
+   this machine's memory channels, so it lives in `parallel_binary.py` with
+   its own battery and a "recalibrate on every new box" note, separate from
+   the compute-bound transcendental table.
+
+   SUPERSEDED NUMBERS, 2026-08-24: this ADR recorded that family at
+   "1.3-2.2x at 1e6-1e7 elements". Measured end to end it was 1.04-1.20x at
+   those floors, because the battery behind it compares a threaded candidate
+   against a single-threaded baseline that lands on a P-core or an E-core per
+   process and stays there. Re-derived from two independent sweeps its floors
+   are 1e7-2e7, every float32 row and all of `np.divide` failed to clear
+   1.3x at any size, and the survivors clear it by 0.01-0.08x. The caveat
+   this point makes was right; the numbers under it were not. See
+   `docs/research/hybrid-cpu-baseline-coin-flip.md`.
 
 ## Consequences
 

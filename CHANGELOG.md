@@ -114,7 +114,7 @@ the reference machines include:
 
 ### Verification
 
-- 2128 tests: hand-written differential suites per path plus a
+- 2182 tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
 - The threaded-ufunc thresholds were re-derived from scratch after the old
   ones were found to rest on a measurement artifact, and 15 of their 16 rows
@@ -130,7 +130,10 @@ the reference machines include:
   end to end through the patched name, one cell per process, sides
   interleaved, only on processes that drew a fast core, and each threshold
   must clear 1.3x on the worst of {sorted, shuffled} x {bare, consumed}
-  input at that size and every larger measured one. `np.sqrt` left the
+  input at that size and every larger measured one, on TWO independent
+  sweeps with the worse reading kept per cell - several margins are within
+  0.06x of the bar, and a threshold is a green, so it has to reproduce just
+  as a red does. The second sweep moved no floor. `np.sqrt` left the
   threaded family entirely - it is memory-bandwidth bound and reaches 1.3x
   at no measured size, having shipped at 1.05x at its own advertised floor.
   Write-up: `docs/research/hybrid-cpu-baseline-coin-flip.md`.
