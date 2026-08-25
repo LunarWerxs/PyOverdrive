@@ -49,5 +49,6 @@ def machine_fingerprint() -> dict:
     return info
 
 
-if __name__ == "__main__":
-    print(json.dumps(machine_fingerprint(), indent=2))
+# No __main__ block here on purpose: tools/fingerprint.py is the documented
+# CLI (AGENTS.md) and had the identical body. Two entry points to the same
+# two lines is one more than anyone needs.

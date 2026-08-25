@@ -26,6 +26,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
+from lab.dyno import is_correct, speedup_of  # noqa: E402
 from lab.dyno.fingerprint import machine_fingerprint  # noqa: E402
 
 RESULTS_ROOT = REPO_ROOT / "benchmarks" / "results"
@@ -78,8 +79,8 @@ def main() -> int:
         if t < 2:
             continue  # below the byte floor nothing dispatches; not a candidate size
         variant = case["variants"].get(f"pyrallel_{t}t")
-        speedup = case["speedups"].get(f"pyrallel_{t}t")
-        ok = bool(variant and variant.get("correct"))
+        speedup = speedup_of(case, f"pyrallel_{t}t")  # derived, not stored
+        ok = bool(variant) and is_correct(variant)  # True is the on-disk default
         table.setdefault((p["op"], p["dtype"]), []).append((n, speedup or 0.0, t, ok))
 
     print(f"\nschedule by bytes: {BYTE_SCHEDULE}\nmin win: {args.min_win}x\n")

@@ -42,6 +42,8 @@ jobs:
         run: python -m pyoverdrive --selfcheck
       - name: Advertised counts still match the registry
         run: python tools/verify_claims.py
+      - name: Benchmark evidence is still in compact form
+        run: python tools/compact_evidence.py --check
       - name: Tests
         run: python -m pytest tests compatibility -q
 

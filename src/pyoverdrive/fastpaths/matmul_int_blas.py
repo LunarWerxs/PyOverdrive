@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from ..dispatcher.gearbox import GEARBOX, FastPath
+from ..dispatcher.gearbox import FastPath
 
 MIN_DIM = 50  # smallest measured winning square size
 _BOUNDS = {

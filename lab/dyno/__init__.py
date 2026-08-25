@@ -58,6 +58,90 @@ DEFAULT_WARMUP = 3
 MAX_LOOPS = 1_000_000
 
 
+# timing statistics, rounded to SIG_FIGS on the way to disk
+_TIMING_FIELDS = ("median_ns", "min_ns", "mean_ns", "mad_ns")
+SIG_FIGS = 6
+
+
+def _round_sig(v):
+    """Six significant figures, scale-safe.
+
+    Significant figures rather than decimal places on purpose: these values
+    span nanoseconds to milliseconds, and a fixed number of decimals would
+    be lossy at the bottom of that range and wasteful at the top.
+    """
+    if not isinstance(v, float) or v != v or v in (float("inf"), float("-inf")):
+        return v
+    return float(f"%.{SIG_FIGS}g" % v)
+
+
+def compact_case(case: dict) -> dict:
+    """The on-disk form of one case: rounded timings, no derived fields.
+
+    Three things come off, none of them measurements:
+
+    - `speedups`, a pure function of the medians beside it.
+    - `role`, which said "baseline" for exactly the variant whose name is
+      already in the case's own `baseline` field.
+    - `correct`, but ONLY where it is True. It was true 7959 times out of
+      7964 across the committed corpus, so it is stored as an exception
+      rather than a constant. The five FALSE ones are real evidence - a
+      candidate that failed its correctness check - and are written out
+      explicitly. is_correct() reads it back with True as the default.
+    """
+    out = {k: v for k, v in case.items() if k != "speedups"}
+    variants = out.get("variants")
+    if isinstance(variants, dict):
+        baseline = out.get("baseline")
+        compacted = {}
+        for name, stats in variants.items():
+            if not isinstance(stats, dict):
+                compacted[name] = stats
+                continue
+            slim = {}
+            for k, v in stats.items():
+                if k == "role":
+                    continue  # derivable: name == case["baseline"]
+                if k == "correct" and v is True:
+                    continue  # the default; False is always written
+                slim[k] = _round_sig(v) if k in _TIMING_FIELDS else v
+            compacted[name] = slim
+        out["variants"] = compacted
+    return out
+
+
+def role_of(case: dict, variant: str) -> str | None:
+    """"baseline" for the case's baseline variant, else None - as stored."""
+    return "baseline" if variant == case.get("baseline") else None
+
+
+def is_correct(stats: dict) -> bool:
+    """Correctness of one variant, with True as the on-disk default.
+
+    Reading this with a bare .get("correct") would treat every passing
+    variant as a failure, because passing variants no longer carry the key.
+    """
+    if "error" in stats:
+        return False
+    return bool(stats.get("correct", True))
+
+
+def speedup_of(case: dict, variant: str):
+    """The speedup a stored case implies, recomputed rather than stored.
+
+    Returns None when the variant errored or failed its correctness check,
+    which is exactly what the old stored `speedups` field recorded.
+    """
+    variants = case.get("variants") or {}
+    base = variants.get(case.get("baseline")) or {}
+    cand = variants.get(variant) or {}
+    if not is_correct(cand) or "median_ns" not in cand:
+        return None
+    if not base.get("median_ns"):
+        return None
+    return base["median_ns"] / cand["median_ns"]
+
+
 def _fmt_ns(ns: float) -> str:
     if ns >= 1e9:
         return f"{ns / 1e9:.2f} s"
@@ -202,6 +286,19 @@ class BenchSuite:
         else:
             print(f"[dyno] machine {busy:.0%} busy {when} this run")
 
+    # --- on-disk form -----------------------------------------------------
+    #
+    # Evidence files were 60% of the repository by bytes: 100 files, 3.4 MB,
+    # pretty-printed, storing 17-significant-digit floats for NANOSECOND
+    # timings whose own MAD is tens of nanoseconds, plus a speedups block
+    # that is a pure function of the medians beside it.
+    #
+    # Nothing is lost here. Whitespace carries no information. Six
+    # significant figures is a thousand times finer than the measurement
+    # noise these numbers describe, so the extra digits were recording the
+    # float representation rather than the measurement. And a derived field
+    # is not evidence - speedup_of() recomputes it exactly.
+
     def save(self) -> Path:
         out_dir = RESULTS_DIR / self.opp_id
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -216,8 +313,8 @@ class BenchSuite:
             "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "fingerprint": self.fingerprint,
             "conditions": self.conditions,
-            "cases": self.cases,
+            "cases": [compact_case(c) for c in self.cases],
         }
-        out.write_text(json.dumps(payload, indent=2))
+        out.write_text(json.dumps(payload, separators=(",", ":")))
         print(f"[dyno] wrote {out.relative_to(REPO_ROOT)}")
         return out
