@@ -30,13 +30,26 @@ def _tol(dtype):
     )
 
 
+# Every shape here is INSIDE the measured regime (inner_tensordot._applicable:
+# rows_a >= 8, rows_b >= 64, rows_a*rows_b >= 1024, k <= 128). The list used to
+# hold shapes like (1, 1, 3) x (2, 3), which the path accepted and ran 2.6x
+# SLOWER than stock - it had no size gate at all. Those moved to
+# REFUSED_SHAPES below, where they assert the refusal instead.
 DISPATCH_SHAPES = [
-    ((3, 4, 8), (5, 8)),
-    ((2, 2, 2, 6), (7, 6)),
-    ((5, 8), (3, 4, 8)),          # high-ndim operand on the right
-    ((3, 4, 8), (8,)),            # 3-D x 1-D
-    ((6, 5, 500), (40, 500)),     # BLAS-sized contraction
-    ((1, 1, 3), (2, 3)),          # degenerate leading dims
+    ((4, 4, 8), (64, 8)),         # at the corner: rows_a 16, rows_b 64
+    ((2, 2, 2, 6), (128, 6)),     # 4-D left operand
+    ((64, 8), (8, 8, 8)),         # high-ndim operand on the RIGHT
+    ((8, 8, 128), (64, 128)),     # at the contraction cap
+    ((20, 5, 32), (256, 32)),     # comfortably inside
+]
+
+# Shapes the path must now decline. Each was measured dispatching into a loss
+# (or sits outside the corner every measured cell won in).
+REFUSED_SHAPES = [
+    ((1, 1, 3), (2, 3)),          # degenerate leading dims: measured 0.30x
+    ((3, 4, 8), (5, 8)),          # rows_b 5, far below the floor
+    ((6, 5, 500), (40, 500)),     # k=500 above the cap; that corner is 0.38-0.62x
+    ((3, 4, 8), (8,)),            # 3-D x 1-D: rows_b 1
 ]
 
 
@@ -96,10 +109,29 @@ def test_shape_mismatch_raises_like_stock():
 
 
 def test_strided_views_dispatch_and_match():
-    a = RNG.standard_normal((6, 8, 16))[:, ::2, :]
-    b = RNG.standard_normal((10, 32))[:, ::2]
+    a = RNG.standard_normal((16, 8, 16))[:, ::2, :]
+    b = RNG.standard_normal((128, 32))[:, ::2]
     assert a.shape[-1] == b.shape[-1]
     assert pyoverdrive.explain("numpy.inner", a, b)[0] == "inner_tensordot"
     np.testing.assert_allclose(
         np.inner(a, b), STOCK_INNER(a, b), **_tol(np.float64)
     )
+
+
+@pytest.mark.parametrize("shapes", REFUSED_SHAPES, ids=str)
+@pytest.mark.parametrize("dtype", [np.float64, np.float32], ids=str)
+def test_outside_the_measured_regime_stays_on_stock(shapes, dtype):
+    """The path has a measured regime now, and outside it stock must answer.
+
+    This is the test that would have caught the original defect: every one
+    of these shapes was accepted before, and the smallest of them ran at
+    0.30x - the fast path making the call three times slower. The selfcheck
+    never saw it because its canonical input was the first shape in the
+    sweep that happened to win.
+    """
+    sa, sb = shapes
+    a = RNG.standard_normal(sa).astype(dtype)
+    b = RNG.standard_normal(sb).astype(dtype)
+    decision, reason = pyoverdrive.explain("numpy.inner", a, b)
+    assert decision == "stock", (shapes, decision, reason)
+    np.testing.assert_array_equal(np.inner(a, b), STOCK_INNER(a, b))

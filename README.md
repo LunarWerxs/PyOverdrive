@@ -224,8 +224,8 @@ det/slogdet/solve, `cholesky_small_batch`, `qr_small_batch`,
 | Fast path | Regime | Measured end-to-end (public API) |
 |---|---|---:|
 | `unique_sort` | `np.unique`/`unique_values`, {int32,int64,uint32,uint64} n >= 64; {int8,uint8,uint16} n >= 1000, int16 n >= 10k via radix (`kind='stable'`) | 37-55x (1M int64); small ints 1.6-27.8x; up to 101x candidate-level |
-| `inner_tensordot` | `np.inner`, float32/float64, ndim > 2 | 18-24x on the reported shape; floor 3.1x |
-| `intersect_sorted` | `np.intersect1d`, same int dtype, combined size >= 400 (32/64-bit) or >= 12k (8/16-bit) | 21.6x random inputs, 90.7x already-sorted (1e6 x 1e5); small ints 1.9-10.1x; up to 433x candidate-level |
+| `inner_tensordot` | `np.inner`, float32/float64, at least one operand ndim > 2, inside a MEASURED regime: >= 8 rows on the left, >= 64 on the right, >= 1024 output cells, contraction <= 128 | 1.21-6.98x inside that regime. It previously had no size gate at all and ran at 0.38x on small operands; the wins and losses interleave, so the gate admits only the corner where every measured cell won |
+| `intersect_sorted` | `np.intersect1d`, same int dtype, combined size >= 400 (32/64-bit) or >= 12k (8/16-bit) | 1.5x at the floor rising to 21.6x random inputs and 90.7x already-sorted (1e6 x 1e5); small ints 1.9-10.1x; up to 433x candidate-level |
 | `pyrallel_<op>` | `np.sin cos tan exp log log10 tanh`, float64/float32, C-contiguous, op/dtype-calibrated size floor (3e5-3e6 elements) | 1.34-1.63x at the floor, 1.8-2.2x at 1e7, measured end-to-end as the WORST of sorted/shuffled input and bare/consumed result. `np.sqrt` is not in this family: bandwidth bound, never reaches 1.3x |
 | `relayout_blocked` | `np.ascontiguousarray` of a transposed/F-ordered 2-D float64/float32/int64 array, >= 512x512 (int64 1024x1024) | 2.8-3.3x at 2048x2048 end-to-end; up to 6.6x candidate-level (float32 8192x1024) |
 | `unique_axis0_column` | `np.unique(a, axis=0)`, single int column (8- to 64-bit), >= 1000 rows | 42x at 10k rows int64; 40-298x small ints |

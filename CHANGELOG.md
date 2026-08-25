@@ -71,7 +71,8 @@ the reference machines include:
   `np.unique` (37-55x)
 - `np.convolve`/`np.correlate` via FFT (3.6-14x end-to-end),
   `np.einsum` two-operand reordering (3.4-27x), `np.inner` on stacked
-  operands (18-24x), `np.intersect1d` (21-90x)
+  operands (1.2-7.0x inside its measured regime), `np.intersect1d`
+  (1.5x at its floor rising to 21-90x at scale)
 - `np.matmul` complex-times-real in upcast-dominated shapes (1.55-7.5x),
   `np.dot` real-matrix-times-complex-vector (12-44x)
 - channel-style reductions (`np.mean`/`np.sum` over leading axes with a
@@ -127,7 +128,7 @@ the reference machines include:
 
 ### Verification
 
-- 2196 tests: hand-written differential suites per path plus a
+- 2202 tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
 - The threaded-ufunc thresholds were re-derived from scratch after the old
   ones were found to rest on a measurement artifact, and 15 of their 16 rows
@@ -180,6 +181,28 @@ the reference machines include:
     measured per-dimension crossover because folding loses on small batches
     where per-call overhead is the whole cost. det 2x2 at its own floor went
     0.97x -> 1.37x, slogdet 3x3 1.01x -> 1.19x.
+- `np.inner` on stacked operands had NO size gate - any ndim>2 pair was
+  accepted - and its only quoted speedup was the upstream issue's own "~10x",
+  never re-measured through the predicate and run. Measured end to end it
+  ranges from 0.38x to 6.98x, i.e. it was making ordinary small calls 2.6x
+  SLOWER. The selfcheck could not see it because its canonical input was the
+  first shape in the sweep that happened to win. Worse, the wins and losses
+  INTERLEAVE - (4,256,512) is 0.43x while (20,16,512) is 1.23x - so no
+  function of volume or output size separates them. The gate is therefore
+  restrictive rather than clever: it admits only the corner where every
+  measured cell won (1.27x-6.98x) and leaves the rest on stock, forfeiting
+  real wins mixed in with the losses. Confirmed to hold outside the
+  measuring grid too, including the operand orientation the grid never used.
+- The pessimization sweep grew a `--sizes` mode: every cell also judged at
+  3x, 10x, 30x and 100x its canonical size, since each canonical input sits
+  near the BOTTOM of what its path accepts and upward was the axis nothing
+  sampled. 313 cells, all clear. A red is re-measured in a second process
+  and only reported if it reproduces.
+- Two more audit findings were REFUTED by measuring them, which is the point
+  of measuring: `np.vectorize` needs no floor (it wins 3.1x even at size 1,
+  because stock is slow at every size), and `intersect1d`'s 1.19x at its
+  floor was a contended reading - the idle box says 1.50x. `svd`'s
+  "PROVISIONAL" calibration label was discharged the same way at 2.38x.
 - Three det/slogdet cells were dispatching into a LOSS at the TOP of their
   window - det 3x3 1.01x at 1e5, slogdet 3x3 0.84x at 1e5, slogdet 4x4
   0.85x at 3e4 - and nothing caught them, because the pessimization sweep

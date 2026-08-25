@@ -114,8 +114,12 @@ def _inputs_unique():
 
 
 def _inputs_inner():
+    # Inside the measured regime (see inner_tensordot._applicable): the old
+    # (4, 5, 64) x (32, 64) sat at rows_b=32, which is now refused - it was
+    # also the FIRST shape in the sweep that won, with everything below it
+    # dispatching into a loss the selfcheck therefore never saw.
     rng = np.random.default_rng(2)
-    return (rng.standard_normal((4, 5, 64)), rng.standard_normal((32, 64))), {}
+    return (rng.standard_normal((4, 5, 64)), rng.standard_normal((64, 64))), {}
 
 
 def _inputs_intersect():

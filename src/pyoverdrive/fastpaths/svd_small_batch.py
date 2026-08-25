@@ -39,7 +39,12 @@ guarantees and therefore three different guards:
   1e-9 contract with a decade to spare. The gram is used only to
   MEASURE the conditioning cheaply.
 
-CALIBRATION: PROVISIONAL pending the idle-box BATCH12-CAL run. Dev box
+CALIBRATION: the floor was CONFIRMED on the idle box 2026-08-25, end to
+end through the public API with the result consumed - svd(compute_uv=False)
+measures 2.38x (2x2) and 2.07x (3x3) at BATCH_MIN=100, rising to 13.4x and
+10.0x at batch 1000. It had been carrying a "PROVISIONAL pending the
+idle-box run" label, which a threshold audit flagged; the label was
+pessimistic, not wrong. Original dev box
 (fp 8f8198d9abab, numpy 2.4.5, guard-inclusive candidates): pinv 2x2
 10.5x at batch 300, 24.7x at 1000, 24.4x at 10_000, 19.9x at 100_000;
 pinv 3x3 5.9x/12.4x/9.5x; norm2 2x2 16.0-48.5x; svdvals 2x2 13.9-32.1x.

@@ -152,8 +152,8 @@ def _measure(op: str, args, kwargs, rounds: int) -> float | None:
     return s / c if c > 0 else None
 
 
-def cells() -> list[str]:
-    """Every cell to judge, as "path" or "path@dtype".
+def cells(mults: tuple = ()) -> list[str]:
+    """Every cell to judge, as "path", "path@dtype", optionally "*mult".
 
     One canonical input per path is not coverage where a path's table spans
     several dtypes: the selfcheck input picks float64 when there is one, and
@@ -173,12 +173,54 @@ def cells() -> list[str]:
     for name in sorted(D._selfcheck_inputs()):
         dtypes = tabled.get(name)
         out.extend([f"{name}@{d}" for d in dtypes] if dtypes else [name])
-    return out
+    if not mults:
+        return out
+    return [c if m == 1 else f"{c}*{m}" for c in out for m in mults]
+
+
+# Scaling factors for the deep sweep. Each path's canonical input sits near
+# the BOTTOM of what it accepts, so the unsampled axis is upward - and that
+# is where the losses were: det 3x3 measured 1.01x at 1e5 and slogdet 3x3
+# 0.84x, both far above their canonical cell, both passing the shallow sweep.
+SIZE_MULTS = (1, 3, 10, 30, 100)
+
+# A scaled cell that would allocate more than this is skipped rather than
+# risking an OOM on someone's machine; the skip is printed, not silent.
+MAX_ELEMENTS = 120_000_000
+
+
+def _scaled(args: tuple, mult: int) -> tuple | None:
+    """Every array argument on the SIZE axis, grown by `mult`.
+
+    Which axis is the size axis is not knowable in general, so the rule is:
+    grow the leading axis of every ndarray whose leading axis is already the
+    longest among the arguments. That keeps paired operands in step
+    (solve's a and b, a binary ufunc's two inputs) while leaving small
+    parameter arrays alone - a 128-element quantile vector beside a
+    1e6-element sample must not be "scaled" into something else entirely.
+    """
+    if mult == 1:
+        return args
+    arrays = [a for a in args if isinstance(a, np.ndarray) and a.ndim >= 1]
+    if not arrays:
+        return None
+    lead = max(a.shape[0] for a in arrays)
+    total = 0
+    out = []
+    for a in args:
+        if isinstance(a, np.ndarray) and a.ndim >= 1 and a.shape[0] == lead:
+            grown = np.concatenate([a] * mult, axis=0)
+            total += grown.size
+            out.append(grown)
+        else:
+            out.append(a)
+    return None if total > MAX_ELEMENTS else tuple(out)
 
 
 def _inputs_for(cell: str):
     """(path name, maker) for a cell, expanding a "path@dtype" cell onto the
     row's own floor rather than whatever the selfcheck input would pick."""
+    cell = cell.split("*", 1)[0]
     if "@" not in cell:
         return cell, D._selfcheck_inputs().get(cell)
     name, dtype_name = cell.split("@", 1)
@@ -209,6 +251,13 @@ def _measure_one(cell: str, fast_under: float | None = None) -> str:
     except Exception as exc:  # noqa: BLE001
         return f"SKIP input-error {exc!r}"
 
+    mult = int(cell.split("*", 1)[1]) if "*" in cell else 1
+    if mult != 1:
+        scaled = _scaled(call_args, mult)
+        if scaled is None:
+            return "SKIP too-big"
+        call_args = scaled
+
     paths = [
         p
         for lst in GEARBOX._paths.values()
@@ -235,6 +284,12 @@ def main(argv: list[str]) -> int:
                     help="accept measurements taken on a slow core too; on a "
                          "hybrid CPU that can hide a threaded pessimization")
     ap.add_argument("--retries", type=int, default=6)
+    ap.add_argument("--sizes", action="store_true",
+                    help="also judge each cell at 3x, 10x, 30x and 100x its "
+                         "canonical size. Every canonical input sits near the "
+                         "BOTTOM of what its path accepts, so upward is the "
+                         "axis nothing was sampling - and three shipped losses "
+                         "were hiding up there.")
     ap.add_argument("--fast-under", type=float, help=argparse.SUPPRESS)
     ap.add_argument("--one", help=argparse.SUPPRESS)  # internal: one path, own process
     args = ap.parse_args(argv[1:])
@@ -258,7 +313,8 @@ def main(argv: list[str]) -> int:
         for p in (lst if isinstance(lst, list) else [lst])
         if p.enabled
     }
-    names = [c for c in cells() if c.split("@", 1)[0] in live]
+    names = [c for c in cells(SIZE_MULTS if args.sizes else ())
+             if c.split("@", 1)[0].split("*", 1)[0] in live]
     pyoverdrive.disable()
 
     classes = cpuclass.classify()
@@ -289,7 +345,21 @@ def main(argv: list[str]) -> int:
         judged += 1
         ratio, op = float(parts[1]), parts[2]
         if ratio < args.min:
-            losses.append((name, op, ratio))
+            # MAKE THE RED REPRODUCE. A sweep this wide will throw the odd
+            # unlucky cell, and a detector that cries wolf gets ignored -
+            # which is how the real one then gets missed. A loss is only
+            # reported when a second, independent process agrees; the worse
+            # of the two is what gets printed.
+            again = subprocess.run(cmd, capture_output=True, text=True,
+                                   cwd=str(REPO))
+            reparts = ((again.stdout or "").strip().splitlines()[-1:] or [""])[0].split()
+            if reparts and reparts[0] == "RATIO" and float(reparts[1]) < args.min:
+                losses.append((name, op, min(ratio, float(reparts[1]))))
+            elif args.verbose:
+                print(f"  {ratio:6.2f}x  {name:28s} {op}  (did not reproduce; "
+                      f"second reading "
+                      f"{reparts[1] if len(reparts) > 1 else '?'})")
+                continue
         if args.verbose:
             print(f"  {ratio:6.2f}x  {name:28s} {op}")
 

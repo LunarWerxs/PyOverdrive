@@ -49,7 +49,11 @@ from .unique_sort import _sort_unique
 # path's fixed cost is two sortedness checks plus dispatch on a microsecond
 # stock call. Measured at combined 200 (100 x 100): sorted 1.5-1.7x, mixed
 # 1.2-1.3x, random LOSES 0.87-0.89x. At combined 400 (200 x 200) every regime
-# and dtype wins (random 1.19x int64 / 1.45x int32, sorted 2.1x); from
+# and dtype wins (random 1.19x int64 / 1.45x int32, sorted 2.1x - all from a CONTENDED run.
+# Re-measured on the idle box 2026-08-25 the same floor is 1.50x int64 /
+# 1.46x int32 random, rising to 5.5-6.6x by combined 20k. A threshold
+# audit flagged the 1.19x as too close to noise to trust; it was, and the
+# honest number is comfortably above it); from
 # combined 1,100 up it is 2.4x-6x, reaching 24-40x random, 71-91x mixed and
 # 90-433x sorted at 1e6 x 1e4..1e5. Below 400 stays on stock.
 #
