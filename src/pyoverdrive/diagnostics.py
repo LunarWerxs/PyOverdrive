@@ -271,6 +271,11 @@ def _inputs_roll_concat():
     return (rng.random(500), 7), {}
 
 
+def _inputs_pad_1d_constant():
+    rng = np.random.default_rng(57)
+    return (rng.standard_normal(500), (3, 4)), {}
+
+
 def _inputs_argmax_blocked():
     rng = np.random.default_rng(23)
     return (rng.random(size=(3_200, 3_200)),), {"axis": 0}
@@ -523,6 +528,7 @@ def _selfcheck_inputs() -> dict[str, Callable[[], tuple[tuple, dict]]]:
         "eigvalsh_2x2_closed": _inputs_eigvalsh_2x2,
         "matmul_split_complex": _inputs_matmul_split,
         "roll_concat_1d": _inputs_roll_concat,
+        "pad_1d_constant": _inputs_pad_1d_constant,
         "argmax_blocked_transpose": _inputs_argmax_blocked,
         "inv_small_batch": _inputs_inv_small,
         "isin_object_hash": _inputs_isin_object,

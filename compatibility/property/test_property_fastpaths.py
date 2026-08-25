@@ -24,6 +24,7 @@ in seconds; the point is argument-space coverage, not benchmark scale.
 
 from __future__ import annotations
 
+import math
 import warnings
 
 import numpy as np
@@ -92,6 +93,33 @@ def compare(op: str, args: tuple, kwargs: dict, equal) -> None:
 
 def exact(g, e):
     return bool(np.array_equal(g, e, equal_nan=(g.dtype.kind == "f")))
+
+
+def byte_exact(g, e):
+    """Stricter than `exact`: compares the raw buffer.
+
+    np.array_equal cannot distinguish +0.0 from -0.0. That is harmless for
+    a path whose output values all come from the input, but not for one
+    where the CALLER supplies a fill value - np.pad(a, 1,
+    constant_values=-0.0) must come back with the sign bit set, and only a
+    byte comparison proves it did. Object dtype is excluded because its
+    buffer holds pointers rather than values.
+    """
+    if g.dtype != e.dtype or g.shape != e.shape:
+        return False
+    if g.dtype == object:
+        # element-wise, and NaN-aware: two separately produced object
+        # arrays hold DISTINCT float objects, and nan != nan, so a plain
+        # list comparison reports a difference between identical results
+        for x, y in zip(g.ravel().tolist(), e.ravel().tolist()):
+            if x is y or x == y:
+                continue
+            if isinstance(x, float) and isinstance(y, float):
+                if math.isnan(x) and math.isnan(y):
+                    continue
+            return False
+        return True
+    return g.tobytes() == e.tobytes()
 
 
 def close_scaled(rtol, atol_frac):
@@ -1296,3 +1324,62 @@ def test_take_index_assign(n, k, dtype, idx_kind, data):
     assert got is out_got
     assert expected is out_exp
     assert exact(got, expected)
+
+
+# --- 1-D constant-mode np.pad (OPP-000057) ----------------------------------
+@settings(**SETTINGS)
+@given(
+    n=st.integers(0, 600),
+    before=st.integers(-2, 400),
+    after=st.integers(-2, 400),
+    dtype=st.sampled_from([np.float64, np.float32, np.int64, np.int32,
+                           np.uint8, np.bool_, np.complex128]),
+    spelling=st.sampled_from(["pair", "scalar", "nested", "list", "kwarg", "array"]),
+    cv=st.sampled_from(["absent", 0, -0.0, 5, -1, 2.5, np.nan, np.inf,
+                        (1, 2), 1 + 2j, "x", None]),
+    mode=st.sampled_from(["absent", "constant", "edge", "reflect"]),
+    hazard=st.sampled_from(["clean", "noncontig", "readonly", "subclass",
+                            "twod", "zerod", "strdtype", "objdtype"]),
+    data=st.data(),
+)
+def test_pad_1d_constant(n, before, after, dtype, spelling, cv, mode, hazard, data):
+    # byte_exact, not exact: constant_values=-0.0 must come back with its
+    # sign bit, and np.array_equal cannot see that
+    rng = np.random.default_rng(data.draw(st.integers(0, 2**32 - 1)))
+    a = (rng.standard_normal(n) * 4).astype(dtype)
+
+    if hazard == "noncontig":
+        a = (rng.standard_normal(max(n * 2, 2)) * 4).astype(dtype)[::2]
+    elif hazard == "readonly" and n:
+        a = a.copy()
+        a.flags.writeable = False
+    elif hazard == "subclass":
+        a = a.view(type("Sub", (np.ndarray,), {}))
+    elif hazard == "twod":
+        a = (rng.standard_normal((3, 4)) * 4).astype(dtype)
+    elif hazard == "zerod":
+        a = np.asarray(a.dtype.type(1))
+    elif hazard == "strdtype":
+        a = np.array(["a", "bb", "c"])
+    elif hazard == "objdtype":
+        a = np.array([1, "x", None], dtype=object)
+
+    if spelling == "pair":
+        args, kwargs = (a, (before, after)), {}
+    elif spelling == "scalar":
+        args, kwargs = (a, before), {}
+    elif spelling == "nested":
+        args, kwargs = (a, ((before, after),)), {}
+    elif spelling == "list":
+        args, kwargs = (a, [before, after]), {}
+    elif spelling == "array":
+        args, kwargs = (a, np.array([before, after])), {}
+    else:
+        args, kwargs = (a,), {"pad_width": (before, after)}
+
+    if mode != "absent":
+        kwargs = {**kwargs, "mode": mode}
+    if cv != "absent":
+        kwargs = {**kwargs, "constant_values": cv}
+
+    compare("numpy.pad", args, kwargs, byte_exact)

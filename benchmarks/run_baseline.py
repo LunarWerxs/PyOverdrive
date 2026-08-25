@@ -62,6 +62,7 @@ CALIBRATION = [
     ("BATCH10-CAL", "benchmarks/micro/bench_batch10_calibration.py"),
     ("BATCH11-CAL", "benchmarks/micro/bench_batch11_calibration.py"),
     ("BATCH12-CAL", "benchmarks/micro/bench_batch12_calibration.py"),
+    ("BATCH13-CAL", "benchmarks/micro/bench_batch13_calibration.py"),
 ]
 PROOF = [("MVP-BASELINE", "benchmarks/micro/bench_enabled_vs_stock.py")]
 

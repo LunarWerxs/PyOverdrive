@@ -1,0 +1,117 @@
+id: OPP-000057
+title: "numpy.pad is a Python driver whose fixed preamble is the entire cost on a small array - a 1-D constant-mode pad is one allocation plus one assignment, 1.5-4.6x consumed"
+sources:
+  - url: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+    repository: numpy/numpy
+    type: benchmark
+    number: 0
+    state_at_ingestion: open
+    retrieved_at: "2026-08-25T04:00:00Z"
+claim:
+  speedup: null
+  baseline: >-
+    np.pad normalizes pad_width through _as_pairs, validates and rounds
+    it to intp, broadcasts the constant to a pair per axis, allocates
+    with np.empty and then writes each pad region through generic N-d
+    slice machinery. On a small array none of that is proportional to
+    the data: stock costs ~6.4 us at n=64 whatever the dtype or size,
+    and the whole of it is preamble. No upstream issue is claimed; the
+    baseline is the implementation. Surfaced by the batch-11 shortlist
+    panel, whose headline figure had never been committed as evidence -
+    see notes.
+  candidate: >-
+    For 1-D constant mode the work is one allocation plus one assignment.
+    With no constant supplied, np.zeros gives the fill for free and only
+    the interior is written; with a constant, np.empty plus three
+    assignments. The constant is normalized to a numpy scalar exactly as
+    _as_pairs does, so numpy's own casting rules apply rather than a
+    reimplementation of them.
+  hardware: "measured here; no third-party claim to attribute"
+affected_operations: [numpy.pad]
+input_regime:
+  dtypes: [float64, float32, int64, int32, int16, int8, uint64, uint32,
+           uint16, uint8, bool, complex128, complex64]
+  sizes: [8, 64, 256, 1000, 4000, 8000, 16000]
+  notes: >-
+    Plain 1-D np.ndarray (exactly, subclasses refused), mode absent or
+    the string "constant", pad_width a non-negative Python/numpy integer
+    in scalar, pair, nested or array spelling, and the RESULT length at
+    most OUTPUT_CAP=16384. constant_values optional; when given it may be
+    a scalar or a before/after pair of any numeric kind. A zero-width pad
+    on both sides WITH an explicit constant is refused (see notes).
+status: shipped
+license_review: clean
+reproducer: benchmarks/micro/bench_batch13_calibration.py
+current_numpy_result:
+  verified_speedup: null
+  fingerprints: [9bbe7063c555, 8f8198d9abab]
+  detail: >
+    BATCH13-CAL, 2026-08-25, both machines. Idle Intel box (fp
+    9bbe7063c555, numpy 2.5.2, 0% load), CONSUMED margin through the
+    SHIPPED route with its predicate priced in, at output lengths
+    14/70/262/1006/4006/8006/16006: no constant 4.57x, 4.46x, 4.23x,
+    3.54x, 2.50x, 1.88x, 1.45x; constant given 2.56x, 2.58x, 2.47x,
+    2.35x, 2.07x, 1.85x, 1.61x. Every measured dtype falls in the same
+    band at n=64 (3.61-4.70x), which is the expected shape for a saving
+    that is fixed machinery rather than element work. Dev box (fp
+    8f8198d9abab, numpy 2.4.5, contended 13-21%) agrees in direction at
+    every cell. Bare timings run roughly 3x higher than these and are
+    recorded alongside them, deliberately - see notes.
+main_branch_result: null
+correctness_risk: medium
+implementation_risk: low
+maintainer_objections: []
+related_opportunities: [OPP-000032]
+notes:
+  - >-
+    THE BARE NUMBER IS NOT THE NUMBER, and this is the opportunity that
+    proves it. The no-constant route allocates with np.zeros, i.e.
+    calloc, so timing the pad call alone banks pages the caller has not
+    faulted in yet. A small array with a huge zero pad measures 342x
+    bare on the idle box and 0.86x once the result is summed - a
+    REGRESSION that would have shipped as the largest speedup in the
+    project had the cap been set from bare timings. Every margin quoted
+    here is therefore CONSUMED, and BATCH13-CAL keeps the refused
+    over-cap cells measured both ways so the crossing is standing
+    evidence rather than an assertion.
+  - >-
+    THE CAP IS ON THE OUTPUT LENGTH, NOT THE INPUT LENGTH, for the same
+    reason: a tiny array with an enormous pad is precisely the shape
+    that looks best bare and performs worst used, and a cap on input
+    size alone would admit it.
+  - >-
+    THREE TRAPS THAT np.array_equal CANNOT SEE, which is why the
+    differential suite compares raw bytes. (1) constant_values=-0.0
+    fills with NEGATIVE zero while np.zeros fills with positive zero, so
+    the np.zeros route is gated on constant_values being ABSENT rather
+    than merely equal to zero. (2) The constant must become a NUMPY
+    SCALAR, as _as_pairs produces: a 0-d array agrees with stock on
+    wrapping -1 into uint8 and DISAGREES on NaN into an integer array,
+    where it silently writes INT_MIN under a RuntimeWarning instead of
+    raising ValueError. An earlier build used np.asarray and so turned a
+    stock exception into a wrong answer; hypothesis found it. (3) A
+    zero-width pad on both sides writes the constant only into empty
+    slices, so the cast never happens and an invalid constant would
+    quietly succeed; that degenerate call is refused.
+  - >-
+    A STRING ARRAY IS PADDED BY STOCK WITH THE STRING "0", not with the
+    empty string np.zeros produces. Shapes and dtypes agree, so only a
+    value comparison catches it - the reason the dtype allowlist is an
+    allowlist and not a kind check.
+  - >-
+    THE PREDICATE IS PART OF THE COST. The raw route measures 7.7x
+    consumed at n=64; the shipped route measured 3.5x, because the
+    normalization runs twice per call (predicate, then run) and a single
+    np.asarray costs about as much as the pad it prepares. Fast-pathing
+    the two spellings that dominate real traffic - a plain int and a
+    2-tuple of ints - took it to 4.46x without changing what is accepted
+    or refused. A guard that is cheap to describe is not automatically
+    cheap to run.
+  - >-
+    THE SHORTLIST HEADLINE WAS UNBACKED. The batch-11 panel recorded
+    "13.9x dev / 15.2x idle at n=64" for this opportunity, and there was
+    no results cell and no bench script behind it. Re-measuring
+    reproduced 13.9x exactly - as a BARE timing of a raw route, which is
+    neither what ships nor what a user experiences. The honest figure is
+    4.46x. Treat any shortlist number without a committed fingerprinted
+    cell as a lead, not as evidence.

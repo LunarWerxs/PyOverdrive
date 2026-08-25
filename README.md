@@ -46,7 +46,7 @@ and the slower one's number is the one quoted.
 The point of an accelerator you can leave switched on is that you never have to
 wonder. So:
 
-- **Results match stock NumPy.** Bit-identical on 47 of the 70 registered paths;
+- **Results match stock NumPy.** Bit-identical on 48 of the 71 registered paths;
   the other 23 run in a documented numeric mode with a measured tolerance.
 - **Every fast path is conservative.** It runs only when a predicate proves the
   input is in its calibrated regime. Anything else - odd dtypes, edge shapes,
@@ -183,9 +183,9 @@ multi-thread number; do not move a threshold on its say-so.
 ## Status
 
 Phases 0-4 prototyped on the first machine (Zen 4 AVX-512, 16C/32T, numpy
-2.4.5, fingerprint `8f8198d9abab`). Forty-four fast-path families are live behind
+2.4.5, fingerprint `8f8198d9abab`). Forty-five fast-path families are live behind
 `enable()` (plus one calibration-gated), every threshold calibrated from
-committed Dyno evidence. Results are bit-identical to stock on 47 of the 70
+committed Dyno evidence. Results are bit-identical to stock on 48 of the 71
 registered paths; the other 23 run in documented numeric mode
 (`inner_tensordot`, float fftconvolve,
 `nanquantile_masked`, `nanpercentile_masked`, `einsum_optimize`,
@@ -222,6 +222,7 @@ det/slogdet/solve, `cholesky_small_batch`, `qr_small_batch`,
 | `einsum_optimize_chain` | `np.einsum` with three or more operands, clean subscripts, naive loop volume >= 65 536 (262 144 scalar output; 76 832 for ellipsis spellings, which cross later) | 1.7x at the floor rising to 150-231x at volume 3-17M end-to-end, 2161x raw at a 4-operand chain, 163x for an ellipsis chain at 67M (stock's default runs ONE fused loop over every index of the chain) |
 | `matmul_split_complex` | `np.matmul(C complex 2-D, R real 2-D)`, C rows <= 256, n >= 1000, q >= 500, matched dtype pairs, all-finite | 1.55-7.5x across the measured m x n x q grid (upcast-copy-dominated shapes); square/tall C measured LOSING and stays stock |
 | `roll_concat_1d` | `np.roll(a, int_shift)` on 1-D int64/float64/int32/float32/bool, size 1-10k | 5.9x at n=8, 4.7x at 1000, 2.4x at 10k (fixed ~4us Python machinery saved); shift=0 copy route up to 11.3x; dies above 10k and stays stock there |
+| `pad_1d_constant` | `np.pad(a, pad_width)` in constant mode on plain 1-D numeric arrays, result length <= 16384 | 4.6x at output 14 falling to 1.5x at 16k with no constant, 2.6x to 1.6x with one. Quoted CONSUMED: the no-constant route allocates with calloc, so a bare timing reports up to 342x for a shape that is 0.86x once the array is read - which is why the cap is on the OUTPUT length |
 | `argmax_blocked_transpose` (calibration-gated, OFF by default) | `np.argmax(a, axis=0)`, C-order 2-D float64/float32/int64, rows >= 3000 and size >= 9e6 | 2.2-4.05x on Intel Alder Lake; a measured 0.65-0.84x REGRESSION on AMD Zen 4, so it only turns on where `python -m pyoverdrive --calibrate` proves the win on that machine |
 | `inv_small_batch` | `np.linalg.inv` on (..., 2, 2)/(..., 3, 3) float64/float32 stacks, batch floors 300-10k, all-finite, det-vs-scale guard (measured condition ceiling: passes 1e6, fails 1e8) | 3x3: 2.95-8.2x f64, 16.5x f32; 2x2: 4.5-12.1x; numeric mode |
 | `isin_object_hash` | `np.isin` on 1-D object arrays, combined >= 300; NaN-like and unhashable inputs answered via stock inside the run | 262x at 30k x 3k (guarded, end-measured), 457x raw; 2.96x at the floor; bit-identical by construction |

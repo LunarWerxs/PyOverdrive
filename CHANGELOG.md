@@ -6,7 +6,7 @@ First public release candidate. MIT licensed.
 
 ### Fast paths
 
-Forty-four always-on fast-path families (70 registered paths) behind
+Forty-five always-on fast-path families (71 registered paths) behind
 `pyoverdrive.enable()`, plus one calibration-gated family. Every
 threshold comes from committed, machine-fingerprinted benchmark
 evidence under `benchmarks/results/`; the headline end-to-end wins on
@@ -71,6 +71,12 @@ the reference machines include:
   tiny trailing axis, 2.2-14.4x), small-array `np.median` (1.5-3.4x),
   small 1-D `np.roll` (2.4-5.9x), uniform-bin `np.histogram2d`
   (1.4-2.4x), threaded elementwise ufuncs (5.8-9.7x at size)
+- 1-D constant-mode `np.pad` as one allocation plus one assignment
+  (1.5-4.6x, bit-identical). Quoted CONSUMED, i.e. with the padded array
+  summed before the clock stops: the no-constant route allocates with
+  calloc, so a bare timing reports up to 342x for a shape that is
+  actually 0.86x once the result is read. The size cap is set on the
+  length of the RESULT for the same reason.
 
 ### Safety machinery
 
@@ -88,14 +94,14 @@ the reference machines include:
   paths whose wins are architecture-dependent: verdicts persist per
   machine fingerprint; foreign or stale calibration files are ignored;
   with no file, gated paths stay off.
-- Bit-identical results on 47 of the 70 registered paths; the other 23
+- Bit-identical results on 48 of the 71 registered paths; the other 23
   run in documented numeric mode, each with a measured tolerance.
   Every path's comparison mode is recorded in its provenance and
   checked by the differential suite.
 
 ### Verification
 
-- 2164 tests: hand-written differential suites per path plus a
+- 2261 tests: hand-written differential suites per path plus a
   hypothesis property net over every patched operation.
 - Full gate green on Windows x86-64 (AMD Zen 4 + Intel Alder Lake) and on
   Linux x86-64 in CI across CPython 3.12/3.13/3.14 against numpy 2.0.2,

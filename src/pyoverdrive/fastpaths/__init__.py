@@ -57,6 +57,7 @@ from . import (
     reduce_tiny_trailing,
     relayout_blocked,
     searchsorted_sortqueries,
+    pad_1d_constant,
     unique_axis0_column,
     unique_sort,
 )
@@ -106,6 +107,7 @@ _MODULES = [
     apply_along_axis_reduce,
     vectorize_ufunc,
     svd_small_batch,
+    pad_1d_constant,
 ]
 
 

@@ -72,6 +72,7 @@ STOCK_VECTORIZE = np.vectorize
 STOCK_PINV = np.linalg.pinv
 STOCK_NORM = np.linalg.norm
 STOCK_SVD = np.linalg.svd
+STOCK_PAD = np.pad
 STOCK_UFUNCS = {op: getattr(np, op) for op in PYRALLEL_SUPPORTED}
 STOCK_BINARY = {op: getattr(np, op) for op in BINARY_SUPPORTED}
 
@@ -88,7 +89,8 @@ pyoverdrive.enable(
      "numpy.linalg.slogdet", "numpy.linalg.solve", "numpy.nan_to_num",
      "numpy.linalg.cholesky", "numpy.interp", "numpy.take", "numpy.linalg.qr",
      "numpy.apply_along_axis", "numpy.vectorize",
-     "numpy.linalg.pinv", "numpy.linalg.norm", "numpy.linalg.svd"]
+     "numpy.linalg.pinv", "numpy.linalg.norm", "numpy.linalg.svd",
+     "numpy.pad"]
     + [f"numpy.{op}" for op in PYRALLEL_SUPPORTED]
     + [f"numpy.{op}" for op in BINARY_SUPPORTED]
 )
@@ -1386,6 +1388,32 @@ suite.measure(
     candidates={"pyoverdrive": lambda a=sv_a2: np.linalg.svd(a, compute_uv=False)},
     check=lambda c, b: c.shape == b.shape
     and bool(np.all(np.abs(c - b) <= 1e-9 * np.maximum(b[..., :1], 1e-300))),
+    samples=3 if SMOKE else 7,
+)
+
+
+# --- batch 13: 1-D constant-mode np.pad --------------------------------------
+# Both rows CONSUME the result. The no-constant route allocates with calloc,
+# so timing the pad call alone banks page faults the caller has not paid for
+# yet - bare, the shape below reports roughly double what a user gets.
+pad_n = 64 if not SMOKE else 16
+pad_a = np.ascontiguousarray(rng.standard_normal(pad_n))
+suite.measure(
+    case=f"pad_1d_zero_n{pad_n}_used",
+    params={"n": pad_n, "expect": "np.zeros plus one assignment; result summed"},
+    baseline=("stock_pad", lambda a=pad_a: float(STOCK_PAD(a, (2, 3)).sum())),
+    candidates={"pyoverdrive": lambda a=pad_a: float(np.pad(a, (2, 3)).sum())},
+    check=lambda c, b: c == b,
+    samples=3 if SMOKE else 7,
+)
+suite.measure(
+    case=f"pad_1d_const_n{pad_n}_used",
+    params={"n": pad_n, "expect": "np.empty plus three assignments; result summed"},
+    baseline=("stock_pad",
+              lambda a=pad_a: float(STOCK_PAD(a, (2, 3), constant_values=5.0).sum())),
+    candidates={"pyoverdrive":
+                lambda a=pad_a: float(np.pad(a, (2, 3), constant_values=5.0).sum())},
+    check=lambda c, b: c == b,
     samples=3 if SMOKE else 7,
 )
 
