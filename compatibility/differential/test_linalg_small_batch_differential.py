@@ -220,7 +220,7 @@ def test_refusal_exactly_singular_solve():
     a = _well_conditioned((1000,), 3, seed=11)
     a[500] = _bad_singular_3x3()
     b = _rhs((1000,), 3, seed=12)
-    _assert_refused(OP_SOLVE, (a, b))
+    _assert_guarded_at_run(OP_SOLVE, (a, b))
 
 
 def test_refusal_near_singular_det():
@@ -233,7 +233,7 @@ def test_refusal_near_singular_solve():
     a = _well_conditioned((1000,), 3, seed=14)
     a[700] = _bad_near_singular_3x3()
     b = _rhs((1000,), 3, seed=15)
-    _assert_refused(OP_SOLVE, (a, b))
+    _assert_guarded_at_run(OP_SOLVE, (a, b))
 
 
 def test_refusal_inf_entry_det():
@@ -246,7 +246,7 @@ def test_refusal_nan_entry_solve():
     a = _well_conditioned((1000,), 3, seed=17)
     a[900, 1, 2] = np.nan
     b = _rhs((1000,), 3, seed=18)
-    _assert_refused(OP_SOLVE, (a, b))
+    _assert_guarded_at_run(OP_SOLVE, (a, b))
 
 
 # --- 4. shape / floor refusals ------------------------------------------

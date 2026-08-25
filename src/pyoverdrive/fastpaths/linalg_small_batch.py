@@ -17,6 +17,8 @@ consumed, which is the only number a user experiences:
     slogdet  d=2  1.51x at 300 -> peak 3.16x at 10k -> 1.79x at 100k
              d=3  1.64x at 500 -> peak 2.52x at 10k -> 1.43x at 100k
              d=4  1.82x at 1000 -> peak 2.52x at 3k -> 1.07x at 100k
+    solve    d=2  1.55x at 300 -> peak 3.82x at 10k -> 1.60x at 300k
+             d=3  1.62x at 1000 -> peak 2.13x at 3k -> capped at 10k
 
 THE PREVIOUS FLOORS SHIPPED A REGRESSION. They were set from
 candidate-only timings (the old docstring quoted "det 2x2 6.2x at 100 to
@@ -29,13 +31,19 @@ batch 13's, one level along: a margin measured without the guard is not
 the margin, exactly as a margin measured without consuming the result is
 not the margin.
 
-Fixed by fusing the guard into the run for det and slogdet - one
-determinant, checked on its own numbers, handing the whole call to stock
-via StockRaised on refusal (cholesky_small_batch's pattern). That roughly
-doubled every cell, and the floors above are then the first measured size
-at or above 1.5x. solve still guards in its predicate, because it needs
-the determinant to build the inverse; its floors are unchanged and were
-NOT re-measured in that sweep.
+Fixed by fusing the guard into the run for ALL THREE - one determinant,
+checked on its own numbers, handing the whole call to stock via
+StockRaised on refusal (cholesky_small_batch's pattern). That roughly
+doubled every cell, and every floor above is then the first measured size
+at or above 1.5x.
+
+solve had the same disease and was measured separately: it was 0.91x at
+its own 2x2 floor of 300 and 0.94x at batch 100_000 for 3x3, both
+dispatching. Cramer's rule needs the determinant to divide by and the
+guard needs it to judge, so computing it once serves both - the floor
+went from 0.91x to 1.55x on the identical input. Its 3x3 arm also gained
+a CAP, because Cramer builds every cofactor as a full-array temporary and
+past L2 that loses to LAPACK outright (0.66x at 300_000).
 
 Conditioning guard: identical policy to inv_small_batch, DET_RTOL=1e-8
 against |det| / scale^d (that module's battery measured the pass at
@@ -44,11 +52,10 @@ behavior, and det/slogdet themselves lose relative accuracy exactly
 where |det| collapses). Exactly-singular input is refused by the same
 test: for solve, stock raises LinAlgError; for det, stock returns 0.0
 exactly, which a rounded closed form will not; for slogdet the SIGN
-would be unstable. Non-finite input is refused too - for solve by an
-isfinite scan in the predicate, for det/slogdet by testing the
-DETERMINANT for finiteness in the run, which is an n-element check
-rather than a 16n one and is equivalent because every entry appears in
-every term of the expansion.
+would be unstable. Non-finite input is refused too, by testing the
+DETERMINANT for finiteness in the run rather than scanning the input,
+which is an n-element check rather than a 16n one and is equivalent
+because every entry appears in every term of the expansion.
 
 Correctness contract:
 - det/slogdet: plain float64 ndarray, shape (..., d, d), d in {2, 3, 4},
@@ -63,7 +70,9 @@ Correctness contract:
   error 2.0e-14 at batch 100 rising to 4.4e-12 at 100_000, which is why
   the 4x4 window is capped rather than open-ended.
 - solve: additionally b must be a plain float64 ndarray of shape
-  batch + (d, 1) (the measured column form); everything else refuses.
+  batch + (d, 1) (the measured column form); everything else refuses. Its
+  guard is fused in exactly as det/slogdet's is, so a refused stack is
+  served by stock mid-call with stock's LinAlgError intact.
 - Different algorithm, different rounding: numeric mode. det/solve
   battery-checked at rtol 1e-9/1e-8; slogdet signs exact, logdet
   rtol 1e-9.
@@ -100,42 +109,24 @@ _WINDOWS = {
     ("slogdet", 2): (300, None),   # 1.25x at 200, 1.51x at 300, peak 3.16x
     ("slogdet", 3): (500, None),   # 1.27x at 300, 1.64x at 500, peak 2.52x
     ("slogdet", 4): (1_000, 30_000),  # 1.37x at 500, 1.82x at 1000, peak 2.52x
-    # solve still guards in its PREDICATE (it needs the determinant to build
-    # the inverse), so it carries the double-work cost these two shed; its
-    # floors are unchanged and unverified by the sweep above
-    ("solve", 2): (300, None),
-    ("solve", 3): (1_000, None),
+    ("solve", 2): (300, None),        # 1.27x at 200, 1.55x at 300, peak 3.82x
+    # CAPPED: Cramer's rule builds every cofactor as a full-array temporary,
+    # so past L2 it loses to LAPACK outright - 1.36x at 10k, 1.13x at 30k,
+    # 0.96x at 100k and 0.66x at 300k. The cap sits at the last size with
+    # real headroom rather than at the crossing itself.
+    ("solve", 3): (1_000, 10_000),    # 1.25x at 500, 1.62x at 1000, peak 2.13x
 }
 
 # stock's return type for slogdet (a namedtuple in modern numpy)
 _SLOGDET_RESULT = type(np.linalg.slogdet(np.eye(2)))
 
 
-def _stack_ok(a, kind: str) -> bool:
-    if type(a) is not np.ndarray or a.dtype != _F64 or a.ndim < 3:
-        return False
-    d = a.shape[-1]
-    if a.shape[-2] != d:
-        return False
-    window = _WINDOWS.get((kind, d))
-    if window is None:
-        return False
-    batch = math.prod(a.shape[:-2])
-    lo, hi = window
-    if batch < lo or (hi is not None and batch > hi):
-        return False
-    if not bool(np.isfinite(a).all()):
-        return False
-    det, scale = _det_and_scale(a)
-    return bool((np.abs(det) >= DET_RTOL * np.maximum(scale, 1e-100) ** d).all())
-
-
 def _shape_ok(a, kind: str) -> bool:
-    """The CHEAP half of _stack_ok: metadata only, no pass over the data.
+    """Metadata only: no pass over the data at all.
 
-    det and slogdet use this instead of _stack_ok because the expensive
-    half of that guard - the finiteness scan and the determinant itself -
-    is exactly the work the run performs. Asking the predicate for it made
+    All three paths use this. The expensive half of a guard here - the
+    finiteness scan and the determinant itself - is exactly the work the
+    run performs. Asking the predicate for it made
     the shipped route compute the determinant TWICE and scan the array a
     third time, which cost the whole margin: measured end to end, the
     2x2 path was 0.70x at its own floor, i.e. slower than stock while
@@ -154,33 +145,37 @@ def _shape_ok(a, kind: str) -> bool:
     return batch >= lo and (hi is None or batch <= hi)
 
 
-def _det_if_safe(a):
-    """The determinant, computed ONCE and guarded on its own numbers.
+def _admissible(a, det) -> bool:
+    """Finite and well-conditioned, judged from a determinant ALREADY computed.
 
-    Returns None when the guard refuses, so the caller can hand the whole
-    call to stock for its own operation.
+    Takes the determinant rather than computing one, so a caller that needs
+    it anyway - solve, which divides by it - pays for it exactly once.
 
-    Non-finiteness is detected on the RESULT rather than by scanning the
-    input: every entry of the matrix appears in every term of the
+    Non-finiteness is detected on the DETERMINANT rather than by scanning
+    the input: every entry of the matrix appears in every term of the
     expansion, so a non-finite entry always reaches the determinant as inf
     or nan (inf times zero is nan, inf minus inf is nan). That turns a
     16n-element scan into an n-element one.
     """
-    det, scale = _det_and_scale(a)
-    d = a.shape[-1]
     if not bool(np.isfinite(det).all()):
-        return None
-    if not bool((np.abs(det) >= DET_RTOL * np.maximum(scale, 1e-100) ** d).all()):
-        return None
-    return det
+        return False
+    scale = np.abs(a).max(axis=(-2, -1))
+    d = a.shape[-1]
+    return bool((np.abs(det) >= DET_RTOL * np.maximum(scale, 1e-100) ** d).all())
 
 
-def _hand_to_stock(op: str, a):
+def _det_if_safe(a):
+    """The determinant, computed ONCE and guarded, or None if refused."""
+    det, _ = _det_and_scale(a)
+    return det if _admissible(a, det) else None
+
+
+def _hand_to_stock(op: str, *args):
     """Graceful mid-run fallback, as cholesky_small_batch does it: refused
     input gets stock's exact behaviour, its LinAlgError included."""
     stock = GEARBOX.stock_fn(op)
     try:
-        return stock(a)
+        return stock(*args)
     except Exception as exc:  # noqa: BLE001 - stock's raise is the contract
         raise StockRaised(exc) from None
 
@@ -197,7 +192,7 @@ def _applicable_solve(args: tuple, kwargs: dict) -> bool:
     if len(args) != 2 or kwargs:
         return False
     a, b = args
-    if not _stack_ok(a, "solve"):
+    if not _shape_ok(a, "solve"):
         return False
     if type(b) is not np.ndarray or b.dtype != _F64:
         return False
@@ -219,6 +214,15 @@ def _run_slogdet(a):
 
 
 def _run_solve(a, b):
+    """Cramer's rule, with the guard FUSED IN.
+
+    Cramer needs the determinant to divide by, and the conditioning guard
+    needs the determinant to judge. Asking the predicate for it meant
+    computing it twice and scanning the array for finiteness on top, which
+    cost more than the closed form saved: end to end this path measured
+    0.91x at its own 2x2 floor and 0.94x at batch 100_000 for 3x3. One
+    determinant now serves both.
+    """
     d = a.shape[-1]
     b1 = b[..., 0, 0]
     b2 = b[..., 1, 0]
@@ -226,7 +230,10 @@ def _run_solve(a, b):
     if d == 2:
         a11 = a[..., 0, 0]; a12 = a[..., 0, 1]
         a21 = a[..., 1, 0]; a22 = a[..., 1, 1]
-        inv_det = 1.0 / (a11 * a22 - a12 * a21)
+        det = a11 * a22 - a12 * a21
+        if not _admissible(a, det):
+            return _hand_to_stock("numpy.linalg.solve", a, b)
+        inv_det = 1.0 / det
         out[..., 0, 0] = (b1 * a22 - b2 * a12) * inv_det
         out[..., 1, 0] = (a11 * b2 - a21 * b1) * inv_det
         return out
@@ -237,7 +244,10 @@ def _run_solve(a, b):
     c11 = a22 * a33 - a23 * a32
     c12 = a23 * a31 - a21 * a33
     c13 = a21 * a32 - a22 * a31
-    inv_det = 1.0 / (a11 * c11 + a12 * c12 + a13 * c13)
+    det = a11 * c11 + a12 * c12 + a13 * c13
+    if not _admissible(a, det):
+        return _hand_to_stock("numpy.linalg.solve", a, b)
+    inv_det = 1.0 / det
     out[..., 0, 0] = (
         b1 * c11 + b2 * (a13 * a32 - a12 * a33) + b3 * (a12 * a23 - a13 * a22)
     ) * inv_det
