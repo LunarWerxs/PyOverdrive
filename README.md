@@ -3,6 +3,8 @@
 **NumPy at full throttle.** Two lines, and NumPy code you have already written
 gets faster. Nothing else changes.
 
+[![Discord](https://img.shields.io/badge/Discord-join_the_community-5865F2?logo=discord&logoColor=white)](https://discord.gg/PsWpeNUzhk)
+
 ```bash
 pip install pyoverdrive
 ```
