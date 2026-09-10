@@ -6,7 +6,7 @@ gets faster. Nothing else changes.
 [![Discord](https://img.shields.io/badge/Discord-join_the_community-5865F2?logo=discord&logoColor=white)](https://discord.gg/PsWpeNUzhk)
 
 ```bash
-pip install pyoverdrive
+pip install git+https://github.com/LunarWerxs/PyOverdrive
 ```
 
 ```python
