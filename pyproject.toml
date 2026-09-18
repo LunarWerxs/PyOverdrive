@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyoverdrive"
-version = "0.1.0"
+version = "1.0.0"
 description = "Drop-in accelerator for NumPy: measured, guarded fast paths behind one enable() call, with automatic fallback to stock NumPy."
 readme = "README.md"
 license = { file = "LICENSE" }
