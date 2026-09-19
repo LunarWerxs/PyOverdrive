@@ -3,13 +3,10 @@ quantile_dense_sort route with numpy's own q/100 scaling.
 
 Provenance (OPP-000022, sibling surface): numpy documents percentile as
 quantile at q/100 and routes it through the same partition-based core,
-so it inherits the same dense-q collapse. The PERCENTILE-CAL battery
-(fp 9bbe7063c555, idle box, 0% load) measured this path's OWN cells:
-1.83x at nq=4, 4.1x at 64, 35.6x at 512 (300x2048), 12.3x at m=512,
-32-42x on 1-D/few-slices, 805.8x at nq=16384 of 65536 - every cell
-BIT-EXACT against stock (the route scales q with the same
-np.true_divide(q, 100) numpy uses, then runs the identical sort+lerp
-arithmetic quantile_dense_sort ships).
+so it inherits the same dense-q partitioning cost. The route scales q
+with np.true_divide(q, 100), matching NumPy, then uses the shared
+sort-and-interpolate implementation. It retains that implementation's
+shape, dtype, quantile-count and reduced-length gates.
 
 Correctness contract: identical to quantile_dense_sort's, with q in
 [0, 100] instead of [0, 1] and method='linear' absent/explicit; the
@@ -18,6 +15,10 @@ predicate and run are shared with that module apart from the scaling.
 Comparison mode: bit-identical (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=percentile_dense or
 pyoverdrive.disable_path("percentile_dense").
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations

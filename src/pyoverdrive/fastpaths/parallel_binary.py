@@ -2,13 +2,11 @@
 
 Provenance (OPP-000008, numpy/numpy#8208): the issue reporter predicted
 that simple arithmetic like np.add would NOT scale across threads (memory
-bandwidth bound). The Dyno reproducer measured otherwise on the first
-calibrated machine: np.add at 1e7 float64 gains 2.4-2.75x on 4-16 threads,
-because one core cannot saturate dual-channel DDR5 by itself. That is a
-bandwidth effect, far more machine dependent than the compute-bound
-transcendental family (parallel_ufunc.py), so it lives in its own module
-with its own calibration table and its own battery
-(benchmarks/micro/bench_pyrallel_binary_calibration.py).
+bandwidth bound). Chunking can use multiple cores to supply memory
+bandwidth, but the outcome depends on the host memory system and thread
+scheduling. The family therefore has its own dtype/size table and battery
+(benchmarks/micro/bench_pyrallel_binary_calibration.py); it does not inherit
+transcendental-ufunc crossovers.
 
 Correctness contract:
 - Applies to ``np.<op>(a, b)`` and ``np.<op>(a, b, out=o)`` only: two plain
@@ -18,7 +16,10 @@ Correctness contract:
 - ``out`` must be a plain, writeable, C-contiguous ndarray of the same
   shape and of the dtype stock would produce (for every op in this table
   that is the operand dtype). ``out`` aliasing an operand
-  (``np.add(x, y, out=x)``) is fine: chunks own disjoint index ranges.
+  (``np.add(x, y, out=x)``) is fine only for exact elementwise aliases:
+  shifted overlapping views stay on stock for safe input buffering.
+- Float64 add with an exact in-place output stays on stock after repeated
+  measured losses; disjoint float64 outputs and integer add retain dispatch.
 - The caller's np.errstate is mirrored into every chunk; raise/call/log
   modes stay on stock (see parallel_ufunc.py).
 - Result is bit-identical to stock (elementwise kernel, no cross-element
@@ -34,13 +35,17 @@ Comparison mode: bit-identical (spec section 9).
 
 Kill switches: PYOVERDRIVE_DISABLE=pyrallel_add (per op),
 pyoverdrive.disable_path("pyrallel_add"), or PYOVERDRIVE_THREADS=1.
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations
 
 import numpy as np
 
-from ..dispatcher.gearbox import FastPath
+from ..dispatcher.gearbox import FastPath, StockRaised
 from ..parallel import pyrallel
 from . import _pyrallel_common as _common
 
@@ -48,49 +53,16 @@ _F64 = np.dtype(np.float64)
 _F32 = np.dtype(np.float32)
 _I64 = np.dtype(np.int64)
 
-# ---------------------------------------------------------------------------
-# CALIBRATION TABLE: op name -> {operand dtype: minimum element count}.
-# Derived by `tools/calibrate_dispatch.py --family binary` (fingerprint
-# 9bbe7063c555), evidence in benchmarks/results/PYRALLEL-DISPATCH-CAL/.
-# A pair absent here measured no >= 1.3x win at any size and stays on stock.
-# Bandwidth-bound wins are the most machine dependent numbers in the
-# project: recalibrate on every new box before trusting this table there.
-# ---------------------------------------------------------------------------
-# RE-DERIVED 2026-08-24 by tools/calibrate_dispatch.py --family binary, and
-# almost nothing of the old table survived. The previous rows came from
-# benchmarks/micro/bench_pyrallel_binary_calibration.py, whose
-# single-threaded baseline is a per-process coin flip on this hybrid CPU
-# (P-core or E-core, 1.44x apart, always inflating a threaded candidate);
-# the "quiet rerun" that moved six rows DOWN to 1e6 was reading that flip.
-# Measured end to end at those 1e6 floors the family actually delivered
-# 1.04-1.20x against a promised 1.3x, and subtract float32 at its 3e6 floor
-# ran at 0.97x - a dispatched loss.
-# Full write-up: docs/research/hybrid-cpu-baseline-coin-flip.md.
-#
-# THESE FLOORS COME FROM TWO INDEPENDENT SWEEPS WITH THE WORSE READING KEPT
-# PER CELL, which for this family is not pedantry. Bandwidth-bound wins here
-# cross the 1.3x bar somewhere between 1e7 and 3e7 elements and the
-# run-to-run spread is about as wide as the margin: one sweep read
-# subtract float64 at 1.23x, 1.14x, 1.33x on consecutive sizes - non
-# monotone. A threshold read off a single sweep is fitting noise, so a row
-# ships only if it cleared 1.3x TWICE at its floor and at every larger size.
-#
-# What that leaves, and what it removed:
-#   - EVERY float32 row is gone. Best any of them managed on the worse
-#     reading is 1.28x (add, multiply at 2e7); float32 halves the bytes per
-#     element, so a given element count carries half the bandwidth pressure.
-#   - divide is gone entirely: float64 peaks at 1.32x but dips to 1.29x at
-#     2e7, so no size clears the bar and stays clear above it.
-#   - multiply float64 misses by a hair (1.31x at 2e7, 1.2996x at 3e7).
-#     Kept out rather than rounded in.
-# Below ~1e6 a binary op finishes in tens of microseconds and threading
-# LOSES by 4-10x (0.50-0.92x at 3e5 here), which is what the floors prevent.
-#
-# This family is the strongest candidate in the project for per-machine
-# calibration (src/pyoverdrive/calibration.py) rather than a shipped table:
-# the numbers are bandwidth, and bandwidth is the least transferable thing
-# measured here. Doing that needs the probe cells run in re-drawn
-# subprocesses first - see the warning in calibration.py.
+# Operation/dtype -> minimum element count. Missing pairs stay on stock.
+# Thread submission and output traffic make small binary calls unsuitable
+# for this route. Floors must be measured through public dispatch, with
+# stock on a fast core of a hybrid CPU; a slow-core baseline flatters the
+# threaded candidate. Repeated independent sweeps guard against noise near
+# a crossover. Float32 and divide rows were withdrawn, and only selected
+# float64/integer rows remain; do not extrapolate across dtype or operation.
+# Historical inputs: benchmarks/results/PYRALLEL-DISPATCH-CAL/.
+# Regeneration tool: tools/calibrate_dispatch.py --family binary.
+# Host calibration may remove rows, never lower these shipped floors.
 SUPPORTED: dict[str, dict[np.dtype, int]] = {
     "add": {_F64: 20_000_000, _I64: 20_000_000},
     "subtract": {_I64: 20_000_000},
@@ -110,7 +82,7 @@ SHIPPED: dict[str, dict[np.dtype, int]] = {
 }
 
 
-def _make_applicable(table: dict[np.dtype, int]):
+def _make_applicable(table: dict[np.dtype, int], *, op_name: str | None = None):
     floor = min(table.values())
 
     def applicable(args: tuple, kwargs: dict) -> bool:
@@ -126,7 +98,14 @@ def _make_applicable(table: dict[np.dtype, int]):
         if kwargs:
             if len(kwargs) != 1 or "out" not in kwargs:
                 return False
-            if not _common.out_ok(kwargs["out"], a.shape, a.dtype):
+            if not _common.out_ok(kwargs["out"], a.shape, a.dtype, args):
+                return False
+            # Only disjoint buffers or exact elementwise aliases survive
+            # out_ok. The latter lose for float64 add on the measured Intel
+            # host; this operation-specific gate leaves the core unchanged.
+            if op_name == "add" and a.dtype == _F64 and (
+                np.shares_memory(kwargs["out"], a) or np.shares_memory(kwargs["out"], b)
+            ):
                 return False
         threshold = table.get(a.dtype)
         return (
@@ -134,7 +113,7 @@ def _make_applicable(table: dict[np.dtype, int]):
             and a.size >= threshold
             and a.flags.c_contiguous
             and b.flags.c_contiguous
-            and _common.core_ready()  # last: costs ~1 us
+            and _common.core_ready()  # last: thread and error-state checks
         )
 
     return applicable
@@ -143,7 +122,11 @@ def _make_applicable(table: dict[np.dtype, int]):
 def _make_run(gearbox, op: str):
     def run(a: np.ndarray, b: np.ndarray, out: np.ndarray | None = None) -> np.ndarray:
         stock = gearbox.stock_fn(op)  # the real ufunc, never the patched name
-        return pyrallel.parallel_elementwise(stock, (a, b), _common.threads_for(a.nbytes), out=out)
+        try:
+            return pyrallel.parallel_elementwise(stock, (a, b), _common.threads_for(a.nbytes), out=out)
+        except RuntimeWarning as exc:
+            # Preserve stock's warning-as-error without replaying mutated inputs.
+            raise StockRaised(exc) from exc
 
     return run
 
@@ -163,7 +146,7 @@ def register(gearbox) -> None:
             FastPath(
                 name=f"pyrallel_{op_name}",
                 op=op,
-                applicable=_make_applicable(table),
+                applicable=_make_applicable(table, op_name=op_name),
                 run=_make_run(gearbox, op),
                 provenance=dict(_PROVENANCE, op=op),
             )

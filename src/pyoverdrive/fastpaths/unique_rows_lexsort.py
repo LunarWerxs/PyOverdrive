@@ -1,7 +1,7 @@
 """Fast path: numpy.unique(a, axis=0) on integer rows via lexsort.
 
 Provenance (OPP-000040): numpy/numpy#11136 - unique(axis=0) is
-needlessly slow (thread spans 2018-2026; 1.96-3x claims). The raw
+paying for structured-row comparisons (thread spans 2018-2026). The raw
 void-view trick the thread favors is DEAD for a transparent layer: a
 pre-battery probe showed stock returns rows in NUMERIC lexicographic
 order while little-endian void memcmp does not (negative ints). The
@@ -10,12 +10,10 @@ significant key), a gather, and an adjacent-difference row mask -
 numeric lexicographic by construction, so every battery cell was
 bit-identical, negative-salted rows and counts included.
 
-Measured (OPP-000040 battery, fp 9bbe7063c555, idle box, 0-1% load):
-int64 low-cardinality 4.4-5.0x (k=2), 2.5-3.1x (k=4), 1.84x (k=8);
-high-cardinality 2.46x (k=2) / 1.40x (k=4); int32 4.0x;
-return_counts 4.88x. Every measured cell from n=1000 up clears the
-min-win, hence the floor; k > 8 and other dtypes are unmeasured and
-stay on stock.
+Row-count and column-count gates limit the route: sorting each column
+introduces work that depends on row width, while small batches may not
+amortize dispatch and temporary arrays. Wider rows and other dtypes stay
+on stock until their own regimes are established.
 
 Correctness contract:
 - Applies only to unique(a, axis=0) (axis by keyword or fifth
@@ -35,6 +33,10 @@ pyoverdrive.disable_path("unique_rows_lexsort").
 
 Implementation note: calls np.lexsort and elementwise compares only -
 never np.unique (a patched name; the OPP-000000 recursion law).
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations

@@ -62,8 +62,16 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
+from .fastpaths import argmax_blocked as _argmax_blocked
+
 MIN_WIN = 1.3  # same threshold the Dyno batteries hold shipped floors to
 _SCHEMA_VERSION = 1
+# Capture the shipped limits before the first saved calibration can change
+# the live module. A later valid calibration may restore these original limits.
+_ARGMAX_SHIPPED_FLOORS = {
+    "rows_min": _argmax_blocked.ROWS_MIN,
+    "size_min": _argmax_blocked.SIZE_MIN,
+}
 
 
 def _machine_identity() -> dict:
@@ -114,9 +122,12 @@ def load(refresh: bool = False) -> dict:
         raw = json.loads(p.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return _cache
-    if raw.get("version") != _SCHEMA_VERSION:
+    if not isinstance(raw, dict) or raw.get("version") != _SCHEMA_VERSION:
         return _cache
-    if raw.get("machine", {}).get("fingerprint") != _machine_identity()["fingerprint"]:
+    machine = raw.get("machine")
+    if not isinstance(machine, dict):
+        return _cache
+    if machine.get("fingerprint") != _machine_identity()["fingerprint"]:
         return _cache
     paths = raw.get("paths")
     if isinstance(paths, dict):
@@ -140,9 +151,9 @@ def save(paths: dict, probes: dict | None = None) -> Path:
 
 
 def apply(gearbox) -> list[str]:
-    """Apply the stored table to the live registry: enable the
-    calibration-gated paths it vouches for and push any stored floors
-    into their modules. Returns the names it enabled."""
+    """Apply valid saved verdicts to the live registry: enable or disable
+    calibration-gated paths and apply floors for positive verdicts.
+    Returns the names it enabled."""
     enabled = []
     table = load()
     for name, entry in table.items():
@@ -151,12 +162,28 @@ def apply(gearbox) -> list[str]:
         gate = _GATED.get(name)
         if gate is None:
             continue  # unknown path (older/newer install): ignore
+        # Validate all consumed fields before enabling or changing any floor.
+        # Ignore the entire bad record, not just its first malformed field.
+        if "enabled" in entry and type(entry["enabled"]) is not bool:
+            continue
+        if not gate.validate(entry):
+            continue
         if gate.always_on:
             # Nothing to enable - these are on already. The stored entry can
             # only narrow the shipped table, so apply it and move on.
             gate.apply_floors(entry)
             continue
-        if entry.get("enabled"):
+        if entry.get("enabled") is False:
+            # Recalibration can withdraw an earlier positive verdict. Missing
+            # or invalid records, unlike an explicit False, change nothing.
+            try:
+                gearbox.set_path_enabled(name, False)
+            except KeyError:
+                pass
+            continue
+        # An explicit environment kill switch takes precedence over a saved
+        # calibration verdict. The caller can still opt in with enable_path().
+        if entry.get("enabled") and name not in gearbox._killed_at_import:
             gate.apply_floors(entry)
             try:
                 gearbox.set_path_enabled(name, True)
@@ -184,10 +211,12 @@ class _Gate:
 
     def __init__(self, name: str, probe: Callable[[], dict],
                  apply_floors: Callable[[dict], None],
-                 always_on: bool = False):
+                 always_on: bool = False,
+                 validate: Callable[[dict], bool] = lambda entry: True):
         self.name = name
         self.probe = probe
         self.apply_floors = apply_floors
+        self.validate = validate
         # always_on gates ship ENABLED; calibration only narrows them. A
         # normal gate ships disabled and calibration is what turns it on.
         self.always_on = always_on
@@ -218,6 +247,16 @@ def _probe_argmax_blocked() -> dict:
         "size_min": argmax_blocked.SIZE_MIN,
         "cells": cells,
     }
+
+
+def _valid_argmax_entry(entry: dict) -> bool:
+    # Missing optional floors retain the live values. Booleans are integers
+    # in Python, so an isinstance(..., int) check would admit unsafe floors.
+    return all(
+        field not in entry
+        or (type(entry[field]) is int and entry[field] >= shipped)
+        for field, shipped in _ARGMAX_SHIPPED_FLOORS.items()
+    )
 
 
 def _apply_argmax_floors(entry: dict) -> None:
@@ -416,16 +455,30 @@ def _apply_pyrallel(entry: dict) -> None:
                          if np.dtype(d).name not in gone})
 
 
+def _valid_pyrallel_entry(entry: dict) -> bool:
+    drop = entry.get("drop", {})
+    # Check every row first: a malformed later row must not leave earlier
+    # rows rewritten. Unknown names are harmless and support newer files;
+    # they can never add rows or lower any of the shipped thresholds.
+    return isinstance(drop, dict) and all(
+        isinstance(name, str)
+        and isinstance(dtypes, list)
+        and all(isinstance(dtype, str) for dtype in dtypes)
+        for name, dtypes in drop.items()
+    )
+
+
 _GATED: dict[str, _Gate] = {
     "argmax_blocked_transpose": _Gate(
-        "argmax_blocked_transpose", _probe_argmax_blocked, _apply_argmax_floors
+        "argmax_blocked_transpose", _probe_argmax_blocked, _apply_argmax_floors,
+        validate=_valid_argmax_entry,
     ),
     # always_on: these paths ship enabled. Calibration can only take rows
     # AWAY from them on a machine where they do not pay; it never turns them
     # on, so a missing or foreign calibration file leaves the shipped table
     # exactly as it is.
     "pyrallel": _Gate("pyrallel", _probe_pyrallel, _apply_pyrallel,
-                      always_on=True),
+                      always_on=True, validate=_valid_pyrallel_entry),
 }
 
 

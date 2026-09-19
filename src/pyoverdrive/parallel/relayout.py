@@ -6,14 +6,17 @@ transposed 2-D array (``np.ascontiguousarray(a.T)``) walks one operand with
 a large stride, so stock's single-threaded strided copy is cache-hostile on
 big matrices. Tiling the copy into blocks that fit L1/L2 and spreading the
 blocks across threads is the issue reporter's own fix; adapted here to the
-persistent pool (the reproducer's per-call executor still measured 2.1x at
-4096x4096 float32; the pool removes that startup cost).
+persistent pool to avoid per-call executor startup.
 
 Contract: ``x`` is a plain 2-D F-contiguous (not C-contiguous) ndarray;
 returns a fresh C-contiguous array equal to ``x`` element for element
 (a copy is bit-identical by definition). Each block is a NumPy slice
 assignment, i.e. stock's own strided copy kernel on a cache-sized window;
 this module adds no arithmetic.
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations

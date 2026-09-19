@@ -2,10 +2,9 @@
 
 Provenance (OPP-000012): numpy/numpy#16160 reports np.isclose paying a
 fixed per-call cost (asanyarray conversions, an errstate context manager,
-two full isfinite reductions) that dwarfs the arithmetic on small inputs:
-2.63x claimed for the fused expression on n=1000, 8.4us -> 3.0us measured
-here on a scalar pair. Dyno reproduced 2.27-2.78x at n <= 10 and the
-predicted decay with size (benchmarks/results/OPP-000012/, contended run).
+two full isfinite reductions) that can dominate arithmetic on small
+inputs. Fusing the finite-input expression removes that wrapper work;
+size caps limit the route as array arithmetic becomes the main cost.
 
 Correctness contract:
 - Applies only to isclose(a, b[, rtol, atol]) where rtol/atol (positional
@@ -13,30 +12,28 @@ Correctness contract:
   False, and the operands are either two Python int/float scalars or two
   plain same-shape same-dtype float64/float32 ndarrays below the size cap
   CONTAINING ONLY FINITE VALUES - the predicate scans isfinite and
-  refuses otherwise. That refusal is measured, not defensive: the exact
-  masked branch stock uses for non-finite entries costs MORE than stock
-  when reimplemented (0.83-0.90x in the battery), and non-finite
-  rtol/atol is precisely the case where stock's errstate suppression is
-  load-bearing (WarrenWeckesser in-thread). equal_nan=True measured only
-  1.19x, under the min-win bar, and stays on stock too. The refusal on a
-  NaN-bearing small array costs the scan plus stock's own identical
-  reduction: 0.82x measured (12.9us vs 10.6us at n=500), the same price
-  as the reimplemented masked branch (0.83x in the battery), accepted
-  and pinned as an MVP-BASELINE guard row.
+  refuses otherwise. Non-finite inputs need stock's masked handling,
+  and non-finite tolerances need its error-state suppression
+  (WarrenWeckesser's observation in-thread). equal_nan=True also stays
+  on stock. The refusal still pays for the finite-value scan, so it
+  belongs in fallback-overhead measurements.
 - With those guarantees the dispatched computation is the pure fused
   expression abs(a - b) <= atol + rtol * abs(b), which for all-finite
   operands and finite tolerances is exactly stock's within_tol
   arithmetic: bit-identical output (a bool array, or np.bool_ for scalar
   input, matching stock's return type).
 
-Size caps (fixed overhead shrinks relatively as n grows; from the
-OPP-000012 battery): float64 arrays dispatch to n=1000 (1.84x there,
-1.29x at 1e4 is under min-win), float32 to n=10_000 (1.64x there, 1.08x
-at 1e5). Scalars always dispatch (2.27-2.78x).
+The dtype-specific size caps bound an overhead-saving regime; removing
+fixed wrapper work cannot imply a benefit for arbitrarily large arrays.
+Scalar handling preserves stock's result type.
 
 Comparison mode: bit-identical (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=isclose_fused or
 pyoverdrive.disable_path("isclose_fused").
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations

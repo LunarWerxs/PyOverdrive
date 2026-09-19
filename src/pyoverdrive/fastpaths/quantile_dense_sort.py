@@ -1,15 +1,10 @@
 """Fast path: numpy.quantile with an ARRAY of quantiles, via sort + exact lerp.
 
 Provenance (OPP-000022): numpy/numpy#32187 - stock quantile's
-partition-based route degrades catastrophically once the requested
-quantile set gets dense (introselect pathology past ~kth density 0.25:
-6.1x at nq 492 of 2048 jumps to 34.5x at nq 512), and the QUANTILE-CAL
-battery (benchmarks/results/QUANTILE-CAL/, idle box, 0% load) showed the
-sort route winning EVERYWHERE measured, not only past the cliff: 1.80x at
-nq=4, 3.1-4.3x at nq 16-64, 13.3x at nq 128 on short slices, 114.8x at
-nq 2048 of 8192, 918x at nq 16384 of 65536, and 1-D inputs 2.7-790x.
-Stock's per-call machinery for array q is simply slower than one sort
-plus vectorized interpolation at every measured point.
+partition-based route can become costly when many order statistics are
+requested. Sorting each slice once and interpolating all requested values
+avoids repeated selection work. Quantile-count and reduced-length windows
+bound the regime; scalar quantiles and unsupported layouts stay on stock.
 
 Correctness contract:
 - Applies only to quantile(a, q[, axis]) where a is a plain float64
@@ -31,6 +26,10 @@ Correctness contract:
 Comparison mode: bit-identical (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=quantile_dense_sort or
 pyoverdrive.disable_path("quantile_dense_sort").
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations
@@ -41,10 +40,9 @@ from ..dispatcher.gearbox import GEARBOX, FastPath
 
 _F64 = np.dtype(np.float64)
 
-# measured bounds (QUANTILE-CAL, fp 9bbe7063c555): every cell inside them
-# wins >= 1.8x. Slice COUNT is deliberately unbounded: it multiplies both
-# stock's per-slice cost and the sort's linearly, so it cannot flip the
-# sign (measured 1, 4, 32, 300 slices, all winning).
+# Bounds on requested quantiles and reduced length limit the sort route.
+# Slice count is not independently gated: both routes repeat work per slice,
+# but shape/count neighbors still need public-API measurements on each host.
 NQ_MIN, NQ_MAX = 4, 16_384
 M_MIN, M_MAX = 512, 65_536
 

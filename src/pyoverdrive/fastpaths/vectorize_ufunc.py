@@ -9,11 +9,9 @@ and wherever a function is passed around and vectorized defensively -
 and in that case the loop is pure loss: the wrapped callable is already
 a fully vectorized C ufunc.
 
-Measured (dev box, fp 8f8198d9abab, float64, n=1M): sqrt 101.1x, exp
-36.6x, sin 20.7x; the earlier survey cell showed 17.8x for sin at
-default settings and 14.1x on the idle box (fp 9bbe7063c555). Results
-are BIT-IDENTICAL on the served set (below), because the two routes run
-the same ufunc over the same values.
+The direct route avoids Python calls per element. This is useful only
+when scalar and array ufunc loops preserve the served dtype's result;
+that correctness restriction is checked separately from timing.
 
 WHY THIS IS A CLASS PATCH, NOT A FUNCTION WRAPPER. np.vectorize is a
 class and the slow part is the INSTANCE's __call__. Replacing the name
@@ -58,6 +56,10 @@ stock's own __call__ unchanged.
 Comparison mode: bit-identical (spec section 9). Kill switch:
 vectorize_ufunc_direct (live: the installed subclass consults the
 path's enabled flag on every call).
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations

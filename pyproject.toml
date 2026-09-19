@@ -15,7 +15,9 @@ keywords = [
     "scientific-computing", "vectorization", "benchmark", "linalg",
 ]
 dependencies = [
-    "numpy>=2.0",
+    # The split-complex matmul path needs the strided-view BLAS routing
+    # introduced in NumPy 2.3; earlier versions suffer severe slowdowns.
+    "numpy>=2.3",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -56,6 +58,8 @@ pyoverdrive = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "compatibility"]
+# Always test this checkout, even if another checkout was installed editable.
+pythonpath = ["src"]
 # No test in this suite legitimately takes minutes - the whole gate runs in
 # well under a minute. A test that blows past this is wedged, not slow, so
 # dump every thread's stack (pytest's faulthandler plugin exits after the

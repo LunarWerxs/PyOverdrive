@@ -163,7 +163,12 @@ def test_1d_input_falls_back():
 
 def test_3d_input_falls_back():
     dtype = np.dtype(np.float64)
-    shape = (64, 64, 64)  # size 262144 >= float64 threshold
+    # derived from the table, not hardcoded: the point of this test is that
+    # ndim alone refuses a BIG ENOUGH input, so a raised floor must grow the
+    # shape with it or the test starts passing for the wrong reason (it did,
+    # when the floors moved to 4M elements in batch 16)
+    side = int(np.ceil(SUPPORTED[dtype] ** (1 / 3))) + 1
+    shape = (side, side, side)
     base = RNG.standard_normal(size=shape[::-1]).astype(dtype)
     x = base.T
     assert x.ndim == 3

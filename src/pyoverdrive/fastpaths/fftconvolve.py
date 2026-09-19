@@ -1,16 +1,12 @@
 """Fast paths: numpy.convolve / numpy.correlate (full/same/valid) via rfft/irfft.
 
 Provenance (OPP-000016): numpy/numpy#1858 (trac #1260, 2009, still open)
-reports full-mode np.correlate/np.convolve using naive O(n*m) direct
-summation, "takes around an hour" at n=1e6 where MATLAB's FFT-based xcorr
-needs 0.35s (a >=171x floor; the numpy run was killed unfinished). The FFT
-route is commenter endolith's sketch; maintainer cournape's own proposal in
-the thread is a size-based heuristic between naive and FFT, which is
-exactly what this dispatch implements. Dyno reproduced 2.3x at n=1000 up to
-1518x at n=20000 float64 (benchmarks/results/OPP-000016/), and the shipped
-thresholds come from the FFTCONV-CAL battery
-(benchmarks/micro/bench_fftconvolve_calibration.py,
-benchmarks/results/FFTCONV-CAL/).
+describes the cost of direct O(n*m) summation for long operands. The FFT
+route follows commenter endolith's sketch; maintainer cournape proposed
+choosing direct or FFT evaluation by size. This dispatcher uses operand
+length and per-mode direct-work floors for that choice. Historical
+reproducers and calibration inputs remain in benchmarks/results/OPP-000016/
+and benchmarks/micro/bench_fftconvolve_calibration.py.
 
 Correctness contract, shared by both registered paths:
 
@@ -28,8 +24,8 @@ Correctness contract, shared by both registered paths:
   estimate above its measured floor. The FFT always pays the full
   transform, but stock's cost depends on the mode: full/same perform
   ~n*m multiply-adds, valid only (max-min+1)*min - a near-equal-length
-  valid call is nearly free on stock (measured 0.01-0.02x for the FFT
-  there) and must stay on it, which is what the per-mode work floors in
+  valid call does little direct work and stays on stock, which is what
+  the per-mode work floors in
   _MODE_WORK_FLOOR encode.
 - float64: results are numerically equal to stock, not bit-identical (the
   two algorithms accumulate rounding in different orders; pv's estimate in
@@ -63,6 +59,10 @@ Correctness contract, shared by both registered paths:
 Comparison mode: numeric for float64, bit-identical for integers (spec
 section 9; the provenance record carries the per-dtype split). Kill
 switches: PYOVERDRIVE_DISABLE=fftconvolve / fftcorrelate.
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations
@@ -90,23 +90,11 @@ class _Spec(NamedTuple):
     int_bound: int  # max|a| * max|v| * min(n, m) ceiling; 0 = float path
 
 
-# CALIBRATION (fp 8f8198d9abab, benchmarks/results/FFTCONV-CAL/, 2026-08-23,
-# 11-14% foreign load, below the contended threshold). 5-smooth padding
-# ships because power-of-two padding can oversize the transform by up to 2x
-# and the battery shows that gap deciding real cases: 20000x1000 float64 is
-# 4.22x smooth5 vs 1.76x pow2, and 4000x250 WINS at 1.83x smooth5 while
-# pow2 loses it (0.90x). Both floors are the measured edge of the winning
-# region, applied to all three dtypes:
-# - min_len 1000: thin kernels lose or go marginal however large the
-#   product gets (m=100: 0.37-0.92x everywhere; m=300 wins 2.1x at
-#   n=10000 but decays to 1.12x by n=100000, below the 1.3x min-win).
-# - product 1e6: (500,500) is only 0.97-1.20x; (1000,1000) is the first
-#   clean win.
-# Measured with both floors satisfied: float64 2.3x (1000x1000) to 5.1x
-# (10000x1000, and 2.9x at 100000x1000); int64 5.9-13.4x; int32 6.7-18.0x.
-# (2000,500), (4000,250) and (10000,300) also win 1.5-2.2x but sit outside
-# the simple two-floor rule and stay on stock; a finer work-ratio predicate
-# is a possible future refinement, with its own battery.
+# Five-smooth padding avoids unnecessarily large FFTs. The shorter-operand
+# floor excludes thin kernels whose direct loop has little work per lag;
+# the product floor amortizes transforms and allocation. The two conditions
+# are independent: a very long operand does not make every thin kernel a
+# suitable FFT candidate. Historical inputs: benchmarks/results/FFTCONV-CAL/.
 _INT_EXACT = 2**52 - 1  # float64 exact-integer ceiling (scipy's nmant bound)
 SUPPORTED: dict[np.dtype, _Spec] = {
     np.dtype(np.float64): _Spec(1000, 1_000_000, 0),
@@ -115,13 +103,9 @@ SUPPORTED: dict[np.dtype, _Spec] = {
 }
 _MIN_LEN_FLOOR = min(s.min_len for s in SUPPORTED.values())
 
-# Per-mode naive-work floors (same battery, mode section, 56-86% load so
-# every ratio is understated). 'same': (1000,1000) work 1e6 straddled the
-# 1.3x min-win across three runs (1.09-1.51x), (3000,1000) work 3e6 is the
-# first clean edge (2.88-2.93x; 3.3-4.9x above it; int64 14.3x). 'valid':
-# (3000,2000) work 2e6 is the edge (1.57-1.70x; 2.3-3.3x above; int64
-# 12.7x), and the near-equal-length witness (10000,9999), work 2e4, loses
-# 0.01-0.02x, which the work model itself excludes.
+# FFT evaluation always pays for a full transform; direct evaluation only
+# computes the requested lags. Separate work floors keep near-equal-length
+# valid-mode calls on stock even when the full convolution would be large.
 _MODE_WORK_FLOOR = {"full": 1_000_000, "same": 3_000_000, "valid": 2_000_000}
 
 
@@ -129,9 +113,8 @@ def _next_smooth5(n: int) -> int:
     """Smallest 2**a * 3**b * 5**c >= n (scipy's next_fast_len idea, reimplemented).
 
     pocketfft is fast on 2/3/5-smooth lengths; padding to the next power of
-    two instead can oversize the transform by up to 2x, which the FFTCONV-CAL
-    battery measured as the difference between winning and losing on
-    unequal-length shapes.
+    two can nearly double the required transform length. Avoiding that
+    padding matters especially for unequal-length operands.
     """
     best = 1 << (n - 1).bit_length()
     p5 = 1

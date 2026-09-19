@@ -29,7 +29,7 @@ import pytest
 
 import pyoverdrive
 from pyoverdrive.dispatcher.gearbox import GEARBOX
-from pyoverdrive.fastpaths.isin_object_hash import SIZE_FLOOR
+from pyoverdrive.fastpaths.isin_object_hash import SIZE_FLOOR, TEST_FLOOR
 
 OP = "numpy.isin"
 PATH = "isin_object_hash"
@@ -138,7 +138,9 @@ def test_dispatch_tuples_as_objects_hashable_composites():
     rng = np.random.default_rng(6)
     pool = [(i, i * 2) for i in range(40)]
     element = _objarr([pool[i] for i in rng.integers(0, len(pool), size=350)])
-    test = _objarr(pool[:10])
+    # 16 tuples, not 10: below TEST_FLOOR the path now refuses, and this
+    # test is about tuple keys hashing correctly, not about the gate.
+    test = _objarr(pool[:16])
     got, stock = _assert_dispatched_equal((element, test), {})
     assert got.any() and not got.all()
 
@@ -146,7 +148,8 @@ def test_dispatch_tuples_as_objects_hashable_composites():
 def test_dispatch_invert_true():
     element = _objarr(_words(400, seed=7))
     rng = np.random.default_rng(8)
-    test = _objarr(rng.choice(VOCAB, size=5, replace=False).tolist())
+    # 16, not 5: see TEST_FLOOR. The subject here is invert=, not the gate.
+    test = _objarr(rng.choice(VOCAB, size=16, replace=False).tolist())
     got, stock = _assert_dispatched_equal((element, test), {"invert": True})
     assert got.any() and not got.all()
 
@@ -171,6 +174,29 @@ def test_dispatch_combined_size_300_exact_floor():
     assert element.size + test.size == SIZE_FLOOR
     decision, reason = GEARBOX.decide(OP, (element, test), {})
     assert decision == PATH, (decision, reason)
+    _assert_dispatched_equal((element, test), {})
+
+
+def test_refusal_test_elements_just_under_test_floor():
+    """The corner the four-axis sweep caught at 0.09x.
+
+    Few test_elements is where stock switches to a chain of vectorized
+    equalities and beats a per-element Python hash outright. Combined size
+    is comfortably over SIZE_FLOOR here, which is the point: no value of
+    that number could ever have expressed this.
+    """
+    element = _objarr(_words(4000, seed=115))
+    test = _objarr(_words(TEST_FLOOR - 1, seed=116))
+    assert element.size + test.size > SIZE_FLOOR
+    decision, reason = GEARBOX.decide(OP, (element, test), {})
+    assert decision == "stock", (decision, reason)
+    _assert_refused_equal((element, test), {})
+
+
+def test_dispatch_test_elements_at_test_floor():
+    """And the first count that does dispatch, so the floor is pinned both ways."""
+    element = _objarr(_words(4000, seed=117))
+    test = _objarr(_words(TEST_FLOOR, seed=118))
     _assert_dispatched_equal((element, test), {})
 
 
@@ -329,3 +355,25 @@ def test_kill_switch_restores_stock_routing():
         assert np.array_equal(got, stock)
     finally:
         pyoverdrive.enable_path(PATH)
+
+
+def test_assume_unique_promise_may_be_false_without_changing_the_answer():
+    """The keyword is a promise numpy does not verify, and this path takes it.
+
+    intersect_sorted REFUSES assume_unique= for the same reason this path
+    accepts it, which reads as two rules and is one: membership is
+    idempotent under duplication, so a caller who promises uniqueness and
+    is wrong still gets stock's answer here. intersect1d's answer does
+    change under a false promise, so it declines.
+
+    Asserted rather than asserted-in-a-docstring, with the promise
+    deliberately false on BOTH operands.
+    """
+    rng = np.random.default_rng(720)
+    vocab = [f"w{i}" for i in range(40)]
+    element = _objarr([vocab[i] for i in rng.integers(0, 40, size=600)])
+    test = _objarr(vocab[:20] * 3)                 # duplicates: promise is false
+    assert element.size > np.unique(element).size
+    assert test.size > len(set(test.tolist()))
+    for promise in (True, False):
+        _assert_dispatched_equal((element, test), {"assume_unique": promise})

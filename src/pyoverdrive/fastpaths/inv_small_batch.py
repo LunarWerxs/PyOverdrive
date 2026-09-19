@@ -3,17 +3,13 @@ vectorized adjugate.
 
 Provenance (OPP-000035): numpy/numpy#17166 - stock inv runs one LAPACK
 call per matrix, so stacked small matrices pay per-call overhead
-thousands of times; the reporter's hand-vectorized adjugate was 213x
-faster on a 4000-stack (88x independently confirmed in-thread), and
-thrasibule named the mechanism: reorder the loops so every arithmetic
-op vectorizes across the batch. Same per-matrix-LAPACK-overhead vein as
-the shipped eigvalsh_2x2_closed (OPP-000030, 31x).
+thousands of times. The reporter used a hand-vectorized adjugate, and
+thrasibule identified the mechanism: reorder the loops so each arithmetic
+operation vectorizes across the batch. The same per-matrix setup issue
+motivates eigvalsh_2x2_closed (OPP-000030).
 
-Measured (OPP-000035 + BATCH5-CAL batteries, fp 9bbe7063c555, idle box,
-0-1% load): 3x3 float64 2.95x at batch 300, 5.24x at 1000, 8.20x at
-4000, 3.27x at 10_000, 1.77x at 100_000; 2x2 float64 12.1x at 1000,
-4.5x at 100_000; 3x3 float32 16.5x at 10_000. Batch 1 loses 0.16x and
-100 straddles 1.39x, hence the floors.
+Per-dtype and matrix-size batch floors amortize dispatch, temporary arrays,
+and the determinant guard. Small or unserved batches stay on LAPACK.
 
 The CONDITION CEILING, measured not guessed: LAPACK's pivoted LU stays
 accurate where the adjugate's naive cancellation does not. The battery's
@@ -40,6 +36,10 @@ Correctness contract:
 Comparison mode: numeric (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=inv_small_batch or
 pyoverdrive.disable_path("inv_small_batch").
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations
@@ -113,28 +113,13 @@ def _det_and_scale(a):
 
 
 def _scale(a):
-    """max|entry| per matrix. Two formulations, and the crossover is real.
+    """Maximum absolute entry per matrix, with a dimension-specific crossover.
 
-    Folding np.maximum over the d*d ENTRY VIEWS issues 2*d*d-1 numpy calls
-    but touches each element once with no temporary copy of the stack.
-    `np.abs(a).max(axis=(-2, -1))` is 2 calls but allocates |a| and then
-    runs a multi-axis reduction over a tiny trailing shape, which numpy does
-    badly. So folding wins on big batches by a lot and loses on small ones,
-    where per-call overhead is the whole cost. Measured here (us):
-
-              n=200   n=500   n=1000  n=5000  n=30000  n=100000
-      d=2 fold  3.6     4.1      5.4    12.0    112.6      352.8
-          axes  8.3    11.1     22.0   127.2    924.2     4120.2
-      d=3 fold  9.6    11.8     17.5    41.7    274.4     1031.2
-          axes  5.6    13.5     23.3   120.3   1356.4     4523.0
-      d=4 fold 16.3    19.6     27.8    88.7    513.6     2114.4
-          axes  6.9    12.2     25.0   122.7   1586.7     4858.9
-
-    Picking one of them everywhere is not an option: this guard sits on the
-    path of det, slogdet, solve and inv, whose floors are 200-1000 batches,
-    while their upper regimes run to 1e5. Folding unconditionally regressed
-    det 3x3 at its own floor from 1.00x to 0.78x. The crossovers below are
-    read off that table, per dimension, not extrapolated.
+    Folding maximum over entry views avoids a temporary copy of the stack,
+    but issues more NumPy calls. Reducing abs(a) over both trailing axes
+    allocates that temporary but uses fewer calls. The batch-size switch
+    balances these costs separately for each matrix dimension; this helper
+    also serves det, slogdet and solve, whose batch windows differ.
     """
     d = a.shape[-1]
     n = a.size // (d * d)
@@ -148,8 +133,8 @@ def _scale(a):
     return out
 
 
-# Batch size from which folding over entry views beats the axis reduction,
-# per dimension. Measured, see _scale.
+# Per-dimension batch crossover between entry-view folding and the
+# temporary-array axis reduction; see _scale for the cost tradeoff.
 _FOLD_FROM = {2: 0, 3: 500, 4: 5_000}
 
 
@@ -157,13 +142,10 @@ def _applicable(args: tuple, kwargs: dict) -> bool:
     """METADATA ONLY. Everything that has to look at the DATA moved into the
     run - see _admit_or_hand_off for why.
 
-    This predicate used to scan the whole stack for finiteness and compute
-    the determinant, and the run then computed the determinant AGAIN. It was
-    not a small overhead: measured at batch 4096 the predicate cost 128.5 us
-    against 25.8 us for the entire 2x2 inverse it was guarding, so the
-    dispatched call ran at 5.0x where the work alone is 30.0x. The same
-    defect had np.linalg.det shipping at 0.70x until it was fused; here it
-    never made the path a loss, only a fraction of what it should be.
+    Data scans and determinant computation belong in the run so the
+    determinant is computed once and reused by its conditioning guard.
+    Keeping these operations in both predicate and run duplicates the
+    expensive work, even when the standalone kernel looks inexpensive.
     """
     if len(args) != 1 or kwargs:
         return False

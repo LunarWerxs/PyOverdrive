@@ -118,19 +118,26 @@ def test_dispatch_float64_side_positional():
     _assert_dispatched_equal((x, v, "right"), {})
 
 
-def test_dispatch_int64_wide_range():
+# int64 WAS a dispatching dtype until batch 16 withdrew the row: numpy 2.5
+# made stock searchsorted fast enough that sorting the queries can no longer
+# repay the argsort for integers, and the row measured 0.26-0.74x across its
+# whole admissible region (see searchsorted_sortqueries.SUPPORTED). These two
+# stay as REFUSAL tests rather than being deleted, because they are the exact
+# shapes that used to dispatch - if int64 ever comes back it must come back
+# on a measurement, not by accident.
+def test_refusal_int64_wide_range():
     x = _sorted_int(200_000, seed=3)
     v = _random_int(200_000, seed=4)
-    _assert_dispatched_equal((x, v), {})
+    _assert_refused_equal((x, v), {})
 
 
-def test_dispatch_int64_duplicates_heavy_both_sides():
+def test_refusal_int64_duplicates_heavy_both_sides():
     rng_x = np.random.default_rng(5)
     rng_v = np.random.default_rng(6)
     x = np.sort(rng_x.integers(0, 50, size=150_000, dtype=np.int64))
     v = rng_v.integers(0, 50, size=150_000, dtype=np.int64)
-    _assert_dispatched_equal((x, v), {"side": "left"})
-    _assert_dispatched_equal((x, v), {"side": "right"})
+    _assert_refused_equal((x, v), {"side": "left"})
+    _assert_refused_equal((x, v), {"side": "right"})
 
 
 def test_dispatch_float64_queries_with_few_nans():
@@ -191,9 +198,9 @@ def test_refusal_v_below_float_floor():
     _assert_refused_equal((x, v), {})
 
 
-def test_refusal_int64_v_below_dtype_floor_above_float_floor():
-    # 50_000 clears the float64 floor (10_000) but not the int64 floor
-    # (100_000): a dtype-specific threshold, not one global number.
+def test_refusal_int64_at_a_size_float64_would_take():
+    # 50_000 clears the float64 floor (10_000) and int64 is refused anyway:
+    # the dtype table is a membership test now, not just a per-dtype size.
     x = _sorted_int(50_000, seed=22)
     v = _random_int(50_000, seed=23)
     _assert_refused_equal((x, v), {})
@@ -264,40 +271,55 @@ def test_kill_switch_restores_stock_routing():
 
 
 # ---------------------------------------------------------------------------
-# 3. unsorted haystack: garbage in, the same garbage out (per the module
-#    docstring) -- verified NOT to hold under installed numpy: stock's own
-#    searchsorted on an unsorted haystack is query-BATCH-ORDER dependent
-#    (confirmed by comparing scalar-per-element calls, which match a manual
-#    textbook bisect_left, against a batched call, which does not; this
-#    smells like an internal locality hint chained between consecutive
-#    queries -- harmless/correct on a truly sorted haystack, order-sensitive
-#    "garbage" on an unsorted one). The fastpath reorders v via argsort
-#    before calling stock, so its unpermuted output can diverge from
-#    stock's own call on the original v order whenever the haystack is not
-#    actually sorted. Dispatch still happens (applicability never checks a's
-#    sortedness), so that half of the contract is asserted for real; the
-#    bit-identity half is marked xfail(strict=True) as an executable record
-#    of the discrepancy from searchsorted_sortqueries.py's docstring
-#    ("an unsorted haystack included: garbage in, the same garbage out").
+# 3. unsorted haystack: REFUSED now, and this is the record of why.
+#
+#    The original contract was "garbage in, the same garbage out" - an
+#    unsorted haystack would dispatch and return exactly what stock
+#    returns. That was verified NOT to hold: stock's own searchsorted on an
+#    unsorted haystack is query-BATCH-ORDER dependent (confirmed by
+#    comparing scalar-per-element calls, which match a manual textbook
+#    bisect_left, against a batched call, which does not; an internal
+#    locality hint chained between consecutive queries -- correct on a
+#    truly sorted haystack, order-sensitive on an unsorted one). The
+#    fastpath reorders v via argsort, so its unpermuted output diverges
+#    from stock's call on the original order: 17122/20000 elements on numpy
+#    2.4.5, and 43407/50000 measured again in batch 16.
+#
+#    That was known and ACCEPTED for a while - dispatch happened anyway,
+#    with the bit-identity half held as a strict xfail below numpy 2.5,
+#    which is where the order dependence was removed. Batch 16 reversed the
+#    call. The reasoning is not that the old one was unreasonable, since
+#    this is undefined behaviour on numpy's side either way; it is that the
+#    package floor is numpy>=2.3, so the divergent versions are SUPPORTED
+#    versions, and this project had already ruled the other way on the same
+#    shape (isin_string_hash refuses lone-NUL strings so stock keeps
+#    answering where stock is quirky). Two opposite decisions about
+#    undefined behaviour is one too many.
+#
+#    The guard costs 0.1-0.5% of the call it protects, so the trade is not
+#    close. On numpy >= 2.5 it refuses an input that would have agreed.
 # ---------------------------------------------------------------------------
 
-@pytest.mark.xfail(
-    condition=np.lib.NumpyVersion(np.__version__) < "2.5.0",
-    strict=True,
-    reason=(
-        "numpy < 2.5: searchsorted's batched result on an unsorted haystack "
-        "is query-order dependent (17122/20000 elements measured on 2.4.5). "
-        "numpy 2.5 removed the order dependence (0/20000 measured on 2.5.2 "
-        "on a second machine), so there this runs as a plain passing test. "
-        "See the block comment above this test."
-    ),
-)
-def test_unsorted_haystack_matches_stocks_garbage_exactly():
+def test_unsorted_haystack_now_refused_rather_than_matched():
+    """SUPERSEDED, and the history is the point.
+
+    This used to assert that an unsorted haystack DISPATCHES and returns
+    stock's garbage exactly, under a strict xfail for numpy < 2.5 because
+    the batched result is query-order dependent there (17122/20000 measured
+    on 2.4.5; 0/20000 on 2.5.2). That contract was "garbage in, the same
+    garbage out", and it held only on the newest numpy.
+
+    The predicate now checks the haystack, so the question does not arise:
+    an unsorted haystack goes to stock on every version. Kept as a refusal
+    test rather than deleted because it is the exact shape that used to
+    dispatch - if the check is ever removed, this fails and the reviewer
+    reads the paragraph above instead of rediscovering it.
+    """
     x = _random_float(50_000, seed=41)  # deliberately NOT sorted
     v = _random_float(50_000, seed=42)
     decision, reason = GEARBOX.decide(OP, (x, v), {})
-    assert decision == PATH, (decision, reason)  # applicability ignores a's order
-    _assert_dispatched_equal((x, v), {})
+    assert decision == "stock", (decision, reason)
+    _assert_refused_equal((x, v), {})
 
 
 # ---------------------------------------------------------------------------
@@ -309,3 +331,71 @@ def test_empty_haystack_refuses_and_matches_stock():
     v = _random_float(50_000, seed=43)
     got = _assert_refused_equal((x, v), {})
     assert np.all(got == 0)
+
+
+# ---------------------------------------------------------------------------
+# 5. the haystack must actually BE a haystack
+# ---------------------------------------------------------------------------
+# numpy documents `a` as needing to be sorted and does not check it, so an
+# unsorted haystack gets a meaningless answer rather than an error. The
+# answer is meaningless but not arbitrary - it is a deterministic function
+# of the array - and this path returned a DIFFERENT one, because sorting
+# the queries is only order-neutral when numpy's progressive narrowing of
+# the search range is valid, which it is not on an unsorted haystack. It
+# dispatched, and 43,407 of 50,000 positions disagreed with stock.
+
+def test_refusal_unsorted_haystack():
+    x = _random_float(50_000, seed=301)          # NOT sorted
+    v = _random_float(50_000, seed=302)
+    assert not bool(np.all(x[1:] >= x[:-1]))
+    _assert_refused_equal((x, v), {})
+
+
+def test_unsorted_haystack_divergence_tracks_the_numpy_boundary():
+    """Is the refusal load-bearing, or precautionary? It depends on numpy.
+
+    Sorting the queries and inverting - exactly what the path does - gives
+    a DIFFERENT answer from stock on numpy < 2.5, where the batched
+    searchsorted narrows its range as it walks the query list and that
+    narrowing is invalid on an unsorted haystack. numpy 2.5 removed the
+    order dependence, so there the two agree and the guard costs a
+    dispatch it did not have to refuse.
+
+    Asserted in BOTH directions rather than xfailed in one, so the day the
+    boundary moves again this says which side it moved to. The package
+    floor is numpy>=2.3, so the divergent versions are supported ones and
+    the guard stays either way.
+    """
+    x = _random_float(50_000, seed=303)
+    v = _random_float(50_000, seed=304)
+    order = np.argsort(v, kind="stable")
+    round_trip = np.empty_like(order)
+    round_trip[order] = _stock(x, v[order])
+    agrees = np.array_equal(round_trip, _stock(x, v))
+    if np.lib.NumpyVersion(np.__version__) < "2.5.0":
+        assert not agrees, (
+            "numpy < 2.5 used to be query-order dependent on an unsorted "
+            "haystack; if that is gone, re-measure the guard's value")
+    else:
+        assert agrees, (
+            "numpy >= 2.5 removed the order dependence; a divergence here "
+            "means it is back and the guard is load-bearing again")
+
+
+def test_dispatch_haystack_sorted_with_duplicates():
+    """Non-decreasing is the bar, not strictly increasing: searchsorted is
+    defined on haystacks with repeats and this is not a uniqueness check."""
+    rng = np.random.default_rng(305)
+    x = np.sort(rng.integers(0, 50, size=50_000).astype(np.float64))
+    v = rng.integers(0, 50, size=50_000).astype(np.float64)
+    assert x.size > np.unique(x).size
+    _assert_dispatched_equal((x, v), {})
+
+
+def test_refusal_haystack_containing_nan():
+    """NaN compares False in both directions, so a NaN anywhere in the
+    haystack reads as unsorted and goes to stock. Conservative on purpose -
+    it costs a dispatch and never an answer."""
+    x = np.concatenate([_sorted_float(49_999, seed=306), [np.nan]])
+    v = _random_float(50_000, seed=307)
+    _assert_refused_equal((x, v), {})

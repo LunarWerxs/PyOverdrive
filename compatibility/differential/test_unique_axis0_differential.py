@@ -1,7 +1,7 @@
 """Differential tests: unique_axis0_column fast path vs stock np.unique.
 
 Contract is BIT-IDENTICAL output wherever the path dispatches (a plain 2-D
-(n, 1) ndarray, n >= SIZE_THRESHOLD, dtype in int32/int64/uint32/uint64,
+(n, 1) ndarray, n >= SIZE_THRESHOLD, any native integer dtype,
 called as ``np.unique(a, axis=0)``), and correct fallback (stock result)
 everywhere else.
 """
@@ -85,15 +85,38 @@ def test_small_dtype_column_dispatched_bit_identical(dtype):
 
 
 def test_interplay_1d_uses_unique_sort_2d_column_uses_axis0():
+    from pyoverdrive.fastpaths.unique_sort import _THRESHOLDS
+
     pyoverdrive.enable(["numpy.unique", "numpy.unique_values"])
     try:
-        flat = RNG.integers(0, 1000, size=SIZE_THRESHOLD * 4, dtype=np.int64)
+        n = max(SIZE_THRESHOLD, _THRESHOLDS[np.dtype(np.int32)])
+        flat = RNG.integers(0, 1000, size=n, dtype=np.int32)
         assert pyoverdrive.explain("numpy.unique", flat)[0] == "unique_sort"
 
         column = flat.reshape(-1, 1)
         assert pyoverdrive.explain("numpy.unique", column, axis=0)[0] == "unique_axis0_column"
     finally:
         pyoverdrive.enable(["numpy.unique"])
+
+
+@pytest.mark.parametrize("dtype", (np.int16, np.int64, np.uint64))
+def test_withdrawn_1d_dtype_keeps_independent_column_route(dtype):
+    # The stock competitors differ: 1-D hashing versus structured row packing.
+    # Withdrawing a 1-D cardinality band must not withdraw the column path.
+    flat = np.arange(max(SIZE_THRESHOLD, 10_000), dtype=dtype) % 17
+    assert pyoverdrive.explain("numpy.unique", flat)[0] == "stock"
+    column = flat.reshape(-1, 1)
+    assert pyoverdrive.explain("numpy.unique", column, axis=0)[0] == "unique_axis0_column"
+    _assert_identical(np.unique(column, axis=0), STOCK_UNIQUE(column, axis=0))
+
+
+def test_column_diagnostic_keeps_its_independent_int64_witness():
+    from pyoverdrive.diagnostics import _inputs_unique_axis0
+
+    args, kwargs = _inputs_unique_axis0()
+    assert args[0].dtype == np.dtype(np.int64)
+    assert pyoverdrive.explain("numpy.unique", *args, **kwargs)[0] == "unique_axis0_column"
+    _assert_identical(np.unique(*args, **kwargs), STOCK_UNIQUE(*args, **kwargs))
 
 
 # -- regimes that MUST fall back --------------------------------------------

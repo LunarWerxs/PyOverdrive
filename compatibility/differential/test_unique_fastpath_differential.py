@@ -61,7 +61,7 @@ def test_dispatched_bit_identical(arr):
 
 
 def test_strided_and_fortran_views_dispatch_and_match():
-    base = RNG.integers(0, 1000, size=SIZE_THRESHOLD * 8, dtype=np.int64)
+    base = RNG.integers(0, 1000, size=SIZE_THRESHOLD * 8, dtype=np.int32)
     views = [
         base[::2],
         base[::-1],
@@ -85,18 +85,59 @@ def test_unique_values_sorted_superset_of_contract():
 # -- regimes that MUST fall back --------------------------------------------
 
 def test_small_arrays_fall_back():
-    arr = np.arange(SIZE_THRESHOLD - 1, dtype=np.int64)
+    arr = np.arange(SIZE_THRESHOLD - 1, dtype=np.int32)
     assert pyoverdrive.explain("numpy.unique", arr)[0] == "stock"
     _assert_identical(np.unique(arr), STOCK_UNIQUE(arr))
+
+
+@pytest.mark.parametrize("dtype,floor", [(np.int32, 10_000), (np.uint32, 10_000), (np.int8, 1000), (np.uint8, 1000)])
+@pytest.mark.parametrize("offset", [-1, 0, 1])
+def test_measured_dtype_floors(dtype, floor, offset):
+    arr = np.broadcast_to(np.array([1], dtype=dtype), (floor + offset,))
+    for op, path in (("unique", "unique_sort"), ("unique_values", "unique_values_sort")):
+        assert pyoverdrive.explain(f"numpy.{op}", arr)[0] == (path if offset >= 0 else "stock")
+    _assert_identical(np.unique(arr), STOCK_UNIQUE(arr))
+
+
+@pytest.mark.parametrize("op,stock", [("unique", STOCK_UNIQUE), ("unique_values", STOCK_UNIQUE_VALUES)])
+@pytest.mark.parametrize("dtype", [np.int16, np.uint16, np.int64, np.uint64])
+@pytest.mark.parametrize("size", [1000, 10_000, 100_000])
+@pytest.mark.parametrize("cardinality", [16, 256, 4096])
+def test_withdrawn_dtypes_fall_back(op, stock, dtype, size, cardinality):
+    rng = np.random.default_rng(20260919)
+    arr = rng.integers(0, cardinality, size, dtype=dtype)
+    assert pyoverdrive.explain(f"numpy.{op}", arr)[0] == "stock"
+    _assert_identical(getattr(np, op)(arr), stock(arr))
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int8, np.uint8])
+def test_unique_values_neighbor_dtypes_still_dispatch(dtype):
+    arr = np.arange(_THRESHOLDS[np.dtype(dtype)], dtype=dtype)
+    assert pyoverdrive.explain("numpy.unique_values", arr)[0] == "unique_values_sort"
+    _assert_identical(np.sort(np.unique_values(arr)), np.sort(STOCK_UNIQUE_VALUES(arr)))
+
+
+def test_unique_selfcheck_input_uses_a_retained_dtype():
+    from pyoverdrive.diagnostics import _inputs_unique
+
+    args, kwargs = _inputs_unique()
+    assert args[0].dtype == np.dtype(np.int32)
+    for op, path in (("numpy.unique", "unique_sort"), ("numpy.unique_values", "unique_values_sort")):
+        assert pyoverdrive.explain(op, *args, **kwargs)[0] == path
 
 
 def test_unsupported_dtypes_fall_back():
     for arr in (
         RNG.random(SIZE_THRESHOLD * 4),                          # float64 excluded
         RNG.random(SIZE_THRESHOLD * 4).astype(np.float32),       # float32 excluded
-        RNG.integers(0, 100, SIZE_THRESHOLD * 4, dtype=np.int8),   # below int8 floor (1000)
-        RNG.integers(0, 100, SIZE_THRESHOLD * 4, dtype=np.int16),  # below int16 floor (10_000)
-        np.array(["a", "b"] * SIZE_THRESHOLD),                   # strings
+        # Sized from each dtype's OWN floor. These two were written as
+        # SIZE_THRESHOLD * 4 back when that was 64, so 256 happened to be
+        # under both narrow floors; the 32/64-bit floor then moved to 1_000
+        # for cardinality reasons and 4_000 is over the int8 floor, so the
+        # case stopped testing what it is named for and started failing.
+        RNG.integers(0, 100, _THRESHOLDS[np.dtype(np.int8)] - 1, dtype=np.int8),
+        RNG.integers(0, 100, 10_000, dtype=np.int16),  # withdrawn even at its old floor
+        np.array(["a", "b"] * 1000),  # below the independent char-view floor
         (RNG.random(SIZE_THRESHOLD * 4) < 0.5),                  # bool
     ):
         decision, _ = pyoverdrive.explain("numpy.unique", arr)
@@ -104,7 +145,7 @@ def test_unsupported_dtypes_fall_back():
 
 
 def test_small_dtype_just_below_floor_falls_back():
-    for dtype in (np.int8, np.uint8, np.int16, np.uint16):
+    for dtype in (np.int8, np.uint8):
         floor = _THRESHOLDS[np.dtype(dtype)]
         arr = RNG.integers(0, 100, size=floor - 1, dtype=dtype)
         decision, _ = pyoverdrive.explain("numpy.unique", arr)
@@ -113,7 +154,7 @@ def test_small_dtype_just_below_floor_falls_back():
 
 
 def test_kwargs_fall_back_with_stock_semantics():
-    arr = RNG.integers(0, 50, size=SIZE_THRESHOLD * 4, dtype=np.int64)
+    arr = RNG.integers(0, 50, size=SIZE_THRESHOLD * 4, dtype=np.int32)
     got_vals, got_counts = np.unique(arr, return_counts=True)
     exp_vals, exp_counts = STOCK_UNIQUE(arr, return_counts=True)
     _assert_identical(got_vals, exp_vals)

@@ -105,27 +105,27 @@ def _assert_refused_raises(args, kwargs):
 
 
 def test_dispatch_bins_40x40_with_range():
-    x, y = _xy(2000, seed=1)
+    x, y = _xy(SAMPLES_MIN, seed=1)
     _assert_dispatched_equal((x, y), {"bins": [40, 40], "range": [[-3, 3], [-3, 3]]})
 
 
 def test_dispatch_bins_scalar_int_40():
-    x, y = _xy(2000, seed=2)
+    x, y = _xy(SAMPLES_MIN, seed=2)
     _assert_dispatched_equal((x, y), {"bins": 40, "range": [[-3, 3], [-3, 3]]})
 
 
 def test_dispatch_bins_asymmetric_40x60():
-    x, y = _xy(2000, seed=3)
+    x, y = _xy(SAMPLES_MIN, seed=3)
     _assert_dispatched_equal((x, y), {"bins": (40, 60), "range": [[-3, 3], [-3, 3]]})
 
 
 def test_dispatch_positional_bins_and_range():
-    x, y = _xy(2000, seed=4)
+    x, y = _xy(SAMPLES_MIN, seed=4)
     _assert_dispatched_equal((x, y, [40, 40], [[-3, 3], [-3, 3]]), {})
 
 
 def test_dispatch_weights_f64():
-    x, y = _xy(2000, seed=5)
+    x, y = _xy(SAMPLES_MIN, seed=5)
     rng = np.random.default_rng(6)
     w = rng.uniform(0.1, 5.0, size=x.size).astype(np.float64)
     _assert_dispatched_equal(
@@ -200,7 +200,7 @@ def test_dispatch_all_out_of_range_samples():
 
 def test_dispatch_boundary_bins_product_equals_min_total():
     assert BINS_MIN_TOTAL == 900
-    x, y = _xy(2000, seed=8)
+    x, y = _xy(SAMPLES_MIN, seed=8)
     decision, reason = GEARBOX.decide(
         OP, (x, y), {"bins": [30, 30], "range": [[-3, 3], [-3, 3]]}
     )
@@ -210,7 +210,7 @@ def test_dispatch_boundary_bins_product_equals_min_total():
 
 def test_refusal_bins_product_just_below_min_total():
     assert 29 * 30 < BINS_MIN_TOTAL
-    x, y = _xy(2000, seed=9)
+    x, y = _xy(SAMPLES_MIN, seed=9)
     decision, reason = GEARBOX.decide(
         OP, (x, y), {"bins": [29, 30], "range": [[-3, 3], [-3, 3]]}
     )
@@ -301,7 +301,7 @@ def test_refusal_python_lists():
 
 
 def test_kill_switch_restores_stock_routing():
-    x, y = _xy(2000, seed=22)
+    x, y = _xy(SAMPLES_MIN, seed=22)
     kwargs = {"bins": [40, 40], "range": [[-3, 3], [-3, 3]]}
     decision, reason = GEARBOX.decide(OP, (x, y), kwargs)
     assert decision == PATH, (decision, reason)
@@ -316,7 +316,7 @@ def test_kill_switch_restores_stock_routing():
         pyoverdrive.enable_path(PATH)
 
 
-@pytest.mark.parametrize("n", [0, 1, 200, 500, SAMPLES_MIN - 1])
+@pytest.mark.parametrize("n", [0, 1, 200, 500, 2000, SAMPLES_MIN - 1])
 def test_below_the_sample_floor_stays_on_stock(n):
     """Few samples into many bins is this path's losing corner and it was
     shipping: measured end to end on the idle box, 200 samples ran at
@@ -334,3 +334,9 @@ def test_below_the_sample_floor_stays_on_stock(n):
     assert decision == "stock", (n, decision, reason)
     _assert_arrays_exactly_equal(np.histogram2d(x, y, **kwargs),
                                  _stock(x, y, **kwargs))
+
+
+@pytest.mark.parametrize("n", [SAMPLES_MIN, SAMPLES_MIN + 1])
+def test_sample_floor_and_immediate_neighbor_dispatch(n):
+    x, y = _xy(n)
+    _assert_dispatched_equal((x, y), {"bins": [40, 40], "range": [[-3, 3], [-3, 3]]})

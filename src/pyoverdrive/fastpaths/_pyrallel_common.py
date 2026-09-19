@@ -32,15 +32,16 @@ def threads_for(nbytes: int) -> int:
     return 1
 
 
-def out_ok(o, shape: tuple, dtype: np.dtype) -> bool:
+def out_ok(o, shape: tuple, dtype: np.dtype, inputs: tuple) -> bool:
     """``out=`` is accepted only as an exact-shape, exact-dtype, writeable,
-    C-contiguous plain ndarray: no cast, no broadcast, no strided write."""
+    C-contiguous plain ndarray with disjoint or exact in-place input aliases."""
     return (
         type(o) is np.ndarray
         and o.shape == shape
         and o.dtype == dtype
         and o.flags.c_contiguous
         and o.flags.writeable
+        and pyrallel.output_alias_safe(inputs, o)
     )
 
 

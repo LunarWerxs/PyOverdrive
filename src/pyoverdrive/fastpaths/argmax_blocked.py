@@ -6,20 +6,12 @@ Provenance (OPP-000034): numpy/numpy#9182 - argmax has no strided
 kernel, so reducing along the non-contiguous axis of a C-order array
 makes a hidden contiguous copy through a cache-hostile transpose walk
 (juliantaylor's root cause). Tiling the transpose into 128x128 blocks
-keeps both sides cache-resident and beats stock's internal copy - ON
-SOME ARCHITECTURES.
-
-Why this path is calibration-gated rather than always-on: the measured
-win does not transfer across CPUs. Intel Alder Lake (fp 9bbe7063c555,
-idle, 0-1% load): 2.2-2.5x float64 from (3000, 3000) up, 4.05x float32,
-2.5x int64. AMD Zen 4 (fp 8f8198d9abab): 0.75-0.84x - a REGRESSION -
-at three of four probed sizes, because Zen 4's stock strided argmax is
-~2.3x faster than Alder Lake's at equal sizes. So the path registers
-DISABLED and turns on only where ``pyoverdrive.calibrate()`` (or
-``python -m pyoverdrive --calibrate``) has measured this machine
-clearing the min-win at the regime's edge cells. See
-src/pyoverdrive/calibration.py; the probe verdict is stored per machine
-fingerprint and stale files from other hardware are ignored.
+keeps source and destination tiles cache-resident. The benefit depends on
+CPU cache behavior and stock's strided-copy implementation, so this path
+ships disabled. ``pyoverdrive.calibrate()`` enables it only when the
+local probe clears its required margin at the regime edges. Calibration
+is stored per machine fingerprint; stale hardware/stack records are
+ignored. See src/pyoverdrive/calibration.py.
 
 Correctness contract (unchanged from the Intel-validated build):
 - Applies only to argmax(a, axis) where a is a plain C-contiguous 2-D
@@ -41,6 +33,10 @@ already off unless calibration enabled it.
 
 Implementation note: the in-run argmax goes through stock_fn, never the
 patched numpy.argmax name.
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations

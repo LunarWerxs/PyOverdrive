@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 import pyoverdrive
-from pyoverdrive.dispatcher.gearbox import FastPath, Gearbox
+from pyoverdrive.dispatcher.gearbox import ClassPath, FastPath, Gearbox
 
 
 @pytest.fixture(autouse=True)
@@ -124,6 +124,95 @@ def test_patch_unpatch_restores_exactly():
     pyoverdrive.disable()
     assert np.positive is stock
     assert not pyoverdrive.enabled()
+
+
+@pytest.mark.parametrize("already_patched", [False, True])
+@pytest.mark.parametrize("invalid_op, error", [
+    ("numpy.this_does_not_exist", AttributeError),
+    ("numpy.linalg.this_does_not_exist", AttributeError),
+    ("other.sin", ValueError),
+    ("numpy.ufunc.reduce", TypeError),  # resolves, but cannot be replaced
+])
+def test_failed_patch_preserves_existing_state(already_patched, invalid_op, error):
+    box = Gearbox()
+    stock_sin, stock_cos = np.sin, np.cos
+    try:
+        if already_patched:
+            box.patch(["numpy.cos"])
+        previous_cos = np.cos
+        previous_stock = box._stock.copy()
+        generation = box.generation
+        with pytest.raises(error):
+            box.patch(["numpy.cos", "numpy.sin", invalid_op])
+        assert np.sin is stock_sin
+        assert np.cos is previous_cos
+        assert box._stock == previous_stock
+        assert box.patched is already_patched
+        assert box.generation == generation
+    finally:
+        box.unpatch()
+    assert np.sin is stock_sin
+    assert np.cos is stock_cos
+
+
+@pytest.mark.parametrize("already_patched", [False, True])
+def test_failed_class_factory_preserves_existing_state(already_patched):
+    box = Gearbox()
+    stock_sin, stock_cos, stock_vectorize = np.sin, np.cos, np.vectorize
+
+    def fail_make(stock):
+        raise RuntimeError("class construction failed")
+
+    box.register_class(ClassPath("broken", "numpy.vectorize", fail_make, lambda a, k: True))
+    try:
+        if already_patched:
+            box.patch(["numpy.cos"])
+        previous_stock = box._stock.copy()
+        previous_cos = np.cos
+        generation = box.generation
+        with pytest.raises(RuntimeError, match="class construction failed"):
+            box.patch(["numpy.sin", "numpy.vectorize"])
+        assert np.sin is stock_sin
+        assert np.cos is previous_cos
+        assert np.vectorize is stock_vectorize
+        assert box._stock == previous_stock
+        assert box.patched is already_patched
+        assert box.generation == generation
+    finally:
+        box.unpatch()
+    assert np.sin is stock_sin
+    assert np.cos is stock_cos
+    assert np.vectorize is stock_vectorize
+
+
+def test_patch_generation_changes_only_when_functions_change():
+    box = Gearbox()
+    stock = np.vectorize
+    made = []
+
+    def make_class(stock):
+        made.append(stock)
+        return type("AcceleratedVectorize", (stock,), {})
+
+    box.register_class(ClassPath("vectorize", "numpy.vectorize", make_class, lambda a, k: True))
+    try:
+        box.unpatch()
+        assert box.generation == 0
+        box.patch(["numpy.vectorize", "numpy.vectorize"])
+        assert len(made) == 1
+        assert issubclass(np.vectorize, stock)
+        replacement = np.vectorize
+        assert box.generation == 1
+        box.patch(["numpy.vectorize"])
+        assert np.vectorize is replacement
+        assert box.generation == 1
+        box.unpatch()
+        assert np.vectorize is stock
+        assert box.generation == 2
+        box.unpatch()
+        assert box.generation == 2
+    finally:
+        box.unpatch()
 
 
 def test_noop_path_does_not_recurse_and_matches_stock():

@@ -38,6 +38,14 @@ Correctness contract:
   blinded the 2.4-era detector while the isin miss remained - caught by
   the property net on 2.5.2 (Linux leg + fresh-venv probe, 2026-08-24).
 
+assume_unique= is ACCEPTED here and REFUSED by intersect_sorted, which is
+one rule and not two. The keyword is a promise numpy does not verify, and
+membership is idempotent under duplication, so a false promise cannot
+change this answer - verified with the promise deliberately false
+(duplicates in both operands), where dispatched matches stock exactly for
+True and False alike. intersect1d's answer DOES change under a false
+promise, so it refuses. See intersect_sorted's contract.
+
 Comparison mode: bit-identical (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=isin_string_hash or
 pyoverdrive.disable_path("isin_string_hash").
@@ -50,6 +58,35 @@ import numpy as np
 from ..dispatcher.gearbox import FastPath
 
 SIZE_FLOOR = 300  # combined elements; smallest measured winning case
+
+# TEST_FLOOR: see isin_object_hash for the mechanism, which is the same one -
+# stock's in1d answers a small test_elements with a chain of vectorized
+# equalities, one full pass each, while this route pays a Python-level hash
+# per element of the big operand. The four-axis sweep caught this path at
+# 0.05x, the worst reading in the package, by moving the operand ratio at
+# constant combined size, which the shipped gate could not see.
+#
+# The number differs from the object path's 12, and NOT for a tidy reason:
+# this crossing MOVES with the element count where the object one does not
+# (idle Intel box, fp 9bbe7063c555, 2026-08-25, tools/probe_isin_ratio.py):
+#
+#   elements     8     12     16     24     32     48     64     96
+#      300     0.58x  0.81x  1.02x  1.42x  1.90x  2.60x  3.33x  4.73x
+#    1,000     0.44x  0.59x  0.75x  1.09x  1.41x  2.03x  2.62x  3.91x
+#   10,000     0.36x  0.48x  0.63x  0.90x  1.10x  1.62x  2.15x  3.26x
+#  100,000     0.31x  0.43x  0.56x  0.79x  1.07x  1.53x  1.94x  2.90x
+#
+# So the crossing walks 16 -> 24 -> 32 -> 32 as the array grows, and 32 is
+# only 1.05-1.10x at the top - a wash, not a promise. 48 is the first column
+# every measured element count clears with a margin, worst 1.53x, which is
+# the same margin the object floor carries.
+#
+# A fitted curve would keep more of the small-array region (24 already wins
+# 1.42x at 300 elements) and is deliberately not used: four points do not
+# justify an exponent, and a flat number every measured cell clears is a
+# better promise than a curve that is right on average. The forfeited region
+# is small arrays with small vocabularies, where the whole call is fast.
+TEST_FLOOR = 48
 
 # stock's bug class (measured on numpy 2.4.5 AND 2.5.2): isin misses
 # strings consisting ONLY of NUL characters ("\x00", "\x00\x00"), while
@@ -134,6 +171,8 @@ def _applicable(args: tuple, kwargs: dict) -> bool:
         return False
     element, test = args
     if not (_string_default_dtype(element) and _string_default_dtype(test)):
+        return False
+    if test.size < TEST_FLOOR:
         return False
     if element.size + test.size < SIZE_FLOOR:
         return False

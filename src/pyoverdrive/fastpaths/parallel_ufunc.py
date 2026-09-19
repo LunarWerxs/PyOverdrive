@@ -13,7 +13,9 @@ Correctness contract:
   positional plain-ndarray argument, and at most the ``out`` keyword, whose
   value must be a plain C-contiguous ndarray of identical shape and dtype
   (``o is x``, the in-place idiom from the source issue, is allowed: each
-  chunk touches only its own index range). Every other keyword (where=,
+  chunk touches only its own index range). Shifted overlapping views stay
+  on stock so its whole-array overlap buffering remains effective.
+  Every other keyword (where=,
   dtype=, casting=, order=, subok=, signature=) and any out= needing a cast,
   broadcast, or non-contiguous write stays on stock untouched.
 - C-contiguous input only (chunks are flat views; anything else falls back).
@@ -43,7 +45,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from ..dispatcher.gearbox import FastPath
+from ..dispatcher.gearbox import FastPath, StockRaised
 from ..parallel import pyrallel
 from . import _pyrallel_common as _common
 
@@ -155,7 +157,7 @@ def _make_applicable(table: dict[np.dtype, int]):
         if kwargs:
             if len(kwargs) != 1 or "out" not in kwargs:
                 return False
-            if not _common.out_ok(kwargs["out"], x.shape, x.dtype):
+            if not _common.out_ok(kwargs["out"], x.shape, x.dtype, args):
                 return False
         threshold = table.get(x.dtype)
         return (
@@ -171,7 +173,12 @@ def _make_applicable(table: dict[np.dtype, int]):
 def _make_run(gearbox, op: str):
     def run(x: np.ndarray, out: np.ndarray | None = None) -> np.ndarray:
         stock = gearbox.stock_fn(op)  # the real ufunc, never the patched name
-        return pyrallel.parallel_unary(stock, x, threads_for(x.nbytes), out=out)
+        try:
+            return pyrallel.parallel_unary(stock, x, threads_for(x.nbytes), out=out)
+        except RuntimeWarning as exc:
+            # A warning promoted to an error came from the stock kernel.
+            # In-place inputs are already modified: replaying is unsafe.
+            raise StockRaised(exc) from exc
 
     return run
 

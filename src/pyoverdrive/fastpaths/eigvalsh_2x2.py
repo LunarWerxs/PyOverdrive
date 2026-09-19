@@ -13,11 +13,9 @@ Route: for real symmetric [[a, b], [b, d]] read from the LOWER triangle
 (stock's default UPLO='L' reads a[..., 1, 0] and ignores a[..., 0, 1]),
 the eigenvalues are (a+d)/2 -/+ sqrt(((a-d)/2)^2 + b^2), ascending.
 
-Measured (OPP-000030 + BATCH4-CAL batteries, fp 9bbe7063c555, idle box,
-0% load): 2.51-2.55x at batch 100, 12.6x at 1000, 31.2x at 10_000, 6.6x
-at 100_000, 5.9x at 1_000_000 (float64); 38.8x at 10_000 float32. Batch
-10 loses (0.67x) and 30 straddles (1.11x), hence the floor of 100. The
-1e12-condition witness passed the scaled tolerance at 30.7x.
+The batch floor amortizes Python dispatch and vectorized temporary-array
+costs. Small batches remain on LAPACK; the closed form targets repeated
+small-matrix setup overhead rather than large-matrix eigensolvers.
 
 Correctness contract:
 - Applies only to eigvalsh(a) / eigvalsh(a, UPLO='L') where a is a plain
@@ -34,6 +32,10 @@ Correctness contract:
 Comparison mode: numeric (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=eigvalsh_2x2_closed or
 pyoverdrive.disable_path("eigvalsh_2x2_closed").
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations

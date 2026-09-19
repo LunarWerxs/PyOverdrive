@@ -1,17 +1,13 @@
 """Fast path: numpy.nanquantile axis-reduction without the per-slice Python loop.
 
 Provenance (OPP-000013): numpy/numpy#16575 reports np.nanquantile(a, q,
-axis=...) tens to hundreds of times slower than np.quantile on the same
-call, because nanquantile loops slice-by-slice in Python (maintainer
-seberg: "these are functions written in Python... overheads associated to
-each individual slice"). Dyno reproduced 53-70x at the reporter's own
-(27, 100) shape and 102x at (50, 100, 100), with zero losing cases
-anywhere measured (benchmarks/results/OPP-000013/). Two routes, both from
-the record:
+axis=...) paying a Python call per slice. Maintainer seberg identifies
+"overheads associated to each individual slice" as the cause. Two routes
+avoid repeated slice-level setup:
 
 - zero NaNs anywhere: one O(n) isnan scan, then numpy's OWN np.quantile,
   which is already vectorized across slices. The scan cost is part of the
-  measured win.
+  dispatched cost.
 - NaNs present: sort along the reduced axis (float NaNs sort to the end),
   per-slice valid counts from the isnan mask, then the same virtual-index
   plus linear-interpolation arithmetic numpy's quantile performs,
@@ -38,6 +34,10 @@ Correctness contract:
 Comparison mode: numeric (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=nanquantile_masked or
 pyoverdrive.disable_path("nanquantile_masked").
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations
@@ -48,21 +48,12 @@ import numpy as np
 
 from ..dispatcher.gearbox import GEARBOX, FastPath
 
-# CALIBRATION (fp 8f8198d9abab, benchmarks/results/FASTNANQ-CAL/,
-# 2026-08-23, 10-11% foreign load). The vectorized route wins EVERY
-# many-slice case measured, down to tiny inputs: 22.6x at (10, 30), 229x
-# at (5, 500), 51.9-63.4x at the reporter's (27, 100), 43.5-75.1x at
-# (50, 100, 100), 5.5-10.9x at (500, 500). It LOSES only in the few-long-
-# slices anti-regime the issue thread predicted (cakedev0): (10000, 3)
-# 0.88x with NaNs, (100000, 5) 0.85-0.93x, where stock's Python loop runs
-# 3-5 iterations and the candidate sorts the whole array. The guard below
-# admits a call when the reduced length is modest (every measured
-# reduced_len <= 500 wins by >= 5.4x) OR the slice count is at least the
-# reduced length (cakedev0's own crossover model); both loss shapes fail
-# both arms. (3, 10000) reduced along its contiguous axis measured a real
-# 1.40-1.50x win but is refused by this rule: layout flips that regime's
-# sign, marginally, and no simple measured rule separates it.
-SIZE_FLOOR = 300  # elements; smallest measured winning input (10, 30)
+# Sorting the whole array can cost more than stock when there are only a
+# few long slices: the Python loop is then short. Following cakedev0's
+# crossover model, admit short reductions or enough slices relative to the
+# reduced length; refuse ambiguous long, few-slice layouts. Historical
+# reproducer inputs remain in benchmarks/results/FASTNANQ-CAL/.
+SIZE_FLOOR = 300  # elements; lower boundary of the served slice regime
 _REDUCED_LEN_CAP = 1_000  # above this, require n_slices >= reduced_len
 
 _F64 = np.dtype(np.float64)

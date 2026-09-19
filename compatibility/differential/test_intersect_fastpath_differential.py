@@ -16,8 +16,7 @@ from pyoverdrive.fastpaths.intersect_sorted import SIZE_THRESHOLD, _THRESHOLDS
 
 STOCK = np.intersect1d
 
-DTYPES = (np.int32, np.int64, np.uint32, np.uint64)
-SMALL_DTYPES = (np.int8, np.uint8, np.int16, np.uint16)
+DTYPES = (np.int32, np.uint32)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -34,13 +33,23 @@ def _assert_identical(got, expected):
 
 # -- regime generators: (rng, dtype) -> (a, b) -------------------------------
 
-def _both_sorted_unique(rng, dtype, na=2000, nb=1800, pool=3000):
+# Sizes track SIZE_THRESHOLD rather than repeating a literal. The floor
+# moved 400 -> 10_000 when cardinality was swept, and every one of these
+# regimes silently stopped dispatching - 34 tests failed at once, all of
+# them fixtures rather than behaviour. Derived sizes cannot drift out from
+# under the gate that way again.
+_NA = SIZE_THRESHOLD  # comfortably over the combined floor on its own
+_NB = (SIZE_THRESHOLD * 9) // 10
+
+
+def _both_sorted_unique(rng, dtype, na=_NA, nb=_NB, pool=None):
+    pool = pool if pool is not None else int(_NA * 1.5)
     a = np.sort(rng.choice(pool, size=na, replace=False)).astype(dtype)
     b = np.sort(rng.choice(pool, size=nb, replace=False)).astype(dtype)
     return a, b
 
 
-def _both_random_dup(rng, dtype, na=2000, nb=1800, low=0, high=500):
+def _both_random_dup(rng, dtype, na=_NA, nb=_NB, low=0, high=500):
     return (
         rng.integers(low, high, size=na, dtype=dtype),
         rng.integers(low, high, size=nb, dtype=dtype),
@@ -54,13 +63,13 @@ def _one_sorted_one_random(rng, dtype):
 
 
 def _identical(rng, dtype):
-    arr = rng.integers(0, 1000, size=2000, dtype=dtype)
+    arr = rng.integers(0, 1000, size=_NA, dtype=dtype)
     return arr.copy(), arr.copy()
 
 
 def _disjoint(rng, dtype):
-    a = rng.integers(0, 1000, size=2000, dtype=dtype)
-    b = rng.integers(2000, 3000, size=1800, dtype=dtype)
+    a = rng.integers(0, 1000, size=_NA, dtype=dtype)
+    b = rng.integers(2000, 3000, size=_NB, dtype=dtype)
     return a, b
 
 
@@ -71,8 +80,8 @@ def _reversed(rng, dtype):
 
 def _full_range(rng, dtype):
     info = np.iinfo(dtype)
-    a = rng.integers(info.min, info.max, size=2000, dtype=dtype, endpoint=True)
-    b = rng.integers(info.min, info.max, size=1800, dtype=dtype, endpoint=True)
+    a = rng.integers(info.min, info.max, size=_NA, dtype=dtype, endpoint=True)
+    b = rng.integers(info.min, info.max, size=_NB, dtype=dtype, endpoint=True)
     a[0], a[1] = info.min, info.max
     b[0], b[1] = info.min, info.max
     return a, b
@@ -80,7 +89,7 @@ def _full_range(rng, dtype):
 
 def _one_vs_large(rng, dtype):
     a = rng.integers(0, 1000, size=1, dtype=dtype)
-    b = rng.integers(0, 1000, size=5000, dtype=dtype)
+    b = rng.integers(0, 1000, size=SIZE_THRESHOLD * 2, dtype=dtype)
     return a, b
 
 
@@ -114,55 +123,39 @@ def test_dispatched_bit_identical(a, b):
 # -- threshold boundary -------------------------------------------------------
 
 def test_threshold_dispatches():
-    a = RNG.integers(0, 1000, size=32, dtype=np.int64)
-    b = RNG.integers(0, 1000, size=SIZE_THRESHOLD - 32, dtype=np.int64)
+    a = RNG.integers(0, 1000, size=32, dtype=np.int32)
+    b = RNG.integers(0, 1000, size=SIZE_THRESHOLD - 32, dtype=np.int32)
     assert a.size + b.size == SIZE_THRESHOLD
     assert pyoverdrive.explain("numpy.intersect1d", a, b)[0] == "intersect_sorted"
     _assert_identical(np.intersect1d(a, b), STOCK(a, b))
 
 
 def test_below_threshold_falls_back():
-    a = RNG.integers(0, 1000, size=32, dtype=np.int64)
-    b = RNG.integers(0, 1000, size=SIZE_THRESHOLD - 33, dtype=np.int64)
+    a = RNG.integers(0, 1000, size=32, dtype=np.int32)
+    b = RNG.integers(0, 1000, size=SIZE_THRESHOLD - 33, dtype=np.int32)
     assert a.size + b.size == SIZE_THRESHOLD - 1
     assert pyoverdrive.explain("numpy.intersect1d", a, b)[0] == "stock"
     _assert_identical(np.intersect1d(a, b), STOCK(a, b))
 
 
-# -- small-dtype threshold (12_000 combined, itemsize <= 2 radix floor) ------
+def test_selfcheck_input_keeps_a_retained_dtype():
+    from pyoverdrive.diagnostics import _inputs_intersect
 
-def _small_random(rng, dtype, na, nb):
-    info = np.iinfo(dtype)
-    return (
-        rng.integers(info.min, info.max, size=na, dtype=dtype, endpoint=True),
-        rng.integers(info.min, info.max, size=nb, dtype=dtype, endpoint=True),
-    )
+    args, kwargs = _inputs_intersect()
+    assert all(a.dtype == np.dtype(np.int32) for a in args)
+    assert pyoverdrive.explain("numpy.intersect1d", *args, **kwargs)[0] == "intersect_sorted"
 
 
-SMALL_DISPATCH_CASES = [
-    pytest.param(
-        *_small_random(RNG, dtype, _THRESHOLDS[np.dtype(dtype)] // 2, _THRESHOLDS[np.dtype(dtype)] // 2),
-        id=f"{np.dtype(dtype)}-small-random",
-    )
-    for dtype in SMALL_DTYPES
-]
-
-
-@pytest.mark.parametrize("a, b", SMALL_DISPATCH_CASES)
-def test_small_dtype_dispatched_bit_identical(a, b):
-    decision, reason = pyoverdrive.explain("numpy.intersect1d", a, b)
-    assert decision == "intersect_sorted", (decision, reason)
+@pytest.mark.parametrize("dtype", [np.int8, np.int16, np.uint16, np.int64, np.uint64, np.uint8])
+@pytest.mark.parametrize("combined_size", [12_000, 24_000])
+@pytest.mark.parametrize("cardinality", [16, 4096])
+def test_withdrawn_dtypes_fall_back(dtype, combined_size, cardinality):
+    """Quiet repeated losses withdraw the dtype, including high-cardinality inputs."""
+    rng = np.random.default_rng(20260919)
+    a = rng.integers(0, min(cardinality, np.iinfo(dtype).max), combined_size // 2, dtype=dtype)
+    b = rng.integers(0, min(cardinality, np.iinfo(dtype).max), combined_size // 2, dtype=dtype)
+    assert pyoverdrive.explain("numpy.intersect1d", a, b)[0] == "stock"
     _assert_identical(np.intersect1d(a, b), STOCK(a, b))
-
-
-def test_small_dtype_below_floor_falls_back():
-    for dtype in SMALL_DTYPES:
-        floor = _THRESHOLDS[np.dtype(dtype)]
-        a = RNG.integers(0, 100, size=floor // 2, dtype=dtype)
-        b = RNG.integers(0, 100, size=floor // 2 - 1, dtype=dtype)
-        assert a.size + b.size == floor - 1
-        assert pyoverdrive.explain("numpy.intersect1d", a, b)[0] == "stock", dtype
-        _assert_identical(np.intersect1d(a, b), STOCK(a, b))
 
 
 # -- fallback regimes ---------------------------------------------------------
@@ -234,8 +227,10 @@ def test_empty_plus_large_matches_stock_regardless_of_dispatch():
 # -- non-contiguous views -----------------------------------------------------
 
 def test_noncontiguous_1d_input_dispatches():
-    base_a = RNG.integers(0, 1000, size=4000, dtype=np.int64)
-    base_b = RNG.integers(0, 1000, size=3600, dtype=np.int64)
+    # ::2 halves each side, so the bases have to be twice the floor for the
+    # VIEWS to clear it - the subject here is non-contiguity, not the gate.
+    base_a = RNG.integers(0, 1000, size=_NA * 2, dtype=np.int32)
+    base_b = RNG.integers(0, 1000, size=_NB * 2, dtype=np.int32)
     a, b = base_a[::2], base_b[::2]
     assert not a.flags["C_CONTIGUOUS"]
     assert pyoverdrive.explain("numpy.intersect1d", a, b)[0] == "intersect_sorted"

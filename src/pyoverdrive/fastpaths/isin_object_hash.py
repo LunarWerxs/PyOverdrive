@@ -2,15 +2,10 @@
 
 Provenance (OPP-000036): numpy/numpy#14997 - object dtype
 unconditionally takes in1d's O(n*m) broadcast-equality path (the
-reporter: ~10-15 s where a set does ~0.1 s). Sibling of the shipped
-isin_string_hash (OPP-000023, 2317x): identical mechanism, object
-operands.
-
-Measured (OPP-000036 + BATCH5-CAL batteries, fp 9bbe7063c555, idle box,
-0-1% load), for the route AS SHIPPED (hazard scan included): 262x at
-30_000 x 3_000 strings, 169x ints, 11.2x at 1_000 x 100, 5.8x at 550
-combined, 2.96x at 300 combined; 105 combined straddles (1.32x), hence
-the floor.
+reporter's comparison used a Python set instead). This is the same
+hash-membership mechanism as isin_string_hash (OPP-000023), adapted to
+object operands. Combined-size and test-set-size floors amortize conversion
+and hashing without assuming every operand ratio benefits.
 
 Hazards, all handled INSIDE the run (measured as part of its cost):
 - NaN-like objects (x != x): Python's `in` matches them by IDENTITY
@@ -34,9 +29,21 @@ Correctness contract:
   BY stock, clean inputs by set membership, which equals stock's
   broadcast == for hash/eq-consistent objects.
 
+assume_unique= is ACCEPTED here and REFUSED by intersect_sorted, which is
+one rule and not two. The keyword is a promise numpy does not verify, and
+membership is idempotent under duplication, so a false promise cannot
+change this answer - verified with the promise deliberately false
+(duplicates in both operands), where dispatched matches stock exactly for
+True and False alike. intersect1d's answer DOES change under a false
+promise, so it refuses. See intersect_sorted's contract.
+
 Comparison mode: bit-identical (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=isin_object_hash or
 pyoverdrive.disable_path("isin_object_hash").
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations
@@ -45,7 +52,15 @@ import numpy as np
 
 from ..dispatcher.gearbox import GEARBOX, FastPath
 
-SIZE_FLOOR = 300  # combined; 2.96x measured there, 105 straddles
+SIZE_FLOOR = 300  # combined input size; conversion/hash setup amortization
+
+# Combined size alone cannot express the few-test-elements corner. Stock
+# can evaluate a short chain of vectorized equalities in C, while this route
+# pays Python hashing and lookup per input element. The number of test
+# elements therefore needs its own floor, independent of total input size.
+# A numeric-dtype crossover formula does not represent Python-object costs.
+# Reproducer: tools/probe_isin_ratio.py.
+TEST_FLOOR = 12
 
 
 def _applicable(args: tuple, kwargs: dict) -> bool:
@@ -61,6 +76,8 @@ def _applicable(args: tuple, kwargs: dict) -> bool:
     for a in (element, test):
         if type(a) is not np.ndarray or a.ndim != 1 or a.dtype != object:
             return False
+    if test.size < TEST_FLOOR:
+        return False
     return element.size + test.size >= SIZE_FLOOR
 
 

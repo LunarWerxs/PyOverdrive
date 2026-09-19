@@ -101,8 +101,9 @@ class Gearbox:
         self._debug = os.environ.get("PYOVERDRIVE_DEBUG", "") not in ("", "0")
         self._warned_paths: set[str] = set()
         self.patched = False
-        # Bumped by every patch/unpatch. Paths that identity-match NumPy
-        # callables (e.g. "is this func1d np.mean?") cache that lookup and
+        # Bumped when patch/unpatch changes the installed callables. Paths
+        # that identity-match NumPy callables (e.g. "is this func1d np.mean?")
+        # cache that lookup and
         # invalidate it on this counter: while patched, np.mean is OUR
         # wrapper, so a lookup built before patching would silently stop
         # matching and the path would never fire again.
@@ -230,21 +231,41 @@ class Gearbox:
         import numpy
 
         targets = operations or self.supported_operations()
+        pending = {}
+        # Resolve every target and construct every replacement before changing
+        # NumPy or recording stock functions. A bad target or class factory
+        # must leave an existing activation exactly as it was.
         for op in targets:
-            if op in self._stock:
+            if op in self._stock or op in pending:
                 continue  # already patched; idempotent
             module, attr = self._resolve(numpy, op)
             stock = getattr(module, attr)
-            self._stock[op] = stock
             cp = self._class_paths.get(op)
             replacement = cp.make(stock) if cp is not None else self._make_wrapper(op, stock)
-            setattr(module, attr, replacement)
+            pending[op] = (module, attr, stock, replacement)
+        if not pending:
+            return
+
+        installed = []
+        try:
+            for module, attr, stock, replacement in pending.values():
+                setattr(module, attr, replacement)
+                installed.append((module, attr, stock))
+        except BaseException:
+            # Resolution alone cannot prove writability (e.g. numpy.ufunc's
+            # methods). Undo only this call's successful assignments.
+            for module, attr, stock in reversed(installed):
+                setattr(module, attr, stock)
+            raise
+        self._stock.update({op: entry[2] for op, entry in pending.items()})
         self.patched = bool(self._stock)
         self.generation += 1
 
     def unpatch(self) -> None:
         import numpy
 
+        if not self._stock:
+            return
         for op, stock in self._stock.items():
             module, attr = self._resolve(numpy, op)
             setattr(module, attr, stock)

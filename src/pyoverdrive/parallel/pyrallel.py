@@ -2,8 +2,9 @@
 
 Mechanism (OPP-000008, numpy/numpy#8208): NumPy's C ufunc inner loops release
 the GIL, so splitting one large elementwise call into contiguous chunks and
-running the chunks on a thread pool genuinely scales on multicore hardware,
-7.2x for np.sin at 1e7 elements on 16 threads on the first calibrated machine.
+running chunks on a persistent pool can divide independent kernel work
+across cores. Dispatch floors must cover submission, synchronization and
+memory traffic; scaling depends on the operation and machine.
 
 Design rules:
 
@@ -16,9 +17,9 @@ Design rules:
 - The pool only ever runs *stock* NumPy kernels, obtained by the caller via
   ``GEARBOX.stock_fn`` (never a patched public name; OPP-000000 recursion
   incident).
-- Any chunk exception propagates to the caller; Gearbox catches it there and
-  falls back to stock NumPy. The partially written output buffer is private
-  to the failed call, so no caller-visible state is corrupted.
+- Every submitted chunk finishes before a chunk exception reaches the caller.
+  The fast paths preserve stock warnings promoted to exceptions without
+  retrying, since an in-place output has already modified the input.
 - ``PYOVERDRIVE_THREADS`` (env) caps pool width; ``PYOVERDRIVE_THREADS=1``
   disables parallel dispatch entirely (``available()`` goes False).
 - NumPy's floating-point error state (np.errstate / np.seterr) is
@@ -39,6 +40,10 @@ runtime. The pool is capped at the logical core count (default further capped
 at 16, the widest measured configuration), so a concurrently running BLAS
 workload degrades gracefully by OS scheduling rather than catastrophically by
 runaway thread creation.
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations
@@ -150,6 +155,26 @@ def _run_chunk(ufunc, ins: tuple, xout, err: dict) -> None:
         ufunc(*ins, out=xout)
 
 
+def output_alias_safe(inputs: tuple, out: np.ndarray) -> bool:
+    """Allow disjoint buffers or exactly matching element-to-byte mappings.
+
+    Shifted overlap lets a chunk overwrite another chunk's unread input.
+    Bounding-box overlap is cheap and exact for the contiguous arrays used
+    here; for other layouts it conservatively refuses ambiguous sharing.
+    """
+    for a in inputs:
+        if a is out or not np.may_share_memory(a, out):
+            continue
+        if not (
+            a.ctypes.data == out.ctypes.data
+            and a.shape == out.shape
+            and a.strides == out.strides
+            and a.dtype == out.dtype
+        ):
+            return False
+    return True
+
+
 def parallel_elementwise(ufunc, inputs: tuple, threads: int, out: np.ndarray | None = None) -> np.ndarray:
     """Run ``ufunc(*inputs, out=out)`` split across ``threads`` contiguous chunks.
 
@@ -160,14 +185,15 @@ def parallel_elementwise(ufunc, inputs: tuple, threads: int, out: np.ndarray | N
     C-contiguous plain ndarray of that shape and of the dtype the ufunc
     would produce. ``out`` aliasing an input (``np.add(x, y, out=x)``) is
     fine: each chunk reads and writes only its own index range and the
-    kernel is elementwise. Without ``out`` a fresh array is returned,
+    kernel is elementwise. Partially overlapping views use one stock call
+    so NumPy can buffer the input safely. Without ``out`` a fresh array is returned,
     allocated with the dtype stock would produce (resolved from the ufunc's
     loop table, never guessed). Elementwise kernels have no cross-element
     data flow, so the result is bit-identical to the unchunked call; the
     differential suites assert that, it is not assumed.
     """
     threads = min(threads, max_threads())
-    if threads < 2:
+    if threads < 2 or (out is not None and not output_alias_safe(inputs, out)):
         return ufunc(*inputs) if out is None else ufunc(*inputs, out=out)
     if out is None:
         resolve = getattr(ufunc, "resolve_dtypes", None)  # absent on test stubs
@@ -193,7 +219,8 @@ def parallel_elementwise(ufunc, inputs: tuple, threads: int, out: np.ndarray | N
     ]
     # Wait for EVERY chunk before surfacing an error: with out= the buffer
     # belongs to the caller, and stock's fallback rewrite must not race a
-    # straggling worker that is still writing its range.
+    # straggling worker that is still writing its range. Stock warnings raised
+    # as exceptions are propagated by the fast paths without a fallback replay.
     _wait_all(futures)
     for f in futures:
         f.result()  # re-raises the first chunk exception -> Gearbox falls back

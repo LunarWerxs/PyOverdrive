@@ -5,26 +5,24 @@ Provenance (OPP-000038): numpy/numpy#17676 - histogramdd builds edge
 arrays and runs a per-dimension searchsorted over every sample even
 when bins are uniform by construction (int bin counts plus an explicit
 range); numpy's own 1-D histogram takes the direct-index shortcut
-internally, which is the reporter's precedent (4-5x in their use case).
+internally, which is the reporter's precedent.
 
 The route computes floor bin indices, then CORRECTS them against the
 actual rounded linspace edges (one vectorized compare down, one up) -
 the same trick numpy's 1-D path uses - so values exactly ON an edge
 land exactly where stock puts them. The battery's decisive edge-salted
-cell (half the samples exactly on interior/outer edges) was
-BIT-IDENTICAL at 1.74x. Rightmost edge inclusive; out-of-range samples
+cell (half the samples exactly on interior/outer edges) checked
+bit-identical results. Rightmost edge inclusive; out-of-range samples
 dropped; weights ride through bincount.
 
-Measured (OPP-000038 + BATCH5-CAL batteries, fp 9bbe7063c555, idle box,
-0-1% load): 1.65x at the reporter's 5e6-sample 100x100 case, 2.41x at
-1000x1000 bins, 1.74x edge-salted, 1.73x weighted, 1.67x at 50x50,
-1.42x at 30x30; 10x10 measured 1.09x (below min-win), hence the
-total-bins floor of 900. histogramdd 3-D measured a wash (1.03x) and
-is NOT shipped.
+The bin-count floor limits the route to grids where replacing repeated
+searches can justify index construction. A separate sample floor is needed
+because allocating and clearing bins can dominate a sparse histogram.
+The implementation covers two dimensions only.
 
 Correctness contract:
 - Applies only to histogram2d(x, y, bins=..., range=...) where x and y
-  are plain 1-D float64 ndarrays of equal length, bins is an int or a
+  are plain 1-D float64 ndarrays of equal length >= SAMPLES_MIN, bins is an int or a
   pair of ints each >= 2 with product >= 900, range is a pair of
   finite (lo, hi) pairs with lo < hi, weights is absent or a plain 1-D
   float64 ndarray of the same length, and density/normed are absent.
@@ -36,6 +34,10 @@ Correctness contract:
 Comparison mode: bit-identical (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=hist2d_uniform or
 pyoverdrive.disable_path("hist2d_uniform").
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations
@@ -46,28 +48,16 @@ from ..dispatcher.gearbox import FastPath
 
 _F64 = np.dtype(np.float64)
 BINS_MIN_EACH = 2
-BINS_MIN_TOTAL = 900  # 30x30 measured 1.42x; 10x10 measured 1.09x
+BINS_MIN_TOTAL = 900  # lower bound for the direct-index grid regime
 
-# SAMPLE floor, added 2026-08-25. The gate above is on BINS only, and that is
-# the wrong axis on its own: this path's cost scales with the number of bins
-# it allocates and clears, while stock's scales with the number of samples it
-# walks. Few samples into many bins is therefore the losing corner, and it was
-# shipping - measured end to end on the idle box, 200 samples ran at
-# 0.75-0.81x and 500 at 0.82-0.98x, across 30x30, 60x60 and 100x100 bins
-# alike. The floor is the first sample count with real headroom:
-#
-#   samples   30x30   60x60   100x100
-#      200    0.75x   0.78x    0.81x
-#      500    0.82x   0.89x    0.98x
-#     1000    1.08x   1.25x    1.37x
-#     2000    1.57x   1.84x    2.02x
-#     5000    2.47x   2.89x    3.10x
-#
-# Found by sweeping every path DOWNWARD from its canonical input
-# (tools/verify_no_pessimization.py --sizes). Nothing had looked below the
-# canonical cell before, and the canonical cell is always one somebody chose
-# because the path worked there.
-SAMPLES_MIN = 2_000
+# A bin-count gate alone admits sparse histograms: this route allocates and
+# clears bins while stock's search cost follows the sample count. The sample
+# floor excludes that corner. Keep sample-count neighbors in the public-API
+# sweep; a large canonical input cannot validate the lower boundary. Quiet
+# AMD NumPy 2.4.5 measured n=2000 at 0.9651x/0.8648x and n=6666 at
+# 2.3387x (BURNDOWN-20260919/amd-complex-hist.json). Use that measured
+# winning size, not an interpolated crossover.
+SAMPLES_MIN = 6_666
 
 
 def _norm_bins(bins):

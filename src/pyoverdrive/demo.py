@@ -53,15 +53,15 @@ def _cases(quick: bool):
     conv_n = 20_000 // k
     conv = rng.standard_normal(conv_n)
     unique_arr = rng.integers(
-        np.iinfo(np.int64).min, np.iinfo(np.int64).max, size=1_000_000 // k, dtype=np.int64
+        np.iinfo(np.int32).min, np.iinfo(np.int32).max, size=1_000_000 // k, dtype=np.int32
     )
     nanq = rng.uniform(size=(50 // k, 100, 100))
     nanq[rng.random(nanq.shape) < 0.1] = np.nan
-    haystack = np.sort(rng.integers(0, 3_000_000, size=1_000_000 // k, dtype=np.int64))
-    needles = rng.integers(0, 3_000_000, size=100_000 // k, dtype=np.int64)
+    haystack = np.sort(rng.integers(0, 3_000_000, size=1_000_000 // k, dtype=np.int32))
+    needles = rng.integers(0, 3_000_000, size=100_000 // k, dtype=np.int32)
     es_x = rng.standard_normal((1_000 // k, 1, 500))
     es_y = rng.standard_normal((1_000 // k, 1, 500))
-    small = rng.integers(-30_000, 30_000, size=1_000_000 // k, dtype=np.int16)
+    small = rng.integers(-100, 100, size=1_000_000 // k, dtype=np.int8)
     sin_x = rng.standard_normal(10_000_000 // k)
     alpha = np.array(list("ASDFGHJKLZ"), dtype="U1")
     chars = alpha[rng.integers(0, 10, size=100_000 // k)]
@@ -81,15 +81,15 @@ def _cases(quick: bool):
     return [
         (f"np.convolve(a, v)  {conv_n}x{conv_n} float64",
          lambda f: f.convolve(conv, conv)),
-        (f"np.unique(a)  {unique_arr.size:,} int64",
+        (f"np.unique(a)  {unique_arr.size:,} int32",
          lambda f: f.unique(unique_arr)),
         (f"np.nanquantile(a, 0.8, axis=0)  {'x'.join(map(str, nanq.shape))}",
          lambda f: f.nanquantile(nanq, 0.8, axis=0)),
-        (f"np.intersect1d(a, b)  {haystack.size:,} x {needles.size:,} int64",
+        (f"np.intersect1d(a, b)  {haystack.size:,} x {needles.size:,} int32",
          lambda f: f.intersect1d(haystack, needles)),
         (f"np.einsum('thd,Thd->thT', x, y)  {es_x.shape[0]}x1x500",
          lambda f: f.einsum("thd,Thd->thT", es_x, es_y)),
-        (f"np.unique(a)  {small.size:,} int16",
+        (f"np.unique(a)  {small.size:,} int8",
          lambda f: f.unique(small)),
         (f"np.sort(a)  {chars.size:,} single-char U1",
          lambda f: f.sort(chars)),

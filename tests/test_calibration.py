@@ -93,6 +93,36 @@ def test_corrupt_file_is_ignored():
     assert calibration.load(refresh=True) == {}
 
 
+@pytest.mark.parametrize("payload", [
+    None, [], "not a table", 1,
+    {"version": 1, "machine": None},
+    {"version": 1, "machine": []},
+])
+def test_wrong_json_structure_is_ignored(payload):
+    p = calibration.calibration_path()
+    p.write_text(json.dumps(payload), encoding="utf-8")
+    assert calibration.load(refresh=True) == {}
+    assert calibration.apply(GEARBOX) == []
+
+
+def test_saved_calibration_does_not_override_environment_kill_switch():
+    import os
+    import subprocess
+    import sys
+
+    calibration.save({PATH: {"enabled": True, "rows_min": 4_000}})
+    env = dict(os.environ, PYOVERDRIVE_DISABLE=PATH)
+    result = subprocess.run(
+        [sys.executable, "-c",
+         "from pyoverdrive.dispatcher.gearbox import GEARBOX; "
+         "print(next(p.enabled for p in GEARBOX._paths['numpy.argmax'] "
+         "if p.name == 'argmax_blocked_transpose'))"],
+        env=env, capture_output=True, text=True, timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "False"
+
+
 def test_unknown_path_entry_is_ignored():
     calibration.save({"some_future_path": {"enabled": True}})
     assert calibration.apply(GEARBOX) == []
@@ -100,15 +130,15 @@ def test_unknown_path_entry_is_ignored():
 
 def test_calibrate_end_to_end_with_stubbed_probe(monkeypatch):
     # force an enabling verdict without paying the real probe's runtime
-    monkeypatch.setitem(
-        calibration._GATED,
-        PATH,
-        calibration._Gate(
+    monkeypatch.setattr(
+        calibration,
+        "_GATED",
+        {PATH: calibration._Gate(
             PATH,
             lambda: {"enabled": True, "rows_min": 3_000, "size_min": 9_000_000,
                      "cells": {"stub": 9.99}},
             calibration._GATED[PATH].apply_floors,
-        ),
+        )},
     )
     import io
 
@@ -252,3 +282,142 @@ def test_a_couple_of_busy_cpus_are_outliers_not_a_core_class(n_busy):
 
 def test_fast_cutoff_is_none_when_there_is_no_split():
     assert _cpuclass.fast_cutoff({"hybrid": False, "fast": [0, 1]}) is None
+
+
+# Nested file data is untrusted: validate a whole gate before changing it.
+@pytest.mark.parametrize("value", [None, True, False, 0, -1, 1, 1.5, "4000"])
+@pytest.mark.parametrize("field", ["rows_min", "size_min"])
+def test_invalid_nested_floor_rejects_entire_argmax_entry(value, field, monkeypatch):
+    before = (argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN)
+    entry = {"enabled": True, "rows_min": 4_000, "size_min": 12_000_000}
+    entry[field] = value
+    monkeypatch.setattr(calibration, "_cache", {PATH: entry})
+    assert calibration.apply(GEARBOX) == []
+    assert (argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN) == before
+    assert not next(p.enabled for p in GEARBOX._paths["numpy.argmax"] if p.name == PATH)
+
+
+@pytest.mark.parametrize("value", [None, 0, 1, "false", "true", [], {}, [True]])
+def test_invalid_nested_enabled_flag_does_not_enable_or_mutate(value, monkeypatch):
+    before = (argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN)
+    monkeypatch.setattr(calibration, "_cache", {
+        PATH: {"enabled": value, "rows_min": 4_000, "size_min": 12_000_000},
+    })
+    assert calibration.apply(GEARBOX) == []
+    assert (argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN) == before
+
+
+@pytest.mark.parametrize("drop", [
+    None, True, 1, "pyrallel_sin", ["pyrallel_sin"],
+    {"pyrallel_cos": None}, {"pyrallel_cos": "float32"},
+    {"pyrallel_cos": 1}, {"pyrallel_cos": [None]},
+    {"pyrallel_cos": [["float32"]]},
+    {"pyrallel_sin": ["float32"], "pyrallel_cos": [{}]},
+])
+def test_invalid_nested_drop_does_not_partially_rewrite_tables(drop, monkeypatch):
+    calibration._apply_pyrallel({"drop": {"pyrallel_tanh": ["float32"]}})
+    before = {
+        mod: {op: dict(row) for op, row in mod.SUPPORTED.items()}
+        for mod in (parallel_ufunc, parallel_binary)
+    }
+    monkeypatch.setattr(calibration, "_cache", {"pyrallel": {"drop": drop}})
+    assert calibration.apply(GEARBOX) == []
+    for mod, tables in before.items():
+        assert mod.SUPPORTED == tables
+
+
+def test_valid_nested_calibration_can_restore_an_earlier_safe_floor(monkeypatch):
+    monkeypatch.setattr(calibration, "_cache", {
+        PATH: {"enabled": True, "rows_min": 4_000, "size_min": 12_000_000},
+    })
+    assert calibration.apply(GEARBOX) == [PATH]
+    monkeypatch.setattr(calibration, "_cache", {
+        PATH: {"enabled": True, "rows_min": 3_000, "size_min": 9_000_000},
+    })
+    assert calibration.apply(GEARBOX) == [PATH]
+    assert (argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN) == (3_000, 9_000_000)
+
+
+def test_recalibration_negative_verdict_disables_previously_enabled_path(monkeypatch):
+    from pyoverdrive.dispatcher.gearbox import FastPath, Gearbox
+
+    monkeypatch.setenv("PYOVERDRIVE_DISABLE", "")
+    gearbox = Gearbox()
+    gearbox.register(FastPath(PATH, "numpy.argmax", lambda args, kwargs: True,
+                              lambda: None, enabled=False))
+    monkeypatch.setattr(calibration, "_cache", {PATH: {"enabled": True}})
+    assert calibration.apply(gearbox) == [PATH]
+    assert gearbox.decide("numpy.argmax", (), {})[0] == PATH
+    before = (argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN)
+    monkeypatch.setattr(calibration, "_cache", {
+        PATH: {"enabled": False, "rows_min": 4_000, "size_min": 12_000_000},
+    })
+    assert calibration.apply(gearbox) == []
+    assert gearbox.decide("numpy.argmax", (), {})[0] == "stock"
+    assert (argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN) == before
+    monkeypatch.setattr(calibration, "_cache", {PATH: {"enabled": True}})
+    assert calibration.apply(gearbox) == [PATH]
+    assert gearbox.decide("numpy.argmax", (), {})[0] == PATH
+
+
+@pytest.mark.parametrize("entry", [{}, {"enabled": False, "rows_min": 0},
+                                    {"enabled": "false"}])
+def test_recalibration_invalid_or_missing_verdict_keeps_live_state(entry, monkeypatch):
+    from pyoverdrive.dispatcher.gearbox import FastPath, Gearbox
+
+    monkeypatch.setenv("PYOVERDRIVE_DISABLE", "")
+    gearbox = Gearbox()
+    gearbox.register(FastPath(PATH, "numpy.argmax", lambda args, kwargs: True,
+                              lambda: None, enabled=True))
+    before = (argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN)
+    monkeypatch.setattr(calibration, "_cache", {PATH: entry})
+    assert calibration.apply(gearbox) == []
+    assert gearbox.decide("numpy.argmax", (), {})[0] == PATH
+    assert (argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN) == before
+
+
+def test_recalibration_positive_verdict_still_honors_environment_kill(monkeypatch):
+    from pyoverdrive.dispatcher.gearbox import FastPath, Gearbox
+
+    monkeypatch.setenv("PYOVERDRIVE_DISABLE", PATH)
+    gearbox = Gearbox()
+    gearbox.register(FastPath(PATH, "numpy.argmax", lambda args, kwargs: True,
+                              lambda: None))
+    monkeypatch.setattr(calibration, "_cache", {PATH: {"enabled": True}})
+    assert calibration.apply(gearbox) == []
+    assert gearbox.decide("numpy.argmax", (), {})[0] == "stock"
+
+
+def test_invalid_nested_payloads_cannot_break_fresh_import():
+    import os
+    import subprocess
+    import sys
+
+    entries = [
+        {"pyrallel": {"drop": ["bad"]}},
+        {"pyrallel": {"drop": {"pyrallel_cos": [["float32"]]}}},
+        {PATH: {"enabled": "true", "rows_min": 4_000}},
+        {PATH: {"enabled": True, "rows_min": True}},
+        {PATH: {"enabled": True, "size_min": -1}},
+        {PATH: {"enabled": True, "size_min": 0}},
+    ]
+    source = """
+import json
+from pyoverdrive.dispatcher.gearbox import GEARBOX
+from pyoverdrive.fastpaths import argmax_blocked, parallel_ufunc, parallel_binary
+path = next(p for p in GEARBOX._paths['numpy.argmax']
+            if p.name == 'argmax_blocked_transpose')
+print(json.dumps([path.enabled, argmax_blocked.ROWS_MIN, argmax_blocked.SIZE_MIN,
+                  parallel_ufunc.SUPPORTED == parallel_ufunc.SHIPPED,
+                  parallel_binary.SUPPORTED == parallel_binary.SHIPPED]))
+"""
+    env = dict(os.environ)
+    env.pop("PYOVERDRIVE_DISABLE", None)
+    for paths in entries:
+        calibration.save(paths)
+        result = subprocess.run(
+            [sys.executable, "-c", source], env=env,
+            capture_output=True, text=True, timeout=30,
+        )
+        assert result.returncode == 0, result.stderr
+        assert json.loads(result.stdout) == [False, 3_000, 9_000_000, True, True]

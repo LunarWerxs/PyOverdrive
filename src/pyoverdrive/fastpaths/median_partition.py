@@ -10,11 +10,9 @@ isnan on the partitioned tail, and computes the even-size mean with
 stock's own 0.5 * (lo + hi) arithmetic - which made every battery cell
 bit-identical, NaN-salted included.
 
-Measured (OPP-000037 + BATCH5-CAL batteries, fp 9bbe7063c555, idle box,
-0-1% load): 3.4x at n=11, 3.0x at 10, 2.9-3.2x at 100/101, 2.2-2.4x at
-1000/1001, 2.03-2.09x at 2000/2001, 1.74x at 3001, 1.47-1.62x at
-5000/5001; 10_000 drops to 1.15-1.26x (below min-win), 100k+ is a wash
-- hence the size cap. Overhead-class win, exactly like roll_concat_1d.
+This targets fixed wrapper overhead on small arrays. The bounded size
+window avoids extrapolating that saving into large partitions, where
+partition work dominates and bypassing the wrapper matters less.
 
 Correctness contract:
 - Applies only to median(a) where a is a plain 1-D float64 ndarray,
@@ -29,6 +27,10 @@ Correctness contract:
 Comparison mode: bit-identical (spec section 9). Kill switch:
 PYOVERDRIVE_DISABLE=median_partition or
 pyoverdrive.disable_path("median_partition").
+
+Historical calibration ratios are omitted because the NumPy version was not
+recorded. See docs/research/2026-09-19-burndown.md for current measured
+evidence and its version, hardware and load qualifications.
 """
 
 from __future__ import annotations
@@ -38,7 +40,7 @@ import numpy as np
 from ..dispatcher.gearbox import FastPath
 
 _F64 = np.dtype(np.float64)
-SIZE_MIN, SIZE_CAP = 10, 5_001  # measured band; 10_000 measured below min-win
+SIZE_MIN, SIZE_CAP = 10, 5_001  # bounded wrapper-overhead regime
 
 
 def _applicable(args: tuple, kwargs: dict) -> bool:

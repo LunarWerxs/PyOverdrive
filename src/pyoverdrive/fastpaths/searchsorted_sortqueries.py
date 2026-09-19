@@ -21,20 +21,40 @@ on a sorted haystack, order-sensitive garbage otherwise; 17122/20000
 elements differed in the 2.4.5 probe), so there the fast path returns
 another member of the same undefined family, not stock's byte-for-byte
 garbage. numpy 2.5 removed the order dependence (0/20000 in the same probe
-on 2.5.2), making the result identical even for abusive input; the
-version-conditional xfail in the differential battery tracks the boundary.
+on 2.5.2), making the result identical even for abusive input.
+
+That divergence was known and tolerated - the path dispatched anyway and a
+strict xfail recorded the boundary. Batch 16 reversed it and the predicate
+now REFUSES an unsorted haystack outright (_haystack_sorted). Not because
+the old call was unreasonable, since this is undefined behaviour on numpy's
+side either way, but because the package floor is numpy>=2.3: the divergent
+versions are SUPPORTED versions, and this project had already ruled the
+other way on the same shape, isin_string_hash refusing lone-NUL strings so
+stock keeps answering where stock is quirky. Two opposite decisions about
+undefined behaviour is one too many, and the guard costs 0.1-0.5% of the
+call. On numpy >= 2.5 it declines an input that would have agreed.
 
 Correctness contract:
 - Applies only to searchsorted(a, v[, side]) where a and v are plain 1-D
-  ndarrays of the same float64/int64 dtype, side is 'left' (the default)
+  ndarrays of the same float64 dtype (int64 was withdrawn - see SUPPORTED),
+  side is 'left' (the default)
   or 'right' (same mechanism by per-element independence; the calibration
   battery carries its measurement), no sorter=, len(a) >= 10_000,
   len(v) at or above the measured dtype floor and at most 10x len(a),
   AND a sampled disorder estimate says the query order is genuinely
   random-like (the SEARCHSORTED-CAL battery measured stock already fast
   on sorted, nearly-sorted, lightly shuffled AND descending queries; only
-  high-disorder orders repay the sort). Scalar v, other dtypes, 2-D+ v,
-  and sorter= all stay on stock.
+  high-disorder orders repay the sort), AND the HAYSTACK IS ACTUALLY
+  SORTED, checked in one O(n) pass (_haystack_sorted). Scalar v, other
+  dtypes, 2-D+ v, and sorter= all stay on stock.
+- That haystack check is a correctness guard, not a performance one, and
+  it was added after the fact: numpy does not verify `a` is sorted, an
+  unsorted one yields a meaningless-but-deterministic answer, and on
+  numpy < 2.5 this path returned a DIFFERENT one - 86.8% of positions
+  disagreed with stock on a 50,000-element unsorted float64 haystack under
+  2.4.5, a supported version. It costs 0.1-0.5% of the
+  call it guards (3 us against 593 us at n=10,000; 250 us against 203 ms
+  at n=1e6), which cannot reach the 1.28-1.97x margin.
 - The inner searchsorted call goes through Gearbox's stock_fn: the sorted
   copy would pass this predicate again and recurse (the OPP-000000
   incident class).
@@ -70,9 +90,25 @@ from ..dispatcher.gearbox import GEARBOX, FastPath
 #   only 1.32x under a 100x larger query set (while 2.18x when sizes
 #   match), so a.size >= 10_000 AND len(v) <= 10 * len(a) (the measured
 #   5:1 ratio case wins 1.46x; 100:1 is where it dies).
+# INT64 WITHDRAWN 2026-08-25, and the reason is a new failure class here:
+# the row was not measured wrong, it ROTTED. numpy 2.5 made stock
+# searchsorted substantially faster and took the whole int64 margin with it.
+# Same grid, same idle box, same code, two numpy versions
+# (tools/probe_searchsorted_haystack.py, haystack x queries, both dtypes):
+#   numpy 2.4.5  int64: 0.73x at a 10k haystack, 1.06x at 100k, 1.90x at
+#                300k, 2.46x at 1M, 3.97x at 3M - the row as calibrated.
+#   numpy 2.5.2  int64: 0.26x, 0.29x, 0.37x, 0.46x, 0.74x - NOT ONE CELL
+#                of its admissible region reaches break-even, and the
+#                worst is 3.8x slower than stock.
+# float64 survived the same change with a reduced margin (1.77-4.41x on
+# 2.4.5, 1.28-1.97x on 2.5.2), so the dtype is what separates them: stock's
+# int64 comparison is now cheap enough that the argsort can never be repaid,
+# while float64 still leaves room. A supported numpy that loses is a loss,
+# so the row goes rather than becoming version-conditional.
+# The original 1.51x-at-1e5 reading also used a LARGER haystack than the
+# query count it was recorded against; at matched sizes 2.4.5 gives 1.06x.
 SUPPORTED: dict[np.dtype, int] = {
     np.dtype(np.float64): 10_000,
-    np.dtype(np.int64): 100_000,
 }
 _FLOOR = min(SUPPORTED.values())
 _HAYSTACK_FLOOR = 10_000
@@ -88,6 +124,47 @@ def _disordered(v: np.ndarray) -> bool:
     p = np.linspace(0, v.size - 2, _DISORDER_SAMPLES).astype(np.intp)
     frac = float(np.count_nonzero(v[p + 1] < v[p])) / p.size
     return min(frac, 1.0 - frac) >= _DISORDER_GATE
+
+
+def _haystack_sorted(a: np.ndarray) -> bool:
+    """Is the haystack actually sorted? One O(n) pass, and it is REQUIRED.
+
+    numpy documents `a` as needing to be sorted and does not check it: an
+    unsorted haystack gets you a meaningless answer rather than an error.
+    Meaningless is not the same as arbitrary, though - stock's answer is a
+    deterministic function of the array it was handed, and on numpy < 2.5
+    THIS PATH RETURNS A DIFFERENT ONE. Measured on a 50,000-element
+    unsorted float64 haystack under numpy 2.4.5: dispatched, and 43,407 of
+    50,000 positions disagree with stock (86.8%). The package floor is
+    numpy>=2.3, so those are SUPPORTED versions.
+
+    On numpy 2.5 and later the two agree - the order dependence was removed
+    upstream - so there this check refuses an input that would have
+    matched. That is deliberate: a predicate whose correctness depends on
+    the numpy version is a predicate nobody can reason about, and the cost
+    is 0.1-0.5%.
+
+    The reason is the path's own mechanism. Sorting the queries is only
+    order-neutral if each query is answered independently; numpy narrows
+    the search range as it walks a SORTED query list, which is valid when
+    the haystack is sorted and wrong when it is not. So the very
+    optimisation this path exists for is what makes it diverge here.
+
+    Undefined behaviour is still behaviour a caller can be relying on, and
+    this project has ruled on exactly this shape once already: isin_string_
+    hash refuses lone-NUL strings so stock keeps answering for an input
+    class where stock is quirky. Bug-for-bug faithfulness wins, so an
+    unsorted haystack goes to stock.
+
+    Non-decreasing, not strictly increasing: searchsorted is defined on
+    haystacks with duplicates and this is not a uniqueness check.
+
+    A haystack containing NaN is refused as a side effect, since NaN
+    compares False in either direction - conservative, consistent with
+    _disordered's treatment of NaN queries, and it only ever costs a
+    dispatch.
+    """
+    return a.size < 2 or bool(np.all(a[1:] >= a[:-1]))
 
 
 def _operands(args: tuple, kwargs: dict):
@@ -123,7 +200,12 @@ def _applicable(args: tuple, kwargs: dict) -> bool:
     threshold = SUPPORTED.get(v.dtype)
     if threshold is None or v.size < threshold:
         return False
-    return _disordered(v)
+    # _disordered is a 4096-point sample and _haystack_sorted is a full
+    # O(n) pass, so the sampled one goes first: the scan is only paid by an
+    # input that would otherwise have dispatched.
+    if not _disordered(v):
+        return False
+    return _haystack_sorted(a)
 
 
 def _run(a, v, side="left"):

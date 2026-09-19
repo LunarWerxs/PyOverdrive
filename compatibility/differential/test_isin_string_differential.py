@@ -17,6 +17,7 @@ import pytest
 
 import pyoverdrive
 from pyoverdrive.dispatcher.gearbox import GEARBOX
+from pyoverdrive.fastpaths.isin_string_hash import SIZE_FLOOR, TEST_FLOOR
 
 OP = "numpy.isin"
 PATH = "isin_string_hash"
@@ -83,10 +84,12 @@ def _assert_refused_raises(args, kwargs):
 # 1. dispatch + bit-identity
 # ---------------------------------------------------------------------------
 
-def test_dispatch_words_test_set_5():
+def test_dispatch_words_test_set_at_floor():
+    # was a 5-word test set; TEST_FLOOR now refuses those, and the subject
+    # here is a SMALL test set dispatching, so it moves to the floor itself
     element = _words(2000, seed=1)
     rng = np.random.default_rng(2)
-    test = _strarr(rng.choice(VOCAB, size=5, replace=False))
+    test = _strarr(rng.choice(VOCAB, size=TEST_FLOOR, replace=False))
     got, stock = _assert_dispatched_equal((element, test), {})
     assert got.any() and not got.all()
 
@@ -108,7 +111,7 @@ def test_dispatch_words_test_all_words_unshuffled():
 
 def test_dispatch_words_empty_overlap():
     element = _words(2000, seed=6)
-    other_vocab = [f"other{i:03d}" for i in range(20)]
+    other_vocab = [f"other{i:03d}" for i in range(TEST_FLOOR)]
     test = _strarr(other_vocab)
     got, stock = _assert_dispatched_equal((element, test), {})
     assert not got.any()
@@ -117,7 +120,7 @@ def test_dispatch_words_empty_overlap():
 def test_dispatch_invert_true():
     element = _words(2000, seed=7)
     rng = np.random.default_rng(8)
-    test = _strarr(rng.choice(VOCAB, size=5, replace=False))
+    test = _strarr(rng.choice(VOCAB, size=TEST_FLOOR, replace=False))
     got, stock = _assert_dispatched_equal((element, test), {"invert": True})
     assert got.any() and not got.all()
 
@@ -125,23 +128,30 @@ def test_dispatch_invert_true():
 def test_dispatch_assume_unique_true():
     element = _words(2000, seed=9)
     rng = np.random.default_rng(10)
-    test = _strarr(rng.choice(VOCAB, size=5, replace=False))
+    test = _strarr(rng.choice(VOCAB, size=TEST_FLOOR, replace=False))
     _assert_dispatched_equal((element, test), {"assume_unique": True})
 
 
 def test_dispatch_assume_unique_false():
     element = _words(2000, seed=11)
     rng = np.random.default_rng(12)
-    test = _strarr(rng.choice(VOCAB, size=5, replace=False))
+    test = _strarr(rng.choice(VOCAB, size=TEST_FLOOR, replace=False))
     _assert_dispatched_equal((element, test), {"assume_unique": False})
 
 
-def test_dispatch_empty_test_elements():
+def test_refusal_empty_test_elements():
+    """Zero test_elements is the extreme of the corner TEST_FLOOR closes.
+
+    It used to dispatch. Stock answers all-False almost for free here while
+    the hash route still walks every element, so refusing is the measured
+    behaviour rather than an accident of the new floor.
+    """
     element = _words(2000, seed=13)
     test = _strarr([])
     assert test.size == 0
-    got, stock = _assert_dispatched_equal((element, test), {})
-    assert not got.any()
+    decision, reason = GEARBOX.decide(OP, (element, test), {})
+    assert decision == "stock", (decision, reason)
+    _assert_refused_equal((element, test), {})
 
 
 def test_dispatch_empty_and_null_and_nonascii_and_long_strings():
@@ -156,7 +166,8 @@ def test_dispatch_empty_and_null_and_nonascii_and_long_strings():
     rng = np.random.default_rng(14)
     filler = [VOCAB[i] for i in rng.integers(0, len(VOCAB), size=300)]
     element = _strarr(words + filler)
-    test = _strarr(["", "plain\x00middle", "αβγ", "\U0001f600", "x" * 2000])
+    test = _strarr(["", "plain\x00middle", "αβγ", "\U0001f600", "x" * 2000]
+                   + VOCAB[:TEST_FLOOR])
     got, stock = _assert_dispatched_equal((element, test), {})
     assert got[:4].all()  # "" embedded-null greek emoji all present in test
     assert bool(got[4])  # "x"*2000 present
@@ -176,20 +187,20 @@ def test_lone_nul_string_stock_quirk_is_refused():
     rng = np.random.default_rng(141)
     filler = [VOCAB[i] for i in rng.integers(0, len(VOCAB), size=300)]
     element = _strarr(["\x00"] + filler)
-    test = _strarr(["\x00"] + VOCAB[:5])
+    test = _strarr(["\x00"] + VOCAB[:TEST_FLOOR])
     decision, reason = GEARBOX.decide(OP, (element, test), {})
     assert decision == "stock", (decision, reason)
     _assert_refused_equal((element, test), {})
     # doubled NUL is ALSO in stock's broken class (measured diverging), so
     # it is refused with the lone one
     element3 = _strarr(["\x00\x00"] + filler)
-    test3 = _strarr(["\x00\x00"] + VOCAB[:5])
+    test3 = _strarr(["\x00\x00"] + VOCAB[:TEST_FLOOR])
     decision3, _ = GEARBOX.decide(OP, (element3, test3), {})
     assert decision3 == "stock"
     _assert_refused_equal((element3, test3), {})
     # a NUL EMBEDDED in a longer string is fine on stock; still dispatches
     element2 = _strarr(["plain\x00middle"] + filler)
-    test2 = _strarr(["plain\x00middle"] + VOCAB[:5])
+    test2 = _strarr(["plain\x00middle"] + VOCAB[:TEST_FLOOR])
     decision2, _ = GEARBOX.decide(OP, (element2, test2), {})
     assert decision2 == PATH
     _assert_dispatched_equal((element2, test2), {})
@@ -250,9 +261,32 @@ def test_refusal_2d_element():
     _assert_refused_equal((element, test), {})
 
 
+def test_refusal_test_elements_just_under_test_floor():
+    """The corner the four-axis sweep caught at 0.05x, the package's worst.
+
+    Combined size is far above SIZE_FLOOR here, which is the whole point:
+    stock answers a small test set with one vectorized pass per test
+    element, so what decides the winner is how many of them there are, and
+    a combined-size gate cannot express that at any value.
+    """
+    element = _words(4000, seed=115)
+    test = _words(TEST_FLOOR - 1, seed=116)
+    assert element.size + test.size > SIZE_FLOOR
+    decision, reason = GEARBOX.decide(OP, (element, test), {})
+    assert decision == "stock", (decision, reason)
+    _assert_refused_equal((element, test), {})
+
+
+def test_dispatch_test_elements_at_test_floor():
+    """And the first count that dispatches, so the floor is pinned both ways."""
+    element = _words(4000, seed=117)
+    test = _words(TEST_FLOOR, seed=118)
+    _assert_dispatched_equal((element, test), {})
+
+
 def test_refusal_combined_size_299_just_under_floor():
-    element = _words(280, seed=21)
-    test = _words(19, seed=22)
+    element = _words(299 - TEST_FLOOR, seed=21)
+    test = _words(TEST_FLOOR, seed=22)
     assert element.size + test.size == 299
     decision, reason = GEARBOX.decide(OP, (element, test), {})
     assert decision == "stock", (decision, reason)
@@ -260,8 +294,8 @@ def test_refusal_combined_size_299_just_under_floor():
 
 
 def test_dispatch_combined_size_300_exact_floor():
-    element = _words(281, seed=23)
-    test = _words(19, seed=24)
+    element = _words(300 - TEST_FLOOR, seed=23)
+    test = _words(TEST_FLOOR, seed=24)
     assert element.size + test.size == 300
     decision, reason = GEARBOX.decide(OP, (element, test), {})
     assert decision == PATH, (decision, reason)
@@ -296,7 +330,7 @@ def test_refusal_python_list_element():
 def test_kill_switch_restores_stock_routing():
     element = _words(2000, seed=30)
     rng = np.random.default_rng(31)
-    test = _strarr(rng.choice(VOCAB, size=5, replace=False))
+    test = _strarr(rng.choice(VOCAB, size=TEST_FLOOR, replace=False))
     decision, reason = GEARBOX.decide(OP, (element, test), {})
     assert decision == PATH, (decision, reason)
     pyoverdrive.disable_path(PATH)
@@ -308,3 +342,21 @@ def test_kill_switch_restores_stock_routing():
         assert np.array_equal(got, stock)
     finally:
         pyoverdrive.enable_path(PATH)
+
+
+def test_assume_unique_promise_may_be_false_without_changing_the_answer():
+    """See the object twin: one rule, not two.
+
+    assume_unique= is a promise numpy does not verify. Membership is
+    idempotent under duplication, so a false promise cannot change this
+    path's answer - unlike intersect1d, whose route through
+    concatenate-and-sort does change, which is why it refuses the keyword.
+    The promise is deliberately false on both operands here.
+    """
+    rng = np.random.default_rng(721)
+    element = _words(2000, seed=722)
+    test = _strarr(list(VOCAB[:TEST_FLOOR]) * 2)   # duplicates: promise is false
+    assert element.size > np.unique(element).size
+    assert test.size > np.unique(test).size
+    for promise in (True, False):
+        _assert_dispatched_equal((element, test), {"assume_unique": promise})

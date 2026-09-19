@@ -2,8 +2,7 @@
 
 Contract (src/pyoverdrive/fastpaths/matmul_split_complex.py): applies only to
 matmul(C, R) with no kwargs, where C is a plain 2-D complex ndarray and R a
-plain 2-D real ndarray of the paired dtype (complex128 with float64, or
-complex64 with float32), inner dimensions matching, m <= M_MAX, n >= N_MIN,
+plain 2-D real ndarray of the paired dtype (complex128 with float64), inner dimensions matching, m <= M_MAX, n >= N_MIN,
 q >= Q_MIN, and both operands all-finite. Dispatch runs two real GEMMs
 (out.real = C.real @ R, out.imag = C.imag @ R) instead of stock's upcast
 complex GEMM, so results agree to BLAS-rounding scale (numeric mode) rather
@@ -99,9 +98,9 @@ def test_dispatch_large_complex128():
     assert got.shape == (64, 600)
 
 
-def test_dispatch_large_complex64():
+def test_refusal_withdrawn_complex64():
     c, r = _mats(64, 1200, 600, 2, c_dtype=np.complex64, r_dtype=np.float32)
-    got, stock = _assert_dispatched_close(c, r, complex64=True)
+    got = _assert_refused_equal((c, r), {})
     assert got.dtype == np.complex64
     assert got.shape == (64, 600)
 

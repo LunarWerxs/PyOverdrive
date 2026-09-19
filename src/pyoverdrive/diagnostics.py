@@ -110,7 +110,8 @@ def configure(
 # stale size fails loudly rather than silently testing stock against stock).
 def _inputs_unique():
     rng = np.random.default_rng(1)
-    return (rng.integers(0, 1_000_000, size=50_000, dtype=np.int64),), {}
+    # int64/uint64 rows were withdrawn after repeated cardinality losses.
+    return (rng.integers(0, 1_000_000, size=50_000, dtype=np.int32),), {}
 
 
 def _inputs_inner():
@@ -125,8 +126,8 @@ def _inputs_inner():
 def _inputs_intersect():
     rng = np.random.default_rng(3)
     return (
-        rng.integers(0, 30_000, size=10_000, dtype=np.int64),
-        rng.integers(0, 30_000, size=2_000, dtype=np.int64),
+        rng.integers(0, 30_000, size=10_000, dtype=np.int32),
+        rng.integers(0, 30_000, size=2_000, dtype=np.int32),
     ), {}
 
 
@@ -141,7 +142,14 @@ def _inputs_unique_axis0():
 def _inputs_relayout():
     from .fastpaths import relayout_blocked
 
-    n = int(max(relayout_blocked.SUPPORTED.values()) ** 0.5)
+    # DELIBERATELY NOT A POWER OF TWO. sqrt of this path's floor is exactly
+    # 2048, and a power-of-two leading dimension is the cache-associativity
+    # corner where a tiled copy wins most - measured 3.58x at n=2048 against
+    # 1.76x at n=2047 on the same box. A fixture sitting on that spike would
+    # report the best shape the path ever sees as if it were the typical one,
+    # which is how the old floors came to be calibrated on power-of-two
+    # squares alone (see relayout_blocked.SUPPORTED).
+    n = int(max(relayout_blocked.SUPPORTED.values()) ** 0.5) + 1
     rng = np.random.default_rng(5)
     return (rng.standard_normal((n, n)).T,), {}  # F-contiguous view
 
@@ -207,9 +215,13 @@ def _inputs_isclose():
 
 def _inputs_isin_string():
     rng = np.random.default_rng(13)
-    words = np.array([f"w{i}" for i in range(50)], dtype=np.dtypes.StringDType())
-    element = words[rng.integers(0, 50, size=2_000)]
-    test = words[:20].copy()
+    words = np.array([f"w{i}" for i in range(80)], dtype=np.dtypes.StringDType())
+    element = words[rng.integers(0, 80, size=2_000)]
+    # 64 test elements, not 20: this path's TEST_FLOOR is 48, because stock
+    # answers a small test set with one vectorized pass per test element and
+    # wins outright below that. A canonical fixture has to sit inside the
+    # shipped gate or the self-check reports a path that cannot dispatch.
+    test = words[:64].copy()
     return (element, test), {}
 
 
