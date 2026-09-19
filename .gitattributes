@@ -1,0 +1,2 @@
+# Keep recorded evidence bytes intact: completion.json cites SHA256 hashes.
+benchmarks/results/BURNDOWN-20260919/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

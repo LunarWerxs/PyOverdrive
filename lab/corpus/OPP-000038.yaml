@@ -82,6 +82,13 @@ linked_prs: []
 related_opportunities: []
 notes:
   - >-
+    CURRENT RUNTIME DISPOSITION (2026-09-19): hist2d_uniform requires at
+    least 6666 float64 samples, int bins >= 900 total (each >= 2), explicit
+    finite range and optional float64 weights. The sample floor moved from
+    2000 to the measured winning 6666-sample case after confirmed losses at
+    2000. Earlier reproduction and shipped notes remain historical; current
+    evidence and qualifications: docs/research/2026-09-19-burndown.md.
+  - >-
     SHIPPED (2026-08-24) as hist2d_uniform
     (src/pyoverdrive/fastpaths/hist2d_uniform.py): histogram2d with int
     bins >= 900 total (each >= 2) plus explicit finite range, float64

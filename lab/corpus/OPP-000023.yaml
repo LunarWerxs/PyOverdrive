@@ -105,7 +105,8 @@ notes:
   - >
     Root cause per the issue body: "both object arrays and stringdtype fall
     back to the `hasobject` path in the `_isin` helper" (the body links
-    numpy/lib/_arraysetops_impl.py lines 910-926 at commit 30483388), and
+    numpy/lib/_arraysetops_impl.py lines 910-926 at
+    https://github.com/numpy/numpy/blob/30483388e8c07f1abd45b47c534801e9207d2643/numpy/lib/_arraysetops_impl.py#L910-L926), and
     "This slow path is much much slower than the sorting path." The
     reporter calls it "more-or-less the same issue as"
     numpy/numpy#14997, the long-standing object-array isin complaint. The

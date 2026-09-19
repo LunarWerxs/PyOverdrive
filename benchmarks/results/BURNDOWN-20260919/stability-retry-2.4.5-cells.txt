@@ -1,0 +1,2 @@
+pad_1d_constant
+fftcorrelate#mode-same%d

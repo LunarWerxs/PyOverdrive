@@ -1,0 +1,5 @@
+matmul_int_blas
+pyrallel_cos@float32
+pyrallel_exp@float64
+pyrallel_exp@float32
+pyrallel_log@float32

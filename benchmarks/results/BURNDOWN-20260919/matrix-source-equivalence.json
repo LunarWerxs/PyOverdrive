@@ -1,0 +1,34 @@
+{
+  "artifact": "gates-final/numpy-latest.json",
+  "frozen_verifier_sha256": "aaf7691db692140ae01451692ea60b0f03e0d637b34c31511fcc64b252ece141",
+  "frozen_source_backup": ".git/burndown/final-gates.zip",
+  "changed_verifier_functions_at_review": [
+    "_collect_child_evidence",
+    "_measure",
+    "_validate_child_record"
+  ],
+  "matrix_fixture_equivalent": true,
+  "note": "Independent review confirms fixture generation and matrix runtime, diagnostics, dispatcher and calibration exact equivalence; timing validation and subsequent optional sampling controls are separate measurement-tool changes.",
+  "reviewed_current_verifier_sha256": "97f2d86e038aca501253862ea5fe15b4bd2972d40999d568d197eaa363266e9b",
+  "unchanged_runtime_and_fixture_files": {
+    "src/pyoverdrive/fastpaths/matmul_split_complex.py": "24011625fcae0e4ae2b49ffbd183b8c59b9ccceb78eadeb374b07476d98d1d46",
+    "src/pyoverdrive/diagnostics.py": "d9c7f3ea76ffe78ffcc378b2b4f934fe4d63cf1555235ce8bec0bac01ec4bfc6",
+    "src/pyoverdrive/dispatcher/gearbox.py": "6ffb03d93360baaebd2cdf8827d3505c2b57116d1a4cd1396ac9329f2ea2bed4",
+    "src/pyoverdrive/calibration.py": "55e979a7f49876648f9d8904262e4dd2e3f4bf8bb8e3d84e05146d1eee54a691"
+  },
+  "sampling_controls_review": {
+    "verifier_sha256": "b02b389dd61aee03b19ff985ba3353f839d16cd5adc2f2e31e3ed5c5e38b7352",
+    "unchanged_fixture_functions": [
+      "cells",
+      "_axes_split_complex",
+      "_inputs_for",
+      "_cell_variants",
+      "_scaled",
+      "_row_cells",
+      "_select_cells"
+    ],
+    "default_rounds": 9,
+    "default_target_seconds": 0.02,
+    "note": "Optional sampling budgets are passed to both sides; acceptance checks remain unchanged."
+  }
+}

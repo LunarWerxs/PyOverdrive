@@ -1,0 +1,10 @@
+argmax:argmax:float64:3000x2999:none
+argmax:argmax:float32:4500x3000:none
+argmax:argmax:float32:10000x1000:none
+argmax:argmax:int64:3000x2999:none
+argmax:argmax:int64:4500x3000:none
+out:sin:float64:300000:inplace
+out:add:float64:60000000:inplace
+out:add:int64:20000000:inplace
+out:add:int64:60000000:disjoint
+out:add:int64:60000000:inplace

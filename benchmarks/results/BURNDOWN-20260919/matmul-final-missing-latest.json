@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "tool": "verify_no_pessimization",
+  "recorded_at": "2026-09-19T21:13:18.026477+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.3",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "d69e2609ccf4"
+  },
+  "source_revision": null,
+  "source": {
+    "sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+    "files": {
+      "lab/dyno/__init__.py": "d2e9c17eb6931a1a0e8ab96770d50a2dd8d358da5fdbbf0cc46111ec2405a0f4",
+      "lab/dyno/fingerprint.py": "d6a2c19dd3c885685d1fa7bbb566464da8a4bf5258a1c76967e3e3fa6dbe7d1c",
+      "lab/dyno/load.py": "1419fe280ad1b64812e920fdf0ee969d9a2cbe23d5477126d2e82bddaff12f6b",
+      "pyproject.toml": "51b46f39e85918ccfda61c67cf875aa373fa15e907dde3456b92bbbb7527fdb3",
+      "src/pyoverdrive/__init__.py": "1e3c7073516caf0c8a7880277f63572a0f1add8753e5f82ab06b64e6db562133",
+      "src/pyoverdrive/__main__.py": "e076d213b4ca05ee2160f50a470f6e5624e37ed2153c38c3c566164db67a1688",
+      "src/pyoverdrive/_cpuclass.py": "cc7b4658e31a01f1880baf2873a57514a550f88f968887d9bb089fce40557b3c",
+      "src/pyoverdrive/calibration.py": "55e979a7f49876648f9d8904262e4dd2e3f4bf8bb8e3d84e05146d1eee54a691",
+      "src/pyoverdrive/demo.py": "994b8240e6038ed02bfc743aaa9a356edc3a8d76c54a77ef625f771250f7c9c0",
+      "src/pyoverdrive/diagnostics.py": "d9c7f3ea76ffe78ffcc378b2b4f934fe4d63cf1555235ce8bec0bac01ec4bfc6",
+      "src/pyoverdrive/dispatcher/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/pyoverdrive/dispatcher/gearbox.py": "6ffb03d93360baaebd2cdf8827d3505c2b57116d1a4cd1396ac9329f2ea2bed4",
+      "src/pyoverdrive/fallback/__init__.py": "300db10ab3d2f65de2fbab38e2b6da91aeb65bbc94675e5e4bf16e9254bd7a7e",
+      "src/pyoverdrive/fastpaths/__init__.py": "7d7ed87220af6f9da4c74b97f4c65f8e1e6af8c340d6e92839a16bdbbc2436ab",
+      "src/pyoverdrive/fastpaths/_pyrallel_common.py": "c44138fada6bd888edc00c240c5e2c13ca699a123536769267ccf9d92a2a5f47",
+      "src/pyoverdrive/fastpaths/apply_along_axis_reduce.py": "7eab1c48a3dbe261c123bf46a60e239a86a5341e2709166b60a7c786b08bacb2",
+      "src/pyoverdrive/fastpaths/argmax_blocked.py": "8ac6b8b6238ab76230b19bb633940bac9d7937f5e289c497a7944fa16025f30e",
+      "src/pyoverdrive/fastpaths/char_view.py": "b149479566231986b23e2585915d0f200ec4327e55da980d785f6acb46ed9901",
+      "src/pyoverdrive/fastpaths/cholesky_small_batch.py": "7ef9067f54755dafb88986ac53eb6dea2399f7dfb4072b9d8dbac902240093d9",
+      "src/pyoverdrive/fastpaths/dot_mixed_view.py": "8a85edbf37bd16e16d4b39ef166486add0b64f3b7de9304b257ddc3ddc199897",
+      "src/pyoverdrive/fastpaths/eigvalsh_2x2.py": "fb92e30297b63c470618b9a5ce9e61799a7bde48813d642e2b4192fb4025b2d5",
+      "src/pyoverdrive/fastpaths/eigvalsh_3x3.py": "078cc3e2cc82aec5d9b3600d74e06e941ebf5a4ca2f0b5574d3f33bfa14b76f1",
+      "src/pyoverdrive/fastpaths/einsum_optimize.py": "8853e789478334b0519dc39a89d4cbfc59871a8670ee6e54cb3f2d286e055231",
+      "src/pyoverdrive/fastpaths/fftconvolve.py": "359d49ac516d756fa644e3e28ba4eb999e7b8d1ec4f2b867a531f77a35f18ca1",
+      "src/pyoverdrive/fastpaths/hist2d_uniform.py": "8184b62ae414489ab95550e5007306f29f333e6af4955b8153d8f54337da8811",
+      "src/pyoverdrive/fastpaths/inner_tensordot.py": "f855a3952c85e0e682f57d311559bc0381a5c5b6d47984dd3ff84962d0e30cfc",
+      "src/pyoverdrive/fastpaths/interp_uniform_grid.py": "fe87bad59dd1077ffa158562a428bf84cf5da4822879f1efc7e6084fc2865ee2",
+      "src/pyoverdrive/fastpaths/intersect_sorted.py": "5ea1213ef90c77488670554b1f2d3d99d25743dc46e9268849743d8bb0df9711",
+      "src/pyoverdrive/fastpaths/inv_small_batch.py": "eb9f17d02f58a0b35c06e090d627905db71fda93d33694b1cc1fa124db8da839",
+      "src/pyoverdrive/fastpaths/isclose_fused.py": "d31ab390e86da641790f9a7bc2a01ca307c06576ab3910eeada5312ddfdeb715",
+      "src/pyoverdrive/fastpaths/isin_object_hash.py": "42aa6c0a5a5073d8d8f0f84b671671cb0b8ade64818a224f5c12df79656f7ba4",
+      "src/pyoverdrive/fastpaths/isin_string_hash.py": "95e171ded3faa1c06f64ac7c656258b8a71a689572e09744086f740c609c228b",
+      "src/pyoverdrive/fastpaths/linalg_small_batch.py": "52d28a91ce60d88a95b6239c82aa34e51d28ecf46fca3ce0b5c2c3a027201434",
+      "src/pyoverdrive/fastpaths/matmul_int_blas.py": "c16190671fac319968b82b3c1a5a7ae1ab7b34b10914009b55b6f0907ffc26a7",
+      "src/pyoverdrive/fastpaths/matmul_split_complex.py": "24011625fcae0e4ae2b49ffbd183b8c59b9ccceb78eadeb374b07476d98d1d46",
+      "src/pyoverdrive/fastpaths/median_partition.py": "0829b449dafda1f88b3bc8a3d9967d6555230329601a3fec493633137ae3f6cc",
+      "src/pyoverdrive/fastpaths/nan_to_num_where.py": "328941791574f993022d28901a9ea93d305cfbec6ac8a331258625cace5429a1",
+      "src/pyoverdrive/fastpaths/nanargminmax_scan.py": "aac89379959c1330ea0bfca509a2d3ad69072dd447bc67144328bfd309f86aed",
+      "src/pyoverdrive/fastpaths/nanmedian_scan.py": "5a151dadbe2b8df5c8c436037395998d99054e9c19fd377cf02cdb8ef2f00b8a",
+      "src/pyoverdrive/fastpaths/nanpercentile_masked.py": "f8930e7afe2465466d96f5f79d89b55e41b7bcccba0fd30d7e6ef7ed9cbe87ab",
+      "src/pyoverdrive/fastpaths/nanquantile_masked.py": "a140c40c31cd6c46b702a27b825e578ba7f495af55184359970e50d7f7eaeaca",
+      "src/pyoverdrive/fastpaths/nanreduce_scan.py": "8228517006b51761995894cd0beac36b34a6462acd857adc41ac55bf54964c47",
+      "src/pyoverdrive/fastpaths/noop.py": "07ba93bc5296f9473c833716188e0218a5479776d64926653961fcea2dfd647a",
+      "src/pyoverdrive/fastpaths/pad_1d_constant.py": "99a5416224e13e61a7bd8dda70f9317280d12611cbbab6642798ec5276df8e75",
+      "src/pyoverdrive/fastpaths/parallel_binary.py": "6ae0f911e2eaaed7aec966594d8d36c606928b63152f062271caafd3668cf937",
+      "src/pyoverdrive/fastpaths/parallel_ufunc.py": "484ab5dc7589d7c8038d2ef4ece4e6f92d2635dd9f598baf2c886b7cf34ae97b",
+      "src/pyoverdrive/fastpaths/percentile_dense.py": "f2e2c75d7879cafca79954ce91443f8e3086b326a7d63aaa40023a24171801ca",
+      "src/pyoverdrive/fastpaths/qr_small_batch.py": "2b087934ee6987be5c04a94cba50803bd4a67dab01c89efca1030b4d805347ab",
+      "src/pyoverdrive/fastpaths/quantile_dense_sort.py": "3fdca329883b9ec595fc5ec5170e8e657b11f97ab33f870799444bbb841a0998",
+      "src/pyoverdrive/fastpaths/reduce_tiny_trailing.py": "f2e09beb1d518edcf96463205ae75f7ca6687c0a0a7ebd27c0e36f88590d8a7c",
+      "src/pyoverdrive/fastpaths/relayout_blocked.py": "de5b13d93ad674a247f4d81f65c67977bc06c44cb8af1969d570a89170223c7e",
+      "src/pyoverdrive/fastpaths/roll_concat.py": "f8f2dbeb81bd185d44eac5feb576ed3bec556ee55685e17a5372b2b1468ea97c",
+      "src/pyoverdrive/fastpaths/searchsorted_extreme_key.py": "5bff96e936d7a82853df3e74bbb7508488cf8e21f212a5c51d50a55ac112e48a",
+      "src/pyoverdrive/fastpaths/searchsorted_sortqueries.py": "70a0fbe5e33b18301262b8eb671fb91502748c37252daedef0da32a994967448",
+      "src/pyoverdrive/fastpaths/svd_small_batch.py": "c20a2c4e7ad664a2492a896a46152fefd8f566c03ed0419ace3346a04a046243",
+      "src/pyoverdrive/fastpaths/take_index_assign.py": "b6b3298ed5b959b08e490e15b081cd03b5eb7ab94d63bc7c8139ecbff1ffc1a0",
+      "src/pyoverdrive/fastpaths/unique_axis0_column.py": "6b9c0e82613bac6169766b68d7f850e7841aa4c76d591c1cf20df51331fd9e99",
+      "src/pyoverdrive/fastpaths/unique_rows_lexsort.py": "6bf95ec8671b111aaf5edf2d2a990a487b609f03c2c77715e6cb5e501eca0144",
+      "src/pyoverdrive/fastpaths/unique_sort.py": "ababc63598881329f5a573fe26d9c818f81e0b17d62c4e5644d4e07332a21cf3",
+      "src/pyoverdrive/fastpaths/vectorize_ufunc.py": "06015ade38efe34f49aa51a7fea9bc77502f7dad8bcdc1d7ae297e65bec61ebc",
+      "src/pyoverdrive/parallel/__init__.py": "8b6d2ae4a18d9bbe6b879fa2b6028cbf903ffa56ef5c8b33305aea3a8368d315",
+      "src/pyoverdrive/parallel/pyrallel.py": "446866c5c292dc10d8e4b9f03b6063882eba6e1c7870580c17d74606c0c177a6",
+      "src/pyoverdrive/parallel/relayout.py": "383721a4e66ec807d70723d380150465948dcc607b1669c24ea376d4a8cd825e",
+      "tools/verify_no_pessimization.py": "97f2d86e038aca501253862ea5fe15b4bd2972d40999d568d197eaa363266e9b"
+    }
+  },
+  "calibration": {
+    "saved": {},
+    "override_configured": true
+  },
+  "selection": {
+    "only": [],
+    "rows": true,
+    "sizes": false,
+    "shapes": false,
+    "values": true,
+    "cells_file": {
+      "sha256": "56f1e07be1c7647279211c970d7de282ff6545be99c1e4997724eb2e8ca7e7f2",
+      "requested": [
+        "matmul_split_complex#complex128-rows-m64-n+1",
+        "matmul_split_complex#complex128-rows-m64-q+1"
+      ]
+    }
+  },
+  "settings": {
+    "min": 1.0,
+    "retries": 6,
+    "any_core": false,
+    "require_quiet": true,
+    "environment": {
+      "PYOVERDRIVE_THREADS": null,
+      "PYOVERDRIVE_DISABLE": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null
+    }
+  },
+  "conditions": {
+    "quiet_threshold": 0.2,
+    "cpu_busy_before": 0.18223583460949466,
+    "cpu_busy_after": 0.12776025236593058,
+    "contended": false,
+    "load_known": true
+  },
+  "cells": [
+    {
+      "cell": "matmul_split_complex#complex128-rows-m64-n+1",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "matmul_split_complex",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            64,
+            1001
+          ],
+          "dtype": "complex128",
+          "strides": [
+            16016,
+            16
+          ],
+          "size": 64064
+        },
+        {
+          "shape": [
+            1001,
+            500
+          ],
+          "dtype": "float64",
+          "strides": [
+            4000,
+            8
+          ],
+          "size": 500500
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "numeric",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.02421015000436455,
+        0.005308350024279207,
+        0.0059768499922938645,
+        0.006423200014978647,
+        0.005745349975768477,
+        0.004281600005924702,
+        0.002799250010866672,
+        0.002430099993944168,
+        0.002252250036690384
+      ],
+      "patched_seconds": [
+        0.020382750022690743,
+        0.004675500036682934,
+        0.019571599957998842,
+        0.010716549993958324,
+        0.008750799985136837,
+        0.003252199967391789,
+        0.018287750019226223,
+        0.0015822999994270504,
+        0.0011416500201448798
+      ],
+      "iterations_per_sample": 2,
+      "rounds": 9,
+      "stock_median_seconds": 0.005308350024279207,
+      "patched_median_seconds": 0.008750799985136837,
+      "ratio": 0.6066131134633859,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "error": "RuntimeError('stock: unstable timing; MAD/median=21.00% exceeds 20%; unverified')",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 1,
+      "stderr": "Traceback (most recent call last):\n  File \"C:\\PyOverdrive-burndown-20260919\\tools\\verify_no_pessimization.py\", line 1881, in <module>\n    raise SystemExit(main(sys.argv))\n                     ~~~~^^^^^^^^^^\n  File \"C:\\PyOverdrive-burndown-20260919\\tools\\verify_no_pessimization.py\", line 1831, in main\n    return _run_child(args)\n  File \"C:\\PyOverdrive-burndown-20260919\\tools\\verify_no_pessimization.py\", line 1714, in _run_child\n    result = _measure_one(args.one, args.fast_under, evidence=evidence)\n  File \"C:\\PyOverdrive-burndown-20260919\\tools\\verify_no_pessimization.py\", line 1376, in _measure_one\n    return _dispatch_measure(name, op, variants, call_kwargs, evidence=evidence)\n  File \"C:\\PyOverdrive-burndown-20260919\\tools\\verify_no_pessimization.py\", line 1339, in _dispatch_measure\n    ratio = _measure(op, cargs, call_kwargs, rounds=9, evidence=evidence,\n                     comparison_mode=path.provenance.get(\"comparison_mode\"))\n  File \"C:\\PyOverdrive-burndown-20260919\\tools\\verify_no_pessimization.py\", line 288, in _measure\n    validate_timing_stability(stock_times, \"stock\")\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\PyOverdrive-burndown-20260919\\tools\\verify_no_pessimization.py\", line 218, in validate_timing_stability\n    raise RuntimeError(f\"{label}: unstable timing; MAD/median={relative_mad:.2%} exceeds 20%; unverified\")\nRuntimeError: stock: unstable timing; MAD/median=21.00% exceeds 20%; unverified\n"
+    }
+  ],
+  "completed": false,
+  "selected_cells": [
+    "matmul_split_complex#complex128-rows-m64-n+1",
+    "matmul_split_complex#complex128-rows-m64-q+1"
+  ],
+  "cpu_classes": {
+    "hybrid": true,
+    "fast": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "slow": [
+      16,
+      17,
+      18,
+      19
+    ],
+    "class_ratio": 2.309,
+    "probe_us": {
+      "9": 136.1,
+      "7": 137.8,
+      "3": 137.8,
+      "2": 137.8,
+      "0": 138.0,
+      "5": 138.1,
+      "1": 138.3,
+      "8": 138.3,
+      "11": 138.4,
+      "13": 139.6,
+      "6": 140.9,
+      "10": 140.9,
+      "12": 141.1,
+      "4": 141.3,
+      "15": 143.7,
+      "14": 144.6,
+      "19": 318.4,
+      "18": 318.7,
+      "17": 320.2,
+      "16": 337.5
+    }
+  },
+  "fast_core_cutoff_us": 231.5,
+  "error": "RuntimeError('cell matmul_split_complex#complex128-rows-m64-n+1 exited 1: Traceback (most recent call last):\\n  File \"C:\\\\PyOverdrive-burndown-20260919\\\\tools\\\\verify_no_pessimization.py\", line 1881, in <module>\\n    raise SystemExit(main(sys.argv))\\n                     ~~~~^^^^^^^^^^\\n  File \"C:\\\\PyOverdrive-burndown-20260919\\\\tools\\\\verify_no_pessimization.py\", line 1831, in main\\n    return _run_child(args)\\n  File \"C:\\\\PyOverdrive-burndown-20260919\\\\tools\\\\verify_no_pessimization.py\", line 1714, in _run_child\\n    result = _measure_one(args.one, args.fast_under, evidence=evidence)\\n  File \"C:\\\\PyOverdrive-burndown-20260919\\\\tools\\\\verify_no_pessimization.py\", line 1376, in _measure_one\\n    return _dispatch_measure(name, op, variants, call_kwargs, evidence=evidence)\\n  File \"C:\\\\PyOverdrive-burndown-20260919\\\\tools\\\\verify_no_pessimization.py\", line 1339, in _dispatch_measure\\n    ratio = _measure(op, cargs, call_kwargs, rounds=9, evidence=evidence,\\n                     comparison_mode=path.provenance.get(\"comparison_mode\"))\\n  File \"C:\\\\PyOverdrive-burndown-20260919\\\\tools\\\\verify_no_pessimization.py\", line 288, in _measure\\n    validate_timing_stability(stock_times, \"stock\")\\n    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^\\n  File \"C:\\\\PyOverdrive-burndown-20260919\\\\tools\\\\verify_no_pessimization.py\", line 218, in validate_timing_stability\\n    raise RuntimeError(f\"{label}: unstable timing; MAD/median={relative_mad:.2%} exceeds 20%; unverified\")\\nRuntimeError: stock: unstable timing; MAD/median=21.00% exceeds 20%; unverified')",
+  "exit_code": 1
+}

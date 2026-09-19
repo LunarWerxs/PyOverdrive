@@ -1,0 +1,1165 @@
+{
+  "schema_version": 1,
+  "tool": "verify_no_pessimization",
+  "recorded_at": "2026-09-19T21:01:38.266100+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.3",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "d69e2609ccf4"
+  },
+  "source_revision": null,
+  "source": {
+    "sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+    "files": {
+      "lab/dyno/__init__.py": "d2e9c17eb6931a1a0e8ab96770d50a2dd8d358da5fdbbf0cc46111ec2405a0f4",
+      "lab/dyno/fingerprint.py": "d6a2c19dd3c885685d1fa7bbb566464da8a4bf5258a1c76967e3e3fa6dbe7d1c",
+      "lab/dyno/load.py": "1419fe280ad1b64812e920fdf0ee969d9a2cbe23d5477126d2e82bddaff12f6b",
+      "pyproject.toml": "51b46f39e85918ccfda61c67cf875aa373fa15e907dde3456b92bbbb7527fdb3",
+      "src/pyoverdrive/__init__.py": "1e3c7073516caf0c8a7880277f63572a0f1add8753e5f82ab06b64e6db562133",
+      "src/pyoverdrive/__main__.py": "e076d213b4ca05ee2160f50a470f6e5624e37ed2153c38c3c566164db67a1688",
+      "src/pyoverdrive/_cpuclass.py": "cc7b4658e31a01f1880baf2873a57514a550f88f968887d9bb089fce40557b3c",
+      "src/pyoverdrive/calibration.py": "55e979a7f49876648f9d8904262e4dd2e3f4bf8bb8e3d84e05146d1eee54a691",
+      "src/pyoverdrive/demo.py": "994b8240e6038ed02bfc743aaa9a356edc3a8d76c54a77ef625f771250f7c9c0",
+      "src/pyoverdrive/diagnostics.py": "d9c7f3ea76ffe78ffcc378b2b4f934fe4d63cf1555235ce8bec0bac01ec4bfc6",
+      "src/pyoverdrive/dispatcher/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/pyoverdrive/dispatcher/gearbox.py": "6ffb03d93360baaebd2cdf8827d3505c2b57116d1a4cd1396ac9329f2ea2bed4",
+      "src/pyoverdrive/fallback/__init__.py": "300db10ab3d2f65de2fbab38e2b6da91aeb65bbc94675e5e4bf16e9254bd7a7e",
+      "src/pyoverdrive/fastpaths/__init__.py": "7d7ed87220af6f9da4c74b97f4c65f8e1e6af8c340d6e92839a16bdbbc2436ab",
+      "src/pyoverdrive/fastpaths/_pyrallel_common.py": "c44138fada6bd888edc00c240c5e2c13ca699a123536769267ccf9d92a2a5f47",
+      "src/pyoverdrive/fastpaths/apply_along_axis_reduce.py": "7eab1c48a3dbe261c123bf46a60e239a86a5341e2709166b60a7c786b08bacb2",
+      "src/pyoverdrive/fastpaths/argmax_blocked.py": "8ac6b8b6238ab76230b19bb633940bac9d7937f5e289c497a7944fa16025f30e",
+      "src/pyoverdrive/fastpaths/char_view.py": "b149479566231986b23e2585915d0f200ec4327e55da980d785f6acb46ed9901",
+      "src/pyoverdrive/fastpaths/cholesky_small_batch.py": "7ef9067f54755dafb88986ac53eb6dea2399f7dfb4072b9d8dbac902240093d9",
+      "src/pyoverdrive/fastpaths/dot_mixed_view.py": "8a85edbf37bd16e16d4b39ef166486add0b64f3b7de9304b257ddc3ddc199897",
+      "src/pyoverdrive/fastpaths/eigvalsh_2x2.py": "fb92e30297b63c470618b9a5ce9e61799a7bde48813d642e2b4192fb4025b2d5",
+      "src/pyoverdrive/fastpaths/eigvalsh_3x3.py": "078cc3e2cc82aec5d9b3600d74e06e941ebf5a4ca2f0b5574d3f33bfa14b76f1",
+      "src/pyoverdrive/fastpaths/einsum_optimize.py": "8853e789478334b0519dc39a89d4cbfc59871a8670ee6e54cb3f2d286e055231",
+      "src/pyoverdrive/fastpaths/fftconvolve.py": "359d49ac516d756fa644e3e28ba4eb999e7b8d1ec4f2b867a531f77a35f18ca1",
+      "src/pyoverdrive/fastpaths/hist2d_uniform.py": "8184b62ae414489ab95550e5007306f29f333e6af4955b8153d8f54337da8811",
+      "src/pyoverdrive/fastpaths/inner_tensordot.py": "f855a3952c85e0e682f57d311559bc0381a5c5b6d47984dd3ff84962d0e30cfc",
+      "src/pyoverdrive/fastpaths/interp_uniform_grid.py": "fe87bad59dd1077ffa158562a428bf84cf5da4822879f1efc7e6084fc2865ee2",
+      "src/pyoverdrive/fastpaths/intersect_sorted.py": "5ea1213ef90c77488670554b1f2d3d99d25743dc46e9268849743d8bb0df9711",
+      "src/pyoverdrive/fastpaths/inv_small_batch.py": "eb9f17d02f58a0b35c06e090d627905db71fda93d33694b1cc1fa124db8da839",
+      "src/pyoverdrive/fastpaths/isclose_fused.py": "d31ab390e86da641790f9a7bc2a01ca307c06576ab3910eeada5312ddfdeb715",
+      "src/pyoverdrive/fastpaths/isin_object_hash.py": "42aa6c0a5a5073d8d8f0f84b671671cb0b8ade64818a224f5c12df79656f7ba4",
+      "src/pyoverdrive/fastpaths/isin_string_hash.py": "95e171ded3faa1c06f64ac7c656258b8a71a689572e09744086f740c609c228b",
+      "src/pyoverdrive/fastpaths/linalg_small_batch.py": "52d28a91ce60d88a95b6239c82aa34e51d28ecf46fca3ce0b5c2c3a027201434",
+      "src/pyoverdrive/fastpaths/matmul_int_blas.py": "c16190671fac319968b82b3c1a5a7ae1ab7b34b10914009b55b6f0907ffc26a7",
+      "src/pyoverdrive/fastpaths/matmul_split_complex.py": "24011625fcae0e4ae2b49ffbd183b8c59b9ccceb78eadeb374b07476d98d1d46",
+      "src/pyoverdrive/fastpaths/median_partition.py": "0829b449dafda1f88b3bc8a3d9967d6555230329601a3fec493633137ae3f6cc",
+      "src/pyoverdrive/fastpaths/nan_to_num_where.py": "328941791574f993022d28901a9ea93d305cfbec6ac8a331258625cace5429a1",
+      "src/pyoverdrive/fastpaths/nanargminmax_scan.py": "aac89379959c1330ea0bfca509a2d3ad69072dd447bc67144328bfd309f86aed",
+      "src/pyoverdrive/fastpaths/nanmedian_scan.py": "5a151dadbe2b8df5c8c436037395998d99054e9c19fd377cf02cdb8ef2f00b8a",
+      "src/pyoverdrive/fastpaths/nanpercentile_masked.py": "f8930e7afe2465466d96f5f79d89b55e41b7bcccba0fd30d7e6ef7ed9cbe87ab",
+      "src/pyoverdrive/fastpaths/nanquantile_masked.py": "a140c40c31cd6c46b702a27b825e578ba7f495af55184359970e50d7f7eaeaca",
+      "src/pyoverdrive/fastpaths/nanreduce_scan.py": "8228517006b51761995894cd0beac36b34a6462acd857adc41ac55bf54964c47",
+      "src/pyoverdrive/fastpaths/noop.py": "07ba93bc5296f9473c833716188e0218a5479776d64926653961fcea2dfd647a",
+      "src/pyoverdrive/fastpaths/pad_1d_constant.py": "99a5416224e13e61a7bd8dda70f9317280d12611cbbab6642798ec5276df8e75",
+      "src/pyoverdrive/fastpaths/parallel_binary.py": "6ae0f911e2eaaed7aec966594d8d36c606928b63152f062271caafd3668cf937",
+      "src/pyoverdrive/fastpaths/parallel_ufunc.py": "484ab5dc7589d7c8038d2ef4ece4e6f92d2635dd9f598baf2c886b7cf34ae97b",
+      "src/pyoverdrive/fastpaths/percentile_dense.py": "f2e2c75d7879cafca79954ce91443f8e3086b326a7d63aaa40023a24171801ca",
+      "src/pyoverdrive/fastpaths/qr_small_batch.py": "2b087934ee6987be5c04a94cba50803bd4a67dab01c89efca1030b4d805347ab",
+      "src/pyoverdrive/fastpaths/quantile_dense_sort.py": "3fdca329883b9ec595fc5ec5170e8e657b11f97ab33f870799444bbb841a0998",
+      "src/pyoverdrive/fastpaths/reduce_tiny_trailing.py": "f2e09beb1d518edcf96463205ae75f7ca6687c0a0a7ebd27c0e36f88590d8a7c",
+      "src/pyoverdrive/fastpaths/relayout_blocked.py": "de5b13d93ad674a247f4d81f65c67977bc06c44cb8af1969d570a89170223c7e",
+      "src/pyoverdrive/fastpaths/roll_concat.py": "f8f2dbeb81bd185d44eac5feb576ed3bec556ee55685e17a5372b2b1468ea97c",
+      "src/pyoverdrive/fastpaths/searchsorted_extreme_key.py": "5bff96e936d7a82853df3e74bbb7508488cf8e21f212a5c51d50a55ac112e48a",
+      "src/pyoverdrive/fastpaths/searchsorted_sortqueries.py": "70a0fbe5e33b18301262b8eb671fb91502748c37252daedef0da32a994967448",
+      "src/pyoverdrive/fastpaths/svd_small_batch.py": "c20a2c4e7ad664a2492a896a46152fefd8f566c03ed0419ace3346a04a046243",
+      "src/pyoverdrive/fastpaths/take_index_assign.py": "b6b3298ed5b959b08e490e15b081cd03b5eb7ab94d63bc7c8139ecbff1ffc1a0",
+      "src/pyoverdrive/fastpaths/unique_axis0_column.py": "6b9c0e82613bac6169766b68d7f850e7841aa4c76d591c1cf20df51331fd9e99",
+      "src/pyoverdrive/fastpaths/unique_rows_lexsort.py": "6bf95ec8671b111aaf5edf2d2a990a487b609f03c2c77715e6cb5e501eca0144",
+      "src/pyoverdrive/fastpaths/unique_sort.py": "ababc63598881329f5a573fe26d9c818f81e0b17d62c4e5644d4e07332a21cf3",
+      "src/pyoverdrive/fastpaths/vectorize_ufunc.py": "06015ade38efe34f49aa51a7fea9bc77502f7dad8bcdc1d7ae297e65bec61ebc",
+      "src/pyoverdrive/parallel/__init__.py": "8b6d2ae4a18d9bbe6b879fa2b6028cbf903ffa56ef5c8b33305aea3a8368d315",
+      "src/pyoverdrive/parallel/pyrallel.py": "446866c5c292dc10d8e4b9f03b6063882eba6e1c7870580c17d74606c0c177a6",
+      "src/pyoverdrive/parallel/relayout.py": "383721a4e66ec807d70723d380150465948dcc607b1669c24ea376d4a8cd825e",
+      "tools/verify_no_pessimization.py": "97f2d86e038aca501253862ea5fe15b4bd2972d40999d568d197eaa363266e9b"
+    }
+  },
+  "calibration": {
+    "saved": {},
+    "override_configured": true
+  },
+  "selection": {
+    "only": [
+      "unique_values_sort"
+    ],
+    "rows": true,
+    "sizes": false,
+    "shapes": false,
+    "values": true
+  },
+  "settings": {
+    "min": 1.0,
+    "retries": 6,
+    "any_core": false,
+    "require_quiet": true,
+    "environment": {
+      "PYOVERDRIVE_THREADS": null,
+      "PYOVERDRIVE_DISABLE": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null
+    }
+  },
+  "conditions": {
+    "quiet_threshold": 0.2,
+    "cpu_busy_before": 0.022012578616352196,
+    "cpu_busy_after": 0.06220839813374801,
+    "contended": false,
+    "load_known": true
+  },
+  "cells": [
+    {
+      "cell": "unique_values_sort",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            50000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 50000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.00396259999834001,
+        0.0038211399922147395,
+        0.003826540010049939,
+        0.003803399996832013,
+        0.003805159986950457,
+        0.0038469200022518634,
+        0.003810720006003976,
+        0.0037975199986249207,
+        0.003849539998918772
+      ],
+      "patched_seconds": [
+        0.00022094000596553087,
+        0.0002050400013104081,
+        0.0002076399978250265,
+        0.00021074002142995596,
+        0.00021042001899331808,
+        0.00020352001301944257,
+        0.00020438001956790686,
+        0.00020953998900949956,
+        0.0002046799985691905
+      ],
+      "iterations_per_sample": 5,
+      "rounds": 9,
+      "stock_median_seconds": 0.0038211399922147395,
+      "patched_median_seconds": 0.0002076399978250265,
+      "ratio": 18.402716394915043,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 18.4027 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort%d",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            50000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 50000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0001505076277495946,
+        0.00015253644097217565,
+        0.00015239830531369326,
+        0.00015097796538118588,
+        0.00015163983088144559,
+        0.00015128559286911356,
+        0.00015079999989751032,
+        0.00015209915246656639,
+        0.00015441355911099305
+      ],
+      "patched_seconds": [
+        4.084322056969849e-05,
+        4.273135574155692e-05,
+        3.958220388424599e-05,
+        3.974830585737097e-05,
+        3.957118685120496e-05,
+        3.937118631487681e-05,
+        3.991525430800551e-05,
+        3.983644113512867e-05,
+        3.998644129073216e-05
+      ],
+      "iterations_per_sample": 118,
+      "rounds": 9,
+      "stock_median_seconds": 0.00015163983088144559,
+      "patched_median_seconds": 3.983644113512867e-05,
+      "ratio": 3.8065606906769127,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 3.8066 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort%u",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            50000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 50000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.003688740008510649,
+        0.0036057999823242426,
+        0.003680459992028773,
+        0.0036986999912187457,
+        0.003649800014682114,
+        0.0037005000049248338,
+        0.003702659998089075,
+        0.003623699978925288,
+        0.003677540016360581
+      ],
+      "patched_seconds": [
+        0.0001912199892103672,
+        0.00019205999560654164,
+        0.00019026000518351793,
+        0.00018968000076711178,
+        0.000185080012306571,
+        0.0001878000097349286,
+        0.0001756599871441722,
+        0.0001921999966725707,
+        0.00017922001425176858
+      ],
+      "iterations_per_sample": 5,
+      "rounds": 9,
+      "stock_median_seconds": 0.003680459992028773,
+      "patched_median_seconds": 0.00018968000076711178,
+      "ratio": 19.403521600295775,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 19.4035 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#int32",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            10000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 10000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0005180916664863212,
+        0.0005123916651225752,
+        0.0005157861127776818,
+        0.0005266500003118482,
+        0.0005153083345956273,
+        0.0005108027770701381,
+        0.0005115916654984984,
+        0.000522236110151021,
+        0.0005236694446971847
+      ],
+      "patched_seconds": [
+        3.422499867156148e-05,
+        3.5263889003545046e-05,
+        3.5452776096968184e-05,
+        3.504166508921319e-05,
+        3.4758332832199005e-05,
+        3.479166641934878e-05,
+        3.4613890521642235e-05,
+        3.495277552348044e-05,
+        3.490000057758557e-05
+      ],
+      "iterations_per_sample": 36,
+      "rounds": 9,
+      "stock_median_seconds": 0.0005157861127776818,
+      "patched_median_seconds": 3.490000057758557e-05,
+      "ratio": 14.778971468239575,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 14.7790 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#int32%d",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            10000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 10000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        3.4789579270971206e-05,
+        3.456192385995078e-05,
+        3.404769545350082e-05,
+        3.4004208381718885e-05,
+        3.377955900561176e-05,
+        3.430821637964559e-05,
+        3.4905210247483545e-05,
+        3.4473747302421584e-05,
+        3.378056125054677e-05
+      ],
+      "patched_seconds": [
+        1.2245490906278571e-05,
+        1.2043286590857472e-05,
+        1.1964328773692997e-05,
+        1.2038276532668628e-05,
+        1.1852304572482146e-05,
+        1.2023446760429647e-05,
+        1.2582765690579204e-05,
+        1.2007615209850137e-05,
+        1.1843286701039465e-05
+      ],
+      "iterations_per_sample": 499,
+      "rounds": 9,
+      "stock_median_seconds": 3.430821637964559e-05,
+      "patched_median_seconds": 1.2023446760429647e-05,
+      "ratio": 2.8534426993561715,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.8534 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#int32%u",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            10000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 10000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0005199305564423816,
+        0.0005163666662863559,
+        0.0005126972197710226,
+        0.0005156166670430037,
+        0.0005171055575677505,
+        0.0005134444444492045,
+        0.0005163472216938519,
+        0.0005192666657320741,
+        0.0005228472226816746
+      ],
+      "patched_seconds": [
+        3.4372222014806335e-05,
+        3.462500171735883e-05,
+        3.416111252995001e-05,
+        3.4552778945200975e-05,
+        3.4474997341425885e-05,
+        3.4102778752437895e-05,
+        3.466944326646626e-05,
+        3.518888843245804e-05,
+        3.473611044076582e-05
+      ],
+      "iterations_per_sample": 36,
+      "rounds": 9,
+      "stock_median_seconds": 0.0005163666662863559,
+      "patched_median_seconds": 3.4552778945200975e-05,
+      "ratio": 14.944287610130818,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 14.9443 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#int8",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            1000
+          ],
+          "dtype": "int8",
+          "strides": [
+            1
+          ],
+          "size": 1000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        2.077845700649108e-05,
+        2.07307133376273e-05,
+        2.073435220607113e-05,
+        2.0562590972901347e-05,
+        2.0510480458559428e-05,
+        2.0469432280519557e-05,
+        2.0368558997247676e-05,
+        2.0376419149653705e-05,
+        2.0391266424279372e-05
+      ],
+      "patched_seconds": [
+        6.63042211501142e-06,
+        6.642503551379649e-06,
+        6.4430857996362785e-06,
+        6.231441050008742e-06,
+        6.284570494962224e-06,
+        6.2905385171156785e-06,
+        6.230130996365301e-06,
+        6.230130996365301e-06,
+        6.227074204530605e-06
+      ],
+      "iterations_per_sample": 687,
+      "rounds": 9,
+      "stock_median_seconds": 2.0510480458559428e-05,
+      "patched_median_seconds": 6.284570494962224e-06,
+      "ratio": 3.2636248531225545,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 3.2636 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#int8%d",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            1000
+          ],
+          "dtype": "int8",
+          "strides": [
+            1
+          ],
+          "size": 1000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        6.51544221315761e-06,
+        6.4644897610050484e-06,
+        6.458775510973468e-06,
+        6.583877554049298e-06,
+        6.456938762293786e-06,
+        6.583537415404912e-06,
+        6.584489803609191e-06,
+        6.605238102528514e-06,
+        6.562585033298958e-06
+      ],
+      "patched_seconds": [
+        5.379591856253188e-06,
+        5.246190509448449e-06,
+        5.259523785920168e-06,
+        5.237414932423303e-06,
+        5.249183650324945e-06,
+        5.220272103134466e-06,
+        5.349047643569659e-06,
+        5.444013640335223e-06,
+        5.239183653374108e-06
+      ],
+      "iterations_per_sample": 1470,
+      "rounds": 9,
+      "stock_median_seconds": 6.562585033298958e-06,
+      "patched_median_seconds": 5.249183650324945e-06,
+      "ratio": 1.2502105985361567,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.2502 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#int8%u",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            1000
+          ],
+          "dtype": "int8",
+          "strides": [
+            1
+          ],
+          "size": 1000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        1.345340200920695e-05,
+        1.3419793865921878e-05,
+        1.34088660676762e-05,
+        1.3339896950409891e-05,
+        1.3334948459121678e-05,
+        1.3361546359764239e-05,
+        1.3450412415736116e-05,
+        1.3529381369115765e-05,
+        1.3590103120917511e-05
+      ],
+      "patched_seconds": [
+        6.425257690596519e-06,
+        6.340412403812114e-06,
+        6.20670100558818e-06,
+        6.24938150291744e-06,
+        6.212783526129944e-06,
+        6.21061856119135e-06,
+        6.234123774794574e-06,
+        6.2182474852606805e-06,
+        6.323298991456167e-06
+      ],
+      "iterations_per_sample": 970,
+      "rounds": 9,
+      "stock_median_seconds": 1.3419793865921878e-05,
+      "patched_median_seconds": 6.234123774794574e-06,
+      "ratio": 2.152635133774527,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.1526 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#uint32",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            10000
+          ],
+          "dtype": "uint32",
+          "strides": [
+            4
+          ],
+          "size": 10000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0005276944462416901,
+        0.0005179916657248719,
+        0.0005127777791737268,
+        0.0005111222239469902,
+        0.0005093888871164785,
+        0.0005103805548666666,
+        0.0005154944438901213,
+        0.0005140277757568078,
+        0.0005112333326703972
+      ],
+      "patched_seconds": [
+        3.261944382554955e-05,
+        3.236388955782685e-05,
+        3.215833243706988e-05,
+        3.194444191952547e-05,
+        3.2224999611369436e-05,
+        3.230833357924389e-05,
+        3.3169444779761965e-05,
+        3.2608332629832956e-05,
+        3.212222105099095e-05
+      ],
+      "iterations_per_sample": 36,
+      "rounds": 9,
+      "stock_median_seconds": 0.0005127777791737268,
+      "patched_median_seconds": 3.230833357924389e-05,
+      "ratio": 15.871378135799455,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 15.8714 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#uint32%d",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            10000
+          ],
+          "dtype": "uint32",
+          "strides": [
+            4
+          ],
+          "size": 10000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        3.447568628425692e-05,
+        3.485274501144886e-05,
+        3.4530784286485585e-05,
+        3.5032745012465646e-05,
+        3.465960788376191e-05,
+        3.463960795973738e-05,
+        3.45366666842179e-05,
+        3.457274516204408e-05,
+        3.458470603743312e-05
+      ],
+      "patched_seconds": [
+        1.2181764788122154e-05,
+        1.2180588080310354e-05,
+        1.2062744958801012e-05,
+        1.1874313749299914e-05,
+        1.2843137351321238e-05,
+        1.2744313525949039e-05,
+        1.2882745039521479e-05,
+        1.27529410426231e-05,
+        1.2707843116539367e-05
+      ],
+      "iterations_per_sample": 510,
+      "rounds": 9,
+      "stock_median_seconds": 3.458470603743312e-05,
+      "patched_median_seconds": 1.2707843116539367e-05,
+      "ratio": 2.7215244727424146,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.7215 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#uint32%u",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            10000
+          ],
+          "dtype": "uint32",
+          "strides": [
+            4
+          ],
+          "size": 10000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0005308833303085218,
+        0.0005260583323736986,
+        0.0005203972234287196,
+        0.000554697222671368,
+        0.0005246999983986219,
+        0.0005209944469647275,
+        0.0005233416676573041,
+        0.0005254777756312655,
+        0.0005265666663439737
+      ],
+      "patched_seconds": [
+        3.884166492045754e-05,
+        3.6969444611006314e-05,
+        3.656388920110961e-05,
+        3.710277895960543e-05,
+        3.690000287153655e-05,
+        3.667777895720469e-05,
+        3.68972250726074e-05,
+        3.650555542359749e-05,
+        3.663611197326746e-05
+      ],
+      "iterations_per_sample": 36,
+      "rounds": 9,
+      "stock_median_seconds": 0.0005254777756312655,
+      "patched_median_seconds": 3.68972250726074e-05,
+      "ratio": 14.241661116715838,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 14.2417 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#uint8",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            1000
+          ],
+          "dtype": "uint8",
+          "strides": [
+            1
+          ],
+          "size": 1000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        1.5804797400043273e-05,
+        1.3702345499669564e-05,
+        1.3791257887880114e-05,
+        1.378528781727687e-05,
+        1.3764072552140652e-05,
+        1.3663219650393165e-05,
+        1.3702025543699768e-05,
+        1.3677292128107442e-05,
+        1.3680490446703902e-05
+      ],
+      "patched_seconds": [
+        6.569936044458578e-06,
+        6.52611945201752e-06,
+        6.306183356632873e-06,
+        6.33454165741134e-06,
+        6.303624701755705e-06,
+        6.316417976141548e-06,
+        6.3351811970204815e-06,
+        6.306929630972048e-06,
+        6.299680232930221e-06
+      ],
+      "iterations_per_sample": 938,
+      "rounds": 9,
+      "stock_median_seconds": 1.3702345499669564e-05,
+      "patched_median_seconds": 6.316417976141548e-06,
+      "ratio": 2.1693221619320053,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.1693 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#uint8%d",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            1000
+          ],
+          "dtype": "uint8",
+          "strides": [
+            1
+          ],
+          "size": 1000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        6.405904079783997e-06,
+        6.398831455204247e-06,
+        6.389667865388361e-06,
+        6.528966816721844e-06,
+        6.411439105685053e-06,
+        6.4203566911677296e-06,
+        6.411316103518449e-06,
+        6.422201723666795e-06,
+        6.398647023550479e-06
+      ],
+      "patched_seconds": [
+        5.202029538449693e-06,
+        5.071033233362004e-06,
+        5.082533864343372e-06,
+        5.111808093610652e-06,
+        5.159532647868584e-06,
+        5.1103935686947015e-06,
+        5.101414553724862e-06,
+        5.09151295090935e-06,
+        5.114637143442552e-06
+      ],
+      "iterations_per_sample": 1626,
+      "rounds": 9,
+      "stock_median_seconds": 6.411316103518449e-06,
+      "patched_median_seconds": 5.1103935686947015e-06,
+      "ratio": 1.2545640599567423,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.2546 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "unique_values_sort#uint8%u",
+      "op": "numpy.unique_values",
+      "path": "unique_values_sort",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "unique_values_sort",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            1000
+          ],
+          "dtype": "uint8",
+          "strides": [
+            1
+          ],
+          "size": 1000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "set-equal (unique_values promises no order)",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        1.3646380096142985e-05,
+        1.349592764705959e-05,
+        1.3491855086168756e-05,
+        1.3521832558305352e-05,
+        1.344524892320966e-05,
+        1.3687104124752846e-05,
+        1.3371040608430475e-05,
+        1.3474660648488149e-05,
+        1.3412895999065015e-05
+      ],
+      "patched_seconds": [
+        7.30214934960446e-06,
+        7.1828054712992586e-06,
+        7.224773853275571e-06,
+        7.128733056449917e-06,
+        7.124999996350564e-06,
+        7.136651537090337e-06,
+        7.0800905471996345e-06,
+        7.1231900278175445e-06,
+        7.813800878536243e-06
+      ],
+      "iterations_per_sample": 884,
+      "rounds": 9,
+      "stock_median_seconds": 1.3491855086168756e-05,
+      "patched_median_seconds": 7.136651537090337e-06,
+      "ratio": 1.8905021516112133,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.8905 numpy.unique_values",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    }
+  ],
+  "completed": true,
+  "selected_cells": [
+    "unique_values_sort",
+    "unique_values_sort%d",
+    "unique_values_sort%u",
+    "unique_values_sort#int32",
+    "unique_values_sort#int32%d",
+    "unique_values_sort#int32%u",
+    "unique_values_sort#int8",
+    "unique_values_sort#int8%d",
+    "unique_values_sort#int8%u",
+    "unique_values_sort#uint32",
+    "unique_values_sort#uint32%d",
+    "unique_values_sort#uint32%u",
+    "unique_values_sort#uint8",
+    "unique_values_sort#uint8%d",
+    "unique_values_sort#uint8%u"
+  ],
+  "cpu_classes": {
+    "hybrid": true,
+    "fast": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "slow": [
+      16,
+      17,
+      18,
+      19
+    ],
+    "class_ratio": 2.308,
+    "probe_us": {
+      "9": 135.6,
+      "11": 137.8,
+      "3": 137.8,
+      "12": 137.8,
+      "1": 137.8,
+      "8": 137.8,
+      "7": 137.9,
+      "13": 137.9,
+      "15": 138.0,
+      "5": 138.1,
+      "10": 138.1,
+      "6": 139.6,
+      "2": 139.7,
+      "0": 139.7,
+      "14": 139.9,
+      "4": 140.0,
+      "17": 317.9,
+      "18": 318.3,
+      "19": 318.6,
+      "16": 318.6
+    }
+  },
+  "fast_core_cutoff_us": 228.95,
+  "summary": {
+    "losses": [],
+    "judged": 15,
+    "skipped": 0
+  },
+  "exit_code": 0
+}

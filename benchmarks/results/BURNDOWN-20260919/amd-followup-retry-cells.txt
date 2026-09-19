@@ -1,0 +1,3 @@
+argmax:argmax:float32:4500x3000:none
+out:sin:float32:9000000:inplace
+out:add:float64:20000000:disjoint

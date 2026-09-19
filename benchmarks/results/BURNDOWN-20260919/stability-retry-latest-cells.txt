@@ -1,0 +1,3 @@
+matmul_int_blas
+pyrallel_minimum@float64
+fftconvolve#mode-same

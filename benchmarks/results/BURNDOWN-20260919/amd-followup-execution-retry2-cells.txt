@@ -1,0 +1,5 @@
+argmax:argmax:float32:4500x3000:none
+out:sin:float64:300000:inplace
+out:add:int64:20000000:inplace
+out:add:int64:60000000:disjoint
+out:add:int64:60000000:inplace

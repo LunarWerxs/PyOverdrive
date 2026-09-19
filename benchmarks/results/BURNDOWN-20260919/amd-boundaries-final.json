@@ -1,0 +1,4024 @@
+{
+  "schema_version": 1,
+  "tool": "verify_no_pessimization",
+  "recorded_at": "2026-09-19T20:38:54.882223+00:00",
+  "fingerprint": {
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "machine": "AMD64",
+    "system": "Windows 11",
+    "logical_cores": 32,
+    "python": "3.14.2",
+    "numpy": "2.4.5",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "AVX512BF16",
+      "AVX512BITALG",
+      "AVX512BW",
+      "AVX512CD",
+      "AVX512DQ",
+      "AVX512F",
+      "AVX512IFMA",
+      "AVX512VBMI",
+      "AVX512VBMI2",
+      "AVX512VL",
+      "AVX512VNNI",
+      "AVX512VPOPCNTDQ",
+      "AVX512_CLX",
+      "AVX512_CNL",
+      "AVX512_ICL",
+      "AVX512_SKX",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3",
+      "X86_V4"
+    ],
+    "fingerprint": "8f8198d9abab"
+  },
+  "source_revision": "da1c93414f3a2b2051cd07c8e238662ac2e5a90e",
+  "source": {
+    "sha256": "6b18436ceb6967382a9b7cee45682f6f54738109bd57e591f8291b0446147377",
+    "files": {
+      "lab/dyno/__init__.py": "d2e9c17eb6931a1a0e8ab96770d50a2dd8d358da5fdbbf0cc46111ec2405a0f4",
+      "lab/dyno/fingerprint.py": "d6a2c19dd3c885685d1fa7bbb566464da8a4bf5258a1c76967e3e3fa6dbe7d1c",
+      "lab/dyno/load.py": "1419fe280ad1b64812e920fdf0ee969d9a2cbe23d5477126d2e82bddaff12f6b",
+      "pyproject.toml": "51b46f39e85918ccfda61c67cf875aa373fa15e907dde3456b92bbbb7527fdb3",
+      "src/pyoverdrive/__init__.py": "1e3c7073516caf0c8a7880277f63572a0f1add8753e5f82ab06b64e6db562133",
+      "src/pyoverdrive/__main__.py": "e076d213b4ca05ee2160f50a470f6e5624e37ed2153c38c3c566164db67a1688",
+      "src/pyoverdrive/_cpuclass.py": "cc7b4658e31a01f1880baf2873a57514a550f88f968887d9bb089fce40557b3c",
+      "src/pyoverdrive/calibration.py": "55e979a7f49876648f9d8904262e4dd2e3f4bf8bb8e3d84e05146d1eee54a691",
+      "src/pyoverdrive/demo.py": "2301afa1d764a04b255cf0e5ff3300813d461d06c67a02878c6f18e8110c3b0a",
+      "src/pyoverdrive/diagnostics.py": "e7fda762d4c30d5d5c63a7c3d1617309f65a6b2043eb2585894bca726edd76d8",
+      "src/pyoverdrive/dispatcher/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/pyoverdrive/dispatcher/gearbox.py": "6ffb03d93360baaebd2cdf8827d3505c2b57116d1a4cd1396ac9329f2ea2bed4",
+      "src/pyoverdrive/fallback/__init__.py": "300db10ab3d2f65de2fbab38e2b6da91aeb65bbc94675e5e4bf16e9254bd7a7e",
+      "src/pyoverdrive/fastpaths/__init__.py": "7d7ed87220af6f9da4c74b97f4c65f8e1e6af8c340d6e92839a16bdbbc2436ab",
+      "src/pyoverdrive/fastpaths/_pyrallel_common.py": "c44138fada6bd888edc00c240c5e2c13ca699a123536769267ccf9d92a2a5f47",
+      "src/pyoverdrive/fastpaths/apply_along_axis_reduce.py": "7eab1c48a3dbe261c123bf46a60e239a86a5341e2709166b60a7c786b08bacb2",
+      "src/pyoverdrive/fastpaths/argmax_blocked.py": "8ac6b8b6238ab76230b19bb633940bac9d7937f5e289c497a7944fa16025f30e",
+      "src/pyoverdrive/fastpaths/char_view.py": "b149479566231986b23e2585915d0f200ec4327e55da980d785f6acb46ed9901",
+      "src/pyoverdrive/fastpaths/cholesky_small_batch.py": "7ef9067f54755dafb88986ac53eb6dea2399f7dfb4072b9d8dbac902240093d9",
+      "src/pyoverdrive/fastpaths/dot_mixed_view.py": "8a85edbf37bd16e16d4b39ef166486add0b64f3b7de9304b257ddc3ddc199897",
+      "src/pyoverdrive/fastpaths/eigvalsh_2x2.py": "fb92e30297b63c470618b9a5ce9e61799a7bde48813d642e2b4192fb4025b2d5",
+      "src/pyoverdrive/fastpaths/eigvalsh_3x3.py": "078cc3e2cc82aec5d9b3600d74e06e941ebf5a4ca2f0b5574d3f33bfa14b76f1",
+      "src/pyoverdrive/fastpaths/einsum_optimize.py": "8853e789478334b0519dc39a89d4cbfc59871a8670ee6e54cb3f2d286e055231",
+      "src/pyoverdrive/fastpaths/fftconvolve.py": "359d49ac516d756fa644e3e28ba4eb999e7b8d1ec4f2b867a531f77a35f18ca1",
+      "src/pyoverdrive/fastpaths/hist2d_uniform.py": "8184b62ae414489ab95550e5007306f29f333e6af4955b8153d8f54337da8811",
+      "src/pyoverdrive/fastpaths/inner_tensordot.py": "f855a3952c85e0e682f57d311559bc0381a5c5b6d47984dd3ff84962d0e30cfc",
+      "src/pyoverdrive/fastpaths/interp_uniform_grid.py": "fe87bad59dd1077ffa158562a428bf84cf5da4822879f1efc7e6084fc2865ee2",
+      "src/pyoverdrive/fastpaths/intersect_sorted.py": "4baa4d439e0277bca8a6040f5d4916b01e052fe6a7eb5c9217bdcce2107fbc81",
+      "src/pyoverdrive/fastpaths/inv_small_batch.py": "eb9f17d02f58a0b35c06e090d627905db71fda93d33694b1cc1fa124db8da839",
+      "src/pyoverdrive/fastpaths/isclose_fused.py": "d31ab390e86da641790f9a7bc2a01ca307c06576ab3910eeada5312ddfdeb715",
+      "src/pyoverdrive/fastpaths/isin_object_hash.py": "42aa6c0a5a5073d8d8f0f84b671671cb0b8ade64818a224f5c12df79656f7ba4",
+      "src/pyoverdrive/fastpaths/isin_string_hash.py": "95e171ded3faa1c06f64ac7c656258b8a71a689572e09744086f740c609c228b",
+      "src/pyoverdrive/fastpaths/linalg_small_batch.py": "52d28a91ce60d88a95b6239c82aa34e51d28ecf46fca3ce0b5c2c3a027201434",
+      "src/pyoverdrive/fastpaths/matmul_int_blas.py": "c16190671fac319968b82b3c1a5a7ae1ab7b34b10914009b55b6f0907ffc26a7",
+      "src/pyoverdrive/fastpaths/matmul_split_complex.py": "aa10f006dac7c54dafc140aee9a2174bff8ba19a542cc64d7144e3e52790a838",
+      "src/pyoverdrive/fastpaths/median_partition.py": "0829b449dafda1f88b3bc8a3d9967d6555230329601a3fec493633137ae3f6cc",
+      "src/pyoverdrive/fastpaths/nan_to_num_where.py": "328941791574f993022d28901a9ea93d305cfbec6ac8a331258625cace5429a1",
+      "src/pyoverdrive/fastpaths/nanargminmax_scan.py": "aac89379959c1330ea0bfca509a2d3ad69072dd447bc67144328bfd309f86aed",
+      "src/pyoverdrive/fastpaths/nanmedian_scan.py": "5a151dadbe2b8df5c8c436037395998d99054e9c19fd377cf02cdb8ef2f00b8a",
+      "src/pyoverdrive/fastpaths/nanpercentile_masked.py": "f8930e7afe2465466d96f5f79d89b55e41b7bcccba0fd30d7e6ef7ed9cbe87ab",
+      "src/pyoverdrive/fastpaths/nanquantile_masked.py": "a140c40c31cd6c46b702a27b825e578ba7f495af55184359970e50d7f7eaeaca",
+      "src/pyoverdrive/fastpaths/nanreduce_scan.py": "8228517006b51761995894cd0beac36b34a6462acd857adc41ac55bf54964c47",
+      "src/pyoverdrive/fastpaths/noop.py": "07ba93bc5296f9473c833716188e0218a5479776d64926653961fcea2dfd647a",
+      "src/pyoverdrive/fastpaths/pad_1d_constant.py": "99a5416224e13e61a7bd8dda70f9317280d12611cbbab6642798ec5276df8e75",
+      "src/pyoverdrive/fastpaths/parallel_binary.py": "d315f4047ac77b080e26a79cc410f60b68f2d7eab1de3f50072fa3fde350c483",
+      "src/pyoverdrive/fastpaths/parallel_ufunc.py": "484ab5dc7589d7c8038d2ef4ece4e6f92d2635dd9f598baf2c886b7cf34ae97b",
+      "src/pyoverdrive/fastpaths/percentile_dense.py": "f2e2c75d7879cafca79954ce91443f8e3086b326a7d63aaa40023a24171801ca",
+      "src/pyoverdrive/fastpaths/qr_small_batch.py": "2b087934ee6987be5c04a94cba50803bd4a67dab01c89efca1030b4d805347ab",
+      "src/pyoverdrive/fastpaths/quantile_dense_sort.py": "3fdca329883b9ec595fc5ec5170e8e657b11f97ab33f870799444bbb841a0998",
+      "src/pyoverdrive/fastpaths/reduce_tiny_trailing.py": "f2e09beb1d518edcf96463205ae75f7ca6687c0a0a7ebd27c0e36f88590d8a7c",
+      "src/pyoverdrive/fastpaths/relayout_blocked.py": "de5b13d93ad674a247f4d81f65c67977bc06c44cb8af1969d570a89170223c7e",
+      "src/pyoverdrive/fastpaths/roll_concat.py": "f8f2dbeb81bd185d44eac5feb576ed3bec556ee55685e17a5372b2b1468ea97c",
+      "src/pyoverdrive/fastpaths/searchsorted_extreme_key.py": "5bff96e936d7a82853df3e74bbb7508488cf8e21f212a5c51d50a55ac112e48a",
+      "src/pyoverdrive/fastpaths/searchsorted_sortqueries.py": "70a0fbe5e33b18301262b8eb671fb91502748c37252daedef0da32a994967448",
+      "src/pyoverdrive/fastpaths/svd_small_batch.py": "c20a2c4e7ad664a2492a896a46152fefd8f566c03ed0419ace3346a04a046243",
+      "src/pyoverdrive/fastpaths/take_index_assign.py": "b6b3298ed5b959b08e490e15b081cd03b5eb7ab94d63bc7c8139ecbff1ffc1a0",
+      "src/pyoverdrive/fastpaths/unique_axis0_column.py": "2c5712875af220b464c574ed71a2c65190b4820127d6bd772105ec215a8d2524",
+      "src/pyoverdrive/fastpaths/unique_rows_lexsort.py": "6bf95ec8671b111aaf5edf2d2a990a487b609f03c2c77715e6cb5e501eca0144",
+      "src/pyoverdrive/fastpaths/unique_sort.py": "fa374d5113d469a483190a7abe1548f454b295f331c87fbe90ed70528949d12f",
+      "src/pyoverdrive/fastpaths/vectorize_ufunc.py": "06015ade38efe34f49aa51a7fea9bc77502f7dad8bcdc1d7ae297e65bec61ebc",
+      "src/pyoverdrive/parallel/__init__.py": "8b6d2ae4a18d9bbe6b879fa2b6028cbf903ffa56ef5c8b33305aea3a8368d315",
+      "src/pyoverdrive/parallel/pyrallel.py": "446866c5c292dc10d8e4b9f03b6063882eba6e1c7870580c17d74606c0c177a6",
+      "src/pyoverdrive/parallel/relayout.py": "383721a4e66ec807d70723d380150465948dcc607b1669c24ea376d4a8cd825e",
+      "tools/verify_no_pessimization.py": "0f469a522b5cd8f2bd4dbe79062fc2d3d6e526b07a33c8736c1d7147e5d0ee47"
+    }
+  },
+  "calibration": {
+    "saved": {},
+    "override_configured": true
+  },
+  "selection": {
+    "only": [
+      "hist2d_uniform",
+      "matmul_split_complex"
+    ],
+    "rows": true,
+    "sizes": true,
+    "shapes": true,
+    "values": true
+  },
+  "settings": {
+    "min": 1.0,
+    "retries": 6,
+    "any_core": false,
+    "require_quiet": true,
+    "environment": {
+      "PYOVERDRIVE_THREADS": null,
+      "PYOVERDRIVE_DISABLE": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null
+    }
+  },
+  "conditions": {
+    "quiet_threshold": 0.2,
+    "cpu_busy_before": 0.19921875,
+    "cpu_busy_after": 0.5277507302823758,
+    "contended": true,
+    "load_known": true
+  },
+  "cells": [
+    {
+      "cell": "hist2d_uniform",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            20000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 20000
+        },
+        {
+          "shape": [
+            20000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 20000
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0008853285710626681,
+        0.0008698238095911663,
+        0.0008629952381376089,
+        0.0008731047620087685,
+        0.0008644999997202484,
+        0.0008755190473970114,
+        0.0008725095235387839,
+        0.0008901428574019866,
+        0.0008683238099495481
+      ],
+      "patched_seconds": [
+        0.00026853333318805587,
+        0.00028000952373813127,
+        0.00027258095187356784,
+        0.0002693285711020941,
+        0.00026584761854748997,
+        0.0002694619047577449,
+        0.00026697142900610784,
+        0.0002667333333409347,
+        0.0002736952377571946
+      ],
+      "iterations_per_sample": 21,
+      "rounds": 9,
+      "stock_median_seconds": 0.0008725095235387839,
+      "patched_median_seconds": 0.0002693285711020941,
+      "ratio": 3.239572838367908,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 3.2396 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform*3",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            60000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 60000
+        },
+        {
+          "shape": [
+            60000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 60000
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0027449999989974977,
+        0.002737457142627266,
+        0.0027372142857140197,
+        0.002697314287485954,
+        0.0027113857151042403,
+        0.00268962857288508,
+        0.0027214571413683836,
+        0.002728171428316273,
+        0.00276311428543912
+      ],
+      "patched_seconds": [
+        0.0010875857135813152,
+        0.0010819999983401171,
+        0.0010503428576547386,
+        0.0010560571411458244,
+        0.0010785142845374399,
+        0.0010374857146026833,
+        0.0010633714285047194,
+        0.001089757144135157,
+        0.00111058571409168
+      ],
+      "iterations_per_sample": 7,
+      "rounds": 9,
+      "stock_median_seconds": 0.002728171428316273,
+      "patched_median_seconds": 0.0010785142845374399,
+      "ratio": 2.529564482760976,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.5296 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform*10",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            200000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 200000
+        },
+        {
+          "shape": [
+            200000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 200000
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.009103149997827131,
+        0.009043149999342859,
+        0.009006500004034024,
+        0.00895440000022063,
+        0.009058099996764213,
+        0.009023149999848101,
+        0.008901549997972324,
+        0.008941849999246188,
+        0.009095150002394803
+      ],
+      "patched_seconds": [
+        0.006042900000466034,
+        0.005469700001413003,
+        0.005386199998611119,
+        0.005553349998081103,
+        0.005663150004693307,
+        0.005405449999670964,
+        0.005582199999480508,
+        0.005374050000682473,
+        0.0054906000004848465
+      ],
+      "iterations_per_sample": 2,
+      "rounds": 9,
+      "stock_median_seconds": 0.009023149999848101,
+      "patched_median_seconds": 0.0054906000004848465,
+      "ratio": 1.643381415337361,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.6434 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform*30",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            600000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 600000
+        },
+        {
+          "shape": [
+            600000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 600000
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.026882099991780706,
+        0.026696000000811182,
+        0.02624680000008084,
+        0.02678879999439232,
+        0.026430699988850392,
+        0.026450799996382557,
+        0.02795699999842327,
+        0.027519100010977127,
+        0.027241300005698577
+      ],
+      "patched_seconds": [
+        0.016997999991872348,
+        0.017500600006314926,
+        0.017409200008842163,
+        0.017399799995473586,
+        0.017823299989686348,
+        0.017694400012260303,
+        0.017784999989089556,
+        0.018593699991470203,
+        0.017424699995899573
+      ],
+      "iterations_per_sample": 1,
+      "rounds": 9,
+      "stock_median_seconds": 0.02678879999439232,
+      "patched_median_seconds": 0.017500600006314926,
+      "ratio": 1.530736088175596,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.5307 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform*100",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            2000000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 2000000
+        },
+        {
+          "shape": [
+            2000000
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 2000000
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.08801010000752285,
+        0.08885519999603275,
+        0.08949569999822415,
+        0.08960719998867717,
+        0.08767850000003818,
+        0.08789249999972526,
+        0.08637839999573771,
+        0.08813799999188632,
+        0.0882220000057714
+      ],
+      "patched_seconds": [
+        0.08368690000497736,
+        0.06060329999309033,
+        0.06299989999388345,
+        0.06316669999796432,
+        0.06076110000140034,
+        0.06337750000238884,
+        0.05860709999979008,
+        0.06370359999709763,
+        0.06255680001049768
+      ],
+      "iterations_per_sample": 1,
+      "rounds": 9,
+      "stock_median_seconds": 0.08813799999188632,
+      "patched_median_seconds": 0.06299989999388345,
+      "ratio": 1.3990180936865533,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.3990 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform/3",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            6666
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 6666
+        },
+        {
+          "shape": [
+            6666
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 6666
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.00030097090903754263,
+        0.00030953090913085775,
+        0.00029802727274893024,
+        0.0002959363636116243,
+        0.00028216909082733434,
+        0.0002899709091500633,
+        0.0002845436363713816,
+        0.00029847454544241456,
+        0.00028879272735635327
+      ],
+      "patched_seconds": [
+        0.00012712181831540709,
+        0.00013087818171532656,
+        0.00012572181823832746,
+        0.0001296999999216165,
+        0.00012561090909664265,
+        0.00012679818186866627,
+        0.00012858545444694092,
+        0.00012520181824749504,
+        0.00013056727263822474
+      ],
+      "iterations_per_sample": 55,
+      "rounds": 9,
+      "stock_median_seconds": 0.0002959363636116243,
+      "patched_median_seconds": 0.00012712181831540709,
+      "ratio": 2.3279745958114337,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.3280 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform/10",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform/30",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform/100",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "matmul_split_complex",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            64,
+            1200
+          ],
+          "dtype": "complex128",
+          "strides": [
+            19200,
+            16
+          ],
+          "size": 76800
+        },
+        {
+          "shape": [
+            1200,
+            600
+          ],
+          "dtype": "float64",
+          "strides": [
+            4800,
+            8
+          ],
+          "size": 720000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "numeric",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.002589266669626037,
+        0.002576633332258401,
+        0.0027616333342545354,
+        0.0025930666694572815,
+        0.0027792333324517435,
+        0.002684866669975842,
+        0.002506200001031781,
+        0.002618166666555529,
+        0.002598166664635452
+      ],
+      "patched_seconds": [
+        0.001009366664220579,
+        0.0009775666694622487,
+        0.0012544666678877547,
+        0.0009541999994932363,
+        0.0013239000012011577,
+        0.001179733333022644,
+        0.0010362333365871261,
+        0.0012433333370912198,
+        0.0011477333318907768
+      ],
+      "iterations_per_sample": 3,
+      "rounds": 9,
+      "stock_median_seconds": 0.002598166664635452,
+      "patched_median_seconds": 0.0011477333318907768,
+      "ratio": 2.2637372222650622,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.2637 numpy.matmul",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex*3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex*10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex*30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex*100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex/3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex/10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex/30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex/100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex>4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex<4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex>16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex<16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            6666
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 6666
+        },
+        {
+          "shape": [
+            6666
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 6666
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.00028858148154405945,
+        0.00029919444447538507,
+        0.0002689277777487102,
+        0.0002689574073344745,
+        0.0002712111109522758,
+        0.00029343888874993555,
+        0.0003082962961074103,
+        0.00029991851840383823,
+        0.0003016703703906387
+      ],
+      "patched_seconds": [
+        0.00012817962959632968,
+        0.00012707777770831145,
+        0.0001293648146437826,
+        0.00012673148146994344,
+        0.000127492592447972,
+        0.0001251925924508315,
+        0.00012950925911017866,
+        0.000125446296200001,
+        0.00013166111090901755
+      ],
+      "iterations_per_sample": 54,
+      "rounds": 9,
+      "stock_median_seconds": 0.00029343888874993555,
+      "patched_median_seconds": 0.000127492592447972,
+      "ratio": 2.3016152006610424,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.3016 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0*3",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            19998
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 19998
+        },
+        {
+          "shape": [
+            19998
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 19998
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.00091037619096737,
+        0.0009028142861401042,
+        0.0009397428567310618,
+        0.0008751809523562857,
+        0.0008720238090193431,
+        0.0008695857146189415,
+        0.0009047333331268636,
+        0.0008611476188802737,
+        0.0008617095237631085
+      ],
+      "patched_seconds": [
+        0.00028130000005365305,
+        0.0002895000001271477,
+        0.0002676333332644953,
+        0.0002720952380470754,
+        0.00026052857131054184,
+        0.00026441904732824435,
+        0.00026622380980933526,
+        0.0002633619047368744,
+        0.00026444285703335134
+      ],
+      "iterations_per_sample": 21,
+      "rounds": 9,
+      "stock_median_seconds": 0.0008751809523562857,
+      "patched_median_seconds": 0.00026622380980933526,
+      "ratio": 3.287387979997261,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 3.2874 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0*10",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            66660
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 66660
+        },
+        {
+          "shape": [
+            66660
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 66660
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0032628166663926095,
+        0.00327471666726827,
+        0.0032928833340217047,
+        0.00342708333482733,
+        0.003246000000217464,
+        0.0032322499998069056,
+        0.0032761166658019647,
+        0.0034501333332931003,
+        0.0035672166656392315
+      ],
+      "patched_seconds": [
+        0.0013379333322518505,
+        0.0013785500001783173,
+        0.0013377333331542711,
+        0.0014009500009706244,
+        0.001326616666725992,
+        0.0013398666657546225,
+        0.0013424333325626019,
+        0.0014872666652081534,
+        0.001433833332460684
+      ],
+      "iterations_per_sample": 6,
+      "rounds": 9,
+      "stock_median_seconds": 0.0032761166658019647,
+      "patched_median_seconds": 0.0013424333325626019,
+      "ratio": 2.44043155539658,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.4404 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0*30",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            199980
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 199980
+        },
+        {
+          "shape": [
+            199980
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 199980
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.009026649997394998,
+        0.01066749999881722,
+        0.010820650000823662,
+        0.010610199999064207,
+        0.01058970000303816,
+        0.010778950003441423,
+        0.010794100002385676,
+        0.00989819999813335,
+        0.009853100003965665
+      ],
+      "patched_seconds": [
+        0.008285500000056345,
+        0.009216000005835667,
+        0.00806114999431884,
+        0.007701800001086667,
+        0.008728950000659097,
+        0.008130900001560804,
+        0.008143949999066535,
+        0.008369899995159358,
+        0.00782315000105882
+      ],
+      "iterations_per_sample": 2,
+      "rounds": 9,
+      "stock_median_seconds": 0.010610199999064207,
+      "patched_median_seconds": 0.008143949999066535,
+      "ratio": 1.3028321637878861,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.3028 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0*100",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            666600
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 666600
+        },
+        {
+          "shape": [
+            666600
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 666600
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.029520900003262796,
+        0.02905080000346061,
+        0.029434600000968203,
+        0.029504999998607673,
+        0.029808899998897687,
+        0.029407000009086914,
+        0.02965779999794904,
+        0.029384200010099448,
+        0.03004979999968782
+      ],
+      "patched_seconds": [
+        0.018559700009063818,
+        0.018764899999951012,
+        0.01822679999168031,
+        0.018862800003262237,
+        0.01877210001111962,
+        0.019150899999658577,
+        0.018647900011274032,
+        0.018450000003213063,
+        0.01863190000585746
+      ],
+      "iterations_per_sample": 1,
+      "rounds": 9,
+      "stock_median_seconds": 0.029504999998607673,
+      "patched_median_seconds": 0.018647900011274032,
+      "ratio": 1.5822156908161091,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.5822 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0/3",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0/10",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0/30",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0/100",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+0%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            6667
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 6667
+        },
+        {
+          "shape": [
+            6667
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 6667
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.00031580800015944987,
+        0.00029551200015703216,
+        0.00031057599990163,
+        0.0003582099999766797,
+        0.00030972199980169537,
+        0.00029616599989822133,
+        0.0003051219999906607,
+        0.0003071299998555332,
+        0.0003097900000284426
+      ],
+      "patched_seconds": [
+        0.00013835799996741115,
+        0.00013329399982467294,
+        0.0001342939998721704,
+        0.0001359239997691475,
+        0.00013524999987566845,
+        0.00012629600008949636,
+        0.00013583200023276732,
+        0.00013779000000795348,
+        0.00012840799987316132
+      ],
+      "iterations_per_sample": 50,
+      "rounds": 9,
+      "stock_median_seconds": 0.00030972199980169537,
+      "patched_median_seconds": 0.00013524999987566845,
+      "ratio": 2.2899963037812507,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.2900 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1*3",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            20001
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 20001
+        },
+        {
+          "shape": [
+            20001
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 20001
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0008938428571647299,
+        0.0009057999996002764,
+        0.000893666666732835,
+        0.0008992523812810846,
+        0.0008990666669671468,
+        0.0010344619049213915,
+        0.0008891666664220836,
+        0.0008744380951005345,
+        0.000871642857202373
+      ],
+      "patched_seconds": [
+        0.00026746190477362167,
+        0.00028626666642681117,
+        0.00027385238111795235,
+        0.0002743714285315946,
+        0.0002652761904755607,
+        0.0002680571425506579,
+        0.00030140952315248014,
+        0.00026140952416296514,
+        0.00026713333361493864
+      ],
+      "iterations_per_sample": 21,
+      "rounds": 9,
+      "stock_median_seconds": 0.0008938428571647299,
+      "patched_median_seconds": 0.0002680571425506579,
+      "ratio": 3.3345235596391913,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 3.3345 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1*10",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            66670
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 66670
+        },
+        {
+          "shape": [
+            66670
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 66670
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0031769000003502392,
+        0.003252166667759108,
+        0.003184516666806303,
+        0.003159033333455833,
+        0.003165950001857709,
+        0.0031965166660180935,
+        0.0031844166660448536,
+        0.003164833333964149,
+        0.0031342333337912955
+      ],
+      "patched_seconds": [
+        0.0011883666666108184,
+        0.00122541666739077,
+        0.0011914333348007251,
+        0.001248133334835681,
+        0.0012002333338993292,
+        0.0011846166671602987,
+        0.0012236833329855774,
+        0.001218799998847923,
+        0.001219733332012159
+      ],
+      "iterations_per_sample": 6,
+      "rounds": 9,
+      "stock_median_seconds": 0.0031769000003502392,
+      "patched_median_seconds": 0.001218799998847923,
+      "ratio": 2.606580245613079,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.6066 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1*30",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            200010
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 200010
+        },
+        {
+          "shape": [
+            200010
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 200010
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.009017149997816887,
+        0.009656750000431202,
+        0.009090200001082849,
+        0.0091737499969895,
+        0.009127499994065147,
+        0.008981299994047731,
+        0.009399050002684817,
+        0.008977949997643009,
+        0.009138350003922824
+      ],
+      "patched_seconds": [
+        0.006222100004379172,
+        0.005859849996340927,
+        0.005821550003020093,
+        0.005905099998926744,
+        0.0055739500021445565,
+        0.005481899999722373,
+        0.005835049996676389,
+        0.005560650002735201,
+        0.005425850002211519
+      ],
+      "iterations_per_sample": 2,
+      "rounds": 9,
+      "stock_median_seconds": 0.009127499994065147,
+      "patched_median_seconds": 0.005821550003020093,
+      "ratio": 1.567881404321873,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.5679 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1*100",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            666700
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 666700
+        },
+        {
+          "shape": [
+            666700
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 666700
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.02943290000257548,
+        0.02980299999762792,
+        0.029808400009642355,
+        0.02903419999347534,
+        0.03091879999556113,
+        0.030380299998796545,
+        0.03127130000211764,
+        0.029844299991964363,
+        0.02977340000506956
+      ],
+      "patched_seconds": [
+        0.018527200008975342,
+        0.018445199995767325,
+        0.01845629999297671,
+        0.01909650000743568,
+        0.019289599993498996,
+        0.023235999993630685,
+        0.01963619999878574,
+        0.019093399998382665,
+        0.01881660000071861
+      ],
+      "iterations_per_sample": 1,
+      "rounds": 9,
+      "stock_median_seconds": 0.029808400009642355,
+      "patched_median_seconds": 0.019093399998382665,
+      "ratio": 1.5611886836376612,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.5612 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1/3",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1/10",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1/30",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1/100",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples+1%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1*3",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            19995
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 19995
+        },
+        {
+          "shape": [
+            19995
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 19995
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.000844699999354568,
+        0.0008653818182541396,
+        0.0008600090904193083,
+        0.0008465727276581509,
+        0.0008642136368011547,
+        0.0008545227273399095,
+        0.0008440090902943418,
+        0.0008808181816923686,
+        0.0009082000000158918
+      ],
+      "patched_seconds": [
+        0.00026810454569799316,
+        0.00026001363651382485,
+        0.0002630545456089418,
+        0.0002694636363726617,
+        0.00026056363673309204,
+        0.0002663318181558597,
+        0.00025825909092831847,
+        0.0002916272728312337,
+        0.00027764090918935835
+      ],
+      "iterations_per_sample": 22,
+      "rounds": 9,
+      "stock_median_seconds": 0.0008600090904193083,
+      "patched_median_seconds": 0.0002663318181558597,
+      "ratio": 3.2290887974790285,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 3.2291 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1*10",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            66650
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 66650
+        },
+        {
+          "shape": [
+            66650
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 66650
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0032034166652010754,
+        0.0031581833342594714,
+        0.003132700000909002,
+        0.003184816666665332,
+        0.003417733333966074,
+        0.0032202000002143905,
+        0.0031714833336688266,
+        0.003157850000813293,
+        0.0031220499998501814
+      ],
+      "patched_seconds": [
+        0.001316416666668374,
+        0.0012760999986009363,
+        0.001167100000505646,
+        0.0012730833332170732,
+        0.0012323666669544764,
+        0.001220866666699294,
+        0.0012371833339178313,
+        0.0011436833325812283,
+        0.0012055499998192924
+      ],
+      "iterations_per_sample": 6,
+      "rounds": 9,
+      "stock_median_seconds": 0.0031714833336688266,
+      "patched_median_seconds": 0.0012323666669544764,
+      "ratio": 2.573490032399571,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.5735 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1*30",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            199950
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 199950
+        },
+        {
+          "shape": [
+            199950
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 199950
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.008887149997462984,
+        0.008906900002330076,
+        0.00892654999915976,
+        0.00920600000245031,
+        0.008975000004284084,
+        0.009050799999386072,
+        0.008937549995607696,
+        0.009021700003359001,
+        0.009028299995406996
+      ],
+      "patched_seconds": [
+        0.005507349997060373,
+        0.005775749996246304,
+        0.0055991500048548914,
+        0.0056531999944127165,
+        0.005899650001083501,
+        0.00556489999871701,
+        0.005880349999642931,
+        0.005523349995200988,
+        0.005674149993865285
+      ],
+      "iterations_per_sample": 2,
+      "rounds": 9,
+      "stock_median_seconds": 0.008975000004284084,
+      "patched_median_seconds": 0.0056531999944127165,
+      "ratio": 1.587596407902504,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.5876 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1*100",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "hist2d_uniform",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            666500
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 666500
+        },
+        {
+          "shape": [
+            666500
+          ],
+          "dtype": "float64",
+          "strides": [
+            8
+          ],
+          "size": 666500
+        }
+      ],
+      "kwargs": {
+        "bins": [
+          40,
+          40
+        ],
+        "range": [
+          [
+            -3.0,
+            3.0
+          ],
+          [
+            -3.0,
+            3.0
+          ]
+        ]
+      },
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.02970420000201557,
+        0.029363599998760037,
+        0.029075600003125146,
+        0.029748300003120676,
+        0.029767800006084144,
+        0.02900509999017231,
+        0.029199800002970733,
+        0.0291233000025386,
+        0.029433099989546463
+      ],
+      "patched_seconds": [
+        0.028550100003485568,
+        0.018996500002685934,
+        0.01872499998717103,
+        0.01894680000259541,
+        0.018630600010510534,
+        0.018982499997946434,
+        0.01918219999060966,
+        0.01878499999293126,
+        0.018904900003690273
+      ],
+      "iterations_per_sample": 1,
+      "rounds": 9,
+      "stock_median_seconds": 0.029363599998760037,
+      "patched_median_seconds": 0.01894680000259541,
+      "ratio": 1.5497920490392938,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.5498 numpy.histogram2d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1/3",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1/10",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1/30",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1/100",
+      "op": "numpy.histogram2d",
+      "path": "hist2d_uniform",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "hist2d_uniform#samples-1%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "matmul_split_complex",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            256,
+            1000
+          ],
+          "dtype": "complex128",
+          "strides": [
+            16000,
+            16
+          ],
+          "size": 256000
+        },
+        {
+          "shape": [
+            1000,
+            500
+          ],
+          "dtype": "float64",
+          "strides": [
+            4000,
+            8
+          ],
+          "size": 500000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "numeric",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0041156799998134375,
+        0.003920440000365488,
+        0.0038165799982380123,
+        0.004044020001310855,
+        0.004003000000375323,
+        0.003782980001415126,
+        0.004142319998936728,
+        0.003948680000030435,
+        0.003857939998852089
+      ],
+      "patched_seconds": [
+        0.002984420000575483,
+        0.0027846000011777505,
+        0.0028978799993637947,
+        0.0027522599993972108,
+        0.002833999998983927,
+        0.0028207600000314413,
+        0.002857439999934286,
+        0.002768379999906756,
+        0.002910479999263771
+      ],
+      "iterations_per_sample": 5,
+      "rounds": 9,
+      "stock_median_seconds": 0.003948680000030435,
+      "patched_median_seconds": 0.002833999998983927,
+      "ratio": 1.3933239242929265,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.3933 numpy.matmul",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128*3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128*10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128*30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128*100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128/3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128/10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128/30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128/100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128>4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128<4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128>16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128<16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1*3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1*10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1*30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1*100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1/3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1/10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1/30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1/100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1>4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1<4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1>16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1<16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m+1%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "matmul_split_complex",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            255,
+            1000
+          ],
+          "dtype": "complex128",
+          "strides": [
+            16000,
+            16
+          ],
+          "size": 255000
+        },
+        {
+          "shape": [
+            1000,
+            500
+          ],
+          "dtype": "float64",
+          "strides": [
+            4000,
+            8
+          ],
+          "size": 500000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "numeric",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0038739250012440607,
+        0.003923100000974955,
+        0.004072800002177246,
+        0.003950149999582209,
+        0.004001350000180537,
+        0.003950775000703288,
+        0.003983599999628495,
+        0.00380287499865517,
+        0.003958900000725407
+      ],
+      "patched_seconds": [
+        0.0027901250032300595,
+        0.00303472499945201,
+        0.0028848249967268202,
+        0.002944200001365971,
+        0.002742150001722621,
+        0.002876624999771593,
+        0.002548174998082686,
+        0.002542425001593074,
+        0.002705725000851089
+      ],
+      "iterations_per_sample": 4,
+      "rounds": 9,
+      "stock_median_seconds": 0.003950775000703288,
+      "patched_median_seconds": 0.0027901250032300595,
+      "ratio": 1.415984945523793,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.4160 numpy.matmul",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1*3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1*10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1*30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1*100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1/3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1/10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1/30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1/100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1>4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1<4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1>16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1<16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-m-1%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "matmul_split_complex",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            256,
+            1001
+          ],
+          "dtype": "complex128",
+          "strides": [
+            16016,
+            16
+          ],
+          "size": 256256
+        },
+        {
+          "shape": [
+            1001,
+            500
+          ],
+          "dtype": "float64",
+          "strides": [
+            4000,
+            8
+          ],
+          "size": 500500
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "numeric",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0040634800010593605,
+        0.003961239999625832,
+        0.003771839998080395,
+        0.003859599999850616,
+        0.003991919997497461,
+        0.003912660002242774,
+        0.003902659998857416,
+        0.003964540001470595,
+        0.0038500199996633457
+      ],
+      "patched_seconds": [
+        0.002960979999625124,
+        0.00271890000149142,
+        0.002636820002226159,
+        0.002681840001605451,
+        0.002788399998098612,
+        0.0027119600010337306,
+        0.002797399999690242,
+        0.002686240000184625,
+        0.0026668199978303166
+      ],
+      "iterations_per_sample": 5,
+      "rounds": 9,
+      "stock_median_seconds": 0.003912660002242774,
+      "patched_median_seconds": 0.0027119600010337306,
+      "ratio": 1.4427425186032856,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.4427 numpy.matmul",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1*3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1*10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1*30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1*100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1/3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1/10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1/30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1/100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1>4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1<4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1>16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1<16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n+1%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1*3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1*10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1*30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1*100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1/3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1/10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1/30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1/100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1>4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1<4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1>16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1<16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-n-1%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "matmul_split_complex",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            256,
+            1000
+          ],
+          "dtype": "complex128",
+          "strides": [
+            16000,
+            16
+          ],
+          "size": 256000
+        },
+        {
+          "shape": [
+            1000,
+            501
+          ],
+          "dtype": "float64",
+          "strides": [
+            4008,
+            8
+          ],
+          "size": 501000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "numeric",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.004312180000124499,
+        0.003926380001939833,
+        0.003912359999958426,
+        0.003964240002096631,
+        0.0039362799987429755,
+        0.0039412399986758825,
+        0.006497519998811185,
+        0.004152800000156276,
+        0.0044324200018309055
+      ],
+      "patched_seconds": [
+        0.0027782599994679914,
+        0.0026638399984221907,
+        0.0026438599976245313,
+        0.0026847200002521276,
+        0.0028469599987147377,
+        0.003144439999596216,
+        0.0035992399993119762,
+        0.0037468599999556317,
+        0.003607380000175908
+      ],
+      "iterations_per_sample": 5,
+      "rounds": 9,
+      "stock_median_seconds": 0.003964240002096631,
+      "patched_median_seconds": 0.0028469599987147377,
+      "ratio": 1.3924466813324705,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.3924 numpy.matmul",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1*3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1*10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1*30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1*100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1/3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1/10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1/30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1/100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1>4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1<4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1>16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1<16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q+1%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1*3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1*10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1*30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1*100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1/3",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1/10",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1/30",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1/100",
+      "result": "SKIP invalid-input",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1>4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1<4",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1>16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1<16",
+      "op": "numpy.matmul",
+      "path": "matmul_split_complex",
+      "variant": 1,
+      "dispatch": {
+        "chosen": "stock",
+        "reason": "no-applicable-path"
+      },
+      "result": "SKIP no-dispatch",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1%d",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "matmul_split_complex#complex128-q-1%u",
+      "result": "SKIP not-valued",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    }
+  ],
+  "completed": true,
+  "selected_cells": [
+    "hist2d_uniform",
+    "hist2d_uniform*3",
+    "hist2d_uniform*10",
+    "hist2d_uniform*30",
+    "hist2d_uniform*100",
+    "hist2d_uniform/3",
+    "hist2d_uniform/10",
+    "hist2d_uniform/30",
+    "hist2d_uniform/100",
+    "hist2d_uniform%d",
+    "hist2d_uniform%u",
+    "matmul_split_complex",
+    "matmul_split_complex*3",
+    "matmul_split_complex*10",
+    "matmul_split_complex*30",
+    "matmul_split_complex*100",
+    "matmul_split_complex/3",
+    "matmul_split_complex/10",
+    "matmul_split_complex/30",
+    "matmul_split_complex/100",
+    "matmul_split_complex>4",
+    "matmul_split_complex<4",
+    "matmul_split_complex>16",
+    "matmul_split_complex<16",
+    "matmul_split_complex%d",
+    "matmul_split_complex%u",
+    "hist2d_uniform#samples+0",
+    "hist2d_uniform#samples+0*3",
+    "hist2d_uniform#samples+0*10",
+    "hist2d_uniform#samples+0*30",
+    "hist2d_uniform#samples+0*100",
+    "hist2d_uniform#samples+0/3",
+    "hist2d_uniform#samples+0/10",
+    "hist2d_uniform#samples+0/30",
+    "hist2d_uniform#samples+0/100",
+    "hist2d_uniform#samples+0%d",
+    "hist2d_uniform#samples+0%u",
+    "hist2d_uniform#samples+1",
+    "hist2d_uniform#samples+1*3",
+    "hist2d_uniform#samples+1*10",
+    "hist2d_uniform#samples+1*30",
+    "hist2d_uniform#samples+1*100",
+    "hist2d_uniform#samples+1/3",
+    "hist2d_uniform#samples+1/10",
+    "hist2d_uniform#samples+1/30",
+    "hist2d_uniform#samples+1/100",
+    "hist2d_uniform#samples+1%d",
+    "hist2d_uniform#samples+1%u",
+    "hist2d_uniform#samples-1",
+    "hist2d_uniform#samples-1*3",
+    "hist2d_uniform#samples-1*10",
+    "hist2d_uniform#samples-1*30",
+    "hist2d_uniform#samples-1*100",
+    "hist2d_uniform#samples-1/3",
+    "hist2d_uniform#samples-1/10",
+    "hist2d_uniform#samples-1/30",
+    "hist2d_uniform#samples-1/100",
+    "hist2d_uniform#samples-1%d",
+    "hist2d_uniform#samples-1%u",
+    "matmul_split_complex#complex128",
+    "matmul_split_complex#complex128*3",
+    "matmul_split_complex#complex128*10",
+    "matmul_split_complex#complex128*30",
+    "matmul_split_complex#complex128*100",
+    "matmul_split_complex#complex128/3",
+    "matmul_split_complex#complex128/10",
+    "matmul_split_complex#complex128/30",
+    "matmul_split_complex#complex128/100",
+    "matmul_split_complex#complex128>4",
+    "matmul_split_complex#complex128<4",
+    "matmul_split_complex#complex128>16",
+    "matmul_split_complex#complex128<16",
+    "matmul_split_complex#complex128%d",
+    "matmul_split_complex#complex128%u",
+    "matmul_split_complex#complex128-m+1",
+    "matmul_split_complex#complex128-m+1*3",
+    "matmul_split_complex#complex128-m+1*10",
+    "matmul_split_complex#complex128-m+1*30",
+    "matmul_split_complex#complex128-m+1*100",
+    "matmul_split_complex#complex128-m+1/3",
+    "matmul_split_complex#complex128-m+1/10",
+    "matmul_split_complex#complex128-m+1/30",
+    "matmul_split_complex#complex128-m+1/100",
+    "matmul_split_complex#complex128-m+1>4",
+    "matmul_split_complex#complex128-m+1<4",
+    "matmul_split_complex#complex128-m+1>16",
+    "matmul_split_complex#complex128-m+1<16",
+    "matmul_split_complex#complex128-m+1%d",
+    "matmul_split_complex#complex128-m+1%u",
+    "matmul_split_complex#complex128-m-1",
+    "matmul_split_complex#complex128-m-1*3",
+    "matmul_split_complex#complex128-m-1*10",
+    "matmul_split_complex#complex128-m-1*30",
+    "matmul_split_complex#complex128-m-1*100",
+    "matmul_split_complex#complex128-m-1/3",
+    "matmul_split_complex#complex128-m-1/10",
+    "matmul_split_complex#complex128-m-1/30",
+    "matmul_split_complex#complex128-m-1/100",
+    "matmul_split_complex#complex128-m-1>4",
+    "matmul_split_complex#complex128-m-1<4",
+    "matmul_split_complex#complex128-m-1>16",
+    "matmul_split_complex#complex128-m-1<16",
+    "matmul_split_complex#complex128-m-1%d",
+    "matmul_split_complex#complex128-m-1%u",
+    "matmul_split_complex#complex128-n+1",
+    "matmul_split_complex#complex128-n+1*3",
+    "matmul_split_complex#complex128-n+1*10",
+    "matmul_split_complex#complex128-n+1*30",
+    "matmul_split_complex#complex128-n+1*100",
+    "matmul_split_complex#complex128-n+1/3",
+    "matmul_split_complex#complex128-n+1/10",
+    "matmul_split_complex#complex128-n+1/30",
+    "matmul_split_complex#complex128-n+1/100",
+    "matmul_split_complex#complex128-n+1>4",
+    "matmul_split_complex#complex128-n+1<4",
+    "matmul_split_complex#complex128-n+1>16",
+    "matmul_split_complex#complex128-n+1<16",
+    "matmul_split_complex#complex128-n+1%d",
+    "matmul_split_complex#complex128-n+1%u",
+    "matmul_split_complex#complex128-n-1",
+    "matmul_split_complex#complex128-n-1*3",
+    "matmul_split_complex#complex128-n-1*10",
+    "matmul_split_complex#complex128-n-1*30",
+    "matmul_split_complex#complex128-n-1*100",
+    "matmul_split_complex#complex128-n-1/3",
+    "matmul_split_complex#complex128-n-1/10",
+    "matmul_split_complex#complex128-n-1/30",
+    "matmul_split_complex#complex128-n-1/100",
+    "matmul_split_complex#complex128-n-1>4",
+    "matmul_split_complex#complex128-n-1<4",
+    "matmul_split_complex#complex128-n-1>16",
+    "matmul_split_complex#complex128-n-1<16",
+    "matmul_split_complex#complex128-n-1%d",
+    "matmul_split_complex#complex128-n-1%u",
+    "matmul_split_complex#complex128-q+1",
+    "matmul_split_complex#complex128-q+1*3",
+    "matmul_split_complex#complex128-q+1*10",
+    "matmul_split_complex#complex128-q+1*30",
+    "matmul_split_complex#complex128-q+1*100",
+    "matmul_split_complex#complex128-q+1/3",
+    "matmul_split_complex#complex128-q+1/10",
+    "matmul_split_complex#complex128-q+1/30",
+    "matmul_split_complex#complex128-q+1/100",
+    "matmul_split_complex#complex128-q+1>4",
+    "matmul_split_complex#complex128-q+1<4",
+    "matmul_split_complex#complex128-q+1>16",
+    "matmul_split_complex#complex128-q+1<16",
+    "matmul_split_complex#complex128-q+1%d",
+    "matmul_split_complex#complex128-q+1%u",
+    "matmul_split_complex#complex128-q-1",
+    "matmul_split_complex#complex128-q-1*3",
+    "matmul_split_complex#complex128-q-1*10",
+    "matmul_split_complex#complex128-q-1*30",
+    "matmul_split_complex#complex128-q-1*100",
+    "matmul_split_complex#complex128-q-1/3",
+    "matmul_split_complex#complex128-q-1/10",
+    "matmul_split_complex#complex128-q-1/30",
+    "matmul_split_complex#complex128-q-1/100",
+    "matmul_split_complex#complex128-q-1>4",
+    "matmul_split_complex#complex128-q-1<4",
+    "matmul_split_complex#complex128-q-1>16",
+    "matmul_split_complex#complex128-q-1<16",
+    "matmul_split_complex#complex128-q-1%d",
+    "matmul_split_complex#complex128-q-1%u"
+  ],
+  "cpu_classes": {
+    "hybrid": false,
+    "fast": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "spread": 1.114,
+    "outlier_cpus": [],
+    "probe_us": {
+      "3": 131.4,
+      "4": 131.8,
+      "2": 131.9,
+      "1": 132.1,
+      "8": 132.1,
+      "10": 132.3,
+      "11": 132.3,
+      "18": 132.3,
+      "6": 132.4,
+      "16": 132.5,
+      "9": 132.6,
+      "5": 132.7,
+      "22": 132.7,
+      "20": 132.8,
+      "12": 132.8,
+      "17": 133.0,
+      "7": 133.1,
+      "19": 133.1,
+      "14": 133.3,
+      "15": 133.8,
+      "13": 133.8,
+      "21": 134.7,
+      "31": 135.1,
+      "27": 135.3,
+      "28": 135.4,
+      "24": 135.6,
+      "0": 135.8,
+      "30": 137.9,
+      "26": 138.2,
+      "23": 138.2,
+      "29": 138.3,
+      "25": 146.4
+    }
+  },
+  "fast_core_cutoff_us": null,
+  "summary": {
+    "losses": [],
+    "judged": 25,
+    "skipped": 139
+  },
+  "exit_code": 1
+}

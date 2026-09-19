@@ -1,0 +1,1 @@
+out:sin:float64:300000:inplace

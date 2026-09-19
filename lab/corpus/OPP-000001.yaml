@@ -58,6 +58,15 @@ related_opportunities:
   - "numpy/numpy#30496 (earlier hash-vs-sort discussion)"
   - "numpy/numpy#32161 (np.isin slow for StringDType, open)"
 notes:
+  - >-
+    CURRENT RUNTIME DISPOSITION (2026-09-19): unique_sort and
+    unique_values_sort retain int8/uint8 at size >= 1000, int32/uint32 at
+    >= 10000. int16, uint16, int64 and uint64 use stock after repeated
+    distribution-dependent losses. The uint16 floor trial at 100000 still
+    lost with dense 0..15 inputs, despite winning a spread-value grid.
+    Earlier result details and shipped thresholds in
+    this record are historical; current evidence and qualifications:
+    docs/research/2026-09-19-burndown.md.
   - The upstream introduction was PR numpy/numpy#26018.
   - PyOverdrive angle is pure dispatch (Gearbox routes large numeric inputs to
     the sort path); no new kernel required, so implementation risk is low and

@@ -54,6 +54,12 @@ linked_prs: []
 linked_commits: []
 related_opportunities: []
 notes:
+  - >-
+    CURRENT RUNTIME DISPOSITION (2026-09-19): intersect_sorted retains
+    only same-dtype int32/uint32 at combined size >= 10000.
+    int8/uint8, int16/uint16 and int64/uint64 use stock after repeated
+    low-cardinality losses. Earlier reproduction details remain historical;
+    current evidence and qualifications: docs/research/2026-09-19-burndown.md.
   - "Feature request (enhancement), not a PR: as retrieved, the issue has zero comments and zero timeline events, so there is no recorded maintainer response yet to summarize as objections; this record should be re-checked on a future re-fetch in case discussion has started."
   - "Reporter's own benchmark compares against the third-party sortednp package, not against any numpy-internal alternative; the claimed 10x-1000x range is the reporter's estimate from that comparison, not a numpy maintainer's."
   - "assume_unique already exists as a parameter on np.intersect1d and np.isin/np.in1d today; the ask is specifically for an assume_sorted hint that a merge-based (O(n+m)) path can exploit, distinct from assume_unique's existing dedup-skip behavior."

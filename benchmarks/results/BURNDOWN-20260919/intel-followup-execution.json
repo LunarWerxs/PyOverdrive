@@ -1,0 +1,5065 @@
+{
+  "schema_version": 1,
+  "tool": "bench_review_followup",
+  "recorded_at": "2026-09-19T20:46:23.560928+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.5.2",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "9bbe7063c555"
+  },
+  "source_revision": null,
+  "source": {
+    "sha256": "d5f094a4eb1fa17e92dbb90f54bb6b9974739bb18bd7a1be085fda875dcdd70e",
+    "files": {
+      "lab/dyno/__init__.py": "d2e9c17eb6931a1a0e8ab96770d50a2dd8d358da5fdbbf0cc46111ec2405a0f4",
+      "lab/dyno/fingerprint.py": "d6a2c19dd3c885685d1fa7bbb566464da8a4bf5258a1c76967e3e3fa6dbe7d1c",
+      "lab/dyno/load.py": "1419fe280ad1b64812e920fdf0ee969d9a2cbe23d5477126d2e82bddaff12f6b",
+      "pyproject.toml": "51b46f39e85918ccfda61c67cf875aa373fa15e907dde3456b92bbbb7527fdb3",
+      "src/pyoverdrive/__init__.py": "1e3c7073516caf0c8a7880277f63572a0f1add8753e5f82ab06b64e6db562133",
+      "src/pyoverdrive/__main__.py": "e076d213b4ca05ee2160f50a470f6e5624e37ed2153c38c3c566164db67a1688",
+      "src/pyoverdrive/_cpuclass.py": "cc7b4658e31a01f1880baf2873a57514a550f88f968887d9bb089fce40557b3c",
+      "src/pyoverdrive/calibration.py": "55e979a7f49876648f9d8904262e4dd2e3f4bf8bb8e3d84e05146d1eee54a691",
+      "src/pyoverdrive/demo.py": "2301afa1d764a04b255cf0e5ff3300813d461d06c67a02878c6f18e8110c3b0a",
+      "src/pyoverdrive/diagnostics.py": "e7fda762d4c30d5d5c63a7c3d1617309f65a6b2043eb2585894bca726edd76d8",
+      "src/pyoverdrive/dispatcher/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/pyoverdrive/dispatcher/gearbox.py": "6ffb03d93360baaebd2cdf8827d3505c2b57116d1a4cd1396ac9329f2ea2bed4",
+      "src/pyoverdrive/fallback/__init__.py": "300db10ab3d2f65de2fbab38e2b6da91aeb65bbc94675e5e4bf16e9254bd7a7e",
+      "src/pyoverdrive/fastpaths/__init__.py": "7d7ed87220af6f9da4c74b97f4c65f8e1e6af8c340d6e92839a16bdbbc2436ab",
+      "src/pyoverdrive/fastpaths/_pyrallel_common.py": "c44138fada6bd888edc00c240c5e2c13ca699a123536769267ccf9d92a2a5f47",
+      "src/pyoverdrive/fastpaths/apply_along_axis_reduce.py": "7eab1c48a3dbe261c123bf46a60e239a86a5341e2709166b60a7c786b08bacb2",
+      "src/pyoverdrive/fastpaths/argmax_blocked.py": "8ac6b8b6238ab76230b19bb633940bac9d7937f5e289c497a7944fa16025f30e",
+      "src/pyoverdrive/fastpaths/char_view.py": "b149479566231986b23e2585915d0f200ec4327e55da980d785f6acb46ed9901",
+      "src/pyoverdrive/fastpaths/cholesky_small_batch.py": "7ef9067f54755dafb88986ac53eb6dea2399f7dfb4072b9d8dbac902240093d9",
+      "src/pyoverdrive/fastpaths/dot_mixed_view.py": "8a85edbf37bd16e16d4b39ef166486add0b64f3b7de9304b257ddc3ddc199897",
+      "src/pyoverdrive/fastpaths/eigvalsh_2x2.py": "fb92e30297b63c470618b9a5ce9e61799a7bde48813d642e2b4192fb4025b2d5",
+      "src/pyoverdrive/fastpaths/eigvalsh_3x3.py": "078cc3e2cc82aec5d9b3600d74e06e941ebf5a4ca2f0b5574d3f33bfa14b76f1",
+      "src/pyoverdrive/fastpaths/einsum_optimize.py": "8853e789478334b0519dc39a89d4cbfc59871a8670ee6e54cb3f2d286e055231",
+      "src/pyoverdrive/fastpaths/fftconvolve.py": "359d49ac516d756fa644e3e28ba4eb999e7b8d1ec4f2b867a531f77a35f18ca1",
+      "src/pyoverdrive/fastpaths/hist2d_uniform.py": "8184b62ae414489ab95550e5007306f29f333e6af4955b8153d8f54337da8811",
+      "src/pyoverdrive/fastpaths/inner_tensordot.py": "f855a3952c85e0e682f57d311559bc0381a5c5b6d47984dd3ff84962d0e30cfc",
+      "src/pyoverdrive/fastpaths/interp_uniform_grid.py": "fe87bad59dd1077ffa158562a428bf84cf5da4822879f1efc7e6084fc2865ee2",
+      "src/pyoverdrive/fastpaths/intersect_sorted.py": "4baa4d439e0277bca8a6040f5d4916b01e052fe6a7eb5c9217bdcce2107fbc81",
+      "src/pyoverdrive/fastpaths/inv_small_batch.py": "eb9f17d02f58a0b35c06e090d627905db71fda93d33694b1cc1fa124db8da839",
+      "src/pyoverdrive/fastpaths/isclose_fused.py": "d31ab390e86da641790f9a7bc2a01ca307c06576ab3910eeada5312ddfdeb715",
+      "src/pyoverdrive/fastpaths/isin_object_hash.py": "42aa6c0a5a5073d8d8f0f84b671671cb0b8ade64818a224f5c12df79656f7ba4",
+      "src/pyoverdrive/fastpaths/isin_string_hash.py": "95e171ded3faa1c06f64ac7c656258b8a71a689572e09744086f740c609c228b",
+      "src/pyoverdrive/fastpaths/linalg_small_batch.py": "52d28a91ce60d88a95b6239c82aa34e51d28ecf46fca3ce0b5c2c3a027201434",
+      "src/pyoverdrive/fastpaths/matmul_int_blas.py": "c16190671fac319968b82b3c1a5a7ae1ab7b34b10914009b55b6f0907ffc26a7",
+      "src/pyoverdrive/fastpaths/matmul_split_complex.py": "aa10f006dac7c54dafc140aee9a2174bff8ba19a542cc64d7144e3e52790a838",
+      "src/pyoverdrive/fastpaths/median_partition.py": "0829b449dafda1f88b3bc8a3d9967d6555230329601a3fec493633137ae3f6cc",
+      "src/pyoverdrive/fastpaths/nan_to_num_where.py": "328941791574f993022d28901a9ea93d305cfbec6ac8a331258625cace5429a1",
+      "src/pyoverdrive/fastpaths/nanargminmax_scan.py": "aac89379959c1330ea0bfca509a2d3ad69072dd447bc67144328bfd309f86aed",
+      "src/pyoverdrive/fastpaths/nanmedian_scan.py": "5a151dadbe2b8df5c8c436037395998d99054e9c19fd377cf02cdb8ef2f00b8a",
+      "src/pyoverdrive/fastpaths/nanpercentile_masked.py": "f8930e7afe2465466d96f5f79d89b55e41b7bcccba0fd30d7e6ef7ed9cbe87ab",
+      "src/pyoverdrive/fastpaths/nanquantile_masked.py": "a140c40c31cd6c46b702a27b825e578ba7f495af55184359970e50d7f7eaeaca",
+      "src/pyoverdrive/fastpaths/nanreduce_scan.py": "8228517006b51761995894cd0beac36b34a6462acd857adc41ac55bf54964c47",
+      "src/pyoverdrive/fastpaths/noop.py": "07ba93bc5296f9473c833716188e0218a5479776d64926653961fcea2dfd647a",
+      "src/pyoverdrive/fastpaths/pad_1d_constant.py": "99a5416224e13e61a7bd8dda70f9317280d12611cbbab6642798ec5276df8e75",
+      "src/pyoverdrive/fastpaths/parallel_binary.py": "d315f4047ac77b080e26a79cc410f60b68f2d7eab1de3f50072fa3fde350c483",
+      "src/pyoverdrive/fastpaths/parallel_ufunc.py": "484ab5dc7589d7c8038d2ef4ece4e6f92d2635dd9f598baf2c886b7cf34ae97b",
+      "src/pyoverdrive/fastpaths/percentile_dense.py": "f2e2c75d7879cafca79954ce91443f8e3086b326a7d63aaa40023a24171801ca",
+      "src/pyoverdrive/fastpaths/qr_small_batch.py": "2b087934ee6987be5c04a94cba50803bd4a67dab01c89efca1030b4d805347ab",
+      "src/pyoverdrive/fastpaths/quantile_dense_sort.py": "3fdca329883b9ec595fc5ec5170e8e657b11f97ab33f870799444bbb841a0998",
+      "src/pyoverdrive/fastpaths/reduce_tiny_trailing.py": "f2e09beb1d518edcf96463205ae75f7ca6687c0a0a7ebd27c0e36f88590d8a7c",
+      "src/pyoverdrive/fastpaths/relayout_blocked.py": "de5b13d93ad674a247f4d81f65c67977bc06c44cb8af1969d570a89170223c7e",
+      "src/pyoverdrive/fastpaths/roll_concat.py": "f8f2dbeb81bd185d44eac5feb576ed3bec556ee55685e17a5372b2b1468ea97c",
+      "src/pyoverdrive/fastpaths/searchsorted_extreme_key.py": "5bff96e936d7a82853df3e74bbb7508488cf8e21f212a5c51d50a55ac112e48a",
+      "src/pyoverdrive/fastpaths/searchsorted_sortqueries.py": "70a0fbe5e33b18301262b8eb671fb91502748c37252daedef0da32a994967448",
+      "src/pyoverdrive/fastpaths/svd_small_batch.py": "c20a2c4e7ad664a2492a896a46152fefd8f566c03ed0419ace3346a04a046243",
+      "src/pyoverdrive/fastpaths/take_index_assign.py": "b6b3298ed5b959b08e490e15b081cd03b5eb7ab94d63bc7c8139ecbff1ffc1a0",
+      "src/pyoverdrive/fastpaths/unique_axis0_column.py": "2c5712875af220b464c574ed71a2c65190b4820127d6bd772105ec215a8d2524",
+      "src/pyoverdrive/fastpaths/unique_rows_lexsort.py": "6bf95ec8671b111aaf5edf2d2a990a487b609f03c2c77715e6cb5e501eca0144",
+      "src/pyoverdrive/fastpaths/unique_sort.py": "fa374d5113d469a483190a7abe1548f454b295f331c87fbe90ed70528949d12f",
+      "src/pyoverdrive/fastpaths/vectorize_ufunc.py": "06015ade38efe34f49aa51a7fea9bc77502f7dad8bcdc1d7ae297e65bec61ebc",
+      "src/pyoverdrive/parallel/__init__.py": "8b6d2ae4a18d9bbe6b879fa2b6028cbf903ffa56ef5c8b33305aea3a8368d315",
+      "src/pyoverdrive/parallel/pyrallel.py": "446866c5c292dc10d8e4b9f03b6063882eba6e1c7870580c17d74606c0c177a6",
+      "src/pyoverdrive/parallel/relayout.py": "383721a4e66ec807d70723d380150465948dcc607b1669c24ea376d4a8cd825e",
+      "tools/verify_no_pessimization.py": "aaf7691db692140ae01451692ea60b0f03e0d637b34c31511fcc64b252ece141"
+    }
+  },
+  "benchmark_source": {
+    "path": "benchmarks/micro/bench_review_followup.py",
+    "sha256": "3bf798492649bd3f9c69d07c53fffda658ed05407e312df154087e3b46557d29"
+  },
+  "selected_cells": [
+    "argmax:argmax:float64:2999x3000:none",
+    "argmax:argmax:float64:3000x2999:none",
+    "argmax:argmax:float64:3000x3000:none",
+    "argmax:argmax:float64:4500x3000:none",
+    "argmax:argmax:float64:3000x4500:none",
+    "argmax:argmax:float64:10000x1000:none",
+    "argmax:argmax:float32:2999x3000:none",
+    "argmax:argmax:float32:3000x2999:none",
+    "argmax:argmax:float32:3000x3000:none",
+    "argmax:argmax:float32:4500x3000:none",
+    "argmax:argmax:float32:3000x4500:none",
+    "argmax:argmax:float32:10000x1000:none",
+    "argmax:argmax:int64:2999x3000:none",
+    "argmax:argmax:int64:3000x2999:none",
+    "argmax:argmax:int64:3000x3000:none",
+    "argmax:argmax:int64:4500x3000:none",
+    "argmax:argmax:int64:3000x4500:none",
+    "argmax:argmax:int64:10000x1000:none",
+    "vectorize:sin:float64:16:none",
+    "vectorize:sin:float64:10000:none",
+    "vectorize:sin:float64:1000000:none",
+    "vectorize:sqrt:float64:16:none",
+    "vectorize:sqrt:float64:10000:none",
+    "vectorize:sqrt:float64:1000000:none",
+    "vectorize:exp:float64:16:none",
+    "vectorize:exp:float64:10000:none",
+    "vectorize:exp:float64:1000000:none",
+    "out:sin:float64:300000:disjoint",
+    "out:sin:float64:300000:inplace",
+    "out:sin:float64:900000:disjoint",
+    "out:sin:float64:900000:inplace",
+    "out:sin:float32:3000000:disjoint",
+    "out:sin:float32:3000000:inplace",
+    "out:sin:float32:9000000:disjoint",
+    "out:sin:float32:9000000:inplace",
+    "out:add:float64:20000000:disjoint",
+    "out:add:float64:20000000:inplace",
+    "out:add:float64:60000000:disjoint",
+    "out:add:float64:60000000:inplace",
+    "out:add:int64:20000000:disjoint",
+    "out:add:int64:20000000:inplace",
+    "out:add:int64:60000000:disjoint",
+    "out:add:int64:60000000:inplace"
+  ],
+  "selection": {
+    "requested_cells": [
+      "argmax:argmax:float64:2999x3000:none",
+      "argmax:argmax:float64:3000x2999:none",
+      "argmax:argmax:float64:3000x3000:none",
+      "argmax:argmax:float64:4500x3000:none",
+      "argmax:argmax:float64:3000x4500:none",
+      "argmax:argmax:float64:10000x1000:none",
+      "argmax:argmax:float32:2999x3000:none",
+      "argmax:argmax:float32:3000x2999:none",
+      "argmax:argmax:float32:3000x3000:none",
+      "argmax:argmax:float32:4500x3000:none",
+      "argmax:argmax:float32:3000x4500:none",
+      "argmax:argmax:float32:10000x1000:none",
+      "argmax:argmax:int64:2999x3000:none",
+      "argmax:argmax:int64:3000x2999:none",
+      "argmax:argmax:int64:3000x3000:none",
+      "argmax:argmax:int64:4500x3000:none",
+      "argmax:argmax:int64:3000x4500:none",
+      "argmax:argmax:int64:10000x1000:none",
+      "vectorize:sin:float64:16:none",
+      "vectorize:sin:float64:10000:none",
+      "vectorize:sin:float64:1000000:none",
+      "vectorize:sqrt:float64:16:none",
+      "vectorize:sqrt:float64:10000:none",
+      "vectorize:sqrt:float64:1000000:none",
+      "vectorize:exp:float64:16:none",
+      "vectorize:exp:float64:10000:none",
+      "vectorize:exp:float64:1000000:none",
+      "out:sin:float64:300000:disjoint",
+      "out:sin:float64:300000:inplace",
+      "out:sin:float64:900000:disjoint",
+      "out:sin:float64:900000:inplace",
+      "out:sin:float32:3000000:disjoint",
+      "out:sin:float32:3000000:inplace",
+      "out:sin:float32:9000000:disjoint",
+      "out:sin:float32:9000000:inplace",
+      "out:add:float64:20000000:disjoint",
+      "out:add:float64:20000000:inplace",
+      "out:add:float64:60000000:disjoint",
+      "out:add:float64:60000000:inplace",
+      "out:add:int64:20000000:disjoint",
+      "out:add:int64:20000000:inplace",
+      "out:add:int64:60000000:disjoint",
+      "out:add:int64:60000000:inplace"
+    ],
+    "requested_cells_sha256": "abbc9ed14f1d4d596474701dee78f9364907369d4a04b545598f126c6e12d28f"
+  },
+  "cells": [
+    {
+      "cell": "argmax:argmax:float64:2999x3000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.824999935925,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float64",
+      "shape": [
+        2999,
+        3000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "stock",
+        "no-applicable-path"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.05450369999743998,
+          0.05722260009497404,
+          0.06056079990230501,
+          0.05788209999445826,
+          0.057295500067994,
+          0.05751050007529557,
+          0.058073700056411326
+        ],
+        "candidate_guard_on": [
+          0.055528500000946224,
+          0.056427399977110326,
+          0.057959600002504885,
+          0.06204960006289184,
+          0.057484099990688264,
+          0.05752350005786866,
+          0.05776370002422482
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.05751050007529557,
+        "candidate_guard_on": 0.05752350005786866
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 0.9997740057096662
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.07290015847860543,
+        "cpu_busy_after": 0.04272151898734178,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float64:3000x2999:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.38250015396625,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float64",
+      "shape": [
+        3000,
+        2999
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "stock",
+        "no-applicable-path"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.05456880002748221,
+          0.05292590009048581,
+          0.05479550000745803,
+          0.05725749989505857,
+          0.05736320000141859,
+          0.05519570002797991,
+          0.05338519997894764
+        ],
+        "candidate_guard_on": [
+          0.055122500052675605,
+          0.05414829996880144,
+          0.054945899988524616,
+          0.05813989997841418,
+          0.05960669997148216,
+          0.0570654000621289,
+          0.05281060002744198
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.05479550000745803,
+        "candidate_guard_on": 0.055122500052675605
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 0.9940677573603321
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.048589341692789945,
+        "cpu_busy_after": 0.10658307210031348,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float64:3000x3000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.42500047758222,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float64",
+      "shape": [
+        3000,
+        3000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.05671310005709529,
+          0.05869029997847974,
+          0.05985970003530383,
+          0.06162990001030266,
+          0.05561669997405261,
+          0.05674150004051626,
+          0.05827769997995347
+        ],
+        "candidate_guard_on": [
+          0.029392700060270727,
+          0.02837559999898076,
+          0.031253600027412176,
+          0.024829200003296137,
+          0.02519469999242574,
+          0.024801800027489662,
+          0.02831199998036027
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.05827769997995347,
+        "candidate_guard_on": 0.02831199998036027
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.0584098622626477
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.09220985691573924,
+        "cpu_busy_after": 0.08437499999999998,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float64:4500x3000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 137.3000006424263,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float64",
+      "shape": [
+        4500,
+        3000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.09396219998598099,
+          0.09494370000902563,
+          0.09301329997833818,
+          0.09315890003927052,
+          0.09382219996768981,
+          0.093239999958314,
+          0.09020640002563596
+        ],
+        "candidate_guard_on": [
+          0.04333080002106726,
+          0.04369799990672618,
+          0.04234849999193102,
+          0.04329300008248538,
+          0.04258250002749264,
+          0.04242319997865707,
+          0.04218099999707192
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.093239999958314,
+        "candidate_guard_on": 0.04258250002749264
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.1896318886424058
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.11006289308176098,
+        "cpu_busy_after": 0.03322784810126578,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float64:3000x4500:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.81250051781535,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float64",
+      "shape": [
+        3000,
+        4500
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.08872530004009604,
+          0.09037360001821071,
+          0.0893204000312835,
+          0.08629849995486438,
+          0.08582420006860048,
+          0.0872923000715673,
+          0.09023500001057982
+        ],
+        "candidate_guard_on": [
+          0.04349109996110201,
+          0.0427562000695616,
+          0.04344110004603863,
+          0.03787069988902658,
+          0.0432938999729231,
+          0.04318570008035749,
+          0.04304459993727505
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.08872530004009604,
+        "candidate_guard_on": 0.04318570008035749
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.0545064656819516
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.031347962382445194,
+        "cpu_busy_after": 0.006269592476489061,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float64:10000x1000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.642501456663,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float64",
+      "shape": [
+        10000,
+        1000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.06237199995666742,
+          0.05897859996184707,
+          0.060035299975425005,
+          0.06128700007684529,
+          0.06188379996456206,
+          0.06233910005539656,
+          0.06185579998418689
+        ],
+        "candidate_guard_on": [
+          0.031415299978107214,
+          0.031188599998131394,
+          0.027115699951536953,
+          0.02713429997675121,
+          0.030004700063727796,
+          0.030040099984034896,
+          0.030104000004939735
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.06185579998418689,
+        "candidate_guard_on": 0.030040099984034896
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.0591076599964966
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.02384737678855331,
+        "cpu_busy_after": 0.0062208398133748455,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float32:2999x3000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 139.10999987274408,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float32",
+      "shape": [
+        2999,
+        3000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "stock",
+        "no-applicable-path"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.045705300057306886,
+          0.045296199969016016,
+          0.043712499900721014,
+          0.04463579994626343,
+          0.04524800006765872,
+          0.04462629999034107,
+          0.04397990007419139
+        ],
+        "candidate_guard_on": [
+          0.04166560003068298,
+          0.04568119999021292,
+          0.0440563999582082,
+          0.044606300070881844,
+          0.045028400025330484,
+          0.04483489994890988,
+          0.04060910001862794
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.04463579994626343,
+        "candidate_guard_on": 0.044606300070881844
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.000661338764585
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.015847860538827252,
+        "cpu_busy_after": 0.0031446540880503138,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float32:3000x2999:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.5399977657944,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float32",
+      "shape": [
+        3000,
+        2999
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "stock",
+        "no-applicable-path"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.04412899992894381,
+          0.044367399998009205,
+          0.044856499996967614,
+          0.037027099984698,
+          0.0420791000360623,
+          0.04392389999702573,
+          0.04317349998746067
+        ],
+        "candidate_guard_on": [
+          0.04478749993722886,
+          0.04384940001182258,
+          0.044549399986863136,
+          0.04445699998177588,
+          0.04354099999181926,
+          0.04425809998065233,
+          0.04376190004404634
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.04392389999702573,
+        "candidate_guard_on": 0.04425809998065233
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 0.9924488402400307
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.03767660910518056,
+        "cpu_busy_after": 0.01713395638629278,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float32:3000x3000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 135.95499913208187,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float32",
+      "shape": [
+        3000,
+        3000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.04341069993097335,
+          0.043752800091169775,
+          0.0443995000096038,
+          0.04383970005437732,
+          0.04451070004142821,
+          0.04338839999400079,
+          0.054467599955387414
+        ],
+        "candidate_guard_on": [
+          0.015009499969892204,
+          0.014931699959561229,
+          0.01503819995559752,
+          0.01484429999254644,
+          0.01517160004004836,
+          0.01484570000320673,
+          0.015003399923443794
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.04383970005437732,
+        "candidate_guard_on": 0.015003399923443794
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.921984368747974
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.006349206349206327,
+        "cpu_busy_after": 0.0,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float32:4500x3000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.88999819755554,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float32",
+      "shape": [
+        4500,
+        3000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.06978210003580898,
+          0.06991449999623,
+          0.06925990001764148,
+          0.06922770000528544,
+          0.06921930005773902,
+          0.06876589998137206,
+          0.06988859991542995
+        ],
+        "candidate_guard_on": [
+          0.022791799972765148,
+          0.02275770006235689,
+          0.023183599929325283,
+          0.02251030004117638,
+          0.022376000066287816,
+          0.022677100030705333,
+          0.022749399999156594
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.06925990001764148,
+        "candidate_guard_on": 0.022749399999156594
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 3.044471503433462
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0015822784810126667,
+        "cpu_busy_after": 0.0,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float32:3000x4500:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.84749787393957,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float32",
+      "shape": [
+        3000,
+        4500
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.06842370005324483,
+          0.0677743999985978,
+          0.06783990003168583,
+          0.06687569990754128,
+          0.06537589989602566,
+          0.06743239995557815,
+          0.06834510003682226
+        ],
+        "candidate_guard_on": [
+          0.02108739991672337,
+          0.021131099900230765,
+          0.02113830007147044,
+          0.021525599993765354,
+          0.023076099925674498,
+          0.024271899950690567,
+          0.023329599993303418
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.0677743999985978,
+        "candidate_guard_on": 0.021525599993765354
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 3.1485487056448083
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.022292993630573243,
+        "cpu_busy_after": 0.0015698587127158659,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:float32:10000x1000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.87750101275742,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "float32",
+      "shape": [
+        10000,
+        1000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.0459057999541983,
+          0.04603510000742972,
+          0.04701380000915378,
+          0.04792130005080253,
+          0.0481285999994725,
+          0.048043400049209595,
+          0.04608270002063364
+        ],
+        "candidate_guard_on": [
+          0.015233600046485662,
+          0.015312200062908232,
+          0.017085100058466196,
+          0.017281200038269162,
+          0.016839300049468875,
+          0.01686970004811883,
+          0.015434699947945774
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.04701380000915378,
+        "candidate_guard_on": 0.016839300049468875
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.7919093947516327
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0,
+        "cpu_busy_after": 0.0,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:int64:2999x3000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.8900011079386,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "int64",
+      "shape": [
+        2999,
+        3000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "stock",
+        "no-applicable-path"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.05650219996459782,
+          0.05709929997101426,
+          0.05751319997943938,
+          0.057060200022533536,
+          0.057859200052917004,
+          0.05496790003962815,
+          0.05497629998717457
+        ],
+        "candidate_guard_on": [
+          0.056451500044204295,
+          0.056255800067447126,
+          0.05709179991390556,
+          0.056586300022900105,
+          0.057387499953620136,
+          0.062134599895216525,
+          0.05588890006765723
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.057060200022533536,
+        "candidate_guard_on": 0.056586300022900105
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.0083748186299801
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0015748031496063408,
+        "cpu_busy_after": 0.02021772939346811,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:int64:3000x2999:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.3799994578585,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "int64",
+      "shape": [
+        3000,
+        2999
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "stock",
+        "no-applicable-path"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.055209800018928945,
+          0.054721100023016334,
+          0.0548354999627918,
+          0.0552251999033615,
+          0.055560699896886945,
+          0.05533320002723485,
+          0.05576130002737045
+        ],
+        "candidate_guard_on": [
+          0.054949200013652444,
+          0.055747800040990114,
+          0.054962399997748435,
+          0.05081329995300621,
+          0.05595449998509139,
+          0.055927000008523464,
+          0.056685500079765916
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.0552251999033615,
+        "candidate_guard_on": 0.055747800040990114
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 0.9906256365767913
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.022508038585209,
+        "cpu_busy_after": 0.0015673981191222097,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:int64:3000x3000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.06499996967614,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "int64",
+      "shape": [
+        3000,
+        3000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.05743650009389967,
+          0.05855439999140799,
+          0.0605269999941811,
+          0.05809329997282475,
+          0.057666099979542196,
+          0.05506359995342791,
+          0.05770100001245737
+        ],
+        "candidate_guard_on": [
+          0.02779800002463162,
+          0.02803940000012517,
+          0.028148100012913346,
+          0.027889000019058585,
+          0.02740679995622486,
+          0.024749599979259074,
+          0.027709400048479438
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.05770100001245737,
+        "candidate_guard_on": 0.02779800002463162
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.075724870901824
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.003215434083601254,
+        "cpu_busy_after": 0.0015673981191222097,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:int64:4500x3000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 134.82749927788973,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "int64",
+      "shape": [
+        4500,
+        3000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.08934060006868094,
+          0.08963750000111759,
+          0.0900631999829784,
+          0.08847439999226481,
+          0.08916210010647774,
+          0.10199110000394285,
+          0.09162950003519654
+        ],
+        "candidate_guard_on": [
+          0.04134689993225038,
+          0.04598759999498725,
+          0.04292989999521524,
+          0.04257359995972365,
+          0.0432394000235945,
+          0.04145019990392029,
+          0.04218979994766414
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.08963750000111759,
+        "candidate_guard_on": 0.04257359995972365
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.1054714679030737
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.007874015748031482,
+        "cpu_busy_after": 0.19999999999999996,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:int64:3000x4500:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 139.9625005433336,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "int64",
+      "shape": [
+        3000,
+        4500
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.09168879990465939,
+          0.08873030007816851,
+          0.08983969991095364,
+          0.0908262999728322,
+          0.08777059998828918,
+          0.08412919996771961,
+          0.08766840002499521
+        ],
+        "candidate_guard_on": [
+          0.04369550000410527,
+          0.04298400005791336,
+          0.04296930006239563,
+          0.04350999998860061,
+          0.04611650004517287,
+          0.043257699930109084,
+          0.048239100025966763
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.08873030007816851,
+        "candidate_guard_on": 0.04350999998860061
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.0393082073411946
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.07006369426751591,
+        "cpu_busy_after": 0.07401574803149602,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "argmax:argmax:int64:10000x1000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.97750177420676,
+      "family": "argmax",
+      "operation": "argmax",
+      "dtype": "int64",
+      "shape": [
+        10000,
+        1000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "argmax_blocked_transpose",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.05937970010563731,
+          0.05984020000323653,
+          0.05987939995247871,
+          0.058639499940909445,
+          0.0641005999641493,
+          0.0611722000176087,
+          0.06095050007570535
+        ],
+        "candidate_guard_on": [
+          0.028636100003495812,
+          0.028086300007998943,
+          0.029331699945032597,
+          0.028459900058805943,
+          0.030112000065855682,
+          0.029322899994440377,
+          0.027620799955911934
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.05987939995247871,
+        "candidate_guard_on": 0.028636100003495812
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 2.0910459156508323
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "argmax_blocked_transpose",
+      "execution": {
+        "path": "argmax_blocked_transpose",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.05128205128205132,
+        "cpu_busy_after": 0.059374999999999956,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "vectorize:sin:float64:16:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 139.74000175949186,
+      "family": "vectorize",
+      "operation": "sin",
+      "dtype": "float64",
+      "shape": [
+        16
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "vectorize_ufunc_direct",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 980,
+      "timings_seconds": {
+        "stock": [
+          6.3285713882318565e-06,
+          6.2778569539362675e-06,
+          6.145408747679725e-06,
+          6.1225514307770196e-06,
+          6.1456118805371984e-06,
+          6.1410198900468495e-06,
+          6.2176532454180475e-06
+        ],
+        "candidate_guard_on": [
+          1.4355103247703947e-06,
+          1.4240823790659102e-06,
+          1.4333673325196212e-06,
+          1.4282648964804046e-06,
+          1.425204123845514e-06,
+          1.4218374640129658e-06,
+          1.4254082070321453e-06
+        ]
+      },
+      "median_seconds": {
+        "stock": 6.1456118805371984e-06,
+        "candidate_guard_on": 1.4254082070321453e-06
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 4.311475021834643
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "vectorize_ufunc_direct",
+      "execution": {
+        "path": "vectorize_ufunc_direct",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false,
+        "direct_ufunc": "sin"
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.05520504731861198,
+        "cpu_busy_after": 0.056426332288401215,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "vectorize:sin:float64:10000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.89500046893954,
+      "family": "vectorize",
+      "operation": "sin",
+      "dtype": "float64",
+      "shape": [
+        10000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "vectorize_ufunc_direct",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 13,
+      "timings_seconds": {
+        "stock": [
+          0.0008114769230954922,
+          0.0007952692237897561,
+          0.0008164307621952433,
+          0.0007512692379980133,
+          0.0007677076903816599,
+          0.0007550538463804584,
+          0.0007609846159959069
+        ],
+        "candidate_guard_on": [
+          2.3707693729263086e-05,
+          2.393077235095776e-05,
+          2.312307389309773e-05,
+          2.3353853836082497e-05,
+          2.3476931696327833e-05,
+          2.2692310337263803e-05,
+          2.312307389309773e-05
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.0007677076903816599,
+        "candidate_guard_on": 2.3353853836082497e-05
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 32.87284812905378
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "vectorize_ufunc_direct",
+      "execution": {
+        "path": "vectorize_ufunc_direct",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false,
+        "direct_ufunc": "sin"
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.017515923566879033,
+        "cpu_busy_after": 0.06240249609984394,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "vectorize:sin:float64:1000000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 137.17749970965087,
+      "family": "vectorize",
+      "operation": "sin",
+      "dtype": "float64",
+      "shape": [
+        1000000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "vectorize_ufunc_direct",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.08584180008620024,
+          0.08645960001740605,
+          0.08798189996741712,
+          0.0893515000352636,
+          0.08684320002794266,
+          0.085738499998115,
+          0.09504009992815554
+        ],
+        "candidate_guard_on": [
+          0.003265800070948899,
+          0.003281499957665801,
+          0.003472799900919199,
+          0.0036699000047519803,
+          0.0032352000707760453,
+          0.0032885000109672546,
+          0.0031255000503733754
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.08684320002794266,
+        "candidate_guard_on": 0.003281499957665801
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 26.464483056009552
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "vectorize_ufunc_direct",
+      "execution": {
+        "path": "vectorize_ufunc_direct",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false,
+        "direct_ufunc": "sin"
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.055031446540880546,
+        "cpu_busy_after": 0.051968503937007915,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "vectorize:sqrt:float64:16:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.9275013934821,
+      "family": "vectorize",
+      "operation": "sqrt",
+      "dtype": "float64",
+      "shape": [
+        16
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "vectorize_ufunc_direct",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1000,
+      "timings_seconds": {
+        "stock": [
+          6.303799455054104e-06,
+          6.4369004685431715e-06,
+          8.608300588093698e-06,
+          1.1103100143373012e-05,
+          6.326099741272629e-06,
+          6.3369000563398004e-06,
+          6.3119996339082714e-06
+        ],
+        "candidate_guard_on": [
+          1.4125003945082426e-06,
+          1.404800103046e-06,
+          3.1454998534172772e-06,
+          1.431199605576694e-06,
+          1.410799566656351e-06,
+          1.4053002232685685e-06,
+          1.408999552950263e-06
+        ]
+      },
+      "median_seconds": {
+        "stock": 6.3369000563398004e-06,
+        "candidate_guard_on": 1.410799566656351e-06
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 4.491708252617696
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "vectorize_ufunc_direct",
+      "execution": {
+        "path": "vectorize_ufunc_direct",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false,
+        "direct_ufunc": "sqrt"
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.05555555555555558,
+        "cpu_busy_after": 0.08125000000000004,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "vectorize:sqrt:float64:10000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.3175018923357,
+      "family": "vectorize",
+      "operation": "sqrt",
+      "dtype": "float64",
+      "shape": [
+        10000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "vectorize_ufunc_direct",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 13,
+      "timings_seconds": {
+        "stock": [
+          0.0007386461455518237,
+          0.0007576538482680917,
+          0.0007656077012562981,
+          0.0007529230788350105,
+          0.0007423307710828689,
+          0.0007587307795452384,
+          0.0007531999950655377
+        ],
+        "candidate_guard_on": [
+          9.938465574612985e-06,
+          9.730771685448977e-06,
+          9.923071887057562e-06,
+          9.73846405171431e-06,
+          9.953841352118896e-06,
+          9.776925883040978e-06,
+          9.884627965780404e-06
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.0007531999950655377,
+        "candidate_guard_on": 9.884627965780404e-06
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 76.19912430422683
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "vectorize_ufunc_direct",
+      "execution": {
+        "path": "vectorize_ufunc_direct",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false,
+        "direct_ufunc": "sqrt"
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.009538950715421324,
+        "cpu_busy_after": 0.007788161993769416,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "vectorize:sqrt:float64:1000000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.0174996079877,
+      "family": "vectorize",
+      "operation": "sqrt",
+      "dtype": "float64",
+      "shape": [
+        1000000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "vectorize_ufunc_direct",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.09454780002124608,
+          0.09367430000565946,
+          0.09397030004765838,
+          0.09562449995428324,
+          0.11425550002604723,
+          0.0941307001048699,
+          0.09399590000975877
+        ],
+        "candidate_guard_on": [
+          0.0019035999430343509,
+          0.0019843000918626785,
+          0.00200159999076277,
+          0.0019945999374613166,
+          0.001986999996006489,
+          0.002000299980863929,
+          0.002005700021982193
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.0941307001048699,
+        "candidate_guard_on": 0.0019945999374613166
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 47.192772012555764
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "vectorize_ufunc_direct",
+      "execution": {
+        "path": "vectorize_ufunc_direct",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false,
+        "direct_ufunc": "sqrt"
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.004769475357710662,
+        "cpu_busy_after": 0.021840873634945357,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "vectorize:exp:float64:16:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 135.83000109065324,
+      "family": "vectorize",
+      "operation": "exp",
+      "dtype": "float64",
+      "shape": [
+        16
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "vectorize_ufunc_direct",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1000,
+      "timings_seconds": {
+        "stock": [
+          6.128800683654845e-06,
+          6.287399912253022e-06,
+          6.193300010636449e-06,
+          6.114099640399218e-06,
+          6.0612006345763806e-06,
+          6.152399815618992e-06,
+          6.11300056334585e-06
+        ],
+        "candidate_guard_on": [
+          1.4300994807854294e-06,
+          1.427399693056941e-06,
+          1.4357996406033634e-06,
+          1.4329003170132638e-06,
+          1.4102999120950699e-06,
+          1.4088003663346172e-06,
+          1.4114998048171402e-06
+        ]
+      },
+      "median_seconds": {
+        "stock": 6.128800683654845e-06,
+        "candidate_guard_on": 1.427399693056941e-06
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 4.293682220520386
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "vectorize_ufunc_direct",
+      "execution": {
+        "path": "vectorize_ufunc_direct",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false,
+        "direct_ufunc": "exp"
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0015698587127158659,
+        "cpu_busy_after": 0.034375000000000044,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "vectorize:exp:float64:10000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.00250240415335,
+      "family": "vectorize",
+      "operation": "exp",
+      "dtype": "float64",
+      "shape": [
+        10000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "vectorize_ufunc_direct",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 12,
+      "timings_seconds": {
+        "stock": [
+          0.0007595916589101156,
+          0.0007539916744766136,
+          0.0007513749975866327,
+          0.0007619666672932605,
+          0.000752724998164922,
+          0.0007584666697463641,
+          0.0007443166590140512
+        ],
+        "candidate_guard_on": [
+          3.234999409566323e-05,
+          3.1991677436356745e-05,
+          3.2274993524576225e-05,
+          3.197500094150504e-05,
+          3.230834651427964e-05,
+          3.1941667354355254e-05,
+          3.220833605155349e-05
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.0007539916744766136,
+        "candidate_guard_on": 3.220833605155349e-05
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 23.40983009087322
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "vectorize_ufunc_direct",
+      "execution": {
+        "path": "vectorize_ufunc_direct",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false,
+        "direct_ufunc": "exp"
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.01273885350318471,
+        "cpu_busy_after": 0.012820512820512775,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "vectorize:exp:float64:1000000:none",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.90250120311975,
+      "family": "vectorize",
+      "operation": "exp",
+      "dtype": "float64",
+      "shape": [
+        1000000
+      ],
+      "alias": "none",
+      "seed": 20260919,
+      "dispatch": [
+        "vectorize_ufunc_direct",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.08647710003424436,
+          0.09037579991854727,
+          0.09157670009881258,
+          0.09189740009605885,
+          0.0925937999272719,
+          0.08982640004251152,
+          0.09293909999541938
+        ],
+        "candidate_guard_on": [
+          0.004293199977837503,
+          0.004289999953471124,
+          0.004341399995610118,
+          0.004252800019457936,
+          0.0046793000074103475,
+          0.004537699976935983,
+          0.004638900049030781
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.09157670009881258,
+        "candidate_guard_on": 0.004341399995610118
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 21.093817706595097
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "vectorize_ufunc_direct",
+      "execution": {
+        "path": "vectorize_ufunc_direct",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false,
+        "direct_ufunc": "exp"
+      },
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.05120000000000002,
+        "cpu_busy_after": 0.06396255850234012,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:sin:float64:300000:disjoint",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 139.6975014358759,
+      "family": "out",
+      "operation": "sin",
+      "dtype": "float64",
+      "shape": [
+        300000
+      ],
+      "alias": "disjoint",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_sin",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 8,
+      "timings_seconds": {
+        "stock": [
+          0.0011976125097135082,
+          0.0011945375008508563,
+          0.0011823374952655286,
+          0.0016080499917734414,
+          0.0011917749798158184,
+          0.001195262506371364,
+          0.00119586251094006
+        ],
+        "candidate_guard_on": [
+          0.000957600015681237,
+          0.0006839624838903546,
+          0.0007022750214673579,
+          0.0008783749799476936,
+          0.0006318374653346837,
+          0.000796162523329258,
+          0.0007084625103743747
+        ],
+        "candidate_guard_off": [
+          0.0007113750179996714,
+          0.0007154124905355275,
+          0.000692587491357699,
+          0.0006659749778918922,
+          0.0006333874916890636,
+          0.0009460499859414995,
+          0.0006147625099401921
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.001195262506371364,
+        "candidate_guard_on": 0.0007084625103743747,
+        "candidate_guard_off": 0.000692587491357699
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.6871217444374698,
+        "candidate_guard_off": 1.725792800600913
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_sin",
+      "execution": {
+        "path": "pyrallel_sin",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 1.587501901667565e-05,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.04472843450479236,
+        "cpu_busy_after": 0.0,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:sin:float64:300000:inplace",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 135.92249888461083,
+      "family": "out",
+      "operation": "sin",
+      "dtype": "float64",
+      "shape": [
+        300000
+      ],
+      "alias": "inplace",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_sin",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 8,
+      "timings_seconds": {
+        "stock": [
+          0.0011904875136679038,
+          0.0011786499962909147,
+          0.0011796750186476856,
+          0.0011745374940801412,
+          0.0011446375137893483,
+          0.0011616999690886587,
+          0.0011483124835649505
+        ],
+        "candidate_guard_on": [
+          0.0014405124820768833,
+          0.0005593750247498974,
+          0.000555549981072545,
+          0.0008295875159092247,
+          0.0009168999822577462,
+          0.000814037470263429,
+          0.0008303624927066267
+        ],
+        "candidate_guard_off": [
+          0.0005852000176673755,
+          0.0005116124957567081,
+          0.000520037516253069,
+          0.0008531374769518152,
+          0.0011796750040957704,
+          0.0008261999901151285,
+          0.0007908999978099018
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.0011745374940801412,
+        "candidate_guard_on": 0.0008295875159092247,
+        "candidate_guard_off": 0.0007908999978099018
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.4158090274452269,
+        "candidate_guard_off": 1.4850644801271693
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_sin",
+      "execution": {
+        "path": "pyrallel_sin",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 3.8687518099322915e-05,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.033175355450236976,
+        "cpu_busy_after": 0.06396255850234012,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:sin:float64:900000:disjoint",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.8850003927946,
+      "family": "out",
+      "operation": "sin",
+      "dtype": "float64",
+      "shape": [
+        900000
+      ],
+      "alias": "disjoint",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_sin",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 2,
+      "timings_seconds": {
+        "stock": [
+          0.003459199971985072,
+          0.0038893999881111085,
+          0.003536249918397516,
+          0.003528849920257926,
+          0.0033904999727383256,
+          0.003492149990051985,
+          0.003499950049445033
+        ],
+        "candidate_guard_on": [
+          0.0020181500585749745,
+          0.0021739499643445015,
+          0.001947099925018847,
+          0.002177499991375953,
+          0.0020412500016391277,
+          0.0019259999971836805,
+          0.0019441000185906887
+        ],
+        "candidate_guard_off": [
+          0.0020576499518938363,
+          0.0024663000367581844,
+          0.0022949500125832856,
+          0.0018386500305496156,
+          0.001916699984576553,
+          0.001750349998474121,
+          0.002014599973335862
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.003499950049445033,
+        "candidate_guard_on": 0.0020181500585749745,
+        "candidate_guard_off": 0.002014599973335862
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.7342367751961738,
+        "candidate_guard_off": 1.7372928103685337
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_sin",
+      "execution": {
+        "path": "pyrallel_sin",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 3.550085239112377e-06,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.07981220657277,
+        "cpu_busy_after": 0.12050078247261342,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:sin:float64:900000:inplace",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 137.489999178797,
+      "family": "out",
+      "operation": "sin",
+      "dtype": "float64",
+      "shape": [
+        900000
+      ],
+      "alias": "inplace",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_sin",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 2,
+      "timings_seconds": {
+        "stock": [
+          0.003942649986129254,
+          0.005021149991080165,
+          0.0038690499495714903,
+          0.0038892499869689345,
+          0.003834600036498159,
+          0.00359214999480173,
+          0.0038968499866314232
+        ],
+        "candidate_guard_on": [
+          0.00257800001418218,
+          0.0026495499187149107,
+          0.00204180006403476,
+          0.0021720999502576888,
+          0.0019074000301770866,
+          0.0024246499524451792,
+          0.0024350500316359103
+        ],
+        "candidate_guard_off": [
+          0.0024490500218234956,
+          0.0027752499445341527,
+          0.0022506999666802585,
+          0.0025128499837592244,
+          0.0021159499883651733,
+          0.0023361999774351716,
+          0.0026681499439291656
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.0038892499869689345,
+        "candidate_guard_on": 0.0024246499524451792,
+        "candidate_guard_off": 0.0024490500218234956
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.6040459708613835,
+        "candidate_guard_off": 1.5880647403327048
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_sin",
+      "execution": {
+        "path": "pyrallel_sin",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": -2.4400069378316402e-05,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.08688783570300163,
+        "cpu_busy_after": 0.07064364207221352,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:sin:float32:3000000:disjoint",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 137.73499813396484,
+      "family": "out",
+      "operation": "sin",
+      "dtype": "float32",
+      "shape": [
+        3000000
+      ],
+      "alias": "disjoint",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_sin",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 2,
+      "timings_seconds": {
+        "stock": [
+          0.0034679999807849526,
+          0.003182700020261109,
+          0.003468699927907437,
+          0.0031151000293903053,
+          0.0034399499418213964,
+          0.0031685999711044133,
+          0.0035141000407747924
+        ],
+        "candidate_guard_on": [
+          0.002230949990916997,
+          0.002496899978723377,
+          0.002107999986037612,
+          0.002174600027501583,
+          0.0022407500073313713,
+          0.0021387499873526394,
+          0.0022682000417262316
+        ],
+        "candidate_guard_off": [
+          0.002101499936543405,
+          0.002355349948629737,
+          0.002297299972269684,
+          0.002250450022984296,
+          0.002256949956063181,
+          0.0029129500035196543,
+          0.0023896500351838768
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.0034399499418213964,
+        "candidate_guard_on": 0.002230949990916997,
+        "candidate_guard_off": 0.002297299972269684
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.5419215831043611,
+        "candidate_guard_off": 1.497388231116722
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_sin",
+      "execution": {
+        "path": "pyrallel_sin",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": -6.634998135268688e-05,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.06416275430359941,
+        "cpu_busy_after": 0.04636785162287482,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:sin:float32:3000000:inplace",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 142.41000171750784,
+      "family": "out",
+      "operation": "sin",
+      "dtype": "float32",
+      "shape": [
+        3000000
+      ],
+      "alias": "inplace",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_sin",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 2,
+      "timings_seconds": {
+        "stock": [
+          0.0035913499887101352,
+          0.003549700020812452,
+          0.0035958000225946307,
+          0.0035014000604860485,
+          0.003586249949876219,
+          0.003674199979286641,
+          0.003574599977582693
+        ],
+        "candidate_guard_on": [
+          0.0024135499843396246,
+          0.002495849970728159,
+          0.002345950051676482,
+          0.0021171499975025654,
+          0.0022848499938845634,
+          0.002390699984971434,
+          0.0023017999483272433
+        ],
+        "candidate_guard_off": [
+          0.0032472999882884324,
+          0.0021580500178970397,
+          0.0023179000127129257,
+          0.0021654999582096934,
+          0.002403499966021627,
+          0.002556750026997179,
+          0.002070349990390241
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.003586249949876219,
+        "candidate_guard_on": 0.002345950051676482,
+        "candidate_guard_off": 0.0023179000127129257
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.5286983400662704,
+        "candidate_guard_off": 1.547197864535488
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_sin",
+      "execution": {
+        "path": "pyrallel_sin",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 2.805003896355629e-05,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.039184952978056464,
+        "cpu_busy_after": 0.05443234836702959,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:sin:float32:9000000:disjoint",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 135.61499945353717,
+      "family": "out",
+      "operation": "sin",
+      "dtype": "float32",
+      "shape": [
+        9000000
+      ],
+      "alias": "disjoint",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_sin",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.00986600003670901,
+          0.009693600004538894,
+          0.00976829999126494,
+          0.009839300066232681,
+          0.009772199904546142,
+          0.010051600052975118,
+          0.009561499929986894
+        ],
+        "candidate_guard_on": [
+          0.005914399982430041,
+          0.006452800007537007,
+          0.0065954000456258655,
+          0.007182199973613024,
+          0.006947900052182376,
+          0.00589819997549057,
+          0.0066451000748202205
+        ],
+        "candidate_guard_off": [
+          0.0062809999799355865,
+          0.006338999955914915,
+          0.006414200062863529,
+          0.005669800098985434,
+          0.005856000003404915,
+          0.0060897000366821885,
+          0.006125600077211857
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.009772199904546142,
+        "candidate_guard_on": 0.0065954000456258655,
+        "candidate_guard_off": 0.006125600077211857
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.4816690173368878,
+        "candidate_guard_off": 1.5953049140279625
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_sin",
+      "execution": {
+        "path": "pyrallel_sin",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 0.0004697999684140086,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.05120000000000002,
+        "cpu_busy_after": 0.05312499999999998,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:sin:float32:9000000:inplace",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.64749926142395,
+      "family": "out",
+      "operation": "sin",
+      "dtype": "float32",
+      "shape": [
+        9000000
+      ],
+      "alias": "inplace",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_sin",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.010599300032481551,
+          0.010632400051690638,
+          0.010652899974957108,
+          0.010648000054061413,
+          0.01058920007199049,
+          0.011951700085774064,
+          0.010751700028777122
+        ],
+        "candidate_guard_on": [
+          0.0077108999248594046,
+          0.007206900045275688,
+          0.007362700067460537,
+          0.007131399936042726,
+          0.007481200038455427,
+          0.007116299937479198,
+          0.007383899996057153
+        ],
+        "candidate_guard_off": [
+          0.007305099978111684,
+          0.007127200020477176,
+          0.00740639993455261,
+          0.007228599977679551,
+          0.007146399933844805,
+          0.0102377999573946,
+          0.0070164999924600124
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.010648000054061413,
+        "candidate_guard_on": 0.007362700067460537,
+        "candidate_guard_off": 0.007228599977679551
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.4462085860485154,
+        "candidate_guard_off": 1.4730376680049078
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_sin",
+      "execution": {
+        "path": "pyrallel_sin",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 0.0001341000897809863,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0032051282051281937,
+        "cpu_busy_after": 0.0078125,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:add:float64:20000000:disjoint",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.25250139739364,
+      "family": "out",
+      "operation": "add",
+      "dtype": "float64",
+      "shape": [
+        20000000
+      ],
+      "alias": "disjoint",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_add",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.029566499986685812,
+          0.024506199988536537,
+          0.02475159999448806,
+          0.02432810002937913,
+          0.024481500033289194,
+          0.025182000012136996,
+          0.025743999984115362
+        ],
+        "candidate_guard_on": [
+          0.021521999966353178,
+          0.021328300004824996,
+          0.023825200041756034,
+          0.023617199971340597,
+          0.021332500036805868,
+          0.025481199962086976,
+          0.024032499990426004
+        ],
+        "candidate_guard_off": [
+          0.022701799985952675,
+          0.021279099979437888,
+          0.024025200051255524,
+          0.025222199968993664,
+          0.022498900070786476,
+          0.02417410002090037,
+          0.021274699945934117
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.02475159999448806,
+        "candidate_guard_on": 0.023617199971340597,
+        "candidate_guard_off": 0.022701799985952675
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.04803279070017,
+        "candidate_guard_off": 1.090292400153457
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_add",
+      "execution": {
+        "path": "pyrallel_add",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 0.0009153999853879213,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.004823151125401881,
+        "cpu_busy_after": 0.0031347962382445305,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:add:float64:20000000:inplace",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.85500084143132,
+      "family": "out",
+      "operation": "add",
+      "dtype": "float64",
+      "shape": [
+        20000000
+      ],
+      "alias": "inplace",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_add",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.019815900013782084,
+          0.01972159999422729,
+          0.020018899929709733,
+          0.0205379999242723,
+          0.020104800001718104,
+          0.019842499983496964,
+          0.020193599979393184
+        ],
+        "candidate_guard_on": [
+          0.028751399950124323,
+          0.019818800035864115,
+          0.02055740007199347,
+          0.02010389999486506,
+          0.019968600012362003,
+          0.020273900008760393,
+          0.020387199940159917
+        ],
+        "candidate_guard_off": [
+          0.021717399940826,
+          0.018756900099106133,
+          0.021573400008492172,
+          0.02023579995147884,
+          0.020487100002355874,
+          0.019954900024458766,
+          0.01953179994598031
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.020018899929709733,
+        "candidate_guard_on": 0.020273900008760393,
+        "candidate_guard_off": 0.02023579995147884
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 0.9874222483616634,
+        "candidate_guard_off": 0.9892813715153744
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_add",
+      "execution": {
+        "path": "pyrallel_add",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 3.8100057281553745e-05,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.008012820512820484,
+        "cpu_busy_after": 0.07894736842105265,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:add:float64:60000000:disjoint",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 136.03250263258815,
+      "family": "out",
+      "operation": "add",
+      "dtype": "float64",
+      "shape": [
+        60000000
+      ],
+      "alias": "disjoint",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_add",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.08040890004485846,
+          0.08125519996974617,
+          0.08546990004833788,
+          0.07829540001694113,
+          0.08226339996326715,
+          0.08168359997216612,
+          0.09823459992185235
+        ],
+        "candidate_guard_on": [
+          0.0675251999637112,
+          0.06797960004769266,
+          0.06770220003090799,
+          0.06680450006388128,
+          0.07244570006150752,
+          0.06683699996210635,
+          0.06465770001523197
+        ],
+        "candidate_guard_off": [
+          0.07042739994358271,
+          0.06863370002247393,
+          0.07080089999362826,
+          0.0729512000689283,
+          0.0705306000309065,
+          0.06555049994494766,
+          0.06528119998984039
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.08168359997216612,
+        "candidate_guard_on": 0.0675251999637112,
+        "candidate_guard_off": 0.07042739994358271
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.2096757953484596,
+        "candidate_guard_off": 1.1598269996847876
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_add",
+      "execution": {
+        "path": "pyrallel_add",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": -0.0029021999798715115,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.004777070063694322,
+        "cpu_busy_after": 0.004777070063694322,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:add:float64:60000000:inplace",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 134.04999917838722,
+      "family": "out",
+      "operation": "add",
+      "dtype": "float64",
+      "shape": [
+        60000000
+      ],
+      "alias": "inplace",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_add",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.0634800000116229,
+          0.06378880003467202,
+          0.06358469999395311,
+          0.06326460000127554,
+          0.06773950008209795,
+          0.06462100008502603,
+          0.06361289997585118
+        ],
+        "candidate_guard_on": [
+          0.06247010000515729,
+          0.06622489995788783,
+          0.06261460005771369,
+          0.06747200002428144,
+          0.06675380002707243,
+          0.061259199981577694,
+          0.06594190001487732
+        ],
+        "candidate_guard_off": [
+          0.06180649995803833,
+          0.06616230006329715,
+          0.06606500002089888,
+          0.06717599998228252,
+          0.06609480001498014,
+          0.06577529991045594,
+          0.06181910005398095
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.06361289997585118,
+        "candidate_guard_on": 0.06594190001487732,
+        "candidate_guard_off": 0.06606500002089888
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 0.964681029231783,
+        "candidate_guard_off": 0.9628835231321878
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_add",
+      "execution": {
+        "path": "pyrallel_add",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": -0.00012310000602155924,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.03508771929824561,
+        "cpu_busy_after": 0.00786163522012584,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:add:int64:20000000:disjoint",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.83000065106899,
+      "family": "out",
+      "operation": "add",
+      "dtype": "int64",
+      "shape": [
+        20000000
+      ],
+      "alias": "disjoint",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_add",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.024858200107701123,
+          0.023509099963121116,
+          0.024894700036384165,
+          0.024019500007852912,
+          0.024158300017006695,
+          0.02723040001001209,
+          0.024337399983778596
+        ],
+        "candidate_guard_on": [
+          0.02308309997897595,
+          0.022797800018452108,
+          0.020921999937854707,
+          0.0228301000315696,
+          0.020882899989373982,
+          0.021274499944411218,
+          0.022150499979034066
+        ],
+        "candidate_guard_off": [
+          0.03164840000681579,
+          0.01897209999151528,
+          0.021714800037443638,
+          0.024929300067014992,
+          0.022771900054067373,
+          0.020873500034213066,
+          0.022484300076030195
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.024337399983778596,
+        "candidate_guard_on": 0.022150499979034066,
+        "candidate_guard_off": 0.022484300076030195
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.0987291486338673,
+        "candidate_guard_off": 1.082417504724727
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_add",
+      "execution": {
+        "path": "pyrallel_add",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": -0.00033380009699612856,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.030110935023771823,
+        "cpu_busy_after": 0.01098901098901095,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:add:int64:20000000:inplace",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.69499962311238,
+      "family": "out",
+      "operation": "add",
+      "dtype": "int64",
+      "shape": [
+        20000000
+      ],
+      "alias": "inplace",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_add",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.02251010003965348,
+          0.021658699959516525,
+          0.021515100030228496,
+          0.02149830001872033,
+          0.0200547999702394,
+          0.019704699981957674,
+          0.019819000037387013
+        ],
+        "candidate_guard_on": [
+          0.02036350010894239,
+          0.020380600006319582,
+          0.020164000103250146,
+          0.020111700054258108,
+          0.01955710002221167,
+          0.019068700028583407,
+          0.018851600005291402
+        ],
+        "candidate_guard_off": [
+          0.02028589998371899,
+          0.02005059993825853,
+          0.020175899961031973,
+          0.020120500004850328,
+          0.01968340005259961,
+          0.018935699947178364,
+          0.01877490000333637
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.02149830001872033,
+        "candidate_guard_on": 0.020111700054258108,
+        "candidate_guard_off": 0.02005059993825853
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.0689449405431366,
+        "candidate_guard_off": 1.0722023323451506
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_add",
+      "execution": {
+        "path": "pyrallel_add",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 6.110011599957943e-05,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.06896551724137934,
+        "cpu_busy_after": 0.012461059190031154,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:add:int64:60000000:disjoint",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.73749994672835,
+      "family": "out",
+      "operation": "add",
+      "dtype": "int64",
+      "shape": [
+        60000000
+      ],
+      "alias": "disjoint",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_add",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.08074570004828274,
+          0.07090970000717789,
+          0.07535019994247705,
+          0.08468280010856688,
+          0.07239479990676045,
+          0.07206400006543845,
+          0.07105380005668849
+        ],
+        "candidate_guard_on": [
+          0.05909130000509322,
+          0.061577499960549176,
+          0.06630479998420924,
+          0.06289900001138449,
+          0.061376400059089065,
+          0.06287299992982298,
+          0.0672958999639377
+        ],
+        "candidate_guard_off": [
+          0.0644307000329718,
+          0.06245299999136478,
+          0.06244260002858937,
+          0.06806769990362227,
+          0.06632059998810291,
+          0.060300800018012524,
+          0.0625241999514401
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.07239479990676045,
+        "candidate_guard_on": 0.06287299992982298,
+        "candidate_guard_off": 0.0625241999514401
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.1514449761831855,
+        "candidate_guard_off": 1.15786847273514
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_add",
+      "execution": {
+        "path": "pyrallel_add",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": 0.00034879997838288546,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0032051282051281937,
+        "cpu_busy_after": 0.0078125,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "out:add:int64:60000000:inplace",
+      "status": "measured",
+      "qualified": true,
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "core_probe_us": 138.85999796912074,
+      "family": "out",
+      "operation": "add",
+      "dtype": "int64",
+      "shape": [
+        60000000
+      ],
+      "alias": "inplace",
+      "seed": 20260919,
+      "dispatch": [
+        "pyrallel_add",
+        "predicate-accepted"
+      ],
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical"
+      },
+      "rounds": 7,
+      "calls_per_sample": 1,
+      "timings_seconds": {
+        "stock": [
+          0.06015020003542304,
+          0.05957939999643713,
+          0.06029100005980581,
+          0.059067699941806495,
+          0.06748849991708994,
+          0.06742189999204129,
+          0.06356140004936606
+        ],
+        "candidate_guard_on": [
+          0.06350150005891919,
+          0.05454100004862994,
+          0.06344700010959059,
+          0.05475959996692836,
+          0.05788100010249764,
+          0.054553299909457564,
+          0.056642199982889
+        ],
+        "candidate_guard_off": [
+          0.06496380001772195,
+          0.05574919993523508,
+          0.05631100002210587,
+          0.0545159000903368,
+          0.05791590001899749,
+          0.05942979990504682,
+          0.06819080002605915
+        ]
+      },
+      "median_seconds": {
+        "stock": 0.06029100005980581,
+        "candidate_guard_on": 0.056642199982889,
+        "candidate_guard_off": 0.05791590001899749
+      },
+      "ratios_stock_over_candidate": {
+        "candidate_guard_on": 1.0644184032050146,
+        "candidate_guard_off": 1.041009464413559
+      },
+      "input_reset": "outside each timed call",
+      "result_consumed": true,
+      "experimental_enable": "pyrallel_add",
+      "execution": {
+        "path": "pyrallel_add",
+        "check": "Gearbox._warned_paths",
+        "fallback_observed": false
+      },
+      "guard_overhead_seconds": -0.0012737000361084938,
+      "conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.019199999999999995,
+        "cpu_busy_after": 0.07064364207221352,
+        "contended": false,
+        "load_known": true
+      },
+      "exit_code": 0,
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    }
+  ],
+  "completed": true,
+  "verified_cells": [
+    "argmax:argmax:float64:2999x3000:none",
+    "argmax:argmax:float64:3000x2999:none",
+    "argmax:argmax:float64:3000x3000:none",
+    "argmax:argmax:float64:4500x3000:none",
+    "argmax:argmax:float64:3000x4500:none",
+    "argmax:argmax:float64:10000x1000:none",
+    "argmax:argmax:float32:2999x3000:none",
+    "argmax:argmax:float32:3000x2999:none",
+    "argmax:argmax:float32:3000x3000:none",
+    "argmax:argmax:float32:4500x3000:none",
+    "argmax:argmax:float32:3000x4500:none",
+    "argmax:argmax:float32:10000x1000:none",
+    "argmax:argmax:int64:2999x3000:none",
+    "argmax:argmax:int64:3000x2999:none",
+    "argmax:argmax:int64:3000x3000:none",
+    "argmax:argmax:int64:4500x3000:none",
+    "argmax:argmax:int64:3000x4500:none",
+    "argmax:argmax:int64:10000x1000:none",
+    "vectorize:sin:float64:16:none",
+    "vectorize:sin:float64:10000:none",
+    "vectorize:sin:float64:1000000:none",
+    "vectorize:sqrt:float64:16:none",
+    "vectorize:sqrt:float64:10000:none",
+    "vectorize:sqrt:float64:1000000:none",
+    "vectorize:exp:float64:16:none",
+    "vectorize:exp:float64:10000:none",
+    "vectorize:exp:float64:1000000:none",
+    "out:sin:float64:300000:disjoint",
+    "out:sin:float64:300000:inplace",
+    "out:sin:float64:900000:disjoint",
+    "out:sin:float64:900000:inplace",
+    "out:sin:float32:3000000:disjoint",
+    "out:sin:float32:3000000:inplace",
+    "out:sin:float32:9000000:disjoint",
+    "out:sin:float32:9000000:inplace",
+    "out:add:float64:20000000:disjoint",
+    "out:add:float64:20000000:inplace",
+    "out:add:float64:60000000:disjoint",
+    "out:add:float64:60000000:inplace",
+    "out:add:int64:20000000:disjoint",
+    "out:add:int64:20000000:inplace",
+    "out:add:int64:60000000:disjoint",
+    "out:add:int64:60000000:inplace"
+  ],
+  "settings": {
+    "rounds": 7,
+    "retries": 6,
+    "any_core": false,
+    "require_quiet": true,
+    "calibration": "pristine shipped tables in fresh children",
+    "environment": {
+      "PYOVERDRIVE_THREADS": null,
+      "PYOVERDRIVE_DISABLE": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null,
+      "PYTHONWARNINGS": null
+    }
+  },
+  "cpu_classes": {
+    "hybrid": true,
+    "fast": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "slow": [
+      16,
+      17,
+      18,
+      19
+    ],
+    "class_ratio": 2.332,
+    "probe_us": {
+      "3": 136.9,
+      "14": 136.9,
+      "8": 136.9,
+      "13": 136.9,
+      "5": 137.0,
+      "10": 137.0,
+      "15": 137.0,
+      "9": 137.0,
+      "11": 137.1,
+      "7": 137.1,
+      "1": 137.2,
+      "4": 138.8,
+      "12": 138.8,
+      "2": 138.9,
+      "0": 138.9,
+      "6": 139.2,
+      "17": 319.4,
+      "19": 319.5,
+      "16": 319.6,
+      "18": 320.3
+    }
+  },
+  "fast_under_us": 229.29999999999998,
+  "conditions": {
+    "quiet_threshold": 0.2,
+    "cpu_busy_before": 0.02170542635658912,
+    "cpu_busy_after": 0.009360374414976613,
+    "contended": false,
+    "load_known": true
+  },
+  "unverified_cells": [],
+  "all_cells_attempted": true,
+  "exit_code": 0
+}

@@ -37,14 +37,14 @@ the short road, and stays out of the way everywhere else.
 
 Measured end-to-end through the public API - `pyoverdrive.enable()` on, your
 call unchanged - on an idle Intel i7-12700K, NumPy 2.5.2, at 0% background
-load. Every number in this repository ships with the machine that produced it
-and the JSON it came from, under
-[`benchmarks/results/`](benchmarks/results). Nothing is admitted on one
-machine's word: a fast path ships only if it wins on both benchmark machines,
-and the slower one's number is the one quoted. The THREADED ufunc thresholds
-are the exception and say so: they come from the one box here that is
-reliably idle, and `python -m pyoverdrive --calibrate` re-checks them on
-yours (see "Baselining a machine").
+load. Raw evidence lives under
+[`benchmarks/results/`](benchmarks/results). These are measurements of specific
+inputs, software versions and hardware, not universal speed guarantees. The
+[current re-measurement report](docs/research/2026-09-19-burndown.md) records
+coverage, losing routes withdrawn from dispatch, and remaining limits on
+cross-machine comparisons. Threaded ufunc thresholds are hardware-sensitive;
+`python -m pyoverdrive --calibrate` re-checks them on yours (see "Baselining a
+machine").
 
 ## Why it is safe
 
@@ -52,7 +52,8 @@ The point of an accelerator you can leave switched on is that you never have to
 wonder. So:
 
 - **Results match stock NumPy.** Bit-identical on 43 of the 67 always-on paths;
-  the other 23 run in a documented numeric mode with a measured tolerance.
+  two additional paths are exact for integer inputs. The remaining 22 use
+  documented numeric tolerances or set equality where output order is unspecified.
 - **Every fast path is conservative.** It runs only when a predicate proves the
   input is in its calibrated regime. Anything else - odd dtypes, edge shapes,
   non-finite values, subclasses - falls back to stock, automatically.
@@ -112,6 +113,10 @@ docs/          Architecture, decisions (ADRs), research reports
 ```
 
 ## Install, verify, roll back
+
+Requires Python 3.12+ and NumPy 2.3+. Earlier NumPy versions lack the
+strided-operand BLAS routing used by the split-complex matrix path.
+See [NumPy PR #23752](https://github.com/numpy/numpy/pull/23752).
 
 ```
 python -m pip install git+https://github.com/LunarWerxs/PyOverdrive.git   # or a built wheel
@@ -181,11 +186,11 @@ threading number comes from). The full correctness gate (differential, property 
 all-paths self-check; 2065 tests and 67 paths at that run, 2026-08-25)
 additionally runs green on a third environment - Linux x86-64 under
 Docker (python:3.13-slim, numpy 2.5.2) - and on a clean-venv wheel
-install, so the compatibility claims hold across two OSes, two
-architectures, and both supported numpy minor lines. The single-threaded
-algorithmic families win on both benchmark machines and transfer at full
-strength or better (intersect1d sorted 83x, correlate int64 15.4x,
-unique(axis=0) 37.9x on Intel).
+install. Those historical checks cover two OSes and two processor families;
+they do not establish performance for every supported version or input. The
+[2026-09-19 report](docs/research/2026-09-19-burndown.md) records newer checks
+against NumPy 2.3.0, 2.4.5 and the resolved latest release, including routes
+withdrawn when those comparisons found regressions.
 
 The THREADED ufunc thresholds are a different story and are stated
 narrowly on purpose. They were re-derived on 2026-08-24 on the Intel box -
@@ -214,8 +219,9 @@ threshold on its say-so.
 Phases 0-4 prototyped on the first machine (Zen 4 AVX-512, 16C/32T, numpy
 2.4.5, fingerprint `8f8198d9abab`). Forty-five fast-path families are live behind
 `enable()` (plus one calibration-gated), every threshold calibrated from
-committed Dyno evidence. Results are bit-identical to stock on 43 of the 67 always-on paths
-registered paths; the other 23 run in documented numeric mode
+committed Dyno evidence. Results are bit-identical to stock on 43 of the 67 always-on paths;
+two more are exact for integer inputs. The remaining 22 use documented
+numeric tolerances or set equality
 (`inner_tensordot`, float fftconvolve,
 `nanquantile_masked`, `nanpercentile_masked`, `einsum_optimize`,
 `reduce_tiny_trailing`, `eigvalsh_2x2_closed`, `eigvalsh_3x3_trig`,
@@ -225,19 +231,19 @@ det/slogdet/solve, `cholesky_small_batch`, `qr_small_batch`,
 
 | Fast path | Regime | Measured end-to-end (public API) |
 |---|---|---:|
-| `unique_sort` | `np.unique`/`unique_values`, {int32,int64,uint32,uint64} n >= 64; {int8,uint8,uint16} n >= 1000, int16 n >= 10k via radix (`kind='stable'`) | 37-55x (1M int64); small ints 1.6-27.8x; up to 101x candidate-level |
+| `unique_sort` | `np.unique`/`unique_values`, int8/uint8 n >= 1000; int32/uint32 n >= 10,000; other dtypes use stock | Repeated distribution-dependent losses withdrew both 16-bit and both 64-bit rows. [Current evidence and withdrawals](docs/research/2026-09-19-burndown.md). |
 | `inner_tensordot` | `np.inner`, float32/float64, at least one operand ndim > 2, inside a MEASURED regime: >= 8 rows on the left, >= 64 on the right, >= 1024 output cells, contraction <= 128 | 1.21-6.98x inside that regime. It previously had no size gate at all and ran at 0.38x on small operands; the wins and losses interleave, so the gate admits only the corner where every measured cell won |
-| `intersect_sorted` | `np.intersect1d`, same int dtype, combined size >= 400 (32/64-bit) or >= 12k (8/16-bit) | 1.5x at the floor rising to 21.6x random inputs and 90.7x already-sorted (1e6 x 1e5); small ints 1.9-10.1x; up to 433x candidate-level |
+| `intersect_sorted` | `np.intersect1d`, same int32/uint32 dtype with combined size >= 10,000; other dtypes use stock | Repeated low-cardinality losses withdrew all 8-bit, 16-bit and 64-bit rows. [Current evidence and withdrawals](docs/research/2026-09-19-burndown.md). |
 | `pyrallel_<op>` | `np.sin cos tan exp log log10 tanh`, float64/float32, C-contiguous, op/dtype-calibrated size floor (3e5-3e6 elements) | 1.34-1.63x at the floor, 1.8-2.2x at 1e7, measured end-to-end as the WORST of sorted/shuffled input and bare/consumed result. `np.sqrt` is not in this family: bandwidth bound, never reaches 1.3x |
-| `relayout_blocked` | `np.ascontiguousarray` of a transposed/F-ordered 2-D float64/float32/int64 array, >= 512x512 (int64 1024x1024) | 2.8-3.3x at 2048x2048 end-to-end; up to 6.6x candidate-level (float32 8192x1024) |
+| `relayout_blocked` | `np.ascontiguousarray` of a transposed/F-ordered 2-D float64/float32/int64 array, >= 4,194,304 elements | 2.8-3.3x at 2048x2048 end-to-end; up to 6.6x candidate-level (float32 8192x1024) |
 | `unique_axis0_column` | `np.unique(a, axis=0)`, single int column (8- to 64-bit), >= 1000 rows | 42x at 10k rows int64; 40-298x small ints |
-| `pyrallel_<op>` (binary) | `np.add maximum minimum` float64/int64, `np.subtract` int64, `np.multiply` int64; same-shape same-dtype C-contiguous; floors of 1e7-2e7 elements | 1.31-1.38x at the floor, worst of two independent sweeps (bandwidth bound; `a + b` is not reachable, only explicit `np.add`). `np.divide` and every float32 row left the family: they clear 1.3x at no measured size |
+| `pyrallel_<op>` (binary) | `np.add maximum minimum` float64/int64, `np.subtract` int64, `np.multiply` int64; same-shape same-dtype C-contiguous; floors of 1e7-2e7 elements; float64 add with exact in-place `out` stays on stock | 1.31-1.38x at the floor, worst of two independent sweeps (bandwidth bound; `a + b` is not reachable, only explicit `np.add`). `np.divide` and every float32 row left the family: they clear 1.3x at no measured size |
 | `fftconvolve` / `fftcorrelate` | `np.convolve`/`np.correlate`, all three modes (full/same/valid), 1-D same-dtype float64/int64/int32, min length 1000, per-mode naive-work floors; floats all-finite and non-overflowing, ints under the 2^52 exactness bound | 3.6x float64 / 13.5x int64 full-mode end-to-end (10k x 1k); same-mode (the smoothing idiom) 2.9-4.9x, valid 1.6-3.3x, int modes ~13-14x; 1518x candidate-level at 20k x 20k. Ints bit-identical, floats ~1e-12 |
 | `nanquantile_masked` | `np.nanquantile(a, q, axis=<int>)`, 2-D+ float64, scalar q, >= 300 elements, guarded against the few-long-slices anti-regime | 22.6-229x across the many-slice region (51.9-63.4x at the reporter's 27x100); results bit-exact vs stock in every probe |
 | `einsum_optimize` | two-operand subscripts-form `np.einsum`, float64/float32, min operand >= 10k (matmul-shaped) or >= 1e6 (scalar output); label and ellipsis (`...ij,...jk`) spellings; routes through numpy's own `optimize=True` | 3.4-27.4x float64 from the floor up (45x candidate-level; ellipsis 3.2-4.3x measured); tiny contractions (the reason optimize is off by default) stay on stock |
-| `searchsorted_sortqueries` | `np.searchsorted`, 1-D same-dtype float64/int64, haystack >= 1e4, queries >= 1e4 (f64) / 1e5 (i64), <= 10x haystack, and a sampled disorder gate (only random-like query orders dispatch) | 2.2-3.6x float64, up to 14.5x int64, bit-identical; sorted/nearly-sorted/descending queries measured losing and refused |
+| `searchsorted_sortqueries` | `np.searchsorted`, 1-D same-dtype float64, sorted haystack >= 1e4, queries >= 1e4, <= 10x haystack, and a sampled disorder gate (only random-like query orders dispatch) | 2.2-3.6x float64 in the original evidence; int64 acceleration withdrawn after stock NumPy improved; bit-identical; sorted/nearly-sorted/descending queries measured losing and refused |
 | `isclose_fused` | `np.isclose`, finite scalar pairs or small all-finite same-shape float64 (<= 1000) / float32 (<= 10k) arrays, default-style finite tolerances | 2.8x scalar pairs, 1.5-1.8x small arrays, bit-identical; NaN-bearing refusal costs 0.82x (documented guard row) |
-| `isin_string_hash` | `np.isin`, 1-D default StringDType pairs, combined >= 300; pure-NUL strings refused (stock bug guarded) | 2319x at the reporter's shape, 13-299x across regimes, bit-identical |
+| `isin_string_hash` | `np.isin`, 1-D default StringDType pairs, combined >= 300 and test_elements >= 48; pure-NUL strings refused (stock bug guarded) | 2319x at the reporter's shape, 13-299x across regimes, bit-identical |
 | `dot_mixed_view` | `np.dot(real f64 2-D, complex128 1-D)`, all-finite, A >= 20k elements | 12-44x via one real GEMV; reverse direction measured no gap and stays stock |
 | `quantile_dense_sort` | `np.quantile` with a q ARRAY (4-16384 quantiles), float64, 1-D or 2-D last-axis, reduced length 512-65536 | 1.8x at 4 quantiles to 918x dense; bit-identical incl. NaN slices (stock's own lerp arithmetic replicated) |
 | `percentile_dense` | `np.percentile`, same regime with q in [0, 100] | 1.83x at nq=4 to 805.8x at nq=16384; bit-identical (numpy's own q/100 scaling) |
@@ -249,14 +255,14 @@ det/slogdet/solve, `cholesky_small_batch`, `qr_small_batch`,
 | `cholesky_small_batch` | `np.linalg.cholesky` on (..., 2, 2) / (..., 3, 3) float64 batches >= 1000, no cap; positive-definite by pivot guard fused into the factorization pass | Cholesky-Crout in cache-sized chunks, 1.9-2.3x (2x2) and 1.6-1.9x (3x3) from batch 1000 to 1M; non-PD input keeps stock's exact LinAlgError via mid-run fallback |
 | `qr_small_batch` | `np.linalg.qr` on (..., 2, 2) / (..., 3, 3) float64 batches >= 300, modes reduced/complete/'r' | unrolled Householder reflectors in LAPACK's own sign convention: 4.1-11x (2x2) and 2.2-4.2x (3x3) with Q, 1.7-8.2x R-only; rank-deficient matrices are split out and served by stock (two valid factorizations can disagree there) |
 | `einsum_optimize_chain` | `np.einsum` with three or more operands, clean subscripts, naive loop volume >= 65 536 (262 144 scalar output; 76 832 for ellipsis spellings, which cross later) | 1.7x at the floor rising to 150-231x at volume 3-17M end-to-end, 2161x raw at a 4-operand chain, 163x for an ellipsis chain at 67M (stock's default runs ONE fused loop over every index of the chain) |
-| `matmul_split_complex` | `np.matmul(C complex 2-D, R real 2-D)`, C rows <= 256, n >= 1000, q >= 500, matched dtype pairs, all-finite | 1.55-7.5x across the measured m x n x q grid (upcast-copy-dominated shapes); square/tall C measured LOSING and stays stock |
+| `matmul_split_complex` | `np.matmul(C complex128 2-D, R float64 2-D)`, C rows <= 64, n >= 1000, q >= 500, all-finite | complex64/float32 stays stock after confirmed losses; retained pair and shape boundary evidence: [burndown report](docs/research/2026-09-19-burndown.md) |
 | `roll_concat_1d` | `np.roll(a, int_shift)` on 1-D int64/float64/int32/float32/bool, size 1-10k | 5.9x at n=8, 4.7x at 1000, 2.4x at 10k (fixed ~4us Python machinery saved); shift=0 copy route up to 11.3x; dies above 10k and stays stock there |
 | `pad_1d_constant` | `np.pad(a, pad_width)` in constant mode on plain 1-D numeric arrays, result length <= 16384 | 4.6x at output 14 falling to 1.5x at 16k with no constant, 2.6x to 1.6x with one. Quoted CONSUMED: the no-constant route allocates with calloc, so a bare timing reports up to 342x for a shape that is 0.86x once the array is read - which is why the cap is on the OUTPUT length |
 | `argmax_blocked_transpose` (calibration-gated, OFF by default) | `np.argmax(a, axis=0)`, C-order 2-D float64/float32/int64, rows >= 3000 and size >= 9e6 | 2.2-4.05x on Intel Alder Lake; a measured 0.65-0.84x REGRESSION on AMD Zen 4, so it only turns on where `python -m pyoverdrive --calibrate` proves the win on that machine |
 | `inv_small_batch` | `np.linalg.inv` on (..., 2, 2)/(..., 3, 3) float64/float32 stacks, batch floors 300-10k, det-vs-scale guard fused into the run (measured condition ceiling: passes 1e6, fails 1e8) | measured end-to-end, consumed: 2x2 4.6-11.5x, 3x3 1.3-2.0x. The guard used to run in the predicate and cost 128.5us against 25.8us for the 2x2 inverse it protected; fusing it took that cell from 5.0x to 11.5x. Numeric mode |
-| `isin_object_hash` | `np.isin` on 1-D object arrays, combined >= 300; NaN-like and unhashable inputs answered via stock inside the run | 262x at 30k x 3k (guarded, end-measured), 457x raw; 2.96x at the floor; bit-identical by construction |
+| `isin_object_hash` | `np.isin` on 1-D object arrays, combined >= 300 and test_elements >= 12; NaN-like and unhashable inputs answered via stock inside the run | 262x at 30k x 3k (guarded, end-measured), 457x raw; 2.96x at the floor; bit-identical by construction |
 | `median_partition` | `np.median` on 1-D float64, 10 <= n <= 5001 | 3.4x at n=11 to 1.5x at 5000 (overhead-class); bit-identical incl. NaN check, scalar type, warnings |
-| `hist2d_uniform` | `np.histogram2d`, int bins (>= 900 total) + explicit range, float64 samples, optional weights | 1.65x at the reporter's 5e6 case, 2.41x at 1000x1000 bins; bit-identical incl. values exactly on bin edges |
+| `hist2d_uniform` | `np.histogram2d`, >= 6,666 float64 samples, int bins (>= 900 total) + explicit range, optional weights | Bit-identical including bin edges. Sample floor raised to a measured winning size after losses at 2,000 samples; [qualified measurements](docs/research/2026-09-19-burndown.md) |
 | `unique_rows_lexsort` | `np.unique(a, axis=0)`, int64/int32 2-D, 2-8 columns, >= 1000 rows, counts supported | 4.4-5x (k=2) to 1.84x (k=8); bit-identical incl. numeric-lexicographic row order |
 | `searchsorted_extreme_key` | `np.searchsorted(int_array, python_int)` where the key is OUTSIDE the dtype's range | O(1) vs stock's per-element bigint walk (163 ms at n=1e5); provably identical answer |
 | `nan{mean,sum,std,var}_scan` | `np.nanmean/nansum/nanstd/nanvar`, float64, no other kwargs, per-op floors 100-10k; one isnan probe, then the plain reduction | nanmean 2.0-12.4x, nansum 1.3-2.9x, nanstd/nanvar 2.2-2.6x; NaN-present input falls back inside the run at a measured 0.96x; bit-identical |

@@ -1,5 +1,52 @@
 # Changelog
 
+## Unreleased
+
+- Recover dispatch fixes and measurement tools that had remained in the
+  archive checkout: conservative unique/intersect/isin/relayout floors,
+  sorted-haystack validation and withdrawal of int64 query sorting.
+- Require NumPy >=2.3 for the split-complex matrix path's BLAS routing;
+  retain package version 1.0.0 and exercise the dependency floor in CI.
+- Route partially overlapping parallel ufunc outputs through stock NumPy;
+  preserve safe aliases subject to operation-specific performance gates.
+- Keep float64 add with exact in-place output on stock after repeated
+  measured losses; retain disjoint float64 outputs and integer add.
+- Preserve floating-point warnings raised as errors without replaying an
+  operation on already modified output.
+- Make activation transactional when a requested operation is invalid.
+- Ignore malformed calibration structures and respect environment kill
+  switches when applying saved calibration. Validate nested flags, floors
+  and dtype-drop records before mutation, and apply negative recalibration
+  verdicts to paths that were previously enabled.
+- Make pytest import the current checkout instead of an unrelated editable
+  installation.
+- Fail performance verification on crashed or incomplete sweeps and refresh
+  cached latest-NumPy environments before checking them.
+- Save source hashes, software versions, raw timings, correctness checks and
+  load conditions with performance evidence; require explicit execution proof
+  and reject raw timing series with MAD/median above 20%, including apparent
+  wins. Support exact cell resumption and retain qualified child evidence
+  while reporting incomplete batches as failures.
+- Check benchmark memory limits before allocating scaled or reshaped inputs.
+- Remove unversioned historical speed ratios from runtime documentation;
+  retain the historical research and link current measurements separately.
+- Restrict 1-D unique/unique_values to int8/uint8 from 1,000 elements and
+  int32/uint32 from 10,000; withdraw 16-bit and 64-bit integer routes after
+  repeated cardinality-sensitive losses across tested NumPy versions.
+- Restrict sorted intersection to int32/uint32 at combined size 10,000;
+  preserve the independent eight-integer-dtype single-column axis-0 unique
+  path and protect it against inheriting unrelated 1-D withdrawals.
+- Restrict split complex matmul to complex128 by float64 with at most 64
+  output rows, inner dimension at least 1,000 and output width at least 500.
+  Raise the uniform histogram sample floor to the measured 6,666 boundary.
+- Validate the current source with 2,633 passing tests and two skips on each
+  of NumPy 2.3.0, 2.4.5 and 2.5.3; verify installed-wheel self-checks outside
+  the checkout at the dependency floor and latest tested version.
+- Complete the declared review evidence: 18 family/version groups, 86
+  supplementary cells and all nineteen formerly unqualified modules, with
+  failed or unstable attempts retained and excluded from accepted claims.
+  See [the review report](docs/research/2026-09-19-burndown.md).
+
 ## 0.1.0 (unreleased)
 
 First public release candidate. MIT licensed.

@@ -1,0 +1,5424 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-19T21:31:02.322252+00:00",
+  "status": "complete",
+  "scope": "Consolidation review follow-up, not a universal speed guarantee",
+  "method": [
+    "Index references original immutable timing records by filename and zero-based record_index.",
+    "Each accepted general-sweep record has a quiet batch envelope and passes the current strict saved-record validator.",
+    "Each accepted supplement passes strict per-child load, correctness, execution and dispersion validation.",
+    "Both sides use the same MAD/median <= 20% rule; rejected raw attempts remain intact.",
+    "Coverage is a union of separately attributed snapshots and retries, never a fictitious single successful sweep.",
+    "SKIP denotes an explicit instrument outcome, not automatically a measured stock refusal.",
+    "Final supplement references replace withdrawn in-place float64 add candidates with explicit stock decisions.",
+    "Legacy qualification is representative named-version evidence, not exhaustive whole-module coverage."
+  ],
+  "family_version_groups": [
+    {
+      "family": "hist2d_uniform",
+      "requested_numpy": "2.3.0",
+      "resolved_numpy": "2.3.0",
+      "selected_count": 12,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 3,
+      "coverage": {
+        "hist2d_uniform": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 0,
+          "result": "RATIO 2.8919 numpy.histogram2d",
+          "kind": "measured"
+        },
+        "hist2d_uniform%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 1,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 2,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+0": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 3,
+          "result": "RATIO 2.2944 numpy.histogram2d",
+          "kind": "measured"
+        },
+        "hist2d_uniform#samples+0%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 4,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+0%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 5,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+1": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 6,
+          "result": "RATIO 2.2681 numpy.histogram2d",
+          "kind": "measured"
+        },
+        "hist2d_uniform#samples+1%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 7,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+1%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 8,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples-1": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 9,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples-1%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 10,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples-1%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.3.0.json",
+          "record_index": 11,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "hist2d_uniform",
+      "requested_numpy": "2.4.5",
+      "resolved_numpy": "2.4.5",
+      "selected_count": 12,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 3,
+      "coverage": {
+        "hist2d_uniform": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 0,
+          "result": "RATIO 3.1346 numpy.histogram2d",
+          "kind": "measured"
+        },
+        "hist2d_uniform%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 1,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 2,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+0": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 3,
+          "result": "RATIO 2.3962 numpy.histogram2d",
+          "kind": "measured"
+        },
+        "hist2d_uniform#samples+0%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 4,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+0%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 5,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+1": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 6,
+          "result": "RATIO 2.3934 numpy.histogram2d",
+          "kind": "measured"
+        },
+        "hist2d_uniform#samples+1%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 7,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+1%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 8,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples-1": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 9,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples-1%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 10,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples-1%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-2.4.5.json",
+          "record_index": 11,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "hist2d_uniform",
+      "requested_numpy": "latest",
+      "resolved_numpy": "2.5.3",
+      "selected_count": 12,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 3,
+      "coverage": {
+        "hist2d_uniform": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 0,
+          "result": "RATIO 3.9422 numpy.histogram2d",
+          "kind": "measured"
+        },
+        "hist2d_uniform%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 1,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 2,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+0": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 3,
+          "result": "RATIO 2.8478 numpy.histogram2d",
+          "kind": "measured"
+        },
+        "hist2d_uniform#samples+0%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 4,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+0%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 5,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+1": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 6,
+          "result": "RATIO 2.8722 numpy.histogram2d",
+          "kind": "measured"
+        },
+        "hist2d_uniform#samples+1%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 7,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples+1%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 8,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples-1": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 9,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples-1%d": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 10,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "hist2d_uniform#samples-1%u": {
+          "artifact": "qualified/hist2d_uniform/numpy-latest.json",
+          "record_index": 11,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "intersect_sorted",
+      "requested_numpy": "2.3.0",
+      "resolved_numpy": "2.3.0",
+      "selected_count": 9,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 9,
+      "coverage": {
+        "intersect_sorted": {
+          "artifact": "qualified/intersect_sorted/numpy-2.3.0.json",
+          "record_index": 0,
+          "result": "RATIO 4.5334 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted%d": {
+          "artifact": "qualified/intersect_sorted/numpy-2.3.0.json",
+          "record_index": 1,
+          "result": "RATIO 1.1568 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted%u": {
+          "artifact": "qualified/intersect_sorted/numpy-2.3.0.json",
+          "record_index": 2,
+          "result": "RATIO 5.2480 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#int32": {
+          "artifact": "qualified/intersect_sorted/numpy-2.3.0.json",
+          "record_index": 3,
+          "result": "RATIO 2.5491 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#int32%d": {
+          "artifact": "qualified/intersect_sorted/numpy-2.3.0.json",
+          "record_index": 4,
+          "result": "RATIO 1.0980 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#int32%u": {
+          "artifact": "qualified/intersect_sorted/numpy-2.3.0.json",
+          "record_index": 5,
+          "result": "RATIO 2.5636 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#uint32": {
+          "artifact": "qualified/intersect_sorted/numpy-2.3.0.json",
+          "record_index": 6,
+          "result": "RATIO 2.5319 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#uint32%d": {
+          "artifact": "qualified/intersect_sorted/numpy-2.3.0.json",
+          "record_index": 7,
+          "result": "RATIO 1.1187 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#uint32%u": {
+          "artifact": "qualified/intersect_sorted/numpy-2.3.0.json",
+          "record_index": 8,
+          "result": "RATIO 2.5498 numpy.intersect1d",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "intersect_sorted",
+      "requested_numpy": "2.4.5",
+      "resolved_numpy": "2.4.5",
+      "selected_count": 9,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 9,
+      "coverage": {
+        "intersect_sorted": {
+          "artifact": "qualified/intersect_sorted/numpy-2.4.5.json",
+          "record_index": 0,
+          "result": "RATIO 4.8755 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted%d": {
+          "artifact": "qualified/intersect_sorted/numpy-2.4.5.json",
+          "record_index": 1,
+          "result": "RATIO 1.6122 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted%u": {
+          "artifact": "qualified/intersect_sorted/numpy-2.4.5.json",
+          "record_index": 2,
+          "result": "RATIO 5.6874 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#int32": {
+          "artifact": "qualified/intersect_sorted/numpy-2.4.5.json",
+          "record_index": 3,
+          "result": "RATIO 2.6587 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#int32%d": {
+          "artifact": "qualified/intersect_sorted/numpy-2.4.5.json",
+          "record_index": 4,
+          "result": "RATIO 1.5909 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#int32%u": {
+          "artifact": "qualified/intersect_sorted/numpy-2.4.5.json",
+          "record_index": 5,
+          "result": "RATIO 2.6801 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#uint32": {
+          "artifact": "qualified/intersect_sorted/numpy-2.4.5.json",
+          "record_index": 6,
+          "result": "RATIO 2.6394 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#uint32%d": {
+          "artifact": "qualified/intersect_sorted/numpy-2.4.5.json",
+          "record_index": 7,
+          "result": "RATIO 1.5578 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#uint32%u": {
+          "artifact": "qualified/intersect_sorted/numpy-2.4.5.json",
+          "record_index": 8,
+          "result": "RATIO 2.7099 numpy.intersect1d",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "intersect_sorted",
+      "requested_numpy": "latest",
+      "resolved_numpy": "2.5.3",
+      "selected_count": 9,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 9,
+      "coverage": {
+        "intersect_sorted": {
+          "artifact": "qualified/intersect_sorted/numpy-latest.json",
+          "record_index": 0,
+          "result": "RATIO 7.8630 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted%d": {
+          "artifact": "qualified/intersect_sorted/numpy-latest.json",
+          "record_index": 1,
+          "result": "RATIO 1.8075 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted%u": {
+          "artifact": "qualified/intersect_sorted/numpy-latest.json",
+          "record_index": 2,
+          "result": "RATIO 10.7951 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#int32": {
+          "artifact": "qualified/intersect_sorted/numpy-latest.json",
+          "record_index": 3,
+          "result": "RATIO 6.8884 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#int32%d": {
+          "artifact": "qualified/intersect_sorted/numpy-latest.json",
+          "record_index": 4,
+          "result": "RATIO 1.8435 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#int32%u": {
+          "artifact": "qualified/intersect_sorted/numpy-latest.json",
+          "record_index": 5,
+          "result": "RATIO 7.0947 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#uint32": {
+          "artifact": "qualified/intersect_sorted/numpy-latest.json",
+          "record_index": 6,
+          "result": "RATIO 6.9080 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#uint32%d": {
+          "artifact": "qualified/intersect_sorted/numpy-latest.json",
+          "record_index": 7,
+          "result": "RATIO 1.7730 numpy.intersect1d",
+          "kind": "measured"
+        },
+        "intersect_sorted#uint32%u": {
+          "artifact": "qualified/intersect_sorted/numpy-latest.json",
+          "record_index": 8,
+          "result": "RATIO 7.0019 numpy.intersect1d",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "matmul_split_complex",
+      "requested_numpy": "2.3.0",
+      "resolved_numpy": "2.3.0",
+      "selected_count": 66,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 12,
+      "coverage": {
+        "matmul_split_complex": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 0,
+          "result": "RATIO 1.9806 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 1,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 2,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 3,
+          "result": "RATIO 1.6250 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 4,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 5,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m+1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 6,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m+1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 7,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m+1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 8,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m-1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 9,
+          "result": "RATIO 1.5821 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-m-1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 10,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m-1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 11,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n+1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 12,
+          "result": "RATIO 1.9599 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-n+1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 13,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n+1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 14,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n-1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 15,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n-1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 16,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n-1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 17,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q+1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 18,
+          "result": "RATIO 1.6882 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-q+1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 19,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q+1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 20,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q-1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 21,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q-1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 22,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q-1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 23,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 24,
+          "result": "RATIO 4.4869 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 25,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 26,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m128": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 27,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m128%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 28,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m128%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 29,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m16": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 30,
+          "result": "RATIO 2.7477 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m16%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 31,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m16%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 32,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m192": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 33,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m192%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 34,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m192%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 35,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m255": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 36,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m255%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 37,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m255%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 38,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m256": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 39,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m256%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 40,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m256%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 41,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m32": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 42,
+          "result": "RATIO 1.8232 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m32%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 43,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m32%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 44,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m63": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 45,
+          "result": "RATIO 1.8119 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m63%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 46,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m63%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 47,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 48,
+          "result": "RATIO 1.5852 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m64%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 49,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 50,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n+1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 51,
+          "result": "RATIO 1.5722 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m64-n+1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 52,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n+1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 53,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n-1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 54,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n-1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 55,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n-1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 56,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q+1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 57,
+          "result": "RATIO 1.6600 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m64-q+1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 58,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q+1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 59,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q-1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 60,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q-1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 61,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q-1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 62,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m65": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 63,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m65%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 64,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m65%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.3.0.json",
+          "record_index": 65,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "matmul_split_complex",
+      "requested_numpy": "2.4.5",
+      "resolved_numpy": "2.4.5",
+      "selected_count": 66,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 12,
+      "coverage": {
+        "matmul_split_complex": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 0,
+          "result": "RATIO 2.5672 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 1,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 2,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 3,
+          "result": "RATIO 1.7208 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 4,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 5,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m+1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 6,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m+1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 7,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m+1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 8,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m-1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 9,
+          "result": "RATIO 1.8949 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-m-1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 10,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m-1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 11,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n+1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 12,
+          "result": "RATIO 2.5372 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-n+1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 13,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n+1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 14,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n-1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 15,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n-1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 16,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n-1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 17,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q+1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 18,
+          "result": "RATIO 1.9187 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-q+1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 19,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q+1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 20,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q-1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 21,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q-1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 22,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q-1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 23,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m1": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 24,
+          "result": "RATIO 4.1009 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m1%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 25,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m1%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 26,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m128": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 27,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m128%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 28,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m128%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 29,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m16": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 30,
+          "result": "RATIO 3.7070 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m16%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 31,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m16%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 32,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m192": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 33,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m192%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 34,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m192%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 35,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m255": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 36,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m255%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 37,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m255%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 38,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m256": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 39,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m256%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 40,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m256%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 41,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m32": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 42,
+          "result": "RATIO 3.0274 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m32%d": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 43,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m32%u": {
+          "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+          "record_index": 44,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m63": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 0,
+          "result": "RATIO 1.7750 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m63%d": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 1,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m63%u": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 2,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 3,
+          "result": "RATIO 1.8480 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m64%d": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 4,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64%u": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 5,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n+1": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 6,
+          "result": "RATIO 1.8084 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m64-n+1%d": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 7,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n+1%u": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 8,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n-1": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 9,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n-1%d": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 10,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n-1%u": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 11,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q+1": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 12,
+          "result": "RATIO 2.3659 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m64-q+1%d": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 13,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q+1%u": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 14,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q-1": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 15,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q-1%d": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 16,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q-1%u": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 17,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m65": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 18,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m65%d": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 19,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m65%u": {
+          "artifact": "matmul-resumed-2.4.5.json",
+          "record_index": 20,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "matmul_split_complex",
+      "requested_numpy": "latest",
+      "resolved_numpy": "2.5.3",
+      "selected_count": 66,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 12,
+      "coverage": {
+        "matmul_split_complex": {
+          "artifact": "intel-matmul-canonical-retry2.json",
+          "record_index": 0,
+          "result": "RATIO 2.5536 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 8,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 9,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 37,
+          "result": "RATIO 2.6882 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 38,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 39,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m+1": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 40,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m+1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 41,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m+1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 42,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m-1": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 43,
+          "result": "RATIO 2.1518 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-m-1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 44,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-m-1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 45,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n+1": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 46,
+          "result": "RATIO 1.7466 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-n+1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 47,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n+1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 48,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n-1": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 49,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n-1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 50,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-n-1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 51,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q+1": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 52,
+          "result": "RATIO 1.7733 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-q+1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 53,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q+1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 54,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q-1": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 55,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q-1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 56,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-q-1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 57,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m1": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 58,
+          "result": "RATIO 4.6782 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 59,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 60,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m128": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 61,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m128%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 62,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m128%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 63,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m16": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 64,
+          "result": "RATIO 3.5196 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m16%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 65,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m16%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 66,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m192": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 67,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m192%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 68,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m192%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 69,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m255": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 70,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m255%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 71,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m255%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 72,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m256": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 73,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m256%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 74,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m256%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 75,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m32": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 76,
+          "result": "RATIO 2.8316 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m32%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 77,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m32%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 78,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m63": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 79,
+          "result": "RATIO 2.2616 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m63%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 80,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m63%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 81,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 83,
+          "result": "RATIO 2.5069 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m64%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 84,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 85,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n+1": {
+          "artifact": "matmul-one-second-latest.json",
+          "record_index": 0,
+          "result": "RATIO 5.2729 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m64-n+1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 87,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n+1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 88,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n-1": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 89,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n-1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 90,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-n-1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 91,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q+1": {
+          "artifact": "matmul-one-second-latest.json",
+          "record_index": 1,
+          "result": "RATIO 4.9512 numpy.matmul",
+          "kind": "measured"
+        },
+        "matmul_split_complex#complex128-rows-m64-q+1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 93,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q+1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 94,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q-1": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 95,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q-1%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 96,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m64-q-1%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 97,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m65": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 98,
+          "result": "SKIP no-dispatch",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m65%d": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 99,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        },
+        "matmul_split_complex#complex128-rows-m65%u": {
+          "artifact": "gates-final/numpy-latest.json",
+          "record_index": 100,
+          "result": "SKIP not-valued",
+          "kind": "explicit_skip"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "unique_axis0_column",
+      "requested_numpy": "2.3.0",
+      "resolved_numpy": "2.3.0",
+      "selected_count": 3,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 3,
+      "coverage": {
+        "unique_axis0_column": {
+          "artifact": "qualified/unique_axis0_column/numpy-2.3.0.json",
+          "record_index": 0,
+          "result": "RATIO 24.1584 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_axis0_column%d": {
+          "artifact": "qualified/unique_axis0_column/numpy-2.3.0.json",
+          "record_index": 1,
+          "result": "RATIO 35.1580 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_axis0_column%u": {
+          "artifact": "qualified/unique_axis0_column/numpy-2.3.0.json",
+          "record_index": 2,
+          "result": "RATIO 27.3188 numpy.unique",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "unique_axis0_column",
+      "requested_numpy": "2.4.5",
+      "resolved_numpy": "2.4.5",
+      "selected_count": 3,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 3,
+      "coverage": {
+        "unique_axis0_column": {
+          "artifact": "qualified/unique_axis0_column/numpy-2.4.5.json",
+          "record_index": 0,
+          "result": "RATIO 24.1840 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_axis0_column%d": {
+          "artifact": "qualified/unique_axis0_column/numpy-2.4.5.json",
+          "record_index": 1,
+          "result": "RATIO 38.3882 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_axis0_column%u": {
+          "artifact": "qualified/unique_axis0_column/numpy-2.4.5.json",
+          "record_index": 2,
+          "result": "RATIO 26.2070 numpy.unique",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "unique_axis0_column",
+      "requested_numpy": "latest",
+      "resolved_numpy": "2.5.3",
+      "selected_count": 3,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 3,
+      "coverage": {
+        "unique_axis0_column": {
+          "artifact": "qualified/unique_axis0_column/numpy-latest.json",
+          "record_index": 0,
+          "result": "RATIO 23.8292 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_axis0_column%d": {
+          "artifact": "qualified/unique_axis0_column/numpy-latest.json",
+          "record_index": 1,
+          "result": "RATIO 40.1162 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_axis0_column%u": {
+          "artifact": "qualified/unique_axis0_column/numpy-latest.json",
+          "record_index": 2,
+          "result": "RATIO 26.8226 numpy.unique",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "unique_sort",
+      "requested_numpy": "2.3.0",
+      "resolved_numpy": "2.3.0",
+      "selected_count": 15,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 15,
+      "coverage": {
+        "unique_sort": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 0,
+          "result": "RATIO 16.5016 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort%d": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 1,
+          "result": "RATIO 2.0049 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort%u": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 2,
+          "result": "RATIO 17.8402 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int32": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 3,
+          "result": "RATIO 14.6148 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int32%d": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 4,
+          "result": "RATIO 1.7161 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int32%u": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 5,
+          "result": "RATIO 15.4893 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int8": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 6,
+          "result": "RATIO 2.5767 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int8%d": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 7,
+          "result": "RATIO 1.0138 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int8%u": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 8,
+          "result": "RATIO 2.3838 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint32": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 9,
+          "result": "RATIO 14.8219 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint32%d": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 10,
+          "result": "RATIO 1.7213 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint32%u": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 11,
+          "result": "RATIO 15.0461 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint8": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 12,
+          "result": "RATIO 2.3645 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint8%d": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 13,
+          "result": "RATIO 1.0330 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint8%u": {
+          "artifact": "qualified/unique_sort/numpy-2.3.0.json",
+          "record_index": 14,
+          "result": "RATIO 2.5564 numpy.unique",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "unique_sort",
+      "requested_numpy": "2.4.5",
+      "resolved_numpy": "2.4.5",
+      "selected_count": 15,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 15,
+      "coverage": {
+        "unique_sort": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 0,
+          "result": "RATIO 17.7940 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort%d": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 1,
+          "result": "RATIO 3.5251 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort%u": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 2,
+          "result": "RATIO 19.7237 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int32": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 3,
+          "result": "RATIO 15.6750 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int32%d": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 4,
+          "result": "RATIO 2.6324 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int32%u": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 5,
+          "result": "RATIO 16.0692 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int8": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 6,
+          "result": "RATIO 2.3473 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int8%d": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 7,
+          "result": "RATIO 1.2621 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int8%u": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 8,
+          "result": "RATIO 1.8129 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint32": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 9,
+          "result": "RATIO 16.9755 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint32%d": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 10,
+          "result": "RATIO 2.6829 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint32%u": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 11,
+          "result": "RATIO 16.7675 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint8": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 12,
+          "result": "RATIO 2.3570 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint8%d": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 13,
+          "result": "RATIO 1.2526 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint8%u": {
+          "artifact": "qualified/unique_sort/numpy-2.4.5.json",
+          "record_index": 14,
+          "result": "RATIO 2.5904 numpy.unique",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "unique_sort",
+      "requested_numpy": "latest",
+      "resolved_numpy": "2.5.3",
+      "selected_count": 15,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 15,
+      "coverage": {
+        "unique_sort": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 0,
+          "result": "RATIO 18.6229 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort%d": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 1,
+          "result": "RATIO 3.8129 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort%u": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 2,
+          "result": "RATIO 19.1892 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int32": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 3,
+          "result": "RATIO 14.8907 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int32%d": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 4,
+          "result": "RATIO 2.7130 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int32%u": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 5,
+          "result": "RATIO 14.2002 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int8": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 6,
+          "result": "RATIO 2.5672 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int8%d": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 7,
+          "result": "RATIO 1.2770 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#int8%u": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 8,
+          "result": "RATIO 2.4857 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint32": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 9,
+          "result": "RATIO 16.5904 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint32%d": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 10,
+          "result": "RATIO 2.9247 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint32%u": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 11,
+          "result": "RATIO 16.7333 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint8": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 12,
+          "result": "RATIO 2.0767 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint8%d": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 13,
+          "result": "RATIO 1.3848 numpy.unique",
+          "kind": "measured"
+        },
+        "unique_sort#uint8%u": {
+          "artifact": "qualified/unique_sort/numpy-latest.json",
+          "record_index": 14,
+          "result": "RATIO 2.0457 numpy.unique",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "unique_values_sort",
+      "requested_numpy": "2.3.0",
+      "resolved_numpy": "2.3.0",
+      "selected_count": 15,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 15,
+      "coverage": {
+        "unique_values_sort": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 0,
+          "result": "RATIO 16.2600 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 1,
+          "result": "RATIO 1.8309 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 2,
+          "result": "RATIO 16.1107 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int32": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 3,
+          "result": "RATIO 14.5851 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int32%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 4,
+          "result": "RATIO 1.5974 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int32%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 5,
+          "result": "RATIO 12.5154 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int8": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 6,
+          "result": "RATIO 2.2354 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int8%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 8,
+          "result": "RATIO 1.0222 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int8%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 9,
+          "result": "RATIO 2.1302 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint32": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 10,
+          "result": "RATIO 13.8165 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint32%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 11,
+          "result": "RATIO 1.7473 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint32%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 12,
+          "result": "RATIO 13.8417 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint8": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 13,
+          "result": "RATIO 2.2588 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint8%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 14,
+          "result": "RATIO 1.0164 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint8%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+          "record_index": 15,
+          "result": "RATIO 2.1900 numpy.unique_values",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "unique_values_sort",
+      "requested_numpy": "2.4.5",
+      "resolved_numpy": "2.4.5",
+      "selected_count": 15,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 15,
+      "coverage": {
+        "unique_values_sort": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 0,
+          "result": "RATIO 17.6900 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 1,
+          "result": "RATIO 3.4676 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 2,
+          "result": "RATIO 18.1573 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int32": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 3,
+          "result": "RATIO 13.5969 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int32%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 4,
+          "result": "RATIO 2.4061 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int32%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 5,
+          "result": "RATIO 13.6410 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int8": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 6,
+          "result": "RATIO 2.1861 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int8%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 7,
+          "result": "RATIO 1.2282 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int8%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 8,
+          "result": "RATIO 2.1570 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint32": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 9,
+          "result": "RATIO 14.3094 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint32%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 10,
+          "result": "RATIO 2.5072 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint32%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 11,
+          "result": "RATIO 16.1288 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint8": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 12,
+          "result": "RATIO 2.1698 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint8%d": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 13,
+          "result": "RATIO 1.1413 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint8%u": {
+          "artifact": "qualified/unique_values_sort/numpy-2.4.5.json",
+          "record_index": 14,
+          "result": "RATIO 2.4093 numpy.unique_values",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "family": "unique_values_sort",
+      "requested_numpy": "latest",
+      "resolved_numpy": "2.5.3",
+      "selected_count": 15,
+      "hardware_scope": "Intel; separate snapshots and sampling budgets are identified per artifact",
+      "measured_count": 15,
+      "coverage": {
+        "unique_values_sort": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 0,
+          "result": "RATIO 18.4027 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort%d": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 1,
+          "result": "RATIO 3.8066 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort%u": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 2,
+          "result": "RATIO 19.4035 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int32": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 3,
+          "result": "RATIO 14.7790 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int32%d": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 4,
+          "result": "RATIO 2.8534 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int32%u": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 5,
+          "result": "RATIO 14.9443 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int8": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 6,
+          "result": "RATIO 3.2636 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int8%d": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 7,
+          "result": "RATIO 1.2502 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#int8%u": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 8,
+          "result": "RATIO 2.1526 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint32": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 9,
+          "result": "RATIO 15.8714 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint32%d": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 10,
+          "result": "RATIO 2.7215 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint32%u": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 11,
+          "result": "RATIO 14.2417 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint8": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 12,
+          "result": "RATIO 2.1693 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint8%d": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 13,
+          "result": "RATIO 1.2546 numpy.unique_values",
+          "kind": "measured"
+        },
+        "unique_values_sort#uint8%u": {
+          "artifact": "qualified/unique_values_sort/numpy-latest.json",
+          "record_index": 14,
+          "result": "RATIO 1.8905 numpy.unique_values",
+          "kind": "measured"
+        }
+      },
+      "uncovered_cells": []
+    }
+  ],
+  "supplements": [
+    {
+      "host": "Intel",
+      "selected_count": 43,
+      "coverage": {
+        "argmax:argmax:float64:2999x3000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 0,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 0.9997740057096662,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float64:3000x2999:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 1,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 0.9940677573603321,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float64:3000x3000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 2,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.0584098622626477,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float64:4500x3000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 3,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.1896318886424058,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float64:3000x4500:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 4,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.0545064656819516,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float64:10000x1000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 5,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.0591076599964966,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:2999x3000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 6,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 1.000661338764585,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:3000x2999:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 7,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 0.9924488402400307,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:3000x3000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 8,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.921984368747974,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:4500x3000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 9,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 3.044471503433462,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:3000x4500:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 10,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 3.1485487056448083,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:10000x1000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 11,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.7919093947516327,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:2999x3000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 12,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 1.0083748186299801,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:3000x2999:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 13,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 0.9906256365767913,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:3000x3000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 14,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.075724870901824,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:4500x3000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 15,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.1054714679030737,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:3000x4500:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 16,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.0393082073411946,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:10000x1000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 17,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.0910459156508323,
+          "disposition": "calibration-gated experiment"
+        },
+        "vectorize:sin:float64:16:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 18,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 4.311475021834643,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sin:float64:10000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 19,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 32.87284812905378,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sin:float64:1000000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 20,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 26.464483056009552,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sqrt:float64:16:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 21,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 4.491708252617696,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sqrt:float64:10000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 22,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 76.19912430422683,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sqrt:float64:1000000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 23,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 47.192772012555764,
+          "disposition": "retained candidate"
+        },
+        "vectorize:exp:float64:16:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 24,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 4.293682220520386,
+          "disposition": "retained candidate"
+        },
+        "vectorize:exp:float64:10000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 25,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 23.40983009087322,
+          "disposition": "retained candidate"
+        },
+        "vectorize:exp:float64:1000000:none": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 26,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 21.093817706595097,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float64:300000:disjoint": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 27,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 1.6871217444374698,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float64:900000:disjoint": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 29,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 1.7342367751961738,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float64:900000:inplace": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 30,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 1.6040459708613835,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float32:3000000:disjoint": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 31,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 1.5419215831043611,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float32:3000000:inplace": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 32,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 1.5286983400662704,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float32:9000000:disjoint": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 33,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 1.4816690173368878,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float32:9000000:inplace": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 34,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 1.4462085860485154,
+          "disposition": "retained candidate"
+        },
+        "out:add:float64:20000000:disjoint": {
+          "artifact": "intel-add-final.json",
+          "record_index": 0,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.0683263042103595,
+          "disposition": "retained candidate"
+        },
+        "out:add:float64:20000000:inplace": {
+          "artifact": "intel-add-final.json",
+          "record_index": 1,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 1.0000599801863492,
+          "disposition": "intentional stock"
+        },
+        "out:add:float64:60000000:disjoint": {
+          "artifact": "intel-add-final.json",
+          "record_index": 2,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.126303482004279,
+          "disposition": "retained candidate"
+        },
+        "out:add:float64:60000000:inplace": {
+          "artifact": "intel-add-final.json",
+          "record_index": 3,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 0.9972840335887901,
+          "disposition": "intentional stock"
+        },
+        "out:add:int64:20000000:disjoint": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 39,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.0987291486338673,
+          "disposition": "retained candidate"
+        },
+        "out:add:int64:20000000:inplace": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 40,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.0689449405431366,
+          "disposition": "retained candidate"
+        },
+        "out:add:int64:60000000:disjoint": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 41,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.1514449761831855,
+          "disposition": "retained candidate"
+        },
+        "out:add:int64:60000000:inplace": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 42,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.0644184032050146,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float64:300000:inplace": {
+          "artifact": "intel-sin-stability-final.json",
+          "record_index": 0,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 1.4536274694420264,
+          "disposition": "retained candidate"
+        }
+      },
+      "uncovered_cells": []
+    },
+    {
+      "host": "AMD",
+      "selected_count": 43,
+      "coverage": {
+        "argmax:argmax:float64:2999x3000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 0,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 0.9913193205067038,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float64:3000x3000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 2,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.5699375507473422,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float64:4500x3000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 3,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.8211265699701693,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float64:3000x4500:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 4,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.7409719780173109,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float64:10000x1000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 5,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.7127452152440739,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:2999x3000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 6,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 0.9951250653211775,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:3000x2999:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 7,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 1.0214846833816569,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:3000x3000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 8,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.6272798541221585,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:3000x4500:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 10,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.652971131088607,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:2999x3000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 12,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 0.9877177548287528,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:3000x3000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 14,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.6036361457822099,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:3000x4500:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 16,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.7097256814914938,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:10000x1000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 17,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.6252370013665847,
+          "disposition": "calibration-gated experiment"
+        },
+        "vectorize:sin:float64:16:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 18,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 3.255461502689767,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sin:float64:10000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 19,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 29.185941796677703,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sin:float64:1000000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 20,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 25.63238019896963,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sqrt:float64:16:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 21,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 3.2385221203087484,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sqrt:float64:10000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 22,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 65.36432035935533,
+          "disposition": "retained candidate"
+        },
+        "vectorize:sqrt:float64:1000000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 23,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 51.900353215632784,
+          "disposition": "retained candidate"
+        },
+        "vectorize:exp:float64:16:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 24,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 3.2116674309584647,
+          "disposition": "retained candidate"
+        },
+        "vectorize:exp:float64:10000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 25,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 29.187206116859905,
+          "disposition": "retained candidate"
+        },
+        "vectorize:exp:float64:1000000:none": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 26,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 26.789692246016685,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float64:300000:disjoint": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 27,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 2.1187706635772496,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float64:900000:disjoint": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 29,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 2.875319878211477,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float64:900000:inplace": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 30,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 2.4148043269125474,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float32:3000000:disjoint": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 31,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 2.2941810875814963,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float32:3000000:inplace": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 32,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 2.1810334184398568,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float32:9000000:disjoint": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 33,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 2.862851208377091,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float32:9000000:inplace": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 34,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 3.0522225463673323,
+          "disposition": "retained candidate"
+        },
+        "out:add:float64:20000000:disjoint": {
+          "artifact": "amd-add-final.json",
+          "record_index": 0,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.0655013017112909,
+          "disposition": "retained candidate"
+        },
+        "out:add:float64:20000000:inplace": {
+          "artifact": "amd-add-final.json",
+          "record_index": 1,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 1.006541022595347,
+          "disposition": "intentional stock"
+        },
+        "out:add:float64:60000000:disjoint": {
+          "artifact": "amd-add-final.json",
+          "record_index": 2,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.0955222947008447,
+          "disposition": "retained candidate"
+        },
+        "out:add:int64:20000000:disjoint": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 39,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.2394575516259507,
+          "disposition": "retained candidate"
+        },
+        "argmax:argmax:float64:3000x2999:none": {
+          "artifact": "amd-followup-execution-retry.json",
+          "record_index": 0,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 1.0004594113892356,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:float32:10000x1000:none": {
+          "artifact": "amd-followup-execution-retry.json",
+          "record_index": 2,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.6280709055301643,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:3000x2999:none": {
+          "artifact": "amd-followup-execution-retry.json",
+          "record_index": 3,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 1.0062268720827632,
+          "disposition": "calibration-gated experiment"
+        },
+        "argmax:argmax:int64:4500x3000:none": {
+          "artifact": "amd-followup-execution-retry.json",
+          "record_index": 4,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.8366971590909206,
+          "disposition": "calibration-gated experiment"
+        },
+        "out:add:float64:60000000:inplace": {
+          "artifact": "amd-add-final.json",
+          "record_index": 3,
+          "dispatch": [
+            "stock",
+            "no-applicable-path"
+          ],
+          "ratio": 0.9533432170541132,
+          "disposition": "intentional stock"
+        },
+        "argmax:argmax:float32:4500x3000:none": {
+          "artifact": "amd-followup-execution-retry2.json",
+          "record_index": 0,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.708849065544062,
+          "disposition": "calibration-gated experiment"
+        },
+        "out:add:int64:60000000:disjoint": {
+          "artifact": "amd-followup-execution-retry2.json",
+          "record_index": 3,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.226861335826368,
+          "disposition": "retained candidate"
+        },
+        "out:add:int64:60000000:inplace": {
+          "artifact": "amd-followup-execution-retry2.json",
+          "record_index": 4,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.1008107382883576,
+          "disposition": "retained candidate"
+        },
+        "out:sin:float64:300000:inplace": {
+          "artifact": "amd-followup-execution-retry4.json",
+          "record_index": 0,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 2.2215220966535303,
+          "disposition": "retained candidate"
+        },
+        "out:add:int64:20000000:inplace": {
+          "artifact": "amd-followup-execution-retry4.json",
+          "record_index": 1,
+          "dispatch": [
+            "pyrallel_add",
+            "predicate-accepted"
+          ],
+          "ratio": 1.1388289045741589,
+          "disposition": "retained candidate"
+        }
+      },
+      "uncovered_cells": []
+    }
+  ],
+  "broad_stability_replays": [
+    {
+      "artifact": "stability-retry-2.3.0.json",
+      "coverage": {
+        "matmul_int_blas": {
+          "artifact": "stability-retry-2.3.0.json",
+          "record_index": 0,
+          "result": "RATIO 2.6771 numpy.matmul",
+          "kind": "measured"
+        },
+        "pyrallel_cos@float32": {
+          "artifact": "stability-retry-2.3.0.json",
+          "record_index": 1,
+          "result": "RATIO 1.4434 numpy.cos",
+          "kind": "measured"
+        },
+        "pyrallel_exp@float64": {
+          "artifact": "stability-retry-2.3.0.json",
+          "record_index": 2,
+          "result": "RATIO 1.4803 numpy.exp",
+          "kind": "measured"
+        },
+        "pyrallel_exp@float32": {
+          "artifact": "stability-retry-2.3.0.json",
+          "record_index": 3,
+          "result": "RATIO 1.3553 numpy.exp",
+          "kind": "measured"
+        },
+        "pyrallel_log@float32": {
+          "artifact": "stability-retry-2.3.0.json",
+          "record_index": 4,
+          "result": "RATIO 1.4419 numpy.log",
+          "kind": "measured"
+        }
+      }
+    },
+    {
+      "artifact": "stability-retry-2.4.5.json",
+      "coverage": {
+        "pad_1d_constant": {
+          "artifact": "stability-retry-2.4.5.json",
+          "record_index": 0,
+          "result": "RATIO 2.4247 numpy.pad",
+          "kind": "measured"
+        },
+        "fftcorrelate#mode-same%d": {
+          "artifact": "stability-retry-2.4.5.json",
+          "record_index": 1,
+          "result": "RATIO 10.0319 numpy.correlate",
+          "kind": "measured"
+        }
+      }
+    },
+    {
+      "artifact": "stability-retry-latest.json",
+      "coverage": {
+        "matmul_int_blas": {
+          "artifact": "stability-retry-latest.json",
+          "record_index": 0,
+          "result": "RATIO 3.2671 numpy.matmul",
+          "kind": "measured"
+        },
+        "pyrallel_minimum@float64": {
+          "artifact": "stability-retry-latest.json",
+          "record_index": 1,
+          "result": "RATIO 1.3054 numpy.minimum",
+          "kind": "measured"
+        },
+        "fftconvolve#mode-same": {
+          "artifact": "stability-retry-latest.json",
+          "record_index": 2,
+          "result": "RATIO 2.8108 numpy.convolve",
+          "kind": "measured"
+        }
+      }
+    }
+  ],
+  "formerly_unqualified_modules": {
+    "eigvalsh_2x2.py": {
+      "cell": "eigvalsh_2x2_closed",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 15,
+      "result": "RATIO 5.6385 numpy.linalg.eigvalsh",
+      "kind": "measured"
+    },
+    "fftconvolve.py": {
+      "cell": "fftconvolve#mode-full",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 264,
+      "result": "RATIO 1.8379 numpy.convolve",
+      "kind": "measured"
+    },
+    "hist2d_uniform.py": {
+      "cell": "hist2d_uniform",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 33,
+      "result": "RATIO 3.9188 numpy.histogram2d",
+      "kind": "measured"
+    },
+    "inner_tensordot.py": {
+      "cell": "inner_tensordot",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 36,
+      "result": "RATIO 1.5207 numpy.inner",
+      "kind": "measured"
+    },
+    "inv_small_batch.py": {
+      "cell": "inv_small_batch#3-float64",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 315,
+      "result": "RATIO 1.4657 numpy.linalg.inv",
+      "kind": "measured"
+    },
+    "isclose_fused.py": {
+      "cell": "isclose_fused#float32^",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 318,
+      "result": "RATIO 1.2075 numpy.isclose",
+      "kind": "measured"
+    },
+    "isin_object_hash.py": {
+      "cell": "isin_object_hash",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 51,
+      "result": "RATIO 2.2506 numpy.isin",
+      "kind": "measured"
+    },
+    "median_partition.py": {
+      "cell": "median_partition",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 66,
+      "result": "RATIO 1.8105 numpy.median",
+      "kind": "measured"
+    },
+    "nanquantile_masked.py": {
+      "cell": "nanquantile_masked",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 87,
+      "result": "RATIO 28.9380 numpy.nanquantile",
+      "kind": "measured"
+    },
+    "parallel_binary.py": {
+      "cell": "pyrallel_minimum@float64",
+      "artifact": "intel-resumed-full.json",
+      "record_index": 128,
+      "result": "RATIO 1.2913 numpy.minimum",
+      "kind": "measured"
+    },
+    "percentile_dense.py": {
+      "cell": "percentile_dense",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 105,
+      "result": "RATIO 6.0721 numpy.percentile",
+      "kind": "measured"
+    },
+    "quantile_dense_sort.py": {
+      "cell": "quantile_dense_sort",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 180,
+      "result": "RATIO 6.4631 numpy.quantile",
+      "kind": "measured"
+    },
+    "relayout.py": {
+      "cell": "relayout_blocked",
+      "artifact": "intel-resumed-full.json",
+      "record_index": 268,
+      "result": "RATIO 1.4883 numpy.ascontiguousarray",
+      "kind": "measured"
+    },
+    "relayout_blocked.py": {
+      "cell": "relayout_blocked",
+      "artifact": "intel-resumed-full.json",
+      "record_index": 268,
+      "result": "RATIO 1.4883 numpy.ascontiguousarray",
+      "kind": "measured"
+    },
+    "unique_axis0_column.py": {
+      "cell": "unique_axis0_column",
+      "artifact": "intel-resumed-full.json",
+      "record_index": 402,
+      "result": "RATIO 24.2803 numpy.unique",
+      "kind": "measured"
+    },
+    "unique_rows_lexsort.py": {
+      "cell": "unique_rows_lexsort%u",
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 221,
+      "result": "RATIO 1.9345 numpy.unique",
+      "kind": "measured"
+    },
+    "argmax_blocked.py": {
+      "cell": "argmax:argmax:float64:3000x3000:none",
+      "host_observations": {
+        "Intel": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 2,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 2.0584098622626477,
+          "disposition": "calibration-gated experiment"
+        },
+        "AMD": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 2,
+          "dispatch": [
+            "argmax_blocked_transpose",
+            "predicate-accepted"
+          ],
+          "ratio": 0.5699375507473422,
+          "disposition": "calibration-gated experiment"
+        }
+      }
+    },
+    "pyrallel.py": {
+      "cell": "out:sin:float32:3000000:disjoint",
+      "host_observations": {
+        "Intel": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 31,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 1.5419215831043611,
+          "disposition": "retained candidate"
+        },
+        "AMD": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 31,
+          "dispatch": [
+            "pyrallel_sin",
+            "predicate-accepted"
+          ],
+          "ratio": 2.2941810875814963,
+          "disposition": "retained candidate"
+        }
+      }
+    },
+    "vectorize_ufunc.py": {
+      "cell": "vectorize:exp:float64:16:none",
+      "host_observations": {
+        "Intel": {
+          "artifact": "intel-followup-execution.json",
+          "record_index": 24,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 4.293682220520386,
+          "disposition": "retained candidate"
+        },
+        "AMD": {
+          "artifact": "amd-followup-execution.json",
+          "record_index": 24,
+          "dispatch": [
+            "vectorize_ufunc_direct",
+            "predicate-accepted"
+          ],
+          "ratio": 3.2116674309584647,
+          "disposition": "retained candidate"
+        }
+      }
+    }
+  },
+  "artifacts": {
+    "qualified/hist2d_uniform/numpy-2.3.0.json": {
+      "sha256": "e5425ead3c55c46aebd4a5c302de7d0031d7d0622c6594e11ca542bc90bda415",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.3.0",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "F16C",
+          "FMA3",
+          "MMX",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3"
+        ],
+        "fingerprint": "8d08c14687cd"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.014195583596214534,
+        "cpu_busy_after": 0.0,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/hist2d_uniform/numpy-2.4.5.json": {
+      "sha256": "c8b3b82f55c0c3b8e1f2eb39946d2021b2fe73b11b24c62f88204e8b8fb950b4",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "015f7385d258"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.006259780907668211,
+        "cpu_busy_after": 0.0078125,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/hist2d_uniform/numpy-latest.json": {
+      "sha256": "bfd8f08c556e312e81e890e869c7780b99ecc3c7059cd370dcc5caf68fb23446",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0062893081761006275,
+        "cpu_busy_after": 0.05581395348837215,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/intersect_sorted/numpy-2.3.0.json": {
+      "sha256": "ee052aadeb692e93527400a29e4c5a2cec0134b2c71a2c0e23ef922c27402bbe",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.3.0",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "F16C",
+          "FMA3",
+          "MMX",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3"
+        ],
+        "fingerprint": "8d08c14687cd"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.06853582554517135,
+        "cpu_busy_after": 0.10426540284360186,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/intersect_sorted/numpy-2.4.5.json": {
+      "sha256": "3044dd6fde59b81243d832b38f426b7f77fa9066d3d02b8cf4b101a6ffbb2133",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "015f7385d258"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.020537124802527673,
+        "cpu_busy_after": 0.05965463108320246,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/intersect_sorted/numpy-latest.json": {
+      "sha256": "34dbdb3c8324d3b822accc05071fbdcd34d967903e14bbdc85787292282ac4b0",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.060413354531001606,
+        "cpu_busy_after": 0.06037151702786381,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/matmul_split_complex/numpy-2.3.0.json": {
+      "sha256": "87ea03bd15dcf6b864b3c0565bffc8dbdf1dc73c787186a42ade4824c23554cd",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.3.0",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "F16C",
+          "FMA3",
+          "MMX",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3"
+        ],
+        "fingerprint": "8d08c14687cd"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.09733124018838302,
+        "cpu_busy_after": 0.028169014084507005,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/matmul_split_complex/numpy-2.4.5.json": {
+      "sha256": "bb5272c8a8a66693900536315400d274fbb476720cd68e6b46652d7416edeaa3",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "015f7385d258"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 1,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0015673981191222097,
+        "cpu_busy_after": 0.001615508885298822,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "matmul-resumed-2.4.5.json": {
+      "sha256": "2ca9acc2714a39a355934b54cf9671ca722f2a025e004bb36d6e20f353b75004",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "015f7385d258"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.04347826086956519,
+        "cpu_busy_after": 0.00783699059561127,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/matmul_split_complex/numpy-latest.json": {
+      "sha256": "5c63d3f62be990ba936e922c5ade112482733644fb772aa668f6d926f5bdd602",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 1,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.009630818619582704,
+        "cpu_busy_after": 0.039246467817896424,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "gates-final/numpy-latest.json": {
+      "sha256": "4672ae59a37f0770e819587d0fdb8239a1223495d46425a9a6993bd78596c5c1",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "a57e87174978c199452b14137830e63d21353d60e100adf1f6a2e736502917e3",
+      "original_exit_code": 1,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.006269592476489061,
+        "cpu_busy_after": 0.004658385093167738,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "intel-matmul-canonical-retry2.json": {
+      "sha256": "de1f1b2c1de850e79903fa10dd99abc87341462343cd66bf787c6e7c79b89aab",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "a57e87174978c199452b14137830e63d21353d60e100adf1f6a2e736502917e3",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.006369426751592355,
+        "cpu_busy_after": 0.0031897926634768536,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "matmul-one-second-latest.json": {
+      "sha256": "1396adf55716781dcced90c0349b3c87eabb12812fd83e39b93fe2fdc95e7fa3",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "88576634106ede31f1f332442882b2192d02123ee8f027c7db5e7d540b51246f",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.029733959311424085,
+        "cpu_busy_after": 0.003231017770597755,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/unique_axis0_column/numpy-2.3.0.json": {
+      "sha256": "f14898cb6a680dda51833defa06e5ae6668d060323db6f9a443c0cc94827be7c",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.3.0",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "F16C",
+          "FMA3",
+          "MMX",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3"
+        ],
+        "fingerprint": "8d08c14687cd"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.05164319248826288,
+        "cpu_busy_after": 0.0,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/unique_axis0_column/numpy-2.4.5.json": {
+      "sha256": "2d8e69704cd362848d56be54f460fcfc19d8e58f337ad6c6a2a93cc7278d39dc",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "015f7385d258"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.010954616588419452,
+        "cpu_busy_after": 0.03588143525741028,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/unique_axis0_column/numpy-latest.json": {
+      "sha256": "13a39add799524b7164861b433dd0fdd4b87fe608059b5476ec3d80dcb61d8b7",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.020440251572327095,
+        "cpu_busy_after": 0.011235955056179803,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/unique_sort/numpy-2.3.0.json": {
+      "sha256": "42fd3794592e960cf975bc551fec3a8f654ec86241178c50f743b864eb975642",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.3.0",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "F16C",
+          "FMA3",
+          "MMX",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3"
+        ],
+        "fingerprint": "8d08c14687cd"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0,
+        "cpu_busy_after": 0.0016051364365970988,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/unique_sort/numpy-2.4.5.json": {
+      "sha256": "152ae9d6e9097838f2c8c285f167eb60e14597411b8873f208e171e5858ef94f",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "015f7385d258"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.009389671361502372,
+        "cpu_busy_after": 0.028169014084507005,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/unique_sort/numpy-latest.json": {
+      "sha256": "a5603d90391fc97e2e697da12f647ddeda715da07b4ecab8c3b445aa607bb535",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0015576323987538387,
+        "cpu_busy_after": 0.06521739130434778,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/unique_values_sort/numpy-2.3.0.json": {
+      "sha256": "e634207462ad7fe082464e0ba790edf5358b03724ae95e838bd47d3bc71e5718",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.3.0",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "F16C",
+          "FMA3",
+          "MMX",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3"
+        ],
+        "fingerprint": "8d08c14687cd"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.031347962382445194,
+        "cpu_busy_after": 0.011128775834658211,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/unique_values_sort/numpy-2.4.5.json": {
+      "sha256": "71b2f51bb4c393ccd111e9f6c1aca89b80c16b8b520e15417f2e1fda2be3b58b",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "015f7385d258"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.017214397496087663,
+        "cpu_busy_after": 0.03125,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "qualified/unique_values_sort/numpy-latest.json": {
+      "sha256": "cf6d0973c6a9c221a11a5c1001d71bed1b1f372ee1bb0bdab84bb31c26a3ff37",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.022012578616352196,
+        "cpu_busy_after": 0.06220839813374801,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "intel-followup-execution.json": {
+      "sha256": "a37f2f0dc40dde12c7724f72a07c92960d96e74592ea6912f86a6945aa072261",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "source_sha256": "d5f094a4eb1fa17e92dbb90f54bb6b9974739bb18bd7a1be085fda875dcdd70e",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.02170542635658912,
+        "cpu_busy_after": 0.009360374414976613,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "intel-sin-stability-final.json": {
+      "sha256": "e0b689c2202420c09d834caf283e819eb044cf9fc6cb78141fc5b808dce85921",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.006249999999999978,
+        "cpu_busy_after": 0.0031397174254317317,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "intel-add-final.json": {
+      "sha256": "f19df58d8e1b813b44f987dd181c0803c0312588816602960f2d291f1e4c5a59",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.029780564263322873,
+        "cpu_busy_after": 0.009463722397476393,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "amd-followup-execution.json": {
+      "sha256": "9daca780ba685f2a4eeb2a0bfc59a1f3cd42f69dbdc6ffff1c078fbba29246a1",
+      "fingerprint": {
+        "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+        "machine": "AMD64",
+        "system": "Windows 11",
+        "logical_cores": 32,
+        "python": "3.14.2",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "AVX512BF16",
+          "AVX512BITALG",
+          "AVX512BW",
+          "AVX512CD",
+          "AVX512DQ",
+          "AVX512F",
+          "AVX512IFMA",
+          "AVX512VBMI",
+          "AVX512VBMI2",
+          "AVX512VL",
+          "AVX512VNNI",
+          "AVX512VPOPCNTDQ",
+          "AVX512_CLX",
+          "AVX512_CNL",
+          "AVX512_ICL",
+          "AVX512_SKX",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3",
+          "X86_V4"
+        ],
+        "fingerprint": "8f8198d9abab"
+      },
+      "source_sha256": "8615ca7c754c996c9330cfdf69237c02fb3cef79ec776246ce6b7f65a1de3ab0",
+      "original_exit_code": 1,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.1572265625,
+        "cpu_busy_after": 0.4306640625,
+        "contended": true,
+        "load_known": true
+      }
+    },
+    "amd-followup-execution-retry.json": {
+      "sha256": "6f36ada01ccc517f5c35dd79c8e8cabc4fc21de3bffa2dbdd91a6eb2619760f1",
+      "fingerprint": {
+        "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+        "machine": "AMD64",
+        "system": "Windows 11",
+        "logical_cores": 32,
+        "python": "3.14.2",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "AVX512BF16",
+          "AVX512BITALG",
+          "AVX512BW",
+          "AVX512CD",
+          "AVX512DQ",
+          "AVX512F",
+          "AVX512IFMA",
+          "AVX512VBMI",
+          "AVX512VBMI2",
+          "AVX512VL",
+          "AVX512VNNI",
+          "AVX512VPOPCNTDQ",
+          "AVX512_CLX",
+          "AVX512_CNL",
+          "AVX512_ICL",
+          "AVX512_SKX",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3",
+          "X86_V4"
+        ],
+        "fingerprint": "8f8198d9abab"
+      },
+      "source_sha256": "8615ca7c754c996c9330cfdf69237c02fb3cef79ec776246ce6b7f65a1de3ab0",
+      "original_exit_code": 1,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.09931170108161258,
+        "cpu_busy_after": 0.11833171677982546,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "amd-followup-execution-retry2.json": {
+      "sha256": "1f489076505874b2be7317e4d944330e82dd866ffed1ce33b0797838741909f0",
+      "fingerprint": {
+        "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+        "machine": "AMD64",
+        "system": "Windows 11",
+        "logical_cores": 32,
+        "python": "3.14.2",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "AVX512BF16",
+          "AVX512BITALG",
+          "AVX512BW",
+          "AVX512CD",
+          "AVX512DQ",
+          "AVX512F",
+          "AVX512IFMA",
+          "AVX512VBMI",
+          "AVX512VBMI2",
+          "AVX512VL",
+          "AVX512VNNI",
+          "AVX512VPOPCNTDQ",
+          "AVX512_CLX",
+          "AVX512_CNL",
+          "AVX512_ICL",
+          "AVX512_SKX",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3",
+          "X86_V4"
+        ],
+        "fingerprint": "8f8198d9abab"
+      },
+      "source_sha256": "8615ca7c754c996c9330cfdf69237c02fb3cef79ec776246ce6b7f65a1de3ab0",
+      "original_exit_code": 1,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.076171875,
+        "cpu_busy_after": 0.05471698113207546,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "amd-followup-execution-retry4.json": {
+      "sha256": "88e188e57904ecf8d65d4ad07bc83cfb2a8a5d32a33a10a5450cd543869fab59",
+      "fingerprint": {
+        "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+        "machine": "AMD64",
+        "system": "Windows 11",
+        "logical_cores": 32,
+        "python": "3.14.2",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "AVX512BF16",
+          "AVX512BITALG",
+          "AVX512BW",
+          "AVX512CD",
+          "AVX512DQ",
+          "AVX512F",
+          "AVX512IFMA",
+          "AVX512VBMI",
+          "AVX512VBMI2",
+          "AVX512VL",
+          "AVX512VNNI",
+          "AVX512VPOPCNTDQ",
+          "AVX512_CLX",
+          "AVX512_CNL",
+          "AVX512_ICL",
+          "AVX512_SKX",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3",
+          "X86_V4"
+        ],
+        "fingerprint": "8f8198d9abab"
+      },
+      "source_sha256": "8615ca7c754c996c9330cfdf69237c02fb3cef79ec776246ce6b7f65a1de3ab0",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.09677419354838712,
+        "cpu_busy_after": 0.1270935960591133,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "amd-add-final.json": {
+      "sha256": "55a959b9b65338e822adbc1ef0fcb892fd8cd7e435042a92c522f17e740844f4",
+      "fingerprint": {
+        "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+        "machine": "AMD64",
+        "system": "Windows 11",
+        "logical_cores": 32,
+        "python": "3.14.2",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "AVX512BF16",
+          "AVX512BITALG",
+          "AVX512BW",
+          "AVX512CD",
+          "AVX512DQ",
+          "AVX512F",
+          "AVX512IFMA",
+          "AVX512VBMI",
+          "AVX512VBMI2",
+          "AVX512VL",
+          "AVX512VNNI",
+          "AVX512VPOPCNTDQ",
+          "AVX512_CLX",
+          "AVX512_CNL",
+          "AVX512_ICL",
+          "AVX512_SKX",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3",
+          "X86_V4"
+        ],
+        "fingerprint": "8f8198d9abab"
+      },
+      "source_sha256": "9be0bfba4d452400546cfe356584409c27d736570c7f3ec01c485c12b5d41944",
+      "original_exit_code": 1,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.152324431256182,
+        "cpu_busy_after": 0.20886699507389161,
+        "contended": true,
+        "load_known": true
+      }
+    },
+    "stability-retry-2.3.0.json": {
+      "sha256": "8eda3672fab26bf3b0e4c8f83675d1ac963599d238920daa4484529a5a73e468",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.3.0",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "F16C",
+          "FMA3",
+          "MMX",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3"
+        ],
+        "fingerprint": "8d08c14687cd"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.007800312012480548,
+        "cpu_busy_after": 0.007788161993769416,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "stability-retry-2.4.5.json": {
+      "sha256": "0ab6b6e3596b8f9931732f05fb8bfdb475825c4dfca9c2cf9ee8ec3eddfa011d",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.4.5",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "015f7385d258"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0078125,
+        "cpu_busy_after": 0.004680187207488307,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "stability-retry-latest.json": {
+      "sha256": "05c9a21f3e8f88d30aadaff2720806f276e1e215d3d25888e8492e8db05228d6",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.003129890453834161,
+        "cpu_busy_after": 0.0031347962382445305,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "versions/numpy-latest.json": {
+      "sha256": "5948f5102a48126dedd3de26d83102c1d8fab6bb22c57e0c0032b2be0bed7bea",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.3",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "d69e2609ccf4"
+      },
+      "source_sha256": "d3a3afadda0009f4dae8b252a5140668157924b732562d44689196dcb492b201",
+      "original_exit_code": 0,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.007824726134585291,
+        "cpu_busy_after": 0.03949447077409163,
+        "contended": false,
+        "load_known": true
+      }
+    },
+    "intel-resumed-full.json": {
+      "sha256": "76d3bd48169d19675bb53363e05c004302f562e3cd9c9e4e873c803c3acc7bef",
+      "fingerprint": {
+        "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "machine": "AMD64",
+        "system": "Windows 10",
+        "logical_cores": 20,
+        "python": "3.13.3",
+        "numpy": "2.5.2",
+        "blas": "scipy-openblas",
+        "simd_features": [
+          "AVX",
+          "AVX2",
+          "BMI",
+          "BMI2",
+          "CX16",
+          "F16C",
+          "FMA3",
+          "GFNI",
+          "LAHF",
+          "LZCNT",
+          "MMX",
+          "MOVBE",
+          "POPCNT",
+          "SSE",
+          "SSE2",
+          "SSE3",
+          "SSE41",
+          "SSE42",
+          "SSSE3",
+          "VAES",
+          "VPCLMULQDQ",
+          "X86_V2",
+          "X86_V3"
+        ],
+        "fingerprint": "9bbe7063c555"
+      },
+      "source_sha256": "8615ca7c754c996c9330cfdf69237c02fb3cef79ec776246ce6b7f65a1de3ab0",
+      "original_exit_code": 1,
+      "original_conditions": {
+        "quiet_threshold": 0.2,
+        "cpu_busy_before": 0.0015600624024960652,
+        "cpu_busy_after": 0.0031104199066873672,
+        "contended": false,
+        "load_known": true
+      }
+    }
+  },
+  "excluded_records_encountered": [
+    {
+      "artifact": "qualified/matmul_split_complex/numpy-2.4.5.json",
+      "record_index": 45,
+      "cell": "matmul_split_complex#complex128-rows-m63",
+      "reason": "failed child"
+    },
+    {
+      "artifact": "qualified/matmul_split_complex/numpy-latest.json",
+      "record_index": 0,
+      "cell": "matmul_split_complex",
+      "reason": "failed child"
+    },
+    {
+      "artifact": "gates-final/numpy-latest.json",
+      "record_index": 6,
+      "cell": "matmul_split_complex",
+      "reason": "stock: unstable timing; MAD/median=63.21% exceeds 20%; unverified"
+    },
+    {
+      "artifact": "gates-final/numpy-latest.json",
+      "record_index": 7,
+      "cell": "matmul_split_complex",
+      "reason": "stock: unstable timing; MAD/median=26.14% exceeds 20%; unverified"
+    },
+    {
+      "artifact": "gates-final/numpy-latest.json",
+      "record_index": 82,
+      "cell": "matmul_split_complex#complex128-rows-m64",
+      "reason": "patched: unstable timing; MAD/median=81.02% exceeds 20%; unverified"
+    },
+    {
+      "artifact": "gates-final/numpy-latest.json",
+      "record_index": 86,
+      "cell": "matmul_split_complex#complex128-rows-m64-n+1",
+      "reason": "stock: unstable timing; MAD/median=40.19% exceeds 20%; unverified"
+    },
+    {
+      "artifact": "gates-final/numpy-latest.json",
+      "record_index": 92,
+      "cell": "matmul_split_complex#complex128-rows-m64-q+1",
+      "reason": "stock: unstable timing; MAD/median=40.05% exceeds 20%; unverified"
+    },
+    {
+      "artifact": "qualified/unique_values_sort/numpy-2.3.0.json",
+      "record_index": 7,
+      "cell": "unique_values_sort#int8%d",
+      "reason": "candidate loss; disposition required"
+    },
+    {
+      "artifact": "intel-followup-execution.json",
+      "record_index": 28,
+      "cell": "out:sin:float64:300000:inplace",
+      "reason": "candidate_guard_off: unstable timing; MAD/median=26.01% exceeds 20%; unverified"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 1,
+      "cell": "argmax:argmax:float64:3000x2999:none",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 9,
+      "cell": "argmax:argmax:float32:4500x3000:none",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 11,
+      "cell": "argmax:argmax:float32:10000x1000:none",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 13,
+      "cell": "argmax:argmax:int64:3000x2999:none",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 15,
+      "cell": "argmax:argmax:int64:4500x3000:none",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 28,
+      "cell": "out:sin:float64:300000:inplace",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 38,
+      "cell": "out:add:float64:60000000:inplace",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 40,
+      "cell": "out:add:int64:20000000:inplace",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 41,
+      "cell": "out:add:int64:60000000:disjoint",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution.json",
+      "record_index": 42,
+      "cell": "out:add:int64:60000000:inplace",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution-retry.json",
+      "record_index": 1,
+      "cell": "argmax:argmax:float32:4500x3000:none",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution-retry.json",
+      "record_index": 5,
+      "cell": "out:sin:float64:300000:inplace",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution-retry.json",
+      "record_index": 7,
+      "cell": "out:add:int64:20000000:inplace",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution-retry.json",
+      "record_index": 8,
+      "cell": "out:add:int64:60000000:disjoint",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution-retry.json",
+      "record_index": 9,
+      "cell": "out:add:int64:60000000:inplace",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution-retry2.json",
+      "record_index": 1,
+      "cell": "out:sin:float64:300000:inplace",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "amd-followup-execution-retry2.json",
+      "record_index": 2,
+      "cell": "out:add:int64:20000000:inplace",
+      "reason": "unqualified child"
+    },
+    {
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 57,
+      "cell": "matmul_int_blas",
+      "reason": "patched: unstable timing; MAD/median=33.08% exceeds 20%; unverified"
+    },
+    {
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 147,
+      "cell": "pyrallel_minimum@float64",
+      "reason": "stock: unstable timing; MAD/median=28.87% exceeds 20%; unverified"
+    },
+    {
+      "artifact": "versions/numpy-latest.json",
+      "record_index": 267,
+      "cell": "fftconvolve#mode-same",
+      "reason": "stock: unstable timing; MAD/median=24.85% exceeds 20%; unverified"
+    },
+    {
+      "artifact": "intel-resumed-full.json",
+      "record_index": 741,
+      "cell": "intersect_sorted#int16%d",
+      "reason": "candidate loss; disposition required"
+    },
+    {
+      "artifact": "intel-resumed-full.json",
+      "record_index": 742,
+      "cell": "intersect_sorted#int16%d",
+      "reason": "candidate loss; disposition required"
+    },
+    {
+      "artifact": "intel-resumed-full.json",
+      "record_index": 786,
+      "cell": "intersect_sorted#uint16%d",
+      "reason": "candidate loss; disposition required"
+    },
+    {
+      "artifact": "intel-resumed-full.json",
+      "record_index": 787,
+      "cell": "intersect_sorted#uint16%d",
+      "reason": "candidate loss; disposition required"
+    },
+    {
+      "artifact": "intel-resumed-full.json",
+      "record_index": 1408,
+      "cell": "unique_sort#uint64%d",
+      "reason": "candidate loss; disposition required"
+    },
+    {
+      "artifact": "intel-resumed-full.json",
+      "record_index": 1409,
+      "cell": "unique_sort#uint64%d",
+      "reason": "candidate loss; disposition required"
+    },
+    {
+      "artifact": "intel-resumed-full.json",
+      "record_index": 1475,
+      "cell": "unique_values_sort#uint16%d",
+      "reason": "candidate loss; disposition required"
+    },
+    {
+      "artifact": "intel-resumed-full.json",
+      "record_index": 1498,
+      "cell": "unique_values_sort#uint64%d",
+      "reason": "candidate loss; disposition required"
+    },
+    {
+      "artifact": "intel-resumed-full.json",
+      "record_index": 1499,
+      "cell": "unique_values_sort#uint64%d",
+      "reason": "candidate loss; disposition required"
+    }
+  ],
+  "correctness": {
+    "numpy_versions": [
+      "2.3.0",
+      "2.4.5",
+      "2.5.3"
+    ],
+    "each_suite": {
+      "passed": 2633,
+      "skipped": 2
+    },
+    "installed_wheel_selfchecks": {
+      "2.3.0": {
+        "paths": 69,
+        "failures": 0
+      },
+      "2.5.3": {
+        "paths": 69,
+        "failures": 0
+      }
+    }
+  }
+}

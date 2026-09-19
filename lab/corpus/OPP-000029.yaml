@@ -76,6 +76,12 @@ linked_prs: []
 related_opportunities: [OPP-000027]
 notes:
   - >-
+    CURRENT RUNTIME DISPOSITION (2026-09-19): matmul_split_complex retains
+    only complex128/float64 pairs, m <= 64, n >= 1000, q >= 500, with finite
+    operands. complex64/float32 uses stock after confirmed public-API losses.
+    The 2026-08-24 shipped note below is historical. Current evidence and
+    qualifications: docs/research/2026-09-19-burndown.md.
+  - >-
     SHIPPED (2026-08-24) as matmul_split_complex
     (src/pyoverdrive/fastpaths/matmul_split_complex.py): matmul(C, R)
     for 2-D complex128+float64 / complex64+float32 pairs with

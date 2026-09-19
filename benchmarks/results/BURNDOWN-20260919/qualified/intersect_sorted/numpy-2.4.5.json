@@ -1,0 +1,871 @@
+{
+  "schema_version": 1,
+  "tool": "verify_no_pessimization",
+  "recorded_at": "2026-09-19T21:01:55.475957+00:00",
+  "fingerprint": {
+    "cpu": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "machine": "AMD64",
+    "system": "Windows 10",
+    "logical_cores": 20,
+    "python": "3.13.3",
+    "numpy": "2.4.5",
+    "blas": "scipy-openblas",
+    "simd_features": [
+      "AVX",
+      "AVX2",
+      "BMI",
+      "BMI2",
+      "CX16",
+      "F16C",
+      "FMA3",
+      "GFNI",
+      "LAHF",
+      "LZCNT",
+      "MMX",
+      "MOVBE",
+      "POPCNT",
+      "SSE",
+      "SSE2",
+      "SSE3",
+      "SSE41",
+      "SSE42",
+      "SSSE3",
+      "VAES",
+      "VPCLMULQDQ",
+      "X86_V2",
+      "X86_V3"
+    ],
+    "fingerprint": "015f7385d258"
+  },
+  "source_revision": null,
+  "source": {
+    "sha256": "3ba24d1d04c9a7f736f94d333ca93ba709c5f7c2c4633e00a31eee1431728d9c",
+    "files": {
+      "lab/dyno/__init__.py": "d2e9c17eb6931a1a0e8ab96770d50a2dd8d358da5fdbbf0cc46111ec2405a0f4",
+      "lab/dyno/fingerprint.py": "d6a2c19dd3c885685d1fa7bbb566464da8a4bf5258a1c76967e3e3fa6dbe7d1c",
+      "lab/dyno/load.py": "1419fe280ad1b64812e920fdf0ee969d9a2cbe23d5477126d2e82bddaff12f6b",
+      "pyproject.toml": "51b46f39e85918ccfda61c67cf875aa373fa15e907dde3456b92bbbb7527fdb3",
+      "src/pyoverdrive/__init__.py": "1e3c7073516caf0c8a7880277f63572a0f1add8753e5f82ab06b64e6db562133",
+      "src/pyoverdrive/__main__.py": "e076d213b4ca05ee2160f50a470f6e5624e37ed2153c38c3c566164db67a1688",
+      "src/pyoverdrive/_cpuclass.py": "cc7b4658e31a01f1880baf2873a57514a550f88f968887d9bb089fce40557b3c",
+      "src/pyoverdrive/calibration.py": "55e979a7f49876648f9d8904262e4dd2e3f4bf8bb8e3d84e05146d1eee54a691",
+      "src/pyoverdrive/demo.py": "994b8240e6038ed02bfc743aaa9a356edc3a8d76c54a77ef625f771250f7c9c0",
+      "src/pyoverdrive/diagnostics.py": "d9c7f3ea76ffe78ffcc378b2b4f934fe4d63cf1555235ce8bec0bac01ec4bfc6",
+      "src/pyoverdrive/dispatcher/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/pyoverdrive/dispatcher/gearbox.py": "6ffb03d93360baaebd2cdf8827d3505c2b57116d1a4cd1396ac9329f2ea2bed4",
+      "src/pyoverdrive/fallback/__init__.py": "300db10ab3d2f65de2fbab38e2b6da91aeb65bbc94675e5e4bf16e9254bd7a7e",
+      "src/pyoverdrive/fastpaths/__init__.py": "7d7ed87220af6f9da4c74b97f4c65f8e1e6af8c340d6e92839a16bdbbc2436ab",
+      "src/pyoverdrive/fastpaths/_pyrallel_common.py": "c44138fada6bd888edc00c240c5e2c13ca699a123536769267ccf9d92a2a5f47",
+      "src/pyoverdrive/fastpaths/apply_along_axis_reduce.py": "7eab1c48a3dbe261c123bf46a60e239a86a5341e2709166b60a7c786b08bacb2",
+      "src/pyoverdrive/fastpaths/argmax_blocked.py": "8ac6b8b6238ab76230b19bb633940bac9d7937f5e289c497a7944fa16025f30e",
+      "src/pyoverdrive/fastpaths/char_view.py": "b149479566231986b23e2585915d0f200ec4327e55da980d785f6acb46ed9901",
+      "src/pyoverdrive/fastpaths/cholesky_small_batch.py": "7ef9067f54755dafb88986ac53eb6dea2399f7dfb4072b9d8dbac902240093d9",
+      "src/pyoverdrive/fastpaths/dot_mixed_view.py": "8a85edbf37bd16e16d4b39ef166486add0b64f3b7de9304b257ddc3ddc199897",
+      "src/pyoverdrive/fastpaths/eigvalsh_2x2.py": "fb92e30297b63c470618b9a5ce9e61799a7bde48813d642e2b4192fb4025b2d5",
+      "src/pyoverdrive/fastpaths/eigvalsh_3x3.py": "078cc3e2cc82aec5d9b3600d74e06e941ebf5a4ca2f0b5574d3f33bfa14b76f1",
+      "src/pyoverdrive/fastpaths/einsum_optimize.py": "8853e789478334b0519dc39a89d4cbfc59871a8670ee6e54cb3f2d286e055231",
+      "src/pyoverdrive/fastpaths/fftconvolve.py": "359d49ac516d756fa644e3e28ba4eb999e7b8d1ec4f2b867a531f77a35f18ca1",
+      "src/pyoverdrive/fastpaths/hist2d_uniform.py": "8184b62ae414489ab95550e5007306f29f333e6af4955b8153d8f54337da8811",
+      "src/pyoverdrive/fastpaths/inner_tensordot.py": "f855a3952c85e0e682f57d311559bc0381a5c5b6d47984dd3ff84962d0e30cfc",
+      "src/pyoverdrive/fastpaths/interp_uniform_grid.py": "fe87bad59dd1077ffa158562a428bf84cf5da4822879f1efc7e6084fc2865ee2",
+      "src/pyoverdrive/fastpaths/intersect_sorted.py": "5ea1213ef90c77488670554b1f2d3d99d25743dc46e9268849743d8bb0df9711",
+      "src/pyoverdrive/fastpaths/inv_small_batch.py": "eb9f17d02f58a0b35c06e090d627905db71fda93d33694b1cc1fa124db8da839",
+      "src/pyoverdrive/fastpaths/isclose_fused.py": "d31ab390e86da641790f9a7bc2a01ca307c06576ab3910eeada5312ddfdeb715",
+      "src/pyoverdrive/fastpaths/isin_object_hash.py": "42aa6c0a5a5073d8d8f0f84b671671cb0b8ade64818a224f5c12df79656f7ba4",
+      "src/pyoverdrive/fastpaths/isin_string_hash.py": "95e171ded3faa1c06f64ac7c656258b8a71a689572e09744086f740c609c228b",
+      "src/pyoverdrive/fastpaths/linalg_small_batch.py": "52d28a91ce60d88a95b6239c82aa34e51d28ecf46fca3ce0b5c2c3a027201434",
+      "src/pyoverdrive/fastpaths/matmul_int_blas.py": "c16190671fac319968b82b3c1a5a7ae1ab7b34b10914009b55b6f0907ffc26a7",
+      "src/pyoverdrive/fastpaths/matmul_split_complex.py": "24011625fcae0e4ae2b49ffbd183b8c59b9ccceb78eadeb374b07476d98d1d46",
+      "src/pyoverdrive/fastpaths/median_partition.py": "0829b449dafda1f88b3bc8a3d9967d6555230329601a3fec493633137ae3f6cc",
+      "src/pyoverdrive/fastpaths/nan_to_num_where.py": "328941791574f993022d28901a9ea93d305cfbec6ac8a331258625cace5429a1",
+      "src/pyoverdrive/fastpaths/nanargminmax_scan.py": "aac89379959c1330ea0bfca509a2d3ad69072dd447bc67144328bfd309f86aed",
+      "src/pyoverdrive/fastpaths/nanmedian_scan.py": "5a151dadbe2b8df5c8c436037395998d99054e9c19fd377cf02cdb8ef2f00b8a",
+      "src/pyoverdrive/fastpaths/nanpercentile_masked.py": "f8930e7afe2465466d96f5f79d89b55e41b7bcccba0fd30d7e6ef7ed9cbe87ab",
+      "src/pyoverdrive/fastpaths/nanquantile_masked.py": "a140c40c31cd6c46b702a27b825e578ba7f495af55184359970e50d7f7eaeaca",
+      "src/pyoverdrive/fastpaths/nanreduce_scan.py": "8228517006b51761995894cd0beac36b34a6462acd857adc41ac55bf54964c47",
+      "src/pyoverdrive/fastpaths/noop.py": "07ba93bc5296f9473c833716188e0218a5479776d64926653961fcea2dfd647a",
+      "src/pyoverdrive/fastpaths/pad_1d_constant.py": "99a5416224e13e61a7bd8dda70f9317280d12611cbbab6642798ec5276df8e75",
+      "src/pyoverdrive/fastpaths/parallel_binary.py": "6ae0f911e2eaaed7aec966594d8d36c606928b63152f062271caafd3668cf937",
+      "src/pyoverdrive/fastpaths/parallel_ufunc.py": "484ab5dc7589d7c8038d2ef4ece4e6f92d2635dd9f598baf2c886b7cf34ae97b",
+      "src/pyoverdrive/fastpaths/percentile_dense.py": "f2e2c75d7879cafca79954ce91443f8e3086b326a7d63aaa40023a24171801ca",
+      "src/pyoverdrive/fastpaths/qr_small_batch.py": "2b087934ee6987be5c04a94cba50803bd4a67dab01c89efca1030b4d805347ab",
+      "src/pyoverdrive/fastpaths/quantile_dense_sort.py": "3fdca329883b9ec595fc5ec5170e8e657b11f97ab33f870799444bbb841a0998",
+      "src/pyoverdrive/fastpaths/reduce_tiny_trailing.py": "f2e09beb1d518edcf96463205ae75f7ca6687c0a0a7ebd27c0e36f88590d8a7c",
+      "src/pyoverdrive/fastpaths/relayout_blocked.py": "de5b13d93ad674a247f4d81f65c67977bc06c44cb8af1969d570a89170223c7e",
+      "src/pyoverdrive/fastpaths/roll_concat.py": "f8f2dbeb81bd185d44eac5feb576ed3bec556ee55685e17a5372b2b1468ea97c",
+      "src/pyoverdrive/fastpaths/searchsorted_extreme_key.py": "5bff96e936d7a82853df3e74bbb7508488cf8e21f212a5c51d50a55ac112e48a",
+      "src/pyoverdrive/fastpaths/searchsorted_sortqueries.py": "70a0fbe5e33b18301262b8eb671fb91502748c37252daedef0da32a994967448",
+      "src/pyoverdrive/fastpaths/svd_small_batch.py": "c20a2c4e7ad664a2492a896a46152fefd8f566c03ed0419ace3346a04a046243",
+      "src/pyoverdrive/fastpaths/take_index_assign.py": "b6b3298ed5b959b08e490e15b081cd03b5eb7ab94d63bc7c8139ecbff1ffc1a0",
+      "src/pyoverdrive/fastpaths/unique_axis0_column.py": "6b9c0e82613bac6169766b68d7f850e7841aa4c76d591c1cf20df51331fd9e99",
+      "src/pyoverdrive/fastpaths/unique_rows_lexsort.py": "6bf95ec8671b111aaf5edf2d2a990a487b609f03c2c77715e6cb5e501eca0144",
+      "src/pyoverdrive/fastpaths/unique_sort.py": "ababc63598881329f5a573fe26d9c818f81e0b17d62c4e5644d4e07332a21cf3",
+      "src/pyoverdrive/fastpaths/vectorize_ufunc.py": "06015ade38efe34f49aa51a7fea9bc77502f7dad8bcdc1d7ae297e65bec61ebc",
+      "src/pyoverdrive/parallel/__init__.py": "8b6d2ae4a18d9bbe6b879fa2b6028cbf903ffa56ef5c8b33305aea3a8368d315",
+      "src/pyoverdrive/parallel/pyrallel.py": "446866c5c292dc10d8e4b9f03b6063882eba6e1c7870580c17d74606c0c177a6",
+      "src/pyoverdrive/parallel/relayout.py": "383721a4e66ec807d70723d380150465948dcc607b1669c24ea376d4a8cd825e",
+      "tools/verify_no_pessimization.py": "97f2d86e038aca501253862ea5fe15b4bd2972d40999d568d197eaa363266e9b"
+    }
+  },
+  "calibration": {
+    "saved": {},
+    "override_configured": true
+  },
+  "selection": {
+    "only": [
+      "intersect_sorted"
+    ],
+    "rows": true,
+    "sizes": false,
+    "shapes": false,
+    "values": true
+  },
+  "settings": {
+    "min": 1.0,
+    "retries": 6,
+    "any_core": false,
+    "require_quiet": true,
+    "environment": {
+      "PYOVERDRIVE_THREADS": null,
+      "PYOVERDRIVE_DISABLE": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null
+    }
+  },
+  "conditions": {
+    "quiet_threshold": 0.2,
+    "cpu_busy_before": 0.020537124802527673,
+    "cpu_busy_after": 0.05965463108320246,
+    "contended": false,
+    "load_known": true
+  },
+  "cells": [
+    {
+      "cell": "intersect_sorted",
+      "op": "numpy.intersect1d",
+      "path": "intersect_sorted",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "intersect_sorted",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            10000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 10000
+        },
+        {
+          "shape": [
+            2000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 2000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0006344699999317527,
+        0.0006437466673863431,
+        0.0007179633326207598,
+        0.0006226833327673375,
+        0.0006205566654292246,
+        0.0006276699985998372,
+        0.0006453466679280003,
+        0.0006668233312666416,
+        0.0008488599987079699
+      ],
+      "patched_seconds": [
+        0.00013142666624238092,
+        0.00021012999738256137,
+        0.00012939333682879806,
+        0.00012900333385914564,
+        0.00012983999913558365,
+        0.00013478000182658433,
+        0.00013553666649386288,
+        0.00015506333438679575,
+        0.00013203666700671116
+      ],
+      "iterations_per_sample": 30,
+      "rounds": 9,
+      "stock_median_seconds": 0.0006437466673863431,
+      "patched_median_seconds": 0.00013203666700671116,
+      "ratio": 4.875514370213713,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 4.8755 numpy.intersect1d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "intersect_sorted%d",
+      "op": "numpy.intersect1d",
+      "path": "intersect_sorted",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "intersect_sorted",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            10000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 10000
+        },
+        {
+          "shape": [
+            2000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 2000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        4.163712134932854e-05,
+        4.135227275334976e-05,
+        4.557020212006238e-05,
+        4.263106066818264e-05,
+        4.142121208427154e-05,
+        4.132676750863667e-05,
+        4.297247476348973e-05,
+        4.122323224866631e-05,
+        4.1334343323897985e-05
+      ],
+      "patched_seconds": [
+        2.6409343447103494e-05,
+        2.6155555693696092e-05,
+        2.5951010151531057e-05,
+        2.901262610755635e-05,
+        2.5692171854616113e-05,
+        2.563712122436199e-05,
+        2.5667424191429158e-05,
+        2.5602777822488787e-05,
+        2.5576767523424943e-05
+      ],
+      "iterations_per_sample": 396,
+      "rounds": 9,
+      "stock_median_seconds": 4.142121208427154e-05,
+      "patched_median_seconds": 2.5692171854616113e-05,
+      "ratio": 1.6122113894715129,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.6122 numpy.intersect1d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "intersect_sorted%u",
+      "op": "numpy.intersect1d",
+      "path": "intersect_sorted",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "intersect_sorted",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            10000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 10000
+        },
+        {
+          "shape": [
+            2000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 2000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0006550827569424592,
+        0.0006584931036521649,
+        0.0006499827582517575,
+        0.000653827582999807,
+        0.0006523517217358638,
+        0.0006507206908908898,
+        0.000649162070376092,
+        0.0006507586222141981,
+        0.0006486999978921537
+      ],
+      "patched_seconds": [
+        0.00011457241509623569,
+        0.00011548620712911261,
+        0.00011828965668020577,
+        0.0001141413813456893,
+        0.00011442068980300221,
+        0.00011435862036486124,
+        0.0001142827577182445,
+        0.00011424482639493614,
+        0.00011476206769845609
+      ],
+      "iterations_per_sample": 29,
+      "rounds": 9,
+      "stock_median_seconds": 0.0006507586222141981,
+      "patched_median_seconds": 0.00011442068980300221,
+      "ratio": 5.687420896820386,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 5.6874 numpy.intersect1d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "intersect_sorted#int32",
+      "op": "numpy.intersect1d",
+      "path": "intersect_sorted",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "intersect_sorted",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        },
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0005374722240958363,
+        0.0005458055562081023,
+        0.0005490222247317433,
+        0.0005481277799440755,
+        0.0005399388869086073,
+        0.0005380277774141481,
+        0.0005428916645339794,
+        0.0005384305550251156,
+        0.0005428083337998638
+      ],
+      "patched_seconds": [
+        0.00020414166566398408,
+        0.00020648055619353222,
+        0.00021433333232481446,
+        0.00020416666908810535,
+        0.00020275555693337487,
+        0.0002039333339780569,
+        0.00020369166870497994,
+        0.00020557222241121862,
+        0.00021340277938482663
+      ],
+      "iterations_per_sample": 36,
+      "rounds": 9,
+      "stock_median_seconds": 0.0005428083337998638,
+      "patched_median_seconds": 0.00020416666908810535,
+      "ratio": 2.6586530319776256,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.6587 numpy.intersect1d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "intersect_sorted#int32%d",
+      "op": "numpy.intersect1d",
+      "path": "intersect_sorted",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "intersect_sorted",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        },
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        3.7675254220553375e-05,
+        3.748000007501598e-05,
+        3.624135604664936e-05,
+        3.6790847415262357e-05,
+        3.591050843755572e-05,
+        3.591932206398855e-05,
+        3.625389812040632e-05,
+        3.590440709080737e-05,
+        3.639186408875857e-05
+      ],
+      "patched_seconds": [
+        2.329152519420042e-05,
+        2.293322014354043e-05,
+        2.2788474462547544e-05,
+        2.3151864297688007e-05,
+        2.278542398648747e-05,
+        2.274677962443586e-05,
+        2.2711186133072537e-05,
+        2.2696271159891356e-05,
+        2.3018644128184197e-05
+      ],
+      "iterations_per_sample": 295,
+      "rounds": 9,
+      "stock_median_seconds": 3.625389812040632e-05,
+      "patched_median_seconds": 2.2788474462547544e-05,
+      "ratio": 1.5908874540939089,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.5909 numpy.intersect1d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "intersect_sorted#int32%u",
+      "op": "numpy.intersect1d",
+      "path": "intersect_sorted",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "intersect_sorted",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        },
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "int32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0005418542872316071,
+        0.0005413828550704888,
+        0.0005452342863593783,
+        0.0005401371412777475,
+        0.0007183714304119348,
+        0.0005497971449845604,
+        0.0005556771431916526,
+        0.0005538457139794315,
+        0.0005501514300704002
+      ],
+      "patched_seconds": [
+        0.00020247428411883966,
+        0.00020157714440886463,
+        0.00020247428411883966,
+        0.0002028800014938627,
+        0.0002246171435607331,
+        0.00020715714365776095,
+        0.00020884571463934012,
+        0.0002057514286467007,
+        0.0002051399987457054
+      ],
+      "iterations_per_sample": 35,
+      "rounds": 9,
+      "stock_median_seconds": 0.0005497971449845604,
+      "patched_median_seconds": 0.0002051399987457054,
+      "ratio": 2.680106992035703,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.6801 numpy.intersect1d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "intersect_sorted#uint32",
+      "op": "numpy.intersect1d",
+      "path": "intersect_sorted",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "intersect_sorted",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "uint32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        },
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "uint32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0005513235296615783,
+        0.0005503558820825728,
+        0.0005532411776263924,
+        0.0005627029424752383,
+        0.0005588794113410747,
+        0.0005583411753725479,
+        0.000561985296799856,
+        0.0005620352937566007,
+        0.0005538500023677069
+      ],
+      "patched_seconds": [
+        0.00020823235322228249,
+        0.00020718823789673692,
+        0.00022299411734018256,
+        0.00021167058730497956,
+        0.00021122941432301612,
+        0.00021154117455486865,
+        0.00021155588054919944,
+        0.000213349998161635,
+        0.00020764411687303116
+      ],
+      "iterations_per_sample": 34,
+      "rounds": 9,
+      "stock_median_seconds": 0.0005583411753725479,
+      "patched_median_seconds": 0.00021154117455486865,
+      "ratio": 2.639397160138807,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.6394 numpy.intersect1d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "intersect_sorted#uint32%d",
+      "op": "numpy.intersect1d",
+      "path": "intersect_sorted",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "intersect_sorted",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "uint32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        },
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "uint32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        4.2359396521425577e-05,
+        3.816682133356891e-05,
+        3.828120654505049e-05,
+        4.575243614086765e-05,
+        3.706566122924507e-05,
+        3.660928075506488e-05,
+        3.791879349347126e-05,
+        3.829280729135477e-05,
+        4.142761017625888e-05
+      ],
+      "patched_seconds": [
+        2.4963341266556434e-05,
+        2.4573781836579127e-05,
+        4.0624594032816293e-05,
+        2.8500231868844574e-05,
+        2.3930162578181572e-05,
+        2.40628771254849e-05,
+        2.399675160205627e-05,
+        3.828051048406592e-05,
+        2.3820185482830432e-05
+      ],
+      "iterations_per_sample": 431,
+      "rounds": 9,
+      "stock_median_seconds": 3.828120654505049e-05,
+      "patched_median_seconds": 2.4573781836579127e-05,
+      "ratio": 1.5578068853882014,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 1.5578 numpy.intersect1d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "cell": "intersect_sorted#uint32%u",
+      "op": "numpy.intersect1d",
+      "path": "intersect_sorted",
+      "variant": 0,
+      "dispatch": {
+        "chosen": "intersect_sorted",
+        "reason": "predicate-accepted",
+        "fallback_observed": false
+      },
+      "inputs": [
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "uint32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        },
+        {
+          "shape": [
+            5000
+          ],
+          "dtype": "uint32",
+          "strides": [
+            4
+          ],
+          "size": 5000
+        }
+      ],
+      "kwargs": {},
+      "correctness": {
+        "passed": true,
+        "mode": "bit-identical",
+        "comparator": "pyoverdrive.diagnostics._equal"
+      },
+      "stock_seconds": [
+        0.0005523029386120685,
+        0.0005511999993091997,
+        0.0005485823528622003,
+        0.0005521882352802684,
+        0.0005408088224666083,
+        0.0005522911772405839,
+        0.0006301176480894141,
+        0.0005400470588082338,
+        0.0005575499997255119
+      ],
+      "patched_seconds": [
+        0.00020612647195401436,
+        0.0002065794131554225,
+        0.00020430000115405112,
+        0.00020376764758325676,
+        0.00020102941198274493,
+        0.00020125293967259282,
+        0.0002042264711823972,
+        0.00020143529400229454,
+        0.00020272352883373112
+      ],
+      "iterations_per_sample": 34,
+      "rounds": 9,
+      "stock_median_seconds": 0.0005521882352802684,
+      "patched_median_seconds": 0.00020376764758325676,
+      "ratio": 2.7098915938294454,
+      "consumption": "_consume after each public call",
+      "sampling": "interleaved stock then patched; per-call seconds",
+      "result": "RATIO 2.7099 numpy.intersect1d",
+      "phase": "initial",
+      "attempt": 1,
+      "returncode": 0,
+      "stderr": ""
+    }
+  ],
+  "completed": true,
+  "selected_cells": [
+    "intersect_sorted",
+    "intersect_sorted%d",
+    "intersect_sorted%u",
+    "intersect_sorted#int32",
+    "intersect_sorted#int32%d",
+    "intersect_sorted#int32%u",
+    "intersect_sorted#uint32",
+    "intersect_sorted#uint32%d",
+    "intersect_sorted#uint32%u"
+  ],
+  "cpu_classes": {
+    "hybrid": true,
+    "fast": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "slow": [
+      16,
+      17,
+      18,
+      19
+    ],
+    "class_ratio": 2.307,
+    "probe_us": {
+      "9": 135.3,
+      "8": 137.1,
+      "10": 137.6,
+      "3": 137.7,
+      "13": 137.7,
+      "15": 137.8,
+      "5": 137.8,
+      "11": 137.8,
+      "7": 137.9,
+      "1": 138.0,
+      "2": 139.6,
+      "14": 139.6,
+      "4": 139.6,
+      "12": 139.6,
+      "0": 139.8,
+      "6": 139.9,
+      "18": 317.9,
+      "19": 318.0,
+      "17": 318.0,
+      "16": 318.3
+    }
+  },
+  "fast_core_cutoff_us": 228.89999999999998,
+  "summary": {
+    "losses": [],
+    "judged": 9,
+    "skipped": 0
+  },
+  "exit_code": 0
+}
