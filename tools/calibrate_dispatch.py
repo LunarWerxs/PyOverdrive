@@ -270,7 +270,7 @@ def derive(rows: dict, target: float,
     return table
 
 
-def main(argv: list[str]) -> int:
+def _parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser()
     ap.add_argument("--target", type=float, default=1.30)
     ap.add_argument("--family", default="unary", choices=("unary", "binary"))
@@ -293,7 +293,119 @@ def main(argv: list[str]) -> int:
                          "slow core")
     ap.add_argument("--fast-under", type=float, help=argparse.SUPPRESS)
     ap.add_argument("--one", help=argparse.SUPPRESS)
-    args = ap.parse_args(argv[1:])
+    return ap
+
+
+def _measure_cell(cmd: list[str], retries: int) -> dict:
+    """One cell, re-drawn until it lands on a fast core or the retries run out.
+
+    A process keeps whatever core class it was given, so the only way to choose is to spawn
+    again. A spawn whose output cannot be parsed returns the error rather than raising: a cell
+    that produced nothing has to reach the caller as a recorded hole, never as a crash.
+    """
+    got = {"dispatch": None, "error": "no attempt"}
+    for _ in range(max(1, retries)):
+        p = subprocess.run(cmd, capture_output=True, text=True, cwd=str(REPO))
+        try:
+            got = json.loads((p.stdout or "").strip().splitlines()[-1])
+        except Exception:  # noqa: BLE001
+            got = {"dispatch": None, "error": (p.stderr or "")[-160:]}
+        if "slow_core" not in got:
+            break
+    return got
+
+
+def _cell_command(op: str, dtype: str, n: int, order: str, args,
+                  cutoff: float | None) -> list[str]:
+    """The `--one` invocation of this same script that measures a single cell."""
+    cmd = [sys.executable, str(Path(__file__)),
+           "--one", f"{op}:{dtype}:{n}:{order}",
+           "--rounds", str(args.rounds),
+           "--family", args.family]
+    if args.force_dispatch:
+        cmd.append("--force-dispatch")
+    if cutoff is not None:
+        cmd += ["--fast-under", f"{cutoff:.3f}"]
+    return cmd
+
+
+def _sweep(ops: list[str], dtypes: list[str], sizes: list[int], args,
+           cutoff: float | None) -> tuple[list[dict], dict, list[tuple]]:
+    """Measure every (op, dtype, size) cell: (raw rows, worst-per-cell, unmeasured cells).
+
+    Prints each row as it lands, so a sweep that takes hours is readable while it runs.
+    """
+    raw: list[dict] = []
+    worst: dict[tuple, float] = {}
+    unmeasured: list[tuple] = []
+    for op in ops:
+        for dtype in dtypes:
+            # np.divide on integer operands produces float64, so the shipped
+            # predicate refuses it (out dtype != operand dtype) and it has no
+            # row to re-derive. --force-dispatch would push it through a path
+            # that was never written for it, so it is skipped outright rather
+            # than measured into a number nobody should act on.
+            if op == "divide" and np.dtype(dtype).kind in "iu":
+                continue
+            for n in sizes:
+                cells = {order: _measure_cell(_cell_command(op, dtype, n, order, args, cutoff),
+                                              args.retries)
+                         for order in ORDERS}
+                vals = [c[k] for c in cells.values()
+                        for k in ("bare", "consumed") if k in c]
+                if not vals:
+                    why = next((c.get("error") or c.get("slow_core")
+                                or c.get("declined") for c in cells.values()
+                                if c.get("dispatch") is None), "no dispatch")
+                    # A cell that produced nothing drops OUT of the size list
+                    # derive() walks, so the threshold would be chosen from a
+                    # sequence with an invisible hole in it. Record it and say
+                    # so before the table: a gap must never read as a pass.
+                    unmeasured.append((op, dtype, n, str(why)[:60]))
+                    print(f"{op:6s} {dtype:8s} {n:9d}  "
+                          f"{'(not measured: ' + str(why)[:32] + ')':>50s}")
+                    continue
+                w = min(vals)
+                worst[(op, dtype, n)] = w
+                raw.append({"op": op, "dtype": dtype, "n": n, "cells": cells,
+                            "worst": w})
+                shown = "  ".join(
+                    f"{cells[o].get(k, float('nan')):10.2f}x"
+                    for o in ORDERS for k in ("bare", "consumed")
+                )
+                flag = " " if w >= args.target else "!"
+                print(f"{op:6s} {dtype:8s} {n:9d}  {shown}  {w:6.2f}x{flag}")
+    return raw, worst, unmeasured
+
+
+def _print_table(ops: list[str], dtypes: list[str], table: dict, args,
+                 unmeasured: list[tuple]) -> None:
+    """The SUPPORTED table, with every hole in the size sequence named ABOVE it."""
+    if unmeasured:
+        print(f"\n!! {len(unmeasured)} cell(s) produced no measurement. Each "
+              f"is a HOLE in the size sequence a threshold is read from, so "
+              f"treat any row below that spans one as unproven:")
+        for op, dtype, n, why in unmeasured:
+            print(f"   {op} {dtype} n={n}: {why}")
+    print(f"\nthresholds at >= {args.target:g}x on the WORST of "
+          f"{{sorted, shuffled}} x {{bare, consumed}}:")
+    print("SUPPORTED: dict[str, dict[np.dtype, int]] = {")
+    print("# rows whose only qualifying size was the largest measured are "
+          "EXCLUDED:\n# one point, nothing above it. Extend --sizes to ship "
+          "them.")
+    for op in ops:
+        if op not in table:
+            print(f'    # "{op}": no size clears the target -> stays on stock')
+            continue
+        entries = ", ".join(
+            f"{_ALIAS[d]}: {table[op][d]:_}" for d in dtypes if d in table[op]
+        )
+        print(f'    "{op}": {{{entries}}},')
+    print("}")
+
+
+def main(argv: list[str]) -> int:
+    args = _parser().parse_args(argv[1:])
 
     if args.ops is None:
         args.ops = ",".join(BINARY_OPS if args.family == "binary" else DOMAINS)
@@ -333,93 +445,14 @@ def main(argv: list[str]) -> int:
     sizes = [int(s) for s in args.sizes.split(",")]
     dtypes = args.dtypes.split(",")
 
-    raw: list[dict] = []
-    worst: dict[tuple, float] = {}
-    unmeasured: list[tuple] = []
     hdr = f"{'op':6s} {'dtype':8s} {'n':>9s}  " + "  ".join(
         f"{o[:4]+'/'+w[:4]:>11s}" for o in ORDERS for w in ("bare", "consumed")
     ) + f"  {'WORST':>7s}"
     print(hdr)
-    for op in ops:
-        for dtype in dtypes:
-            # np.divide on integer operands produces float64, so the shipped
-            # predicate refuses it (out dtype != operand dtype) and it has no
-            # row to re-derive. --force-dispatch would push it through a path
-            # that was never written for it, so it is skipped outright rather
-            # than measured into a number nobody should act on.
-            if op == "divide" and np.dtype(dtype).kind in "iu":
-                continue
-            for n in sizes:
-                cells: dict[str, dict] = {}
-                for order in ORDERS:
-                    cmd = [sys.executable, str(Path(__file__)),
-                           "--one", f"{op}:{dtype}:{n}:{order}",
-                           "--rounds", str(args.rounds),
-                           "--family", args.family]
-                    if args.force_dispatch:
-                        cmd.append("--force-dispatch")
-                    if cutoff is not None:
-                        cmd += ["--fast-under", f"{cutoff:.3f}"]
-                    # Re-draw until this cell lands on a fast core. A process
-                    # keeps whatever class it was given, so the only way to
-                    # choose is to spawn again.
-                    for _ in range(max(1, args.retries)):
-                        p = subprocess.run(cmd, capture_output=True, text=True,
-                                           cwd=str(REPO))
-                        try:
-                            got = json.loads((p.stdout or "").strip().splitlines()[-1])
-                        except Exception:  # noqa: BLE001
-                            got = {"dispatch": None, "error": (p.stderr or "")[-160:]}
-                        if "slow_core" not in got:
-                            break
-                    cells[order] = got
-                vals = [c[k] for c in cells.values()
-                        for k in ("bare", "consumed") if k in c]
-                if not vals:
-                    why = next((c.get("error") or c.get("slow_core")
-                                or c.get("declined") for c in cells.values()
-                                if c.get("dispatch") is None), "no dispatch")
-                    # A cell that produced nothing drops OUT of the size list
-                    # derive() walks, so the threshold would be chosen from a
-                    # sequence with an invisible hole in it. Record it and say
-                    # so before the table: a gap must never read as a pass.
-                    unmeasured.append((op, dtype, n, str(why)[:60]))
-                    print(f"{op:6s} {dtype:8s} {n:9d}  "
-                          f"{'(not measured: ' + str(why)[:32] + ')':>50s}")
-                    continue
-                w = min(vals)
-                worst[(op, dtype, n)] = w
-                raw.append({"op": op, "dtype": dtype, "n": n, "cells": cells,
-                            "worst": w})
-                shown = "  ".join(
-                    f"{cells[o].get(k, float('nan')):10.2f}x"
-                    for o in ORDERS for k in ("bare", "consumed")
-                )
-                flag = " " if w >= args.target else "!"
-                print(f"{op:6s} {dtype:8s} {n:9d}  {shown}  {w:6.2f}x{flag}")
+    raw, worst, unmeasured = _sweep(ops, dtypes, sizes, args, cutoff)
 
     table = derive(worst, args.target, tuple(dtypes))
-    if unmeasured:
-        print(f"\n!! {len(unmeasured)} cell(s) produced no measurement. Each "
-              f"is a HOLE in the size sequence a threshold is read from, so "
-              f"treat any row below that spans one as unproven:")
-        for op, dtype, n, why in unmeasured:
-            print(f"   {op} {dtype} n={n}: {why}")
-    print(f"\nthresholds at >= {args.target:g}x on the WORST of "
-          f"{{sorted, shuffled}} x {{bare, consumed}}:")
-    print("SUPPORTED: dict[str, dict[np.dtype, int]] = {")
-    print("# rows whose only qualifying size was the largest measured are "
-          "EXCLUDED:\n# one point, nothing above it. Extend --sizes to ship "
-          "them.")
-    for op in ops:
-        if op not in table:
-            print(f'    # "{op}": no size clears the target -> stays on stock')
-            continue
-        entries = ", ".join(
-            f"{_ALIAS[d]}: {table[op][d]:_}" for d in dtypes if d in table[op]
-        )
-        print(f'    "{op}": {{{entries}}},')
-    print("}")
+    _print_table(ops, dtypes, table, args, unmeasured)
 
     if args.json:
         Path(args.json).write_text(json.dumps(

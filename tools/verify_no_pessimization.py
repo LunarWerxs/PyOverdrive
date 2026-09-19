@@ -410,7 +410,7 @@ def _measure_one(cell: str, fast_under: float | None = None) -> str:
     return "SKIP unmeasurable" if dispatched else "SKIP no-dispatch"
 
 
-def main(argv: list[str]) -> int:
+def _parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser()
     ap.add_argument("--min", type=float, default=1.0)
     ap.add_argument("-v", "--verbose", action="store_true")
@@ -431,20 +431,14 @@ def main(argv: list[str]) -> int:
                          "is the axis np.inner's 0.38x corner lived on.")
     ap.add_argument("--fast-under", type=float, help=argparse.SUPPRESS)
     ap.add_argument("--one", help=argparse.SUPPRESS)  # internal: one path, own process
-    args = ap.parse_args(argv[1:])
+    return ap
 
-    if args.one:
-        print(_measure_one(args.one, args.fast_under))
-        return 0
 
-    # EVERY PATH GETS A FRESH PROCESS. Measuring 69 paths in one process
-    # produced a red that reproduced four times and was still wrong:
-    # pyrallel_tan reported 0.89x in the sweep and 1.15x in isolation, in
-    # every configuration tried (only-tan enabled, everything enabled, pool
-    # already warm). Sixty-eight other paths' allocations get to the
-    # threaded ones through cache and allocator state, and no amount of
-    # re-measuring inside that process escapes it. A per-path subprocess is
-    # slower and is the only way the number means anything.
+def _cells_to_judge(args) -> list[str]:
+    """The cell names worth spawning a process for: live dispatching paths only, and for a shape
+    cell, only one whose canonical input is 2-D or deeper (a 1-D input has no aspect ratio, so
+    filtering here saves a subprocess each and keeps the printed count a count of cells that
+    could ever judge)."""
     pyoverdrive.enable()
     live = {
         p.name
@@ -457,9 +451,6 @@ def main(argv: list[str]) -> int:
                               ASPECT_FACTORS if args.shapes else ())
              if re.split(r"[@*/><]", c)[0] in live]
 
-    # A shape cell needs a 2-D-or-deeper input to have an aspect ratio at
-    # all; filtering the 1-D cells here saves a subprocess each, and the
-    # count printed below stays a count of cells that could ever judge.
     shaped_ok: dict[str, bool] = {}
 
     def _has_matrix(cell: str) -> bool:
@@ -476,27 +467,30 @@ def main(argv: list[str]) -> int:
     names = [c for c in names if (">" not in c and "<" not in c)
              or _has_matrix(c)]
     pyoverdrive.disable()
+    return names
 
-    classes = cpuclass.classify()
-    print(cpuclass.describe(classes))
-    cutoff = None if args.any_core else cpuclass.fast_cutoff(classes)
-    if cutoff is not None:
-        print(f"measuring only on the fast class (probe <= {cutoff:.0f} us), "
-              f"up to {args.retries} re-draws per path")
 
+def _read_path(cmd: list[str], retries: int) -> list[str]:
+    """Run one path's own process, re-drawing while it lands on a slow core. Returns the last
+    line's whitespace-split parts, which the caller reads as `RATIO <n> <op>` or anything else."""
+    line = [""]
+    for _ in range(max(1, retries)):
+        proc = subprocess.run(cmd, capture_output=True, text=True, cwd=str(REPO))
+        line = (proc.stdout or "").strip().splitlines()[-1:] or [""]
+        if line[0].strip() != "SLOW-CORE":
+            break
+    return line[0].split()
+
+
+def _judge_paths(names: list[str], args, cutoff: float | None) -> tuple[list[tuple], int, int]:
+    """(losses, judged, skipped) over every cell, each in its own process."""
     losses: list[tuple[str, str, float]] = []
     judged = skipped = 0
     for name in names:
         cmd = [sys.executable, str(Path(__file__)), "--one", name]
         if cutoff is not None:
             cmd += ["--fast-under", f"{cutoff:.3f}"]
-        for _ in range(max(1, args.retries)):
-            proc = subprocess.run(cmd, capture_output=True, text=True,
-                                  cwd=str(REPO))
-            line = (proc.stdout or "").strip().splitlines()[-1:] or [""]
-            if line[0].strip() != "SLOW-CORE":
-                break
-        parts = line[0].split()
+        parts = _read_path(cmd, args.retries)
         if not parts or parts[0] != "RATIO":
             skipped += 1
             if args.verbose:
@@ -522,6 +516,34 @@ def main(argv: list[str]) -> int:
                 continue
         if args.verbose:
             print(f"  {ratio:6.2f}x  {name:28s} {op}")
+    return losses, judged, skipped
+
+
+def main(argv: list[str]) -> int:
+    args = _parser().parse_args(argv[1:])
+
+    if args.one:
+        print(_measure_one(args.one, args.fast_under))
+        return 0
+
+    # EVERY PATH GETS A FRESH PROCESS. Measuring 69 paths in one process
+    # produced a red that reproduced four times and was still wrong:
+    # pyrallel_tan reported 0.89x in the sweep and 1.15x in isolation, in
+    # every configuration tried (only-tan enabled, everything enabled, pool
+    # already warm). Sixty-eight other paths' allocations get to the
+    # threaded ones through cache and allocator state, and no amount of
+    # re-measuring inside that process escapes it. A per-path subprocess is
+    # slower and is the only way the number means anything.
+    names = _cells_to_judge(args)
+
+    classes = cpuclass.classify()
+    print(cpuclass.describe(classes))
+    cutoff = None if args.any_core else cpuclass.fast_cutoff(classes)
+    if cutoff is not None:
+        print(f"measuring only on the fast class (probe <= {cutoff:.0f} us), "
+              f"up to {args.retries} re-draws per path")
+
+    losses, judged, skipped = _judge_paths(names, args, cutoff)
 
     print(f"\njudged {judged} dispatching paths in their own processes, "
           f"skipped {skipped} (no canonical input, or it does not dispatch)")

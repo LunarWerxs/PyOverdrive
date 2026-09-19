@@ -57,6 +57,80 @@ REL_TOL = 1e-9          # "the dropped field was derivable" - essentially exact
 ROUND_TOL = 1e-4        # "rounding moved it no more than rounding can"
 
 
+def _verify_speedups(before: dict, after: dict, where: str) -> list[str]:
+    """Every dropped speedup must come back, from the original medians and from the rounded ones.
+
+    Two separate claims, checked separately because they have very different tolerances and only
+    the first one is about redundancy:
+
+      (1) the dropped field was DERIVABLE: recomputing it from the ORIGINAL medians must
+          reproduce it essentially exactly.
+      (2) rounding the medians perturbs that derived value by no more than the rounding itself,
+          i.e. ~10^-(SIG_FIGS-1) relative.
+
+    Deriving from the rounded medians and demanding 1e-9 conflates the two and fails on the
+    rounding, which is not a redundancy failure.
+    """
+    problems: list[str] = []
+    for name, want in (before.get("speedups") or {}).items():
+        exact = speedup_of(before, name)
+        rounded = speedup_of(after, name)
+        if want is None:
+            if exact is not None:
+                problems.append(f"{where}: {name} was null, derives to {exact}")
+            continue
+        if exact is None:
+            problems.append(f"{where}: {name} was {want}, derives to null")
+            continue
+        if abs(exact - want) > REL_TOL * max(abs(want), 1e-300):
+            problems.append(
+                f"{where}: {name} was NOT derivable - stored {want!r}, "
+                f"recomputed {exact!r}"
+            )
+        if rounded is None or abs(rounded - want) > ROUND_TOL * max(abs(want), 1e-300):
+            problems.append(
+                f"{where}: {name} moves more than rounding allows - "
+                f"{want!r} -> {rounded!r}"
+            )
+    return problems
+
+
+def _verify_variants(before: dict, after: dict, where: str) -> list[str]:
+    """Each variant's dropped fields must reconstruct, and a correctness failure must stay written."""
+    problems: list[str] = []
+    for name, stats in (before.get("variants") or {}).items():
+        new = after["variants"][name]
+
+        # role and correct are no longer stored; they must RECONSTRUCT
+        # to exactly what was there, which is the whole claim.
+        if "role" in stats and role_of(after, name) != stats["role"]:
+            problems.append(
+                f"{where}: {name}.role was {stats['role']!r}, "
+                f"reconstructs as {role_of(after, name)!r}"
+            )
+        if "correct" in stats and is_correct(new) != bool(stats["correct"]):
+            problems.append(
+                f"{where}: {name}.correct was {stats['correct']!r}, "
+                f"reads back as {is_correct(new)!r}"
+            )
+        if stats.get("correct") is False and new.get("correct") is not False:
+            problems.append(
+                f"{where}: {name} was a CORRECTNESS FAILURE and that is "
+                "evidence - it must stay written explicitly"
+            )
+
+        for k, v in stats.items():
+            if k in ("role", "correct"):
+                continue  # handled above, by reconstruction
+            nv = new.get(k)
+            if isinstance(v, float) and v == v and abs(v) != float("inf"):
+                if nv is None or abs(nv - v) > 10 ** -(SIG_FIGS - 1) * max(abs(v), 1e-300):
+                    problems.append(f"{where}: {name}.{k} {v!r} -> {nv!r}")
+            elif v != nv:
+                problems.append(f"{where}: {name}.{k} {v!r} -> {nv!r}")
+    return problems
+
+
 def _verify(original: dict, compacted: dict, path: Path) -> list[str]:
     problems: list[str] = []
     for key in original:
@@ -74,68 +148,8 @@ def _verify(original: dict, compacted: dict, path: Path) -> list[str]:
             if before[key] != after.get(key):
                 problems.append(f"{where}: field {key!r} changed")
 
-        # Two separate claims, checked separately because they have very
-        # different tolerances and only the first one is about redundancy.
-        #
-        #   (1) the dropped field was DERIVABLE: recomputing it from the
-        #       ORIGINAL medians must reproduce it essentially exactly.
-        #   (2) rounding the medians perturbs that derived value by no more
-        #       than the rounding itself, i.e. ~10^-(SIG_FIGS-1) relative.
-        #
-        # Deriving from the rounded medians and demanding 1e-9 conflates the
-        # two and fails on the rounding, which is not a redundancy failure.
-        stored = before.get("speedups") or {}
-        for name, want in stored.items():
-            exact = speedup_of(before, name)
-            rounded = speedup_of(after, name)
-            if want is None:
-                if exact is not None:
-                    problems.append(f"{where}: {name} was null, derives to {exact}")
-                continue
-            if exact is None:
-                problems.append(f"{where}: {name} was {want}, derives to null")
-                continue
-            if abs(exact - want) > REL_TOL * max(abs(want), 1e-300):
-                problems.append(
-                    f"{where}: {name} was NOT derivable - stored {want!r}, "
-                    f"recomputed {exact!r}"
-                )
-            if rounded is None or abs(rounded - want) > ROUND_TOL * max(abs(want), 1e-300):
-                problems.append(
-                    f"{where}: {name} moves more than rounding allows - "
-                    f"{want!r} -> {rounded!r}"
-                )
-
-        for name, stats in (before.get("variants") or {}).items():
-            new = after["variants"][name]
-
-            # role and correct are no longer stored; they must RECONSTRUCT
-            # to exactly what was there, which is the whole claim.
-            if "role" in stats and role_of(after, name) != stats["role"]:
-                problems.append(
-                    f"{where}: {name}.role was {stats['role']!r}, "
-                    f"reconstructs as {role_of(after, name)!r}"
-                )
-            if "correct" in stats and is_correct(new) != bool(stats["correct"]):
-                problems.append(
-                    f"{where}: {name}.correct was {stats['correct']!r}, "
-                    f"reads back as {is_correct(new)!r}"
-                )
-            if stats.get("correct") is False and new.get("correct") is not False:
-                problems.append(
-                    f"{where}: {name} was a CORRECTNESS FAILURE and that is "
-                    "evidence - it must stay written explicitly"
-                )
-
-            for k, v in stats.items():
-                if k in ("role", "correct"):
-                    continue  # handled above, by reconstruction
-                nv = new.get(k)
-                if isinstance(v, float) and v == v and abs(v) != float("inf"):
-                    if nv is None or abs(nv - v) > 10 ** -(SIG_FIGS - 1) * max(abs(v), 1e-300):
-                        problems.append(f"{where}: {name}.{k} {v!r} -> {nv!r}")
-                elif v != nv:
-                    problems.append(f"{where}: {name}.{k} {v!r} -> {nv!r}")
+        problems += _verify_speedups(before, after, where)
+        problems += _verify_variants(before, after, where)
     return problems
 
 
