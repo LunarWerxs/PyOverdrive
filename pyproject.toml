@@ -17,7 +17,7 @@ keywords = [
 dependencies = [
     # The split-complex matmul path needs the strided-view BLAS routing
     # introduced in NumPy 2.3; earlier versions suffer severe slowdowns.
-    "numpy>=2.3",
+    "numpy>=2.5.3",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
