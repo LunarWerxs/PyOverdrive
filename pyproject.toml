@@ -40,7 +40,7 @@ Homepage = "https://github.com/LunarWerxs/PyOverdrive"
 Repository = "https://github.com/LunarWerxs/PyOverdrive"
 Changelog = "https://github.com/LunarWerxs/PyOverdrive/blob/main/CHANGELOG.md"
 Issues = "https://github.com/LunarWerxs/PyOverdrive/issues"
-"Built by" = "https://connections.icu"
+"Built by" = "https://getconnections.icu"
 
 [project.optional-dependencies]
 dev = [
