@@ -105,7 +105,7 @@ def test_refusal_withdrawn_complex64():
     assert got.shape == (64, 600)
 
 
-def test_dispatch_m_equals_max_dispatches():
+def test_dispatch_m_max_n_min_q_min_dispatches():
     c, r = _mats(M_MAX, N_MIN, Q_MIN, 3)
     _assert_dispatched_close(c, r)
 
@@ -115,19 +115,9 @@ def test_refusal_m_max_plus_one():
     _assert_refused_equal((c, r), {})
 
 
-def test_dispatch_n_equals_min_dispatches():
-    c, r = _mats(M_MAX, N_MIN, Q_MIN, 5)
-    _assert_dispatched_close(c, r)
-
-
 def test_refusal_n_min_minus_one():
     c, r = _mats(M_MAX, N_MIN - 1, Q_MIN, 6)
     _assert_refused_equal((c, r), {})
-
-
-def test_dispatch_q_equals_min_dispatches():
-    c, r = _mats(M_MAX, N_MIN, Q_MIN, 7)
-    _assert_dispatched_close(c, r)
 
 
 def test_refusal_q_min_minus_one():

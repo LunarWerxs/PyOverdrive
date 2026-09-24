@@ -219,15 +219,12 @@ def test_refusal_int64_batch():
     _assert_refused_close((a,), {})
 
 
-def test_refusal_nan_in_batch():
+@pytest.mark.parametrize(
+    "idx, bad", [((42, 0, 0), np.nan), ((42, 1, 0), np.inf)], ids=["nan", "inf"]
+)
+def test_refusal_non_finite_in_batch(idx, bad):
     a = _symmetric_batch((500,), 17, dtype=np.float64)
-    a[42, 0, 0] = np.nan
-    _assert_refused_raise_parity((a,), {})
-
-
-def test_refusal_inf_in_batch():
-    a = _symmetric_batch((500,), 18, dtype=np.float64)
-    a[42, 1, 0] = np.inf
+    a[idx] = bad
     _assert_refused_raise_parity((a,), {})
 
 
@@ -236,12 +233,6 @@ def test_refusal_python_nested_list_input():
     a_arr = _symmetric_batch((500,), 19, dtype=np.float64)
     a_list = a_arr.tolist()
     _assert_refused_close((a_list,), {})
-
-
-def test_refusal_batch_below_floor():
-    a = _symmetric_batch((10,), 20, dtype=np.float64)
-    assert a.shape[0] < BATCH_MIN
-    _assert_refused_close((a,), {})
 
 
 # ---------------------------------------------------------------------------

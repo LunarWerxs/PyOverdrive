@@ -220,25 +220,16 @@ def test_refusal_inf_in_fp():
 # --- 6. refusal: kwargs -------------------------------------------------
 
 
-def test_refusal_left_kwarg():
+@pytest.mark.parametrize(
+    "kwargs",
+    [{"left": -1.0}, {"right": 99.0}, {"period": 1.0}],
+    ids=["left", "right", "period"],
+)
+def test_refusal_left_right_period_kwargs(kwargs):
     xp = _linspace_grid(0.0, 1.0, 100)
     fp = np.linspace(0.0, 1.0, 100)
     x = _queries(xp, NQ_MIN, seed=13)
-    _assert_refused((x, xp, fp), {"left": -1.0})
-
-
-def test_refusal_right_kwarg():
-    xp = _linspace_grid(0.0, 1.0, 100)
-    fp = np.linspace(0.0, 1.0, 100)
-    x = _queries(xp, NQ_MIN, seed=14)
-    _assert_refused((x, xp, fp), {"right": 99.0})
-
-
-def test_refusal_period_kwarg():
-    xp = _linspace_grid(0.0, 1.0, 100)
-    fp = np.linspace(0.0, 1.0, 100)
-    x = _queries(xp, NQ_MIN, seed=15)
-    _assert_refused((x, xp, fp), {"period": 1.0})
+    _assert_refused((x, xp, fp), kwargs)
 
 
 # --- 7. refusal: dtype / shape ----------------------------------------------

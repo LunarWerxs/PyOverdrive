@@ -117,12 +117,6 @@ def test_dispatch_2d_axis(axis):
     _assert_dispatched_exact(a, q, axis)
 
 
-def test_dispatch_q_endpoints_included():
-    a = _make((2048,), seed=4)
-    q = np.array([0.0, 0.1, 0.5, 0.9, 1.0], dtype=np.float64)
-    _assert_dispatched_exact(a, q, _OMIT)
-
-
 def test_dispatch_q_unsorted_with_duplicates():
     a = _make((2048,), seed=5)
     q = np.array([0.5, 0.1, 0.5, 0.9, 0.1, 0.0, 1.0, 0.3], dtype=np.float64)
@@ -190,14 +184,12 @@ def test_dispatch_method_linear_explicit():
     _assert_dispatched_exact(a, q, _OMIT, extra_kwargs={"method": "linear"})
 
 
-def test_dispatch_reduced_length_lower_boundary():
-    a = _make((512,), seed=12)
-    q = np.array([0.0, 0.25, 0.5, 0.75, 1.0], dtype=np.float64)
-    _assert_dispatched_exact(a, q, _OMIT)
-
-
-def test_dispatch_reduced_length_upper_boundary():
-    a = _make((65536,), seed=13)
+@pytest.mark.parametrize(
+    "n, seed", [(512, 12), (65536, 13)], ids=["lower", "upper"]
+)
+def test_dispatch_reduced_length_boundaries(n, seed):
+    # q includes both endpoints, so these rows also pin the q=0 / q=1 cases
+    a = _make((n,), seed=seed)
     q = np.array([0.0, 0.25, 0.5, 0.75, 1.0], dtype=np.float64)
     _assert_dispatched_exact(a, q, _OMIT)
 
