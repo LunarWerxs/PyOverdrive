@@ -11,6 +11,11 @@
   `--baseline` comparison with cells measured on only one side;
   `--calibrate` now enables the blocked argmax path only on a "faster"
   verdict and reports an inconclusive probe as such.
+- Add seeded declarative fuzzing to the differential suites: per-path input
+  spaces (strided, reversed and transposed views, variable rank, element and
+  allocation limits, NaN/inf/-0.0) checked against stock on every test run,
+  and a `compatibility/differential/fuzz.py` mode that shrinks each mismatch
+  it finds and saves it to a corpus the plain test run replays.
 - Recover dispatch fixes and measurement tools that had remained in the
   archive checkout: conservative unique/intersect/isin/relayout floors,
   sorted-haystack validation and withdrawal of int64 query sorting.
