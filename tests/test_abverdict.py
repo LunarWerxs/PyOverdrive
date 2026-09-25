@@ -52,7 +52,8 @@ def test_unusable_samples_are_invalid():
     assert abverdict.compare([1.0, float("nan"), 1.0], FAST)["verdict"] == "invalid"
 
 
-def _report(tmp_path, name, *, numpy="2.3.0", schema=1, stock=SLOW, patched=FAST):
+def _report(tmp_path, name, *, numpy="2.3.0", schema=1, stock=SLOW, patched=FAST,
+            cell="roll"):
     report = {
         "schema_version": schema, "tool": "verify_no_pessimization", "completed": True,
         "fingerprint": {"fingerprint": "abc", "numpy": numpy, "python": "3.12.0"},
@@ -61,7 +62,7 @@ def _report(tmp_path, name, *, numpy="2.3.0", schema=1, stock=SLOW, patched=FAST
         "calibration": {"saved": {}},
         "conditions": {"contended": False, "load_known": True},
         "source": {"sha256": "s1"},
-        "cells": [{"cell": "roll", "returncode": 0, "stock_seconds": stock,
+        "cells": [{"cell": cell, "returncode": 0, "stock_seconds": stock,
                    "patched_seconds": patched}],
     }
     path = tmp_path / f"{name}.json"
@@ -74,6 +75,23 @@ def test_cli_supports_a_claim_backed_by_three_matching_runs(tmp_path):
             for i in range(3)]
     assert ab_compare.main(["ab_compare", *runs, "--min-speedup", "1.3",
                             "--require-win"]) == 0
+
+
+def test_cli_claim_mode_fails_on_overlapping_runs_without_require_win(tmp_path, capsys):
+    # Medians favour the patched side, but one patched run is slower than
+    # every stock run: inconclusive, which a claim must never pass on.
+    runs = [_report(tmp_path, f"r{i}", patched=patched)
+            for i, patched in enumerate((FAST, FAST, [11.0, 11.1, 10.9, 11.05, 10.95]))]
+    assert ab_compare.main(["ab_compare", *runs]) == 1
+    assert "inconclusive" in capsys.readouterr().out
+
+
+def test_cli_baseline_refuses_cells_measured_on_one_side(tmp_path, capsys):
+    old = [_report(tmp_path, f"o{i}") for i in range(3)]
+    new = [_report(tmp_path, f"n{i}", cell="flip") for i in range(3)]
+    assert ab_compare.main(["ab_compare", *new, "--baseline", *old]) == 2
+    err = capsys.readouterr().err
+    assert "roll (baseline only)" in err and "flip (candidate only)" in err
 
 
 def test_cli_refuses_a_schema_bump_and_a_foreign_environment(tmp_path, capsys):

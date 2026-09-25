@@ -6,7 +6,9 @@
   no-win or inconclusive, from log-scale Welch tests with a Holm step-down
   across the suite, at least 3 independent runs and non-overlapping run
   ranges. `tools/ab_compare.py` applies them to verify_no_pessimization
-  evidence and refuses mismatched schemas, environments or contended runs;
+  evidence and refuses mismatched schemas, environments or contended runs,
+  fails a speedup claim unless every cell is "faster", and refuses a
+  `--baseline` comparison with cells measured on only one side;
   `--calibrate` now enables the blocked argmax path only on a "faster"
   verdict and reports an inconclusive probe as such.
 - Recover dispatch fixes and measurement tools that had remained in the

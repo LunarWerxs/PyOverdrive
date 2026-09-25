@@ -29,9 +29,10 @@ Probe discipline: a probe measures the path's own regime EDGE cells (the
 weakest cells its predicate admits) against stock, and enables only if
 every probed cell is a "faster" verdict against MIN_WIN (abverdict.py:
 interval above the bar after Holm correction, no overlap between the two
-sides' readings; anything noisier is inconclusive and stays off). Interior cells only get faster, so a
-machine that wins the edges wins the regime. Probes run in-process on
-unpatched stock functions and take a few seconds total.
+sides' readings; anything noisier is inconclusive and stays off).
+Interior cells only get faster, so a machine that wins the edges wins
+the regime. Probes run in-process on unpatched stock functions and take
+a few seconds total.
 
 TWO KINDS OF GATE LIVE HERE.
 

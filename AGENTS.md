@@ -45,7 +45,9 @@ Two systems in one monorepo:
   NumPy/BLAS, thread setting or a contended run, and reports noisy cells as
   `inconclusive` (fewer than 3 runs, overlapping run ranges, or a
   Holm-corrected interval that straddles the bar). Inconclusive is never a
-  pass; measure more. `--calibrate` gates argmax on the same verdict rules
+  pass: without `--baseline` it exits 1 unless every cell is `faster`, and
+  with `--baseline` it refuses cells measured on only one side; measure
+  more. `--calibrate` gates argmax on the same verdict rules
   (`src/pyoverdrive/abverdict.py`).
 - Recalibrate PyRallel on new hardware with
   `benchmarks/micro/bench_pyrallel_calibration.py`, then read the table

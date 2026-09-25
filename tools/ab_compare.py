@@ -32,8 +32,12 @@ Refused outright (exit 2), never migrated or averaged over:
                   that ran contended or with unknown load; and in claim mode
                   reports from different source builds (source sha256)
 
-Exit 0 = no cell is a proven regression; 1 = at least one cell is "slower"
-(or, with --require-win, any cell is not "faster"); 2 = invalid/incomparable.
+Claim mode (no --baseline) passes only when every cell is "faster":
+exit 0 = every cell is conclusively faster than the bar; 1 = any cell is
+not. Build mode (--baseline) asks only for no regression: exit 0 = no cell
+is "slower"; 1 = at least one is (or, with --require-win, any cell is not
+"faster"). Exit 2 = invalid/incomparable, including a cell measured on only
+one side of a --baseline comparison.
 """
 
 from __future__ import annotations
@@ -145,8 +149,15 @@ def build_cells(candidate: list[tuple[Path, dict]],
         return {name: ([s for s, _ in runs], [p for _, p in runs])
                 for name, runs in sorted(new.items())}
     old = runs_by_cell(baseline)
+    # WHY: a cell measured on one side only would silently vanish, letting a
+    # partial comparison pass as a full one; refuse and name the cells.
+    one_sided = sorted(set(old) ^ set(new))
+    if one_sided:
+        raise Refused("invalid", "cells measured on only one side: "
+                      + ", ".join(f"{n} ({'baseline' if n in old else 'candidate'} only)"
+                                  for n in one_sided))
     return {name: ([p for _, p in old[name]], [p for _, p in new[name]])
-            for name in sorted(set(old) & set(new))}
+            for name in sorted(old)}
 
 
 def judge(candidate_paths: list[Path], baseline_paths: list[Path] | None,
@@ -186,7 +197,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--min-speedup", type=float, default=1.0,
                     help="bar a 'faster' verdict's whole interval must clear")
     ap.add_argument("--require-win", action="store_true",
-                    help="fail unless every cell is conclusively faster")
+                    help="fail unless every cell is conclusively faster "
+                         "(always on without --baseline)")
     ap.add_argument("--json", action="store_true", help="print verdicts as JSON")
     args = ap.parse_args(argv[1:])
 
@@ -205,7 +217,9 @@ def main(argv: list[str]) -> int:
         counts = {k: sum(v["verdict"] == k for v in verdicts.values())
                   for k in abverdict.VERDICTS}
         print("  " + ", ".join(f"{n} {k}" for k, n in counts.items() if n))
-    return exit_code(verdicts, args.require_win)
+    # WHY: a speedup claim that exits 0 on "inconclusive" would let noise
+    # pass as a win, so claim mode always requires every cell to be faster.
+    return exit_code(verdicts, args.require_win or args.baseline is None)
 
 
 if __name__ == "__main__":
