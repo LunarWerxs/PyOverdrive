@@ -25,7 +25,10 @@ Correctness contract:
   no other kwargs (dtype/out/keepdims/where force stock, as do other
   dtypes: every one is unmeasured or semantics this route must not
   guess). Zero-length reduced axes refuse (stock emits empty-slice
-  warnings this route does not replicate).
+  warnings this route does not replicate). Non-contiguous views refuse:
+  stock reduces a contiguous copy, and the plain reduction over the
+  strided view sums in a different order (seeded differential fuzzing
+  found nanmean and nansum ULP drift on stepped 3-D views).
 - clean input: bit-identical to stock (same pairwise reduction
   arithmetic; battery-checked with array_equal on every cell).
 - NaN present: stock's own result, via internal fallback.
@@ -85,6 +88,10 @@ def _applicable_for(op: str):
         if type(a) is not np.ndarray or a.dtype != _F64:
             return False
         if a.size < floor:
+            return False
+        if not (a.flags.c_contiguous or a.flags.f_contiguous):
+            # stock reduces a contiguous copy; the plain reduction over a
+            # strided view sums in another order and drifts by ULPs
             return False
         if axis is None:
             return True

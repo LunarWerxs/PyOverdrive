@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Keep non-contiguous views on stock for nanmean/nansum/nanstd/nanvar: the
+  plain reduction over a strided view was not bit-identical to stock, which
+  reduces a contiguous copy. Found by the new seeded differential fuzzing.
 - Judge A/B timings with verdicts instead of median ratios: faster, slower,
   no-win or inconclusive, from log-scale Welch tests with a Holm step-down
   across the suite, at least 3 independent runs and non-overlapping run

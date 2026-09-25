@@ -187,6 +187,15 @@ def test_refusal_axis_tuple(op, path, floor, npfn):
 
 
 @pytest.mark.parametrize("op,path,floor,npfn", OPS, ids=OP_IDS)
+def test_refusal_strided_view(op, path, floor, npfn):
+    rng = np.random.default_rng(12)
+    a = rng.standard_normal((120, 102, 12))[::2, ::3, ::-2]
+    assert a.size >= floor
+    _assert_refused_exact(op, npfn, (a,), {})
+    _assert_refused_exact(op, npfn, (a,), {"axis": 1})
+
+
+@pytest.mark.parametrize("op,path,floor,npfn", OPS, ids=OP_IDS)
 def test_refusal_empty_array(op, path, floor, npfn):
     a = np.array([], dtype=np.float64)
     decision, reason = GEARBOX.decide(op, (a,), {})
