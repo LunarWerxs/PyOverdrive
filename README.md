@@ -76,6 +76,13 @@ Over 2,000 tests - hand-written differential suites per path plus property
 fuzzing against stock - run green on Windows (AMD Zen 4 and Intel hybrid) and
 Linux x86-64.
 
+Contributors can hunt for divergences beyond the seeded sample the test run
+checks: `python compatibility/differential/fuzz.py --path nanmean_scan
+--iterations 5000 --seed 7` samples that path's declared input space
+(strided, reversed and transposed views, ranks 0-3, NaN/inf/-0.0, sizes
+straddling its gates), shrinks any mismatch and saves it under
+`compatibility/differential/corpus/`, where every later test run replays it.
+
 PyOverdrive is an independent project. It is not affiliated with or endorsed by
 NumPy or NumFOCUS.
 
