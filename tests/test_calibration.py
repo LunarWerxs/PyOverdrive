@@ -152,6 +152,23 @@ def test_calibrate_end_to_end_with_stubbed_probe(monkeypatch):
     assert calibration.load(refresh=True)[PATH]["enabled"] is True
 
 
+def test_argmax_probe_stays_off_on_a_noisy_median_win(monkeypatch):
+    # Median ratio 1.5x clears MIN_WIN, which alone used to enable the path;
+    # the two sides' readings overlap, so the verdict must be inconclusive.
+    stock = [15.0, 30.0, 14.0, 16.0, 15.0, 14.5, 15.5, 15.0, 15.0]
+    cand = [10.0, 10.0, 16.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0]
+    monkeypatch.setattr(calibration, "_interleaved", lambda s, c: (stock, cand))
+    # The timings are stubbed, so skip the ~150 MB probe arrays as well.
+    tiny = np.random.default_rng(0)
+    monkeypatch.setattr(np.random, "default_rng",
+                        lambda seed: type("Rng", (), {"random": staticmethod(
+                            lambda size: tiny.random(size=(2, 2)))})())
+    verdict = calibration._probe_argmax_blocked()
+    assert min(verdict["cells"].values()) >= calibration.MIN_WIN
+    assert verdict["enabled"] is False
+    assert set(verdict["verdicts"].values()) == {"inconclusive"}
+
+
 def test_calibrate_refuses_while_patched():
     pyoverdrive.enable(["numpy.roll"])
     try:
