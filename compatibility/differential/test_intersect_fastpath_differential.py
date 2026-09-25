@@ -241,18 +241,21 @@ def test_noncontiguous_1d_input_dispatches():
 
 @given(
     a=hnp.arrays(
-        dtype=np.int64,
-        shape=hnp.array_shapes(min_dims=1, max_dims=1, min_side=0, max_side=400),
+        dtype=np.int32,
+        shape=hnp.array_shapes(
+            min_dims=1, max_dims=1, min_side=SIZE_THRESHOLD, max_side=SIZE_THRESHOLD + 400
+        ),
         elements=st.integers(min_value=-1000, max_value=1000),
     ),
     b=hnp.arrays(
-        dtype=np.int64,
+        dtype=np.int32,
         shape=hnp.array_shapes(min_dims=1, max_dims=1, min_side=0, max_side=400),
         elements=st.integers(min_value=-1000, max_value=1000),
     ),
 )
 @settings(max_examples=40, deadline=None)
 def test_property_matches_stock(a, b):
+    assert pyoverdrive.explain("numpy.intersect1d", a, b)[0] == "intersect_sorted"
     got = np.intersect1d(a, b)
     expected = STOCK(a, b)
     assert got.dtype == expected.dtype

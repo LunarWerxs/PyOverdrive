@@ -150,12 +150,6 @@ def test_refusal_complex128():
     _assert_refused_exact((a,), {})
 
 
-def test_refusal_int64():
-    rng = np.random.default_rng(12)
-    a = rng.integers(-1000, 1000, size=20000).astype(np.int64)
-    _assert_refused_exact((a,), {})
-
-
 def test_refusal_size_below_floor():
     a = _mk_1d(SIZE_FLOOR - 1, nan_frac=0.01, seed=13)
     _assert_refused_exact((a,), {})

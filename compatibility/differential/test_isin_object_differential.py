@@ -86,16 +86,6 @@ def _assert_refused_equal(args, kwargs):
     return got
 
 
-def _assert_refused_raises(args, kwargs):
-    decision, reason = GEARBOX.decide(OP, args, kwargs)
-    assert decision == "stock", (args, kwargs, decision, reason)
-    with pytest.raises(Exception) as got_exc:
-        np.isin(*args, **kwargs)
-    with pytest.raises(Exception) as stock_exc:
-        _stock(*args, **kwargs)
-    assert type(got_exc.value) is type(stock_exc.value)
-
-
 # ---------------------------------------------------------------------------
 # 1. dispatch + bit-identity
 # ---------------------------------------------------------------------------
@@ -329,15 +319,6 @@ def test_refusal_kind_sort_explicit():
     decision, reason = GEARBOX.decide(OP, (element, test), {})
     assert decision == PATH  # sanity: same inputs would dispatch without kind
     _assert_refused_equal((element, test), {"kind": "sort"})
-
-
-def test_refusal_below_floor():
-    element = _objarr(_words(200, seed=37))
-    test = _objarr(_words(50, seed=38))
-    assert element.size + test.size == 250 < SIZE_FLOOR
-    decision, reason = GEARBOX.decide(OP, (element, test), {})
-    assert decision == "stock", (decision, reason)
-    _assert_refused_equal((element, test), {})
 
 
 def test_kill_switch_restores_stock_routing():

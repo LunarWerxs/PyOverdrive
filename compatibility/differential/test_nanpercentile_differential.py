@@ -102,7 +102,7 @@ def test_refusal_q_above_100_raises_like_stock():
         _stock(a, 101.0, axis=0)
 
 
-def test_refusal_q_between_1_and_100_still_dispatches():
+def test_dispatch_q_below_one_is_a_percent_not_a_fraction():
     # the percentile domain is [0, 100]; 0.5 means half a percent here,
     # not a median - it must dispatch and still agree with stock
     a = _make((30, 40), nan_frac=0.05, seed=7)

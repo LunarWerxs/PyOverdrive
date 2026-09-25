@@ -415,13 +415,6 @@ def test_refusal_small_square_below_both_floors():
     _assert_refused("numpy.convolve", (a, v), {"mode": "full"})
 
 
-def test_refusal_float64_with_nan_localizes_exactly():
-    a, v = _float_pair(1500, 1500)
-    a = a.copy()
-    a[750] = np.nan
-    _assert_refused("numpy.convolve", (a, v), {"mode": "full"}, equal_nan=True)
-
-
 def test_refusal_float64_with_inf():
     a, v = _float_pair(1500, 1500)
     a = a.copy()

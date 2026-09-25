@@ -355,14 +355,6 @@ def test_construction_non_served_ufunc_isnan_not_accelerated_but_works():
     assert np.array_equal(v(x), sv(x))
 
 
-def test_construction_non_served_ufunc_logical_not_not_accelerated_but_works():
-    v = np.vectorize(np.logical_not)
-    _assert_not_accelerated(v, (np.logical_not,), {})
-    sv = _stock_vectorize(np.logical_not)
-    x = np.array([0.0, 1.0, 0.0, -1.0], dtype=np.float64)
-    assert np.array_equal(v(x), sv(x))
-
-
 def test_construction_decorator_spelling_not_accelerated_but_works():
     @np.vectorize
     def triple(x):

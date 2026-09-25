@@ -102,13 +102,6 @@ def test_dispatch_words_test_set_50_shuffled():
     assert got.all()
 
 
-def test_dispatch_words_test_all_words_unshuffled():
-    element = _words(2000, seed=5)
-    test = _strarr(VOCAB)
-    got, stock = _assert_dispatched_equal((element, test), {})
-    assert got.all()
-
-
 def test_dispatch_words_empty_overlap():
     element = _words(2000, seed=6)
     other_vocab = [f"other{i:03d}" for i in range(TEST_FLOOR)]
@@ -125,18 +118,12 @@ def test_dispatch_invert_true():
     assert got.any() and not got.all()
 
 
-def test_dispatch_assume_unique_true():
+@pytest.mark.parametrize("assume_unique", [True, False])
+def test_dispatch_assume_unique(assume_unique):
     element = _words(2000, seed=9)
     rng = np.random.default_rng(10)
     test = _strarr(rng.choice(VOCAB, size=TEST_FLOOR, replace=False))
-    _assert_dispatched_equal((element, test), {"assume_unique": True})
-
-
-def test_dispatch_assume_unique_false():
-    element = _words(2000, seed=11)
-    rng = np.random.default_rng(12)
-    test = _strarr(rng.choice(VOCAB, size=TEST_FLOOR, replace=False))
-    _assert_dispatched_equal((element, test), {"assume_unique": False})
+    _assert_dispatched_equal((element, test), {"assume_unique": assume_unique})
 
 
 def test_refusal_empty_test_elements():

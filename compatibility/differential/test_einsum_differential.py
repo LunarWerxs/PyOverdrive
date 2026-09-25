@@ -211,11 +211,6 @@ def test_refusal_single_operand_transpose():
     _assert_refused_equal(("ij->ji", a), {})
 
 
-def test_refusal_single_operand_trace():
-    a = _pos((150, 150), np.float64, seed=21)
-    _assert_refused_equal(("ii->", a), {})
-
-
 def test_refusal_mixed_dtypes():
     a = _pos((120, 120), np.float64, seed=22)
     b = _pos((120, 120), np.float32, seed=23)

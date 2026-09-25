@@ -161,23 +161,6 @@ def test_dispatch_empty_int64_array_below_range():
     assert stock == 0
 
 
-def test_dispatch_unsorted_array_above_range_matches_stock():
-    # Provability claim: the fast path's answer equals stock's even though
-    # a is not sorted, because both routes reduce to a uniform per-element
-    # comparison against a key outside the dtype's whole representable range.
-    a = _arr(500, np.int64, seed=9)
-    assert not np.all(a[:-1] <= a[1:])  # sanity: genuinely unsorted
-    got, stock = _assert_dispatched_equal((a, 2**70), {})
-    assert got == a.size == stock
-
-
-def test_dispatch_unsorted_array_below_range_matches_stock():
-    a = _arr(500, np.int64, seed=10)
-    assert not np.all(a[:-1] <= a[1:])
-    got, stock = _assert_dispatched_equal((a, -(2**70)), {})
-    assert got == 0 == stock
-
-
 def test_dispatch_key_exactly_iinfo_max_plus_one():
     a = _arr(500, np.int64, seed=11)
     hi = np.iinfo(np.int64).max

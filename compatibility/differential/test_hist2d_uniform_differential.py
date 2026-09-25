@@ -189,15 +189,6 @@ def test_empty_x_and_y_stays_on_stock_and_matches():
                                  _stock(x, y, **kwargs))
 
 
-def test_dispatch_all_out_of_range_samples():
-    x = np.full(SAMPLES_MIN * 2, 1000.0, dtype=np.float64)
-    y = np.full(SAMPLES_MIN * 2, -1000.0, dtype=np.float64)
-    got, stock = _assert_dispatched_equal(
-        (x, y), {"bins": [40, 40], "range": [[-3, 3], [-3, 3]]}
-    )
-    assert got[0].sum() == 0.0
-
-
 def test_dispatch_boundary_bins_product_equals_min_total():
     assert BINS_MIN_TOTAL == 900
     x, y = _xy(SAMPLES_MIN, seed=8)

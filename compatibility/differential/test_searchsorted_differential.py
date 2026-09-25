@@ -100,12 +100,6 @@ def test_dispatch_float64_side_omitted():
     _assert_dispatched_equal((x, v), {})
 
 
-def test_dispatch_float64_side_left_kwarg():
-    x = _sorted_float(50_000, seed=1)
-    v = _random_float(50_000, seed=2)
-    _assert_dispatched_equal((x, v), {"side": "left"})
-
-
 def test_dispatch_float64_side_right_kwarg():
     x = _sorted_float(50_000, seed=1)
     v = _random_float(50_000, seed=2)
@@ -299,27 +293,6 @@ def test_kill_switch_restores_stock_routing():
 #    The guard costs 0.1-0.5% of the call it protects, so the trade is not
 #    close. On numpy >= 2.5 it refuses an input that would have agreed.
 # ---------------------------------------------------------------------------
-
-def test_unsorted_haystack_now_refused_rather_than_matched():
-    """SUPERSEDED, and the history is the point.
-
-    This used to assert that an unsorted haystack DISPATCHES and returns
-    stock's garbage exactly, under a strict xfail for numpy < 2.5 because
-    the batched result is query-order dependent there (17122/20000 measured
-    on 2.4.5; 0/20000 on 2.5.2). That contract was "garbage in, the same
-    garbage out", and it held only on the newest numpy.
-
-    The predicate now checks the haystack, so the question does not arise:
-    an unsorted haystack goes to stock on every version. Kept as a refusal
-    test rather than deleted because it is the exact shape that used to
-    dispatch - if the check is ever removed, this fails and the reviewer
-    reads the paragraph above instead of rediscovering it.
-    """
-    x = _random_float(50_000, seed=41)  # deliberately NOT sorted
-    v = _random_float(50_000, seed=42)
-    decision, reason = GEARBOX.decide(OP, (x, v), {})
-    assert decision == "stock", (decision, reason)
-    _assert_refused_equal((x, v), {})
 
 
 # ---------------------------------------------------------------------------

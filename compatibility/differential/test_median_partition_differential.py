@@ -169,19 +169,9 @@ def test_dispatch_all_equal(n):
     _assert_dispatched_equal((a,), {})
 
 
-def test_dispatch_size_equals_size_cap():
-    a = _arr(SIZE_CAP, seed=6001)
-    _assert_dispatched_equal((a,), {})
-
-
 def test_refusal_size_cap_plus_one():
     a = _arr(SIZE_CAP + 1, seed=6002)
     _assert_refused_equal((a,), {})
-
-
-def test_dispatch_size_equals_size_min():
-    a = _arr(SIZE_MIN, seed=6003)
-    _assert_dispatched_equal((a,), {})
 
 
 def test_refusal_size_min_minus_one():

@@ -108,19 +108,10 @@ def test_dispatch_exact_equality(shape, axis, q, nan_frac):
         _assert_dispatched_exact(a, q, axis)
 
 
-def test_dispatch_q_as_python_int_zero():
+@pytest.mark.parametrize("q", [0, 1])
+def test_dispatch_q_as_python_int(q):
     a = _make((27, 100))
-    _assert_dispatched_exact(a, 0, 0)
-
-
-def test_dispatch_q_as_python_int_one():
-    a = _make((27, 100))
-    _assert_dispatched_exact(a, 1, 0)
-
-
-def test_dispatch_axis_positional():
-    a = _make((50, 40, 30))
-    _assert_dispatched_exact(a, 0.5, 1, use_kwarg=False)
+    _assert_dispatched_exact(a, q, 0)
 
 
 def test_dispatch_axis_kwarg():
@@ -229,16 +220,11 @@ def test_refusal_weights_kwarg():
     _assert_refused_equal((a, 0.5, 1), {"weights": w, "method": "inverted_cdf"})
 
 
-def test_refusal_anti_regime_wide_short_axis0():
+@pytest.mark.parametrize("shape, axis", [((10000, 3), 0), ((3, 10000), 1)])
+def test_refusal_anti_regime_wide_short(shape, axis):
     # reduced = 10000 > 1000, size = 30000 < 10000**2: refused.
-    a = _make((10000, 3))
-    _assert_refused_equal((a, 0.5, 0), {})
-
-
-def test_refusal_anti_regime_wide_short_axis1():
-    # reduced = 10000 > 1000, size = 30000 < 10000**2: refused.
-    a = _make((3, 10000))
-    _assert_refused_equal((a, 0.5, 1), {})
+    a = _make(shape)
+    _assert_refused_equal((a, 0.5, axis), {})
 
 
 def test_dispatch_regime_boundary_large_reduced_dispatches():

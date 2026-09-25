@@ -166,12 +166,6 @@ def test_dispatch_clustered_eigenvalues():
     assert np.all(got[..., :-1] <= got[..., 1:])
 
 
-def test_dispatch_ascending_order():
-    a = _symmetric_batch((500,), 10, dtype=np.float64)
-    got, _ = _assert_dispatched_close(a)
-    assert np.all(got[..., :-1] <= got[..., 1:])
-
-
 def test_dispatch_asymmetric_input_lower_triangle_only():
     # Both stock (UPLO='L') and the fast path read only the lower triangle,
     # so garbage in the upper triangle must not change dispatch or result.

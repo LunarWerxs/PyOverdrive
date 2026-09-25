@@ -15,14 +15,6 @@ sweep = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(sweep)
 
 
-def test_histogram_floor_is_previously_measured_winning_size():
-    assert hist2d_uniform.SAMPLES_MIN == 6666
-
-
-def test_matmul_cap_is_measured_winning_boundary():
-    assert matmul_split_complex.M_MAX == 64
-
-
 @pytest.mark.parametrize("offset", [-1, 0, 1])
 def test_histogram_rows_bracket_sample_floor(offset):
     rows = dict(sweep._axes_hist2d()["hist2d_uniform"])

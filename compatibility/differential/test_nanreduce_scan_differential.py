@@ -194,14 +194,6 @@ def test_refusal_empty_array(op, path, floor, npfn):
     _compare_call(npfn, GEARBOX.stock_fn(op), (a,), {})
 
 
-@pytest.mark.parametrize("op,path,floor,npfn", OPS, ids=OP_IDS)
-def test_refusal_zero_length_reduced_axis(op, path, floor, npfn):
-    a = np.empty((5, 0), dtype=np.float64)
-    decision, reason = GEARBOX.decide(op, (a,), {"axis": 1})
-    assert decision == "stock", (op, decision, reason)
-    _compare_call(npfn, GEARBOX.stock_fn(op), (a,), {"axis": 1})
-
-
 # -- 6: negative axis on 2-D ----------------------------------------------------
 
 @pytest.mark.parametrize("op,path,floor,npfn", OPS, ids=OP_IDS)

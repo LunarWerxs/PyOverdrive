@@ -241,15 +241,10 @@ def test_refusal_float32_input():
     _assert_refused((a,), {})
 
 
-def test_refusal_nan_entry():
+@pytest.mark.parametrize("bad", [np.nan, np.inf], ids=["nan", "inf"])
+def test_refusal_non_finite_entry(bad):
     a = _random_batch((BATCH_MIN,), 3, seed=403)
-    a[7, 0, 0] = np.nan
-    _assert_refused_raise_parity((a,), {})
-
-
-def test_refusal_inf_entry():
-    a = _random_batch((BATCH_MIN,), 3, seed=404)
-    a[7, 1, 0] = np.inf
+    a[7, 1, 0] = bad
     _assert_refused_raise_parity((a,), {})
 
 
