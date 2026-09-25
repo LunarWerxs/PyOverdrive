@@ -37,6 +37,16 @@ Two systems in one monorepo:
   treat its thresholds as conservative and rerun when the box is quiet
   before claiming a crossover moved. Never benchmark while another heavy
   run of yours is in flight.
+- A "measured faster" claim needs a verdict, not a median ratio: run
+  `tools/verify_no_pessimization.py --json` three or more times with the
+  same settings, then `tools/ab_compare.py RUN1.json RUN2.json RUN3.json
+  --min-speedup <bar>` (or `--baseline OLD*.json -- NEW*.json` to compare
+  two builds). It refuses (exit 2) reports from another schema, machine,
+  NumPy/BLAS, thread setting or a contended run, and reports noisy cells as
+  `inconclusive` (fewer than 3 runs, overlapping run ranges, or a
+  Holm-corrected interval that straddles the bar). Inconclusive is never a
+  pass; measure more. `--calibrate` gates argmax on the same verdict rules
+  (`src/pyoverdrive/abverdict.py`).
 - Recalibrate PyRallel on new hardware with
   `benchmarks/micro/bench_pyrallel_calibration.py`, then read the table
   `lab/cli/calibrate_pyrallel.py` prints into

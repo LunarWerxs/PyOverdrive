@@ -27,7 +27,9 @@ zero risk.
 
 Probe discipline: a probe measures the path's own regime EDGE cells (the
 weakest cells its predicate admits) against stock, and enables only if
-every probed cell clears MIN_WIN. Interior cells only get faster, so a
+every probed cell is a "faster" verdict against MIN_WIN (abverdict.py:
+interval above the bar after Holm correction, no overlap between the two
+sides' readings; anything noisier is inconclusive and stays off). Interior cells only get faster, so a
 machine that wins the edges wins the regime. Probes run in-process on
 unpatched stock functions and take a few seconds total.
 
@@ -57,6 +59,7 @@ import hashlib
 import json
 import os
 import platform
+import statistics
 import sys
 import time
 from pathlib import Path
@@ -193,19 +196,6 @@ def apply(gearbox) -> list[str]:
     return enabled
 
 
-def _timeit(fn: Callable[[], Any], budget_s: float = 0.6, min_reps: int = 3) -> float:
-    fn()  # warm
-    best = float("inf")
-    t_end = time.perf_counter() + budget_s
-    reps = 0
-    while reps < min_reps or time.perf_counter() < t_end:
-        t0 = time.perf_counter()
-        fn()
-        best = min(best, time.perf_counter() - t0)
-        reps += 1
-    return best
-
-
 class _Gate:
     """One calibration-gated path: its probe cells and floor plumbing."""
 
@@ -222,30 +212,56 @@ class _Gate:
         self.always_on = always_on
 
 
+ARGMAX_PROBE_ROUNDS = 9
+
+
+def _interleaved(stock_fn: Callable[[], Any], cand_fn: Callable[[], Any],
+                 rounds: int = ARGMAX_PROBE_ROUNDS) -> tuple[list[float], list[float]]:
+    """Per-call seconds for both sides, alternating so drift hits both."""
+    stock_fn()  # warm
+    cand_fn()
+    st, ct = [], []
+    for _ in range(rounds):
+        t0 = time.perf_counter()
+        stock_fn()
+        st.append(time.perf_counter() - t0)
+        t0 = time.perf_counter()
+        cand_fn()
+        ct.append(time.perf_counter() - t0)
+    return st, ct
+
+
 def _probe_argmax_blocked() -> dict:
     """Regime-edge cells for argmax_blocked_transpose: the (3000, 3000)
     floor corner and the thin-cols (10000, 1000) edge. Enable only if
-    both clear MIN_WIN - Intel Alder Lake measured 2.2x/2.2x here, Zen 4
-    measured 0.82x/0.75x."""
+    both are a "faster" verdict against MIN_WIN - Intel Alder Lake
+    measured 2.2x/2.2x here, Zen 4 measured 0.82x/0.75x.
+
+    A median ratio over the bar is not enough: an overlapping or noisy
+    reading is "inconclusive" (abverdict.py), and inconclusive leaves the
+    path off, because enabling on noise is the one mistake this gate exists
+    to prevent. The two cells form one Holm family."""
     import numpy as np
 
+    from . import abverdict
     from .fastpaths import argmax_blocked
 
     rng = np.random.default_rng(9182)
-    cells = {}
-    wins = []
+    samples = {}
     for rows, cols in ((3_000, 3_000), (10_000, 1_000)):
         a = rng.random(size=(rows, cols))
-        t_stock = _timeit(lambda: np.argmax(a, axis=0))
-        t_cand = _timeit(lambda: argmax_blocked._blocked_argmax_axis0(a, np.argmax))
-        ratio = t_stock / t_cand if t_cand > 0 else 0.0
-        cells[f"{rows}x{cols}"] = round(ratio, 3)
-        wins.append(ratio >= MIN_WIN)
+        samples[f"{rows}x{cols}"] = _interleaved(
+            lambda a=a: np.argmax(a, axis=0),
+            lambda a=a: argmax_blocked._blocked_argmax_axis0(a, np.argmax))
+    verdicts = abverdict.compare_suite(samples, min_speedup=MIN_WIN)
+    cells = {k: round(statistics.median(st) / statistics.median(ct), 3)
+             for k, (st, ct) in samples.items()}
     return {
-        "enabled": all(wins),
+        "enabled": all(v["verdict"] == "faster" for v in verdicts.values()),
         "rows_min": argmax_blocked.ROWS_MIN,
         "size_min": argmax_blocked.SIZE_MIN,
         "cells": cells,
+        "verdicts": {k: v["verdict"] for k, v in verdicts.items()},
     }
 
 
@@ -510,7 +526,13 @@ def calibrate(verbose: bool = True, file=None) -> dict:
         results[name] = verdict
         if verbose:
             cells = ", ".join(f"{k}: {v}x" for k, v in verdict.get("cells", {}).items())
-            state = "ENABLED" if verdict["enabled"] else "stays off (no win here)"
+            if verdict["enabled"]:
+                state = "ENABLED"
+            elif "inconclusive" in verdict.get("verdicts", {}).values():
+                # Noise, not a loss: say so, so the user knows a re-run helps.
+                state = "stays off (inconclusive; re-run on an idle machine)"
+            else:
+                state = "stays off (no win here)"
             out.write(f"  {name:<28} {state}  [{cells}]\n")
     path = save(results)
     enabled = apply(GEARBOX)
