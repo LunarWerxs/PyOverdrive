@@ -137,7 +137,9 @@ def default_values(
         vals = np.round(vals / scale * 2)  # ties among floats
     if kind == "c":
         vals = vals + 1j * (np.asarray(rng.standard_normal(shape)) * scale)
-    vals = vals.astype(dtype)
+    # np.array, not .astype: a rank-0 draw is a numpy scalar by now, and the
+    # special-value assignment below needs an ndarray
+    vals = np.array(vals, dtype=dtype)
     if vals.size and rng.random() < special_probability:
         mask = rng.random(shape) < rng.uniform(0.0, 0.2)
         picks = rng.choice(len(_SPECIALS), size=int(mask.sum()))
@@ -262,23 +264,43 @@ class FuzzSpec:
     enable_paths: tuple[str, ...] = ()  # paths registered disabled by default
 
 
+def _path_enabled(name: str) -> bool:
+    for paths in GEARBOX._paths.values():
+        for p in paths:
+            if p.name == name:
+                return p.enabled
+    for cp in GEARBOX._class_paths.values():
+        if cp.name == name:
+            return cp.enabled
+    raise KeyError(f"no fast path named {name!r}")
+
+
 class activated:
-    """Patch exactly the spec's op (and switch on default-off paths) for
-    the duration; restores stock NumPy on exit."""
+    """Patch the spec's op (and switch on default-off paths) for the
+    duration; on exit, restore the patched ops and path switches that were
+    in place before, so a caller's own activation survives."""
 
     def __init__(self, spec: FuzzSpec):
         self.spec = spec
 
     def __enter__(self):
+        # WHY: record the prior state first; exit restores it rather than
+        # forcing everything off
+        self._prior_ops = sorted(GEARBOX._stock)
+        self._prior_paths = {name: _path_enabled(name) for name in self.spec.enable_paths}
         pyoverdrive.enable([self.spec.op])
         for name in self.spec.enable_paths:
             pyoverdrive.enable_path(name)
         return self
 
     def __exit__(self, *exc):
-        for name in self.spec.enable_paths:
-            pyoverdrive.disable_path(name)
-        pyoverdrive.disable()
+        for name, was_enabled in self._prior_paths.items():
+            if not was_enabled:
+                pyoverdrive.disable_path(name)
+        if self.spec.op not in self._prior_ops:
+            pyoverdrive.disable()
+            if self._prior_ops:
+                pyoverdrive.enable(self._prior_ops)
         return False
 
 

@@ -14,8 +14,8 @@ from __future__ import annotations
 import numpy as np
 
 from fuzzing import (
-    Case, FuzzedArray, FuzzedParameter, FuzzSpec, Fuzzer, Layout, load_case, materialize,
-    save_case, shrink,
+    Case, FuzzedArray, FuzzedParameter, FuzzSpec, Fuzzer, Layout, default_values, load_case,
+    materialize, save_case, shrink,
 )
 
 
@@ -67,6 +67,17 @@ def test_same_seed_same_samples_and_constraints_hold():
         view = case.materialize()["x"]
         assert view.base is None or view.base.nbytes <= 40_000
     assert any(not c.arrays["x"][1].is_contiguous for c in first)
+
+
+def test_rank_zero_float_draws_take_special_values():
+    # Regression: a rank-0 float draw used to be a numpy scalar, so the
+    # special-value assignment raised TypeError and `python fuzz.py` crashed
+    # on the first rank-0 sample of noop_positive.
+    rng = np.random.default_rng(0)
+    for dtype in (np.float32, np.float64, np.complex128):
+        for _ in range(20):
+            vals = default_values(rng, np.dtype(dtype), (), special_probability=1.0)
+            assert isinstance(vals, np.ndarray) and vals.shape == () and vals.dtype == dtype
 
 
 def test_shrink_keeps_the_failure_and_minimizes():
