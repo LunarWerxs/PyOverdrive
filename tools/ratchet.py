@@ -24,8 +24,14 @@ mean, because a path that wins one regime by losing another is exactly
 what this project refuses to ship. A path needs a selfcheck input in
 pyoverdrive/diagnostics.py to have any cell at all.
 
+Each cell is judged by its final reading, as the sweep judges it: a
+confirmation run or a slow-core retry overrules the reading before it.
+
 Rules, in order:
 - gate fails, stage exceeds 2x --budget, or no cell measured: revert
+- any cell of the path errored or crashed (a wrong result fails the
+  sweep's own correctness check), the sweep did not complete, or it
+  exited nonzero for any reason but a measured loss: revert
 - metric below 1.0 (slower than stock somewhere): revert
 - metric >= incumbent * (1 + --min-gain): keep
 - the change deletes more lines than it adds and the metric holds within
@@ -48,7 +54,12 @@ A kept verdict is a search result, not shipping evidence: a path still
 needs its Dyno benchmark, provenance record and the full
 verify_no_pessimization sweep (docs/BUILD_SPEC.md section 10.2) before it
 is listed as shipped. Run on a quiet machine; --require-quiet makes a
-contended measurement inconclusive instead of a verdict.
+contended measurement (before or after the run) inconclusive instead of a
+verdict.
+
+The default gate is compatibility/differential/test_<path>_differential.py,
+but test file names often differ from path names (fastpaths/dot_mixed_view.py
+is tested by test_dot_mixed_differential.py), so --test is usually needed.
 
 Usage:
     .venv/Scripts/python tools/ratchet.py --path <name> [--test PATH]
@@ -66,6 +77,7 @@ import argparse
 import json
 import math
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -94,23 +106,80 @@ def decide(metric: float | None, incumbent: float, net_lines: int, *,
     return "revert", f"no improvement ({metric:.4f}x vs {incumbent:.4f}x)"
 
 
-def metric_from_evidence(evidence: dict, path: str) -> tuple[float | None, list[dict]]:
-    """Worst valid ratio among the sweep's cells for exactly `path`.
+def cell_path(cell: str) -> str:
+    """The fast path a sweep cell belongs to.
 
-    --only is a substring filter, so other paths whose names contain this
-    one can appear in the evidence; they are ignored. Cells that errored,
-    crashed or carry a non-finite ratio are not measurements.
+    WHY: a crashed child's record carries no "path" key, only its cell name
+    ("p", "p@float32", "p#row", "p*4", "p/2", "p>8", "p<8", "p%d"), so the
+    name is the one field every record has.
     """
+    return re.split(r"[@#*/><%]", str(cell), maxsplit=1)[0]
+
+
+def _path_records(evidence: dict, path: str) -> list[dict]:
+    # --only is a substring filter, so cells of other paths whose names
+    # contain this one can appear in the evidence; they are not this path.
+    return [r for r in evidence.get("cells", []) if cell_path(r.get("cell", "")) == path]
+
+
+def metric_from_evidence(evidence: dict, path: str) -> tuple[float | None, list[dict]]:
+    """Worst final ratio among the sweep's cells for exactly `path`.
+
+    Records are appended in measurement order, so the last one per cell is
+    the reading the sweep acted on: a confirmation run of 1.0x or more
+    overrules a noisy first reading below it. A final reading that errored,
+    crashed or carries a non-finite ratio is not a measurement (and
+    sweep_failure reverts the candidate for it).
+    """
+    final: dict[str, dict] = {}
+    for record in _path_records(evidence, path):
+        final[record.get("cell")] = record
     judged = []
-    for record in evidence.get("cells", []):
+    for cell, record in final.items():
         ratio = record.get("ratio")
-        if (record.get("path") != path or "error" in record or record.get("returncode")
+        if ("error" in record or record.get("returncode")
                 or not isinstance(ratio, (int, float)) or not math.isfinite(ratio) or ratio <= 0):
             continue
-        judged.append({"cell": record.get("cell"), "ratio": float(ratio)})
+        judged.append({"cell": cell, "ratio": float(ratio)})
     if not judged:
         return None, []
     return min(c["ratio"] for c in judged), judged
+
+
+def quiet_refusal(evidence: dict) -> str | None:
+    """Why a --require-quiet sweep measured nothing trustworthy, or None.
+
+    WHY: contention measured after the run makes the sweep exit 1 without
+    the "quiet run refused" text; its numbers must not become a verdict.
+    """
+    error = str(evidence.get("error", ""))
+    if "quiet run refused" in error:
+        return error
+    conditions = evidence.get("conditions") or {}
+    if conditions.get("contended") or conditions.get("load_known") is False:
+        return "quiet conditions were not met before and after the run"
+    return None
+
+
+def sweep_failure(evidence: dict, path: str, code: int, metric: float | None) -> str | None:
+    """Why the sweep's evidence cannot vouch for the candidate, or None.
+
+    WHY: the sweep aborts with partial evidence when a child crashes, fails
+    its correctness check or reads unstable. Judging the surviving cells
+    would keep a candidate that returns wrong results in a cell the
+    differential test misses. A nonzero exit that is only a measured loss
+    (metric below 1.0) is left to decide(), which reverts it by name.
+    """
+    for record in _path_records(evidence, path):
+        if "error" in record or record.get("returncode"):
+            detail = record.get("error") or f"exit {record['returncode']}"
+            return f"cell {record.get('cell')} failed: {str(detail)[:200]}"
+    if evidence.get("completed") is not True:
+        detail = evidence.get("error") or "no completed evidence written"
+        return f"sweep incomplete: {str(detail)[:200]}"
+    if code and (metric is None or metric >= 1.0):
+        return f"sweep failed (exit {code})"
+    return None
 
 
 def branch_refusal(branch: str | None) -> str | None:
@@ -187,7 +256,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--path", required=True, help="Gearbox fast path name being searched")
     ap.add_argument("--test", action="append", default=[],
                     help="gate test file (repeatable); default "
-                         "compatibility/differential/test_<path>_differential.py")
+                         "compatibility/differential/test_<path>_differential.py, "
+                         "which often does not exist, so usually needed")
     ap.add_argument("--budget", type=float, default=600.0,
                     help="seconds per stage; a stage is killed at twice this")
     ap.add_argument("--min-gain", type=float, default=0.02,
@@ -263,12 +333,17 @@ def main(argv: list[str] | None = None) -> int:
             evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             evidence = {}
-        if args.require_quiet and "quiet run refused" in str(evidence.get("error", "")):
-            print(f"INCONCLUSIVE: {evidence['error']}; tree untouched")
+        quiet = quiet_refusal(evidence) if args.require_quiet and code is not None else None
+        if quiet:
+            print(f"INCONCLUSIVE: {quiet}; tree untouched")
             return INCONCLUSIVE
         entry["metric"], entry["cells"] = metric_from_evidence(evidence, args.path)
+        failure = None if code is None else sweep_failure(evidence, args.path, code,
+                                                          entry["metric"])
         if code is None:
             verdict, reason = "revert", "sweep exceeded 2x budget"
+        elif failure:
+            verdict, reason = "revert", failure
         elif args.init:
             verdict, reason = ("init", "incumbent recorded") if entry["metric"] is not None \
                 else ("revert", "no cell measured")
