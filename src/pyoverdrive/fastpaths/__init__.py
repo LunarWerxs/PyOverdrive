@@ -10,6 +10,12 @@ Each module in this package defines ``register(gearbox)`` and is listed in
 - a kill switch (automatic via Gearbox name registration).
 
 See docs/BUILD_SPEC.md section 10.2.
+
+Searching for a new path unattended: commit each attempt at
+fastpaths/<name>.py on a search branch and run tools/ratchet.py --path
+<name>. It keeps the commit only when the differential test passes and the
+measured worst-cell speedup beats the incumbent, and resets the branch
+otherwise, so the tip is always the best passing version.
 """
 
 from __future__ import annotations
