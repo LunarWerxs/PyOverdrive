@@ -564,6 +564,16 @@ Each fast path must be isolated behind a stable internal interface and include:
 
 Prefer narrow, independently shippable fast paths over a monolithic rewrite.
 
+To search for a path unattended (for example overnight), work on a search
+branch and loop: commit an attempt, then run
+`tools/ratchet.py --path <name>`. The differential test is the gate and
+the worst-cell speedup from `tools/verify_no_pessimization.py` the metric;
+the attempt is kept only if it passes and beats the incumbent (or removes
+code at equal speed), else the branch is reset to the incumbent. The
+ledger and logs live under the worktree's git directory. A kept attempt is
+a search result, not shipping evidence: it still needs everything listed
+above.
+
 ### 10.3 PyRallel adaptive parallel execution core
 
 Begin PyRallel with a persistent native thread pool. Creating Python threads or a new executor for every NumPy call will erase many gains.

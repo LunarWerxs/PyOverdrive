@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add `tools/ratchet.py`, a keep-or-revert judge for unattended fast-path
+  search: each committed attempt must pass its differential test and beat
+  the incumbent's worst-cell speedup, or the search branch is reset to the
+  incumbent. Refuses on main/master, detached HEAD and dirty trees.
 - Recover dispatch fixes and measurement tools that had remained in the
   archive checkout: conservative unique/intersect/isin/relayout floors,
   sorted-haystack validation and withdrawal of int64 query sorting.
