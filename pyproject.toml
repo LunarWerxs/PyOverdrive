@@ -57,6 +57,7 @@ where = ["src"]
 pyoverdrive = ["py.typed"]
 
 [tool.pytest.ini_options]
+addopts = "--durations=20"
 testpaths = ["tests", "compatibility"]
 # Always test this checkout, even if another checkout was installed editable.
 pythonpath = ["src"]
