@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The README's speed table now matches the committed evidence for the machine
+  it names (`benchmarks/results/MVP-BASELINE/9bbe7063c555.json`, i7-12700K,
+  NumPy 2.5.2): 1592x, 1131x, 211x, 181x, 175x and 3.7x. The old figures
+  (1593x, 1041x, 217x, 186x, 174x, 3.8x) came from a run that file no
+  longer holds.
 - Keep non-contiguous views on stock for nanmean/nansum/nanstd/nanvar: the
   plain reduction over a strided view was not bit-identical to stock, which
   reduces a contiguous copy. Found by the new seeded differential fuzzing.

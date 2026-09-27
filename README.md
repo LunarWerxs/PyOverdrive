@@ -28,12 +28,12 @@ the short road, and stays out of the way everywhere else.
 
 | Your call | What PyOverdrive does instead | Measured |
 |---|---|---:|
-| `np.isin(a, b)` on `StringDType` | hash-set membership | **1593x** |
-| `np.searchsorted(a, huge_python_int)` | an O(1) provable answer | **1041x** |
-| `np.apply_along_axis(np.mean, -1, a)` | the `axis=` reduction, once | **217x** |
-| `np.vectorize(np.sqrt)(x)` | calls the wrapped ufunc directly | **186x** |
-| `np.einsum('ij,jk,kl->il', a, b, c)` | NumPy's own planner, above a measured size gate | **174x** |
-| `np.linalg.qr(stack_of_10k_3x3)` | closed-form Householder, vectorized | **3.8x** |
+| `np.isin(a, b)` on `StringDType` | hash-set membership | **1592x** |
+| `np.searchsorted(a, huge_python_int)` | an O(1) provable answer | **1131x** |
+| `np.apply_along_axis(np.mean, -1, a)` | the `axis=` reduction, once | **211x** |
+| `np.vectorize(np.sqrt)(x)` | calls the wrapped ufunc directly | **181x** |
+| `np.einsum('ij,jk,kl->il', a, b, c)` | NumPy's own planner, above a measured size gate | **175x** |
+| `np.linalg.qr(stack_of_10k_3x3)` | closed-form Householder, vectorized | **3.7x** |
 
 Measured end-to-end through the public API - `pyoverdrive.enable()` on, your
 call unchanged - on an idle Intel i7-12700K, NumPy 2.5.2, at 0% background
