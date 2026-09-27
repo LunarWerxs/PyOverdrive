@@ -260,6 +260,118 @@ def _quiet(value):
     return type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 0.20
 
 
+def _check(condition, reason):
+    if not condition:
+        raise ValueError(reason)
+
+
+def _positive(value):
+    return type(value) in (int, float) and math.isfinite(value) and value > 0
+
+
+def _agrees(value, expected):
+    return (type(value) in (int, float) and math.isfinite(value)
+            and math.isclose(value, expected, rel_tol=1e-12, abs_tol=0.0))
+
+
+def _recorded_cell(record, expected_cell):
+    """The cell a saved record claims, after checking its identity axes."""
+    _check(isinstance(record, dict), "measurement must be an object")
+    _check(record.get("status") == "measured", "not a measured record")
+    family, op = record.get("family"), record.get("operation")
+    shape = record.get("shape")
+    _check(family in ("argmax", "vectorize", "out"), "unknown family")
+    _check(isinstance(shape, list) and shape and all(type(n) is int and n > 0 for n in shape), "invalid shape")
+    _check(isinstance(op, str) and isinstance(record.get("dtype"), str)
+           and isinstance(record.get("alias"), str), "missing cell axes")
+    cell = Cell(family, op, record["dtype"], tuple(shape), record["alias"])
+    _check(record.get("cell") == cell.name and (expected_cell is None or cell.name == expected_cell), "cell identity mismatch")
+    return cell
+
+
+def _recorded_dispatch(record, cell, path):
+    """Check the dispatch evidence; True when it is the withdrawn stock regime."""
+    _check(record.get("experimental_enable") == path, "experimental path mismatch")
+    decision = record.get("dispatch")
+    neighbor = cell.family == "argmax" and (cell.shape[0] < 3000 or math.prod(cell.shape) < 9_000_000)
+    _check(isinstance(decision, list) and len(decision) == 2 and all(isinstance(x, str) for x in decision), "invalid dispatch evidence")
+    intentional_stock = decision[0] == "stock" and _withdrawn_inplace_add(cell)
+    _check(decision[0] == path or (neighbor and decision[0] == "stock") or intentional_stock,
+           "unexpected dispatch path")
+    return intentional_stock
+
+
+def _check_run_evidence(record):
+    correctness = record.get("correctness")
+    _check(isinstance(correctness, dict) and correctness.get("passed") is True
+           and correctness.get("mode") == "bit-identical", "missing or failed correctness verification")
+    fingerprint = record.get("fingerprint")
+    _check(isinstance(fingerprint, dict) and all(isinstance(fingerprint.get(k), str) and fingerprint[k]
+           for k in ("fingerprint", "numpy", "python")), "missing machine fingerprint")
+    conditions = record.get("conditions")
+    _check(isinstance(conditions, dict) and all(_quiet(conditions.get(k)) for k in ("cpu_busy_before", "cpu_busy_after"))
+           and conditions.get("load_known") is True and conditions.get("contended") is False,
+           "missing or nonquiet child load evidence")
+
+
+def _check_timings(record, family):
+    rounds, number = record.get("rounds"), record.get("calls_per_sample")
+    _check(type(rounds) is int and rounds > 0 and type(number) is int and number > 0, "invalid sample counts")
+    labels = {"stock", "candidate_guard_on"}
+    if family == "out":
+        labels.add("candidate_guard_off")
+    samples, medians = record.get("timings_seconds"), record.get("median_seconds")
+    ratios = record.get("ratios_stock_over_candidate")
+    _check(isinstance(samples, dict) and set(samples) == labels, "missing raw timing samples")
+    _check(isinstance(medians, dict) and set(medians) == labels, "missing timing medians")
+    _check(isinstance(ratios, dict) and set(ratios) == labels - {"stock"}, "missing timing ratios")
+    _check_timing_values(labels, samples, medians, ratios, rounds)
+    if family == "out":
+        _check(_agrees(record.get("guard_overhead_seconds"), medians["candidate_guard_on"] - medians["candidate_guard_off"]),
+               "guard overhead does not match raw samples")
+
+
+def _check_timing_values(labels, samples, medians, ratios, rounds):
+    for label in labels:
+        values = samples[label]
+        _check(isinstance(values, list) and len(values) == rounds and all(_positive(v) for v in values), "invalid raw timing samples")
+        _check(_agrees(medians[label], statistics.median(values)), "median does not match raw samples")
+        sweep.validate_timing_stability(values, label)
+    for label in labels - {"stock"}:
+        _check(_agrees(ratios[label], medians["stock"] / medians[label]), "ratio does not match raw samples")
+
+
+def _check_stderr(record):
+    stderr = record.get("stderr", "")
+    _check(isinstance(stderr, str), "invalid child stderr")
+    _check("falling back to stock" not in stderr.lower(), "child stderr reports fallback")
+
+
+def _check_stock_flag(execution, intentional_stock):
+    if intentional_stock:
+        _check(isinstance(execution, dict) and execution.get("intentional_stock") is True
+               and execution.get("stock_reason") == "float64-add-exact-inplace",
+               "missing intentional stock execution verification")
+    elif isinstance(execution, dict):
+        _check(execution.get("intentional_stock", False) is False,
+               "intentional stock contradicts dispatch evidence")
+
+
+def _check_execution(record, cell, path, intentional_stock, require_execution):
+    execution = record.get("execution")
+    _check_stock_flag(execution, intentional_stock)
+    if execution is None and not require_execution:
+        return {"timings_verified": True, "execution_verified": False,
+                "stderr_fallback_observed": False}
+    _check(isinstance(execution, dict) and execution.get("path") == path
+           and execution.get("check") == "Gearbox._warned_paths"
+           and execution.get("fallback_observed") is False, "missing or failed execution verification")
+    if cell.family == "vectorize":
+        _check(execution.get("direct_ufunc") == cell.op, "missing direct ufunc execution verification")
+    return {"timings_verified": True, "execution_verified": True,
+            "stderr_fallback_observed": False}
+
+
 def validate_measurement(record, expected_cell=None, *, require_execution=True):
     """Check a saved measurement without changing it or its source attribution.
 
@@ -267,87 +379,14 @@ def validate_measurement(record, expected_cell=None, *, require_execution=True):
     the explicit execution checks added later. Opting into their inspection
     returns execution_verified=False; it never upgrades them to verified cells.
     """
-    def check(condition, reason):
-        if not condition:
-            raise ValueError(reason)
-
-    def positive(value):
-        return type(value) in (int, float) and math.isfinite(value) and value > 0
-
-    def agrees(value, expected):
-        return (type(value) in (int, float) and math.isfinite(value)
-                and math.isclose(value, expected, rel_tol=1e-12, abs_tol=0.0))
-
-    check(isinstance(record, dict), "measurement must be an object")
-    check(record.get("status") == "measured", "not a measured record")
-    family, op = record.get("family"), record.get("operation")
-    shape = record.get("shape")
-    check(family in ("argmax", "vectorize", "out"), "unknown family")
-    check(isinstance(shape, list) and shape and all(type(n) is int and n > 0 for n in shape), "invalid shape")
-    check(isinstance(op, str) and isinstance(record.get("dtype"), str)
-          and isinstance(record.get("alias"), str), "missing cell axes")
-    cell = Cell(family, op, record["dtype"], tuple(shape), record["alias"])
-    check(record.get("cell") == cell.name and (expected_cell is None or cell.name == expected_cell), "cell identity mismatch")
+    cell = _recorded_cell(record, expected_cell)
     path = {"argmax": "argmax_blocked_transpose", "vectorize": "vectorize_ufunc_direct",
-            "out": f"pyrallel_{op}"}[family]
-    check(record.get("experimental_enable") == path, "experimental path mismatch")
-    decision = record.get("dispatch")
-    neighbor = family == "argmax" and (shape[0] < 3000 or math.prod(shape) < 9_000_000)
-    check(isinstance(decision, list) and len(decision) == 2 and all(isinstance(x, str) for x in decision), "invalid dispatch evidence")
-    intentional_stock = decision[0] == "stock" and _withdrawn_inplace_add(cell)
-    check(decision[0] == path or (neighbor and decision[0] == "stock") or intentional_stock,
-          "unexpected dispatch path")
-    correctness = record.get("correctness")
-    check(isinstance(correctness, dict) and correctness.get("passed") is True
-          and correctness.get("mode") == "bit-identical", "missing or failed correctness verification")
-    fingerprint = record.get("fingerprint")
-    check(isinstance(fingerprint, dict) and all(isinstance(fingerprint.get(k), str) and fingerprint[k]
-          for k in ("fingerprint", "numpy", "python")), "missing machine fingerprint")
-    conditions = record.get("conditions")
-    check(isinstance(conditions, dict) and all(_quiet(conditions.get(k)) for k in ("cpu_busy_before", "cpu_busy_after"))
-          and conditions.get("load_known") is True and conditions.get("contended") is False,
-          "missing or nonquiet child load evidence")
-    rounds, number = record.get("rounds"), record.get("calls_per_sample")
-    check(type(rounds) is int and rounds > 0 and type(number) is int and number > 0, "invalid sample counts")
-    labels = {"stock", "candidate_guard_on"}
-    if family == "out":
-        labels.add("candidate_guard_off")
-    samples, medians = record.get("timings_seconds"), record.get("median_seconds")
-    ratios = record.get("ratios_stock_over_candidate")
-    check(isinstance(samples, dict) and set(samples) == labels, "missing raw timing samples")
-    check(isinstance(medians, dict) and set(medians) == labels, "missing timing medians")
-    check(isinstance(ratios, dict) and set(ratios) == labels - {"stock"}, "missing timing ratios")
-    for label in labels:
-        values = samples[label]
-        check(isinstance(values, list) and len(values) == rounds and all(positive(v) for v in values), "invalid raw timing samples")
-        check(agrees(medians[label], statistics.median(values)), "median does not match raw samples")
-        sweep.validate_timing_stability(values, label)
-    for label in labels - {"stock"}:
-        check(agrees(ratios[label], medians["stock"] / medians[label]), "ratio does not match raw samples")
-    if family == "out":
-        check(agrees(record.get("guard_overhead_seconds"), medians["candidate_guard_on"] - medians["candidate_guard_off"]),
-              "guard overhead does not match raw samples")
-    stderr = record.get("stderr", "")
-    check(isinstance(stderr, str), "invalid child stderr")
-    check("falling back to stock" not in stderr.lower(), "child stderr reports fallback")
-    execution = record.get("execution")
-    if intentional_stock:
-        check(isinstance(execution, dict) and execution.get("intentional_stock") is True
-              and execution.get("stock_reason") == "float64-add-exact-inplace",
-              "missing intentional stock execution verification")
-    elif isinstance(execution, dict):
-        check(execution.get("intentional_stock", False) is False,
-              "intentional stock contradicts dispatch evidence")
-    if execution is None and not require_execution:
-        return {"timings_verified": True, "execution_verified": False,
-                "stderr_fallback_observed": False}
-    check(isinstance(execution, dict) and execution.get("path") == path
-          and execution.get("check") == "Gearbox._warned_paths"
-          and execution.get("fallback_observed") is False, "missing or failed execution verification")
-    if family == "vectorize":
-        check(execution.get("direct_ufunc") == op, "missing direct ufunc execution verification")
-    return {"timings_verified": True, "execution_verified": True,
-            "stderr_fallback_observed": False}
+            "out": f"pyrallel_{cell.op}"}[cell.family]
+    intentional_stock = _recorded_dispatch(record, cell, path)
+    _check_run_evidence(record)
+    _check_timings(record, cell.family)
+    _check_stderr(record)
+    return _check_execution(record, cell, path, intentional_stock, require_execution)
 
 
 def _unqualify(record, reason_code, reason):
@@ -401,7 +440,7 @@ def _child(args):
     return code
 
 
-def main(argv=None):
+def _parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--family", action="append", choices=("argmax", "vectorize", "out"))
     parser.add_argument("--only", action="append", default=[])
@@ -416,41 +455,44 @@ def main(argv=None):
     parser.add_argument("--timeout", type=float, default=300)
     parser.add_argument("--one", help=argparse.SUPPRESS)
     parser.add_argument("--fast-under", type=float, help=argparse.SUPPRESS)
-    args = parser.parse_args(argv)
-    if args.rounds < 1 or args.retries < 1 or args.timeout <= 0:
-        parser.error("rounds, retries and timeout must be positive")
+    return parser
+
+
+def _read_cells_file(parser, args):
+    """Exact cell IDs from --cells-file and the bytes they were read from."""
+    if args.family or args.only:
+        parser.error("--cells-file cannot combine with --family or --only")
+    try:
+        content = args.cells_file.read_bytes()
+        selected = [line.strip() for line in content.decode("utf-8-sig").splitlines() if line.strip()]
+    except (OSError, UnicodeError) as exc:
+        parser.error(f"cannot read --cells-file: {exc}")
+    if len(selected) != len(set(selected)):
+        parser.error("--cells-file contains duplicate cell IDs")
+    unknown = set(selected) - cells().keys()
+    if unknown:
+        parser.error(f"unknown exact cell IDs: {sorted(unknown)}")
+    return selected, content
+
+
+def _selection(parser, args):
     selected = [name for name, c in cells().items()
                 if (not args.family or c.family in args.family)
                 and (not args.only or any(s in name for s in args.only))]
     selection = {}
     if args.cells_file:
-        if args.family or args.only:
-            parser.error("--cells-file cannot combine with --family or --only")
-        try:
-            content = args.cells_file.read_bytes()
-            selected = [line.strip() for line in content.decode("utf-8-sig").splitlines() if line.strip()]
-        except (OSError, UnicodeError) as exc:
-            parser.error(f"cannot read --cells-file: {exc}")
-        if len(selected) != len(set(selected)):
-            parser.error("--cells-file contains duplicate cell IDs")
-        unknown = set(selected) - cells().keys()
-        if unknown:
-            parser.error(f"unknown exact cell IDs: {sorted(unknown)}")
+        selected, content = _read_cells_file(parser, args)
         selection["cells_file"] = {"path": str(args.cells_file),
                                    "sha256": hashlib.sha256(content).hexdigest()}
     selection["requested_cells"] = selected
     selection["requested_cells_sha256"] = hashlib.sha256(
         json.dumps(selected, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
-    if args.list:
-        print("\n".join(selected))
-        return 0
-    if args.json is None:
-        parser.error("--json is required for measurements")
-    if args.one:
-        return _child(args)
-    before = sweep._foreign_load()
-    record = {
+    return selected, selection
+
+
+def _parent_record(args, selected, selection):
+    return {
         "schema_version": 1, "tool": "bench_review_followup",
         "recorded_at": datetime.now(timezone.utc).isoformat(),
         "fingerprint": sweep._fingerprint(), "source_revision": sweep._source_revision(),
@@ -468,92 +510,164 @@ def main(argv=None):
                          "PYOVERDRIVE_THREADS", "PYOVERDRIVE_DISABLE", "OMP_NUM_THREADS",
                          "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "PYTHONWARNINGS")}},
     }
+
+
+@dataclass
+class _Run:
+    """Parent bookkeeping shared by the cell loop and the final write."""
+    args: argparse.Namespace
+    selected: list
+    record: dict
+    before: object
+    unresolved: dict
+    attempted: set
+
+
+def _child_env(scratch):
+    env = dict(os.environ, PYOVERDRIVE_CALIBRATION=str(Path(scratch) / "absent.json"))
+    env["PYTHONPATH"] = str(REPO / "src") + os.pathsep + env.get("PYTHONPATH", "")
+    return env
+
+
+def _child_command(args, name, destination, cutoff):
+    cmd = [sys.executable, str(Path(__file__).resolve()), "--one", name,
+           "--json", str(destination), "--rounds", str(args.rounds)]
+    if args.require_quiet:
+        cmd.append("--require-quiet")
+    if cutoff is not None:
+        cmd += ["--fast-under", str(cutoff)]
+    return cmd
+
+
+def _is_quiet_refusal(child, proc):
+    return (child.get("status") == "unverified"
+            and child.get("reason_code") in ("quiet-before", "quiet-after")
+            and not child.get("error") and proc.returncode in (0, 1))
+
+
+def _attempt_cell(run, name, scratch, env, cutoff):
+    """Run one cell until a fast-core draw, a quiet refusal or the retry limit."""
+    args = run.args
+    for attempt in range(1, args.retries + 1):
+        destination = Path(scratch) / "cell.json"
+        destination.unlink(missing_ok=True)
+        cmd = _child_command(args, name, destination, cutoff)
+        proc = subprocess.run(cmd, cwd=REPO, env=env, capture_output=True,
+                              text=True, timeout=args.timeout)
+        child = (json.loads(destination.read_text(), parse_constant=_invalid_json_constant)
+                 if destination.exists() else {})
+        child.update(attempt=attempt, returncode=proc.returncode, stderr=proc.stderr)
+        run.record["cells"].append(child)
+        quiet_refusal = _is_quiet_refusal(child, proc)
+        if child.get("cell") != name or (proc.returncode and not quiet_refusal) or child.get("error"):
+            raise RuntimeError(f"{name}: {child.get('error', 'child failed')} {proc.stderr}")
+        if quiet_refusal:
+            _unqualify(child, child["reason_code"], child.get("reason", "quiet conditions not met"))
+            break
+        if child.get("status") != "slow-core":
+            break
+    return child
+
+
+def _settle_child(name, child):
+    """Unqualify an exhausted slow-core draw or a measured cell with noisy load."""
+    if child.get("status") == "slow-core":
+        _unqualify(child, "slow-core-exhausted", "no fast-core draw within retry limit")
+    elif child.get("status") == "measured":
+        if not child.get("correctness", {}).get("passed"):
+            raise RuntimeError(f"{name}: missing or failed correctness verification")
+        conditions = child.get("conditions", {})
+        if not all(key in conditions for key in ("cpu_busy_before", "cpu_busy_after")):
+            raise RuntimeError(f"{name}: missing child load evidence")
+        if not _quiet(conditions["cpu_busy_before"]) or not _quiet(conditions["cpu_busy_after"]):
+            _unqualify(child, "quiet-after", "child load evidence does not qualify")
+
+
+def _record_child(run, name, child):
+    if child.get("status") == "unverified":
+        run.unresolved[name] = {"cell": name, "reason_code": child["reason_code"], "reason": child["reason"]}
+        print(f"UNVERIFIED {name}: {child['reason']}", flush=True)
+        return
+    if child.get("status") != "measured":
+        raise RuntimeError(f"{name}: unknown child status {child.get('status')!r}")
+    child["qualified"] = False
+    validate_measurement(child, name)
+    child["qualified"] = True
+    run.record["verified_cells"].append(name)
+    run.unresolved.pop(name)
+    print(f"{name}: {child['ratios_stock_over_candidate']}", flush=True)
+
+
+def _run_cells(run):
+    args = run.args
+    if args.require_quiet and not _quiet(run.before):
+        raise RuntimeError(f"quiet run refused: load={run.before!r}")
+    if not run.selected:
+        raise RuntimeError("no cells selected")
+    classes = None if args.any_core else cpuclass.classify()
+    cutoff = None if args.any_core else cpuclass.fast_cutoff(classes)
+    run.record["cpu_classes"] = classes
+    run.record["fast_under_us"] = cutoff
+    with tempfile.TemporaryDirectory(prefix="pyoverdrive-followup-") as scratch:
+        env = _child_env(scratch)
+        for name in run.selected:
+            run.attempted.add(name)
+            child = _attempt_cell(run, name, scratch, env, cutoff)
+            _settle_child(name, child)
+            _record_child(run, name, child)
+    run.record["completed"] = not run.unresolved
+    return int(bool(run.unresolved))
+
+
+def _mark_stopped(run, exc):
+    for name, pending in run.unresolved.items():
+        if pending["reason_code"] == "not-attempted":
+            pending.update(
+                reason_code="execution-error" if name in run.attempted else "not-attempted",
+                reason=f"run stopped: {exc}",
+            )
+
+
+def _finish_run(run, code):
+    after = sweep._foreign_load()
+    record = run.record
+    record["conditions"] = _conditions(run.before, after)
+    record["unverified_cells"] = list(run.unresolved.values())
+    record["all_cells_attempted"] = len(run.attempted) == len(run.selected)
+    if run.args.require_quiet and not _quiet(after):
+        record["batch_unverified_reason"] = "final parent load does not meet quiet conditions; individually qualified cells are retained"
+        code = 1
+    record["exit_code"] = code
+    sweep._write_json(run.args.json, record)
+    return code
+
+
+def main(argv=None):
+    parser = _parser()
+    args = parser.parse_args(argv)
+    if args.rounds < 1 or args.retries < 1 or args.timeout <= 0:
+        parser.error("rounds, retries and timeout must be positive")
+    selected, selection = _selection(parser, args)
+    if args.list:
+        print("\n".join(selected))
+        return 0
+    if args.json is None:
+        parser.error("--json is required for measurements")
+    if args.one:
+        return _child(args)
+    before = sweep._foreign_load()
     unresolved = {name: {"cell": name, "reason_code": "not-attempted",
                          "reason": "cell has not run"} for name in selected}
-    attempted = set()
+    run = _Run(args, selected, _parent_record(args, selected, selection), before, unresolved, set())
     code = 1
     try:
-        if args.require_quiet and not _quiet(before):
-            raise RuntimeError(f"quiet run refused: load={before!r}")
-        if not selected:
-            raise RuntimeError("no cells selected")
-        classes = None if args.any_core else cpuclass.classify()
-        cutoff = None if args.any_core else cpuclass.fast_cutoff(classes)
-        record["cpu_classes"] = classes
-        record["fast_under_us"] = cutoff
-        with tempfile.TemporaryDirectory(prefix="pyoverdrive-followup-") as scratch:
-            env = dict(os.environ, PYOVERDRIVE_CALIBRATION=str(Path(scratch) / "absent.json"))
-            env["PYTHONPATH"] = str(REPO / "src") + os.pathsep + env.get("PYTHONPATH", "")
-            for name in selected:
-                attempted.add(name)
-                for attempt in range(1, args.retries + 1):
-                    destination = Path(scratch) / "cell.json"
-                    destination.unlink(missing_ok=True)
-                    cmd = [sys.executable, str(Path(__file__).resolve()), "--one", name,
-                           "--json", str(destination), "--rounds", str(args.rounds)]
-                    if args.require_quiet:
-                        cmd.append("--require-quiet")
-                    if cutoff is not None:
-                        cmd += ["--fast-under", str(cutoff)]
-                    proc = subprocess.run(cmd, cwd=REPO, env=env, capture_output=True,
-                                          text=True, timeout=args.timeout)
-                    child = (json.loads(destination.read_text(), parse_constant=_invalid_json_constant)
-                             if destination.exists() else {})
-                    child.update(attempt=attempt, returncode=proc.returncode, stderr=proc.stderr)
-                    record["cells"].append(child)
-                    quiet_refusal = (child.get("status") == "unverified"
-                                     and child.get("reason_code") in ("quiet-before", "quiet-after")
-                                     and not child.get("error") and proc.returncode in (0, 1))
-                    if child.get("cell") != name or (proc.returncode and not quiet_refusal) or child.get("error"):
-                        raise RuntimeError(f"{name}: {child.get('error', 'child failed')} {proc.stderr}")
-                    if quiet_refusal:
-                        _unqualify(child, child["reason_code"], child.get("reason", "quiet conditions not met"))
-                        break
-                    if child.get("status") != "slow-core":
-                        break
-                if child.get("status") == "slow-core":
-                    _unqualify(child, "slow-core-exhausted", "no fast-core draw within retry limit")
-                elif child.get("status") == "measured":
-                    if not child.get("correctness", {}).get("passed"):
-                        raise RuntimeError(f"{name}: missing or failed correctness verification")
-                    conditions = child.get("conditions", {})
-                    if not all(key in conditions for key in ("cpu_busy_before", "cpu_busy_after")):
-                        raise RuntimeError(f"{name}: missing child load evidence")
-                    if not _quiet(conditions["cpu_busy_before"]) or not _quiet(conditions["cpu_busy_after"]):
-                        _unqualify(child, "quiet-after", "child load evidence does not qualify")
-                if child.get("status") == "unverified":
-                    unresolved[name] = {"cell": name, "reason_code": child["reason_code"], "reason": child["reason"]}
-                    print(f"UNVERIFIED {name}: {child['reason']}", flush=True)
-                    continue
-                if child.get("status") != "measured":
-                    raise RuntimeError(f"{name}: unknown child status {child.get('status')!r}")
-                child["qualified"] = False
-                validate_measurement(child, name)
-                child["qualified"] = True
-                record["verified_cells"].append(name)
-                unresolved.pop(name)
-                print(f"{name}: {child['ratios_stock_over_candidate']}", flush=True)
-        record["completed"] = not unresolved
-        code = int(bool(unresolved))
+        code = _run_cells(run)
     except Exception as exc:
-        record["error"] = repr(exc)
-        for name, pending in unresolved.items():
-            if pending["reason_code"] == "not-attempted":
-                pending.update(
-                    reason_code="execution-error" if name in attempted else "not-attempted",
-                    reason=f"run stopped: {exc}",
-                )
+        run.record["error"] = repr(exc)
+        _mark_stopped(run, exc)
         print(f"NOT verified: {exc}", file=sys.stderr)
     finally:
-        after = sweep._foreign_load()
-        record["conditions"] = _conditions(before, after)
-        record["unverified_cells"] = list(unresolved.values())
-        record["all_cells_attempted"] = len(attempted) == len(selected)
-        if args.require_quiet and not _quiet(after):
-            record["batch_unverified_reason"] = "final parent load does not meet quiet conditions; individually qualified cells are retained"
-            code = 1
-        record["exit_code"] = code
-        sweep._write_json(args.json, record)
+        code = _finish_run(run, code)
     return code
 
 

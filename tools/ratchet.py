@@ -251,7 +251,7 @@ def _net_lines(incumbent: str) -> int:
     return net
 
 
-def main(argv: list[str] | None = None) -> int:
+def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(prog="tools/ratchet.py", description=__doc__.split("\n\n")[0])
     ap.add_argument("--path", required=True, help="Gearbox fast path name being searched")
     ap.add_argument("--test", action="append", default=[],
@@ -275,7 +275,11 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     if args.budget <= 0 or args.min_gain < 0 or not 0 <= args.hold < 1:
         ap.error("--budget must be positive, --min-gain non-negative, --hold in [0, 1)")
+    return args
 
+
+def _preflight(args: argparse.Namespace) -> tuple[list[str], str | None]:
+    """The gate tests, and why the tree must not be touched (or None)."""
     refusal = branch_refusal(_git("symbolic-ref", "--short", "-q", "HEAD", check=False) or None)
     if refusal is None and _git("status", "--porcelain"):
         refusal = "working tree is not clean; commit the candidate first"
@@ -283,6 +287,93 @@ def main(argv: list[str] | None = None) -> int:
     missing = [t for t in tests if not (ROOT / t).is_file()]
     if refusal is None and missing:
         refusal = f"gate test not found: {', '.join(missing)} (pass --test)"
+    return tests, refusal
+
+
+def _resolve_incumbent(args: argparse.Namespace, head: str,
+                       ledger: Path) -> tuple[str, float, str | None]:
+    """The incumbent and its metric, and why HEAD cannot be judged against it (or None)."""
+    try:
+        incumbent, incumbent_metric = _incumbent(ledger, args.base)
+    except RuntimeError as exc:
+        return "", 0.0, f"no incumbent: {exc}"
+    if not args.init and head == incumbent:
+        return incumbent, incumbent_metric, f"HEAD {head[:9]} is the incumbent; commit a candidate first"
+    descends = subprocess.run(["git", "-C", str(ROOT), "merge-base", "--is-ancestor",
+                               incumbent, "HEAD"], capture_output=True).returncode == 0
+    if not args.init and not descends:
+        return incumbent, incumbent_metric, f"HEAD does not descend from the incumbent {incumbent[:9]}"
+    return incumbent, incumbent_metric, None
+
+
+def _run_sweep(args: argparse.Namespace, entry: dict, prefix: Path,
+               limit: float) -> tuple[int | None, dict]:
+    evidence_path = Path(f"{prefix}-evidence.json")
+    sweep = [sys.executable, "tools/verify_no_pessimization.py", "--only", args.path,
+             "--json", str(evidence_path)]
+    sweep += [f"--{axis}" for axis in ("sizes", "shapes", "rows", "values")
+              if getattr(args, axis)]
+    if args.require_quiet:
+        sweep.append("--require-quiet")
+    code = _run_bounded(sweep, Path(entry["logs"]["sweep"]), limit)
+    entry["logs"]["evidence"] = str(evidence_path)
+    try:
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        evidence = {}
+    return code, evidence
+
+
+def _sweep_verdict(args: argparse.Namespace, entry: dict, evidence: dict, code: int | None,
+                   incumbent_metric: float) -> tuple[str, str]:
+    entry["metric"], entry["cells"] = metric_from_evidence(evidence, args.path)
+    failure = None if code is None else sweep_failure(evidence, args.path, code,
+                                                      entry["metric"])
+    if code is None:
+        return "revert", "sweep exceeded 2x budget"
+    if failure:
+        return "revert", failure
+    if args.init:
+        return ("init", "incumbent recorded") if entry["metric"] is not None \
+            else ("revert", "no cell measured")
+    return decide(entry["metric"], incumbent_metric, entry["net_lines"],
+                  min_gain=args.min_gain, hold=args.hold)
+
+
+def _judge(args: argparse.Namespace, tests: list[str], entry: dict, prefix: Path,
+           incumbent_metric: float) -> tuple[str | None, str]:
+    """(verdict, reason); verdict None means a quiet run was refused (reason says why)."""
+    limit = 2 * args.budget
+    # Gate first: it is cheaper than the sweep and a wrong answer at any
+    # speed is worthless (autoresearch's fast-fail on divergence).
+    code = _run_bounded([sys.executable, "-m", "pytest", "-q", "-x", *tests],
+                        Path(entry["logs"]["gate"]), limit)
+    if code != 0:
+        return "revert", ("gate exceeded 2x budget" if code is None
+                          else f"gate failed (exit {code})")
+    code, evidence = _run_sweep(args, entry, prefix, limit)
+    quiet = quiet_refusal(evidence) if args.require_quiet and code is not None else None
+    if quiet:
+        return None, quiet
+    return _sweep_verdict(args, entry, evidence, code, incumbent_metric)
+
+
+def _record_verdict(entry: dict, verdict: str, incumbent: str, ledger: Path) -> None:
+    if verdict == "revert":
+        _git("reset", "--hard", incumbent)
+    with open(ledger, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(entry) + "\n")
+
+
+def _revert_note(verdict: str, incumbent: str, dry_run: bool) -> str:
+    if verdict != "revert":
+        return ""
+    return f"; reset to {incumbent[:9]}" if not dry_run else "; dry run, tree untouched"
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
+    tests, refusal = _preflight(args)
     if refusal:
         print(f"REFUSED: {refusal}")
         return REFUSED
@@ -290,66 +381,22 @@ def main(argv: list[str] | None = None) -> int:
     head = _git("rev-parse", "HEAD")
     out = _ledger_dir()
     ledger = out / f"{args.path}.jsonl"
-    try:
-        incumbent, incumbent_metric = _incumbent(ledger, args.base)
-    except RuntimeError as exc:
-        print(f"REFUSED: no incumbent: {exc}")
-        return REFUSED
-    if not args.init and head == incumbent:
-        print(f"REFUSED: HEAD {head[:9]} is the incumbent; commit a candidate first")
-        return REFUSED
-    descends = subprocess.run(["git", "-C", str(ROOT), "merge-base", "--is-ancestor",
-                               incumbent, "HEAD"], capture_output=True).returncode == 0
-    if not args.init and not descends:
-        print(f"REFUSED: HEAD does not descend from the incumbent {incumbent[:9]}")
+    incumbent, incumbent_metric, refusal = _resolve_incumbent(args, head, ledger)
+    if refusal:
+        print(f"REFUSED: {refusal}")
         return REFUSED
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     prefix = out / f"{stamp}-{args.path}-{head[:9]}"
-    limit = 2 * args.budget
     entry = {"at": stamp, "path": args.path, "head": head, "incumbent": incumbent,
              "incumbent_metric": incumbent_metric, "metric": None, "cells": [],
              "net_lines": 0 if args.init else _net_lines(incumbent),
              "logs": {"gate": f"{prefix}-gate.log", "sweep": f"{prefix}-sweep.log"}}
 
-    # Gate first: it is cheaper than the sweep and a wrong answer at any
-    # speed is worthless (autoresearch's fast-fail on divergence).
-    code = _run_bounded([sys.executable, "-m", "pytest", "-q", "-x", *tests],
-                        Path(entry["logs"]["gate"]), limit)
-    if code != 0:
-        verdict, reason = "revert", ("gate exceeded 2x budget" if code is None
-                                     else f"gate failed (exit {code})")
-    else:
-        evidence_path = Path(f"{prefix}-evidence.json")
-        sweep = [sys.executable, "tools/verify_no_pessimization.py", "--only", args.path,
-                 "--json", str(evidence_path)]
-        sweep += [f"--{axis}" for axis in ("sizes", "shapes", "rows", "values")
-                  if getattr(args, axis)]
-        if args.require_quiet:
-            sweep.append("--require-quiet")
-        code = _run_bounded(sweep, Path(entry["logs"]["sweep"]), limit)
-        entry["logs"]["evidence"] = str(evidence_path)
-        try:
-            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            evidence = {}
-        quiet = quiet_refusal(evidence) if args.require_quiet and code is not None else None
-        if quiet:
-            print(f"INCONCLUSIVE: {quiet}; tree untouched")
-            return INCONCLUSIVE
-        entry["metric"], entry["cells"] = metric_from_evidence(evidence, args.path)
-        failure = None if code is None else sweep_failure(evidence, args.path, code,
-                                                          entry["metric"])
-        if code is None:
-            verdict, reason = "revert", "sweep exceeded 2x budget"
-        elif failure:
-            verdict, reason = "revert", failure
-        elif args.init:
-            verdict, reason = ("init", "incumbent recorded") if entry["metric"] is not None \
-                else ("revert", "no cell measured")
-        else:
-            verdict, reason = decide(entry["metric"], incumbent_metric, entry["net_lines"],
-                                     min_gain=args.min_gain, hold=args.hold)
+    verdict, reason = _judge(args, tests, entry, prefix, incumbent_metric)
+    if verdict is None:
+        print(f"INCONCLUSIVE: {reason}; tree untouched")
+        return INCONCLUSIVE
 
     entry.update(verdict=verdict, reason=reason)
     shown = "-" if entry["metric"] is None else f"{entry['metric']:.4f}x"
@@ -357,13 +404,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"REFUSED: cannot record {head[:9]} as incumbent: {reason}; logs in {out}")
         return REFUSED
     if not args.dry_run:
-        if verdict == "revert":
-            _git("reset", "--hard", incumbent)
-        with open(ledger, "a", encoding="utf-8") as fh:
-            fh.write(json.dumps(entry) + "\n")
+        _record_verdict(entry, verdict, incumbent, ledger)
     label = {"keep": "KEEP", "init": "INIT", "revert": "REVERT"}[verdict]
-    after = "" if verdict != "revert" else (f"; reset to {incumbent[:9]}" if not args.dry_run
-                                            else "; dry run, tree untouched")
+    after = _revert_note(verdict, incumbent, args.dry_run)
     print(f"{label} {head[:9]} {args.path} {shown}: {reason}{after}")
     return REVERT if verdict == "revert" else KEEP
 
