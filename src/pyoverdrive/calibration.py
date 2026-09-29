@@ -78,9 +78,8 @@ _ARGMAX_SHIPPED_FLOORS = {
 }
 
 
-def _machine_identity() -> dict:
-    """The same identity-bearing fields lab/dyno/fingerprint.py hashes, so
-    calibration files and committed Dyno evidence share fingerprints."""
+def _stack_fields() -> dict:
+    """The identity fields that cost nothing to read."""
     import numpy as np
 
     blas = None
@@ -89,18 +88,66 @@ def _machine_identity() -> dict:
         blas = cfg.get("Build Dependencies", {}).get("blas", {}).get("name")
     except Exception:
         pass
-    info = {
-        "cpu": platform.processor(),
-        "machine": platform.machine(),
-        "system": f"{platform.system()} {platform.release()}",
+    return {
         "logical_cores": os.cpu_count(),
         "python": sys.version.split()[0],
         "numpy": np.__version__,
         "blas": blas,
     }
+
+
+def _machine_identity() -> dict:
+    """The same identity-bearing fields lab/dyno/fingerprint.py hashes, so
+    calibration files and committed Dyno evidence share fingerprints.
+
+    Expensive: platform.processor()/release() run three WMI queries on
+    Windows (Python 3.12+) and fork `uname -p` elsewhere, 50-130 ms cold.
+    load() avoids it at import through _host_key()."""
+    info = {
+        "cpu": platform.processor(),
+        "machine": platform.machine(),
+        "system": f"{platform.system()} {platform.release()}",
+        **_stack_fields(),
+    }
     digest = hashlib.sha256(json.dumps(info, sort_keys=True).encode()).hexdigest()[:12]
     info["fingerprint"] = digest
     return info
+
+
+def _host_key(fingerprint: Any) -> str | None:
+    """A cheap proof that THIS host, on this stack, computed `fingerprint`.
+
+    save() stores it beside the fingerprint. It hashes the fingerprint with
+    syscall/environment stand-ins for the fields _machine_identity() pays
+    for (host name, CPU identifier, OS build or uname) plus the exact stack
+    fields, so a match means the full identity would come out the same. A
+    file copied from another host, an edited fingerprint, or a file written
+    before this key existed misses, and load() falls back to the full
+    fingerprint check. None when the stand-ins are missing (a stripped
+    Windows environment): then only the full check decides."""
+    if sys.platform == "win32":
+        env = os.environ
+        if not env.get("COMPUTERNAME") or not env.get("PROCESSOR_IDENTIFIER"):
+            return None
+        host: list = [
+            env["COMPUTERNAME"],
+            env["PROCESSOR_IDENTIFIER"],
+            env.get("PROCESSOR_ARCHITECTURE", ""),
+            env.get("PROCESSOR_ARCHITEW6432", ""),
+            list(sys.getwindowsversion()[:3]),
+        ]
+    else:
+        host = list(os.uname())
+    blob = json.dumps([fingerprint, host, sys.version, _stack_fields()], sort_keys=True)
+    return hashlib.sha256(blob.encode()).hexdigest()[:16]
+
+
+def _same_machine(machine: dict) -> bool:
+    stored = machine.get("fingerprint")
+    host_key = machine.get("host_key")
+    if isinstance(host_key, str) and host_key and host_key == _host_key(stored):
+        return True
+    return stored == _machine_identity()["fingerprint"]
 
 
 def calibration_path() -> Path:
@@ -131,7 +178,7 @@ def load(refresh: bool = False) -> dict:
     machine = raw.get("machine")
     if not isinstance(machine, dict):
         return _cache
-    if machine.get("fingerprint") != _machine_identity()["fingerprint"]:
+    if not _same_machine(machine):
         return _cache
     paths = raw.get("paths")
     if isinstance(paths, dict):
@@ -142,9 +189,11 @@ def load(refresh: bool = False) -> dict:
 def save(paths: dict, probes: dict | None = None) -> Path:
     p = calibration_path()
     p.parent.mkdir(parents=True, exist_ok=True)
+    machine = _machine_identity()
+    machine["host_key"] = _host_key(machine["fingerprint"])
     payload = {
         "version": _SCHEMA_VERSION,
-        "machine": _machine_identity(),
+        "machine": machine,
         "calibrated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "paths": paths,
         "probes": probes or {},

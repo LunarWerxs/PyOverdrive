@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `import pyoverdrive` no longer re-reads the CPU and OS identity (three
+  WMI queries on Windows, a `uname -p` fork elsewhere, 50-130 ms) to check
+  a calibration file this host wrote: `--calibrate` now stores a cheap host
+  key beside the fingerprint, and a file whose key does not match (another
+  host, an edited fingerprint, or a file from an older version) still gets
+  the full fingerprint check. Re-run `--calibrate` once to get the faster
+  import.
 - The README's speed table now matches the committed evidence for the machine
   it names (`benchmarks/results/MVP-BASELINE/9bbe7063c555.json`, i7-12700K,
   NumPy 2.5.2): 1592x, 1131x, 211x, 181x, 175x and 3.7x. The old figures
