@@ -77,9 +77,3 @@ jobs:
           fresh/bin/python -m pip install dist/*.whl
           cd /tmp
           $GITHUB_WORKSPACE/fresh/bin/python -m pyoverdrive --selfcheck
-      - name: Upload installable packages
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: pyoverdrive-dist
-          path: dist/*
-          if-no-files-found: error
