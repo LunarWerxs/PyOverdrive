@@ -2,14 +2,18 @@ schema: hydra-rsi/1
 # Callgrind counts of CPython are not bit-exact: two runs of one commit differ by about 0.01-0.05% on
 # these cells (11% on cells under 5M instructions, which is why none of those is declared). So each
 # metric is judged against a band measured from `repeat` runs, never as an exact count.
+# A Windows host measures them in `image` on its linux docker context (Hydra's Linux leg);
+# tools/rsi_linux.sh installs valgrind and the pinned numpy a bare container lacks.
 metrics:
   - id: ratchet.searchsorted_sortqueries.instructions
     kind: count
     better: lower
     unit: instructions
-    measure: "python tools/instcount.py --cell searchsorted_sortqueries --json"
+    measure: "sh tools/rsi_linux.sh --cell searchsorted_sortqueries --json"
     pick: 'json:$.patched'
     where: linux
+    image: localci/python-3.12-bookworm:23ed2964a003
+    cache: [/root/.cache/pip]
     gate: band
     repeat: 3
     tracks: null
@@ -17,9 +21,11 @@ metrics:
     kind: count
     better: lower
     unit: instructions
-    measure: "python tools/instcount.py --cell matmul_split_complex --json"
+    measure: "sh tools/rsi_linux.sh --cell matmul_split_complex --json"
     pick: 'json:$.patched'
     where: linux
+    image: localci/python-3.12-bookworm:23ed2964a003
+    cache: [/root/.cache/pip]
     gate: band
     repeat: 3
     tracks: null
