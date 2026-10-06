@@ -1,12 +1,25 @@
 schema: hydra-rsi/1
+# Callgrind counts of CPython are not bit-exact: two runs of one commit differ by about 0.01-0.05% on
+# these cells (11% on cells under 5M instructions, which is why none of those is declared). So each
+# metric is judged against a band measured from `repeat` runs, never as an exact count.
 metrics:
-  - id: ratchet.cell.instructions
+  - id: ratchet.searchsorted_sortqueries.instructions
     kind: count
     better: lower
     unit: instructions
-    measure: "python tools/instcount.py --cell <cell> --json"
+    measure: "python tools/instcount.py --cell searchsorted_sortqueries --json"
     pick: 'json:$.patched'
-    heavy: true
     where: linux
-    gate: exact
+    gate: band
+    repeat: 3
+    tracks: null
+  - id: ratchet.matmul_split_complex.instructions
+    kind: count
+    better: lower
+    unit: instructions
+    measure: "python tools/instcount.py --cell matmul_split_complex --json"
+    pick: 'json:$.patched'
+    where: linux
+    gate: band
+    repeat: 3
     tracks: null
