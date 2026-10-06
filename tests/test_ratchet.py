@@ -116,3 +116,21 @@ def test_refuses_to_reset_detached_or_primary_branches(branch):
 
 def test_allows_a_search_branch():
     assert ratchet.branch_refusal("search/unique-sort") is None
+
+
+@pytest.mark.parametrize("count", [None, 0, -5, "n/a", {"stock": None, "patched": 7},
+                                   {"stock": 0, "patched": 7}, {"stock": 9, "patched": 0}])
+def test_unmeasured_instructions_fall_back_to_wall_never_zero(count):
+    cells = [{"cell": "unique_sort", "ratio": 1.8, "single_threaded": True, "instructions": count}]
+    metric, notes = ratchet.judge_cells(cells)
+    assert metric == 1.8 and cells[0]["basis"] == "wall"
+    assert "NOT MEASURED" in notes[0]
+
+
+def test_single_threaded_cell_is_judged_on_its_instruction_count():
+    single = {"cell": "unique_sort", "ratio": 3.0, "single_threaded": True,
+              "instructions": {"stock": 900, "patched": 600}}
+    multi = {"cell": "pyrallel_add", "ratio": 2.0, "single_threaded": False, "instructions": None}
+    metric, notes = ratchet.judge_cells([single, multi])
+    assert metric == 1.5 and single["basis"] == "instructions" and multi["basis"] == "wall"
+    assert notes == []

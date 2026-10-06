@@ -1,0 +1,656 @@
+{
+ "schema": "pyoverdrive-instcount-baseline/1",
+ "tool": "callgrind (valgrind-3.19.0)",
+ "calls": 20,
+ "host": {
+  "os": "Debian bookworm container on a WSL2 5.10 kernel (perf instructions:u refused: no permission)",
+  "cpu": "12th Gen Intel(R) Core(TM) i7-12700K",
+  "python": "3.12.14",
+  "numpy": "2.5.3"
+ },
+ "pins": {
+  "threads": 1,
+  "PYTHONHASHSEED": 0
+ },
+ "note": "Counts are instructions per 20 calls of one side, startup differenced out. Two runs per cell. NOT exact: repeat counts agree to ~0.02% on cells over 100M instructions and 0.1-11% below 5M. null = cell has no dispatch on its input, NOT MEASURED.",
+ "cells": {
+  "apply_along_axis_reduce": {
+   "runs": [
+    {
+     "stock": 1722891972,
+     "patched": 15201901
+    },
+    {
+     "stock": 1715692348,
+     "patched": 15189641
+    }
+   ]
+  },
+  "argmax_blocked_transpose": null,
+  "cholesky_small_batch": {
+   "runs": [
+    {
+     "stock": 33096266,
+     "patched": 19578808
+    },
+    {
+     "stock": 33009508,
+     "patched": 19464250
+    }
+   ]
+  },
+  "det_small_batch": {
+   "runs": [
+    {
+     "stock": 19332945,
+     "patched": 9308645
+    },
+    {
+     "stock": 19247298,
+     "patched": 9222478
+    }
+   ]
+  },
+  "dot_int_blas": {
+   "runs": [
+    {
+     "stock": 169313245,
+     "patched": 19422341
+    },
+    {
+     "stock": 169357427,
+     "patched": 19421414
+    }
+   ]
+  },
+  "dot_mixed_view": {
+   "runs": [
+    {
+     "stock": 5087722,
+     "patched": 6034288
+    },
+    {
+     "stock": 5193388,
+     "patched": 6026890
+    }
+   ]
+  },
+  "eigvalsh_2x2_closed": {
+   "runs": [
+    {
+     "stock": 24035105,
+     "patched": 2954363
+    },
+    {
+     "stock": 24025201,
+     "patched": 2676143
+    }
+   ]
+  },
+  "eigvalsh_3x3_trig": {
+   "runs": [
+    {
+     "stock": 59449910,
+     "patched": 17044753
+    },
+    {
+     "stock": 59184167,
+     "patched": 17040841
+    }
+   ]
+  },
+  "einsum_optimize": {
+   "runs": [
+    {
+     "stock": 110008862,
+     "patched": 23861520
+    },
+    {
+     "stock": 109921373,
+     "patched": 23751468
+    }
+   ]
+  },
+  "einsum_optimize_chain": {
+   "runs": [
+    {
+     "stock": 291109716,
+     "patched": 8738653
+    },
+    {
+     "stock": 291082727,
+     "patched": 8730862
+    }
+   ]
+  },
+  "fftconvolve": {
+   "runs": [
+    {
+     "stock": 20993052,
+     "patched": 15732023
+    },
+    {
+     "stock": 20845803,
+     "patched": 15478665
+    }
+   ]
+  },
+  "fftcorrelate": {
+   "runs": [
+    {
+     "stock": 161434989,
+     "patched": 16852509
+    },
+    {
+     "stock": 161322054,
+     "patched": 16861895
+    }
+   ]
+  },
+  "hist2d_uniform": {
+   "runs": [
+    {
+     "stock": 134757736,
+     "patched": 88509648
+    },
+    {
+     "stock": 134836902,
+     "patched": 88452643
+    }
+   ]
+  },
+  "inner_tensordot": {
+   "runs": [
+    {
+     "stock": 5267193,
+     "patched": 3432511
+    },
+    {
+     "stock": 5309944,
+     "patched": 3288855
+    }
+   ]
+  },
+  "interp_uniform_grid": {
+   "runs": [
+    {
+     "stock": 57373730,
+     "patched": 36680896
+    },
+    {
+     "stock": 57188486,
+     "patched": 36422129
+    }
+   ]
+  },
+  "intersect_sorted": {
+   "runs": [
+    {
+     "stock": 147573673,
+     "patched": 26943977
+    },
+    {
+     "stock": 147353343,
+     "patched": 26937063
+    }
+   ]
+  },
+  "inv_small_batch": {
+   "runs": [
+    {
+     "stock": 41926075,
+     "patched": 15016519
+    },
+    {
+     "stock": 42067419,
+     "patched": 15111140
+    }
+   ]
+  },
+  "isclose_fused": {
+   "runs": [
+    {
+     "stock": 3270799,
+     "patched": 2151285
+    },
+    {
+     "stock": 3273320,
+     "patched": 2366774
+    }
+   ]
+  },
+  "isin_object_hash": {
+   "runs": [
+    {
+     "stock": 29417162,
+     "patched": 14368865
+    },
+    {
+     "stock": 29441463,
+     "patched": 14054665
+    }
+   ]
+  },
+  "isin_string_hash": {
+   "runs": [
+    {
+     "stock": 295340243,
+     "patched": 81699154
+    },
+    {
+     "stock": 294807397,
+     "patched": 81691908
+    }
+   ]
+  },
+  "matmul_int_blas": {
+   "runs": [
+    {
+     "stock": 184891496,
+     "patched": 19397870
+    },
+    {
+     "stock": 185011187,
+     "patched": 19348947
+    }
+   ]
+  },
+  "matmul_split_complex": {
+   "runs": [
+    {
+     "stock": 1892582561,
+     "patched": 1043179804
+    },
+    {
+     "stock": 1892603346,
+     "patched": 1043148326
+    }
+   ]
+  },
+  "mean_tiny_trailing": {
+   "runs": [
+    {
+     "stock": 52606943,
+     "patched": 5629612
+    },
+    {
+     "stock": 52589521,
+     "patched": 5619008
+    }
+   ]
+  },
+  "median_partition": {
+   "runs": [
+    {
+     "stock": 2863262,
+     "patched": 1741589
+    },
+    {
+     "stock": 2752836,
+     "patched": 1724684
+    }
+   ]
+  },
+  "nan_to_num_where": {
+   "runs": [
+    {
+     "stock": 12409120,
+     "patched": 7749658
+    },
+    {
+     "stock": 12339855,
+     "patched": 7708802
+    }
+   ]
+  },
+  "nanargmax_scan": {
+   "runs": [
+    {
+     "stock": 3184441,
+     "patched": 1407411
+    },
+    {
+     "stock": 3165168,
+     "patched": 1405864
+    }
+   ]
+  },
+  "nanargmin_scan": {
+   "runs": [
+    {
+     "stock": 2980112,
+     "patched": 1616491
+    },
+    {
+     "stock": 3152511,
+     "patched": 1625486
+    }
+   ]
+  },
+  "nanmean_scan": {
+   "runs": [
+    {
+     "stock": 4430286,
+     "patched": 1956741
+    },
+    {
+     "stock": 4416337,
+     "patched": 2063350
+    }
+   ]
+  },
+  "nanmedian_scan": {
+   "runs": [
+    {
+     "stock": 1302734156,
+     "patched": 212587333
+    },
+    {
+     "stock": 1302719570,
+     "patched": 212567232
+    }
+   ]
+  },
+  "nanpercentile_masked": {
+   "runs": [
+    {
+     "stock": 618439912,
+     "patched": 11216730
+    },
+    {
+     "stock": 618650912,
+     "patched": 11103127
+    }
+   ]
+  },
+  "nanquantile_masked": {
+   "runs": [
+    {
+     "stock": 618363031,
+     "patched": 10960474
+    },
+    {
+     "stock": 618480361,
+     "patched": 10871280
+    }
+   ]
+  },
+  "nanstd_scan": {
+   "runs": [
+    {
+     "stock": 12623198,
+     "patched": 4750970
+    },
+    {
+     "stock": 12491049,
+     "patched": 4808974
+    }
+   ]
+  },
+  "nansum_scan": {
+   "runs": [
+    {
+     "stock": 6949239,
+     "patched": 2853868
+    },
+    {
+     "stock": 6908485,
+     "patched": 2737795
+    }
+   ]
+  },
+  "nanvar_scan": {
+   "runs": [
+    {
+     "stock": 12501414,
+     "patched": 4605694
+    },
+    {
+     "stock": 12499436,
+     "patched": 4676049
+    }
+   ]
+  },
+  "norm2_small_batch": {
+   "runs": [
+    {
+     "stock": 640576340,
+     "patched": 36165915
+    },
+    {
+     "stock": 640562390,
+     "patched": 36071959
+    }
+   ]
+  },
+  "pad_1d_constant": {
+   "runs": [
+    {
+     "stock": 2443927,
+     "patched": 1170963
+    },
+    {
+     "stock": 2421082,
+     "patched": 1102613
+    }
+   ]
+  },
+  "percentile_dense": {
+   "runs": [
+    {
+     "stock": 185719973,
+     "patched": 58190060
+    },
+    {
+     "stock": 185555380,
+     "patched": 58380324
+    }
+   ]
+  },
+  "pinv_small_batch": {
+   "runs": [
+    {
+     "stock": 1028342715,
+     "patched": 52147055
+    },
+    {
+     "stock": 1028146805,
+     "patched": 52078008
+    }
+   ]
+  },
+  "qr_small_batch": {
+   "runs": [
+    {
+     "stock": 162864576,
+     "patched": 39442881
+    },
+    {
+     "stock": 162952527,
+     "patched": 39196223
+    }
+   ]
+  },
+  "quantile_dense_sort": {
+   "runs": [
+    {
+     "stock": 188758598,
+     "patched": 57718194
+    },
+    {
+     "stock": 188694348,
+     "patched": 57670589
+    }
+   ]
+  },
+  "relayout_blocked": null,
+  "roll_concat_1d": {
+   "runs": [
+    {
+     "stock": 1483780,
+     "patched": 736824
+    },
+    {
+     "stock": 1318396,
+     "patched": 737932
+    }
+   ]
+  },
+  "searchsorted_extreme_key": {
+   "runs": [
+    {
+     "stock": 3578585,
+     "patched": 834044
+    },
+    {
+     "stock": 3524891,
+     "patched": 876488
+    }
+   ]
+  },
+  "searchsorted_sortqueries": {
+   "runs": [
+    {
+     "stock": 308813897,
+     "patched": 533625857
+    },
+    {
+     "stock": 308752243,
+     "patched": 533337715
+    }
+   ]
+  },
+  "slogdet_small_batch": {
+   "runs": [
+    {
+     "stock": 19220061,
+     "patched": 10749344
+    },
+    {
+     "stock": 19217674,
+     "patched": 10771127
+    }
+   ]
+  },
+  "solve_small_batch": {
+   "runs": [
+    {
+     "stock": 97200199,
+     "patched": 29947202
+    },
+    {
+     "stock": 97229905,
+     "patched": 30063602
+    }
+   ]
+  },
+  "sort_char_view": {
+   "runs": [
+    {
+     "stock": 22849992,
+     "patched": 2205382
+    },
+    {
+     "stock": 22912479,
+     "patched": 2265324
+    }
+   ]
+  },
+  "sum_tiny_trailing": {
+   "runs": [
+    {
+     "stock": 58748568,
+     "patched": 5291370
+    },
+    {
+     "stock": 58806958,
+     "patched": 5253517
+    }
+   ]
+  },
+  "svdvals_small_batch": {
+   "runs": [
+    {
+     "stock": 630040721,
+     "patched": 43228177
+    },
+    {
+     "stock": 630101112,
+     "patched": 43109899
+    }
+   ]
+  },
+  "take_index_assign": {
+   "runs": [
+    {
+     "stock": 13212017,
+     "patched": 10915609
+    },
+    {
+     "stock": 13179751,
+     "patched": 10920988
+    }
+   ]
+  },
+  "unique_axis0_column": {
+   "runs": [
+    {
+     "stock": 180599438,
+     "patched": 4665312
+    },
+    {
+     "stock": 180613033,
+     "patched": 4865676
+    }
+   ]
+  },
+  "unique_char_view": {
+   "runs": [
+    {
+     "stock": 28084611,
+     "patched": 5154079
+    },
+    {
+     "stock": 28088878,
+     "patched": 5253589
+    }
+   ]
+  },
+  "unique_rows_lexsort": {
+   "runs": [
+    {
+     "stock": 720373705,
+     "patched": 106907911
+    },
+    {
+     "stock": 720459019,
+     "patched": 106855966
+    }
+   ]
+  },
+  "unique_sort": {
+   "runs": [
+    {
+     "stock": 647625590,
+     "patched": 59844040
+    },
+    {
+     "stock": 647588225,
+     "patched": 59809742
+    }
+   ]
+  },
+  "unique_values_sort": {
+   "runs": [
+    {
+     "stock": 608786070,
+     "patched": 59845328
+    },
+    {
+     "stock": 608769760,
+     "patched": 59810322
+    }
+   ]
+  }
+ }
+}

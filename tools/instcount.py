@@ -2,9 +2,14 @@
 
 WHY: wall-clock ratios on a shared box move with foreign load; for a
 SINGLE-THREADED cell the number of user-space instructions retired is
-exact for a fixed amount of work, so tools/ratchet.py judges those cells
-on it. Windows has no such counter here: the field is None (NOT MEASURED),
-never 0, and the caller falls back to the wall ratio.
+far steadier than wall time (no foreign-load dependence), but NOT
+bit-exact: measured 2026-10-05 under callgrind with a pinned hash seed,
+repeat counts agree to ~0.02% on cells over 100M instructions and
+0.1-11% on cells under 5M (a few tens of thousands of instructions of
+per-process wobble, so raise --calls for a small cell). perf, when it can
+open the event, is the same kind of count. tools/ratchet.py judges
+single-threaded cells on it. Windows has no such counter here: the field
+is None (NOT MEASURED), never 0, and the caller falls back to the wall ratio.
 
 Counter, in order: `perf stat -e instructions:u` when perf may open the
 event (checked by running it on `true`; containers often forbid it), else
@@ -36,8 +41,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+# PYTHONHASHSEED matters: with a random seed the startup count of two
+# identical processes differs by hundreds of thousands of instructions
+# (measured 2026-10-05 under callgrind), which swamps a small cell's signal.
 _PIN = {"PYOVERDRIVE_THREADS": "1", "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1",
-        "MKL_NUM_THREADS": "1"}
+        "MKL_NUM_THREADS": "1", "PYTHONHASHSEED": "0"}
 
 
 def counter() -> str | None:
