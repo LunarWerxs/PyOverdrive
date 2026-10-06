@@ -164,7 +164,7 @@ def _haystack_sorted(a: np.ndarray) -> bool:
     _disordered's treatment of NaN queries, and it only ever costs a
     dispatch.
     """
-    return a.size < 2 or bool(np.all(a[1:] >= a[:-1]))
+    return a.size < 2 or int(np.count_nonzero(a[1:] >= a[:-1])) == a.size - 1
 
 
 def _operands(args: tuple, kwargs: dict):

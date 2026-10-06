@@ -1,0 +1,24 @@
+{
+ "closed": null,
+ "def_hash": "b50485036d5eee7d",
+ "id": "20261006-ratchet-searchsorted-sortqueries-instruc-7931",
+ "idea": "haystack-sorted guard counts bool comparisons with count_nonzero instead of np.all (fewer instructions in the guard, same answer incl. NaN)",
+ "lane": "normal",
+ "metric": "ratchet.searchsorted_sortqueries.instructions",
+ "opened": {
+  "at": "2026-10-06T11:13:02+00:00",
+  "by": "blogi",
+  "commit": "25fef26fe57fdf8d67e5d659b23dc9dc1e4e5ac4",
+  "machine": "MPC-HELL"
+ },
+ "pass_line": null,
+ "predict": {
+  "expect": 533000000.0,
+  "hi": 536000000.0,
+  "lo": 530000000.0,
+  "p_keep": 0.3
+ },
+ "probe_minutes": null,
+ "project": "pyoverdrive",
+ "schema": "hydra-rsi-trial/1"
+}
