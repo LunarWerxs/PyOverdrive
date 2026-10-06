@@ -27,6 +27,16 @@ pyoverdrive/diagnostics.py to have any cell at all.
 Each cell is judged by its final reading, as the sweep judges it: a
 confirmation run or a slow-core retry overrules the reading before it.
 
+SINGLE-THREADED cells (every path but parallel_*) are judged on exact
+user-space instruction counts (stock / patched, tools/instcount.py: perf
+stat -e instructions:u, else valgrind callgrind) when the host can count;
+multi-threaded cells keep the wall ratio and its guards. Where it cannot
+(Windows) the field is null, NOT MEASURED, never zero, and the cell falls
+back to its wall ratio with a line saying so. `--proof-row CELL` records a
+stock-vs-patched row (wall ratio next to instruction ratio, and whether
+they agree) in the path's ledger. Linux: `python tools/ratchet.py
+--proof-row <cell>`.
+
 Rules, in order:
 - gate fails, stage exceeds 2x --budget, or no cell measured: revert
 - any cell of the path errored or crashed (a wrong result fails the
@@ -83,6 +93,9 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import instcount  # noqa: E402  (sibling tool; user-space instruction counts, Linux only)
 
 ROOT = Path(__file__).resolve().parents[1]
 PROTECTED_BRANCHES = {"main", "master"}
@@ -144,6 +157,60 @@ def metric_from_evidence(evidence: dict, path: str) -> tuple[float | None, list[
     if not judged:
         return None, []
     return min(c["ratio"] for c in judged), judged
+
+
+def instruction_ratio(inst: dict | None) -> float | None:
+    """stock / patched user-space instructions, or None when NOT MEASURED.
+
+    WHY: None and 0 are different facts. A missing, null, zero or negative
+    count is never a measurement, so the cell stays on its wall judgement.
+    """
+    if not isinstance(inst, dict):
+        return None
+    stock, patched = inst.get("stock"), inst.get("patched")
+    for count in (stock, patched):
+        if isinstance(count, bool) or not isinstance(count, int) or count <= 0:
+            return None
+    return stock / patched
+
+
+def judge_cells(cells: list[dict]) -> tuple[float | None, list[str]]:
+    """Metric and notes. A single-threaded cell with a count is judged on the
+    count (exact); every other cell keeps its wall ratio and its guards.
+
+    Each cell dict gets "basis" ("instructions" | "wall") and "judged_ratio".
+    """
+    notes = []
+    for cell in cells:
+        ratio = instruction_ratio(cell.get("instructions")) if cell.get("single_threaded") else None
+        if ratio is not None:
+            cell["basis"], cell["judged_ratio"] = "instructions", ratio
+            continue
+        cell["basis"], cell["judged_ratio"] = "wall", cell["ratio"]
+        if cell.get("single_threaded"):
+            notes.append(f"{cell['cell']}: instructions NOT MEASURED, judged on wall time")
+    if not cells:
+        return None, notes
+    return min(c["judged_ratio"] for c in cells), notes
+
+
+def attach_instructions(cells: list[dict], evidence: dict, measure=None) -> None:
+    """Mark each cell single- or multi-threaded and record its instruction counts.
+
+    `measure(cell) -> {"tool","stock","patched",...}` defaults to
+    tools/instcount.py; a record's own "instructions" field wins when present.
+    """
+    measure = measure or instcount.measure_cell
+    finals = {r.get("cell"): r for r in evidence.get("cells", [])}
+    for cell in cells:
+        record = finals.get(cell["cell"], {})
+        chosen = (record.get("dispatch") or {}).get("chosen") or cell_path(cell["cell"])
+        cell["single_threaded"] = instcount.is_single_threaded(chosen)
+        if not cell["single_threaded"]:
+            cell["instructions"] = None
+            continue
+        inst = record.get("instructions") or measure(cell["cell"])
+        cell["instructions"] = inst if instruction_ratio(inst) is not None else None
 
 
 def quiet_refusal(evidence: dict) -> str | None:
@@ -253,7 +320,10 @@ def _net_lines(incumbent: str) -> int:
 
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(prog="tools/ratchet.py", description=__doc__.split("\n\n")[0])
-    ap.add_argument("--path", required=True, help="Gearbox fast path name being searched")
+    ap.add_argument("--path", help="Gearbox fast path name being searched")
+    ap.add_argument("--proof-row", metavar="CELL",
+                    help="record a stock-vs-patched proof row (wall vs instruction ratio) for "
+                         "one cell in the path's ledger, then exit; needs no clean tree")
     ap.add_argument("--test", action="append", default=[],
                     help="gate test file (repeatable); default "
                          "compatibility/differential/test_<path>_differential.py, "
@@ -273,6 +343,8 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
                     help="measure the current tip and record it as the incumbent")
     ap.add_argument("--dry-run", action="store_true", help="judge only: no reset, no ledger entry")
     args = ap.parse_args(argv)
+    if not args.path and not args.proof_row:
+        ap.error("--path is required (or --proof-row CELL)")
     if args.budget <= 0 or args.min_gain < 0 or not 0 <= args.hold < 1:
         ap.error("--budget must be positive, --min-gain non-negative, --hold in [0, 1)")
     return args
@@ -333,11 +405,62 @@ def _sweep_verdict(args: argparse.Namespace, entry: dict, evidence: dict, code: 
         return "revert", "sweep exceeded 2x budget"
     if failure:
         return "revert", failure
+    attach_instructions(entry["cells"], evidence)
+    entry["wall_metric"] = entry["metric"]
+    entry["metric"], notes = judge_cells(entry["cells"])
+    entry["notes"] = notes
+    for note in notes:
+        print(note)
     if args.init:
         return ("init", "incumbent recorded") if entry["metric"] is not None \
             else ("revert", "no cell measured")
     return decide(entry["metric"], incumbent_metric, entry["net_lines"],
                   min_gain=args.min_gain, hold=args.hold)
+
+
+def proof_row(cell: str, *, tolerance: float = 0.10) -> dict:
+    """A before/after pair for one cell: stock is "before", patched is "after".
+
+    Records wall and instruction ratios side by side and whether the count
+    tracks wall time (the two ratios agree within `tolerance`, relative).
+    Without a counter the instruction fields are None and `tracks` is None.
+    """
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        evidence_path = Path(tmp) / "cell.json"
+        subprocess.run([sys.executable, "tools/verify_no_pessimization.py", "--one", cell,
+                        "--evidence-cell", str(evidence_path)], cwd=ROOT,
+                       capture_output=True, text=True)
+        try:
+            record = json.loads(evidence_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            record = {}
+    inst = instcount.measure_cell(cell)
+    wall_ratio = record.get("ratio")
+    count_ratio = instruction_ratio(inst)
+    tracks = None
+    if count_ratio is not None and isinstance(wall_ratio, (int, float)) and wall_ratio > 0:
+        tracks = abs(count_ratio / wall_ratio - 1.0) <= tolerance
+    return {"verdict": "proof", "cell": cell, "path": cell_path(cell),
+            "at": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
+            "before": "stock", "after": "patched",
+            "wall_seconds": {"before": record.get("stock_median_seconds"),
+                             "after": record.get("patched_median_seconds")},
+            "wall_ratio": wall_ratio, "instructions": inst,
+            "instruction_ratio": count_ratio, "tolerance": tolerance, "tracks": tracks}
+
+
+def _record_proof(cell: str) -> int:
+    row = proof_row(cell)
+    ledger = _ledger_dir() / f"{row['path']}.jsonl"
+    with open(ledger, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(row) + "\n")
+    if row["instruction_ratio"] is None:
+        print(f"PROOF {cell}: instructions NOT MEASURED on this host; wall ratio {row['wall_ratio']}")
+        return REFUSED
+    print(f"PROOF {cell}: wall {row['wall_ratio']}x, instructions "
+          f"{row['instruction_ratio']:.4f}x, tracks={row['tracks']}; recorded in {ledger}")
+    return KEEP if row["tracks"] else REVERT
 
 
 def _judge(args: argparse.Namespace, tests: list[str], entry: dict, prefix: Path,
@@ -373,6 +496,8 @@ def _revert_note(verdict: str, incumbent: str, dry_run: bool) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+    if args.proof_row:
+        return _record_proof(args.proof_row)
     tests, refusal = _preflight(args)
     if refusal:
         print(f"REFUSED: {refusal}")

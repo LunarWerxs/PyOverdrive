@@ -1,0 +1,12 @@
+schema: hydra-rsi/1
+metrics:
+  - id: ratchet.cell.instructions
+    kind: count
+    better: lower
+    unit: instructions
+    measure: "python tools/instcount.py --cell <cell> --json"
+    pick: 'json:$.patched'
+    heavy: true
+    where: linux
+    gate: exact
+    tracks: null
