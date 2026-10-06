@@ -1,7 +1,8 @@
 #!/bin/sh
 # The RSI measure of one cell's instruction count on any Linux (.rsi/rsi.yaml): installs only what a bare
 # container lacks, then hands over to tools/instcount.py. numpy is pinned so a reading taken today and
-# one taken next month count the same library; a host that already has numpy and valgrind installs nothing.
+# one taken next month count the same library (any other numpy is replaced: it runs in the throwaway Linux-leg
+# container, `image:` in the manifest); a host that already has numpy 2.5.3 and valgrind installs nothing.
 set -e
 command -v valgrind >/dev/null 2>&1 || {
   apt-get -qq update && apt-get -qq install -y --no-install-recommends valgrind
