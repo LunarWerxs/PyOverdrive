@@ -210,7 +210,7 @@ def _applicable(args: tuple, kwargs: dict) -> bool:
 
 def _run(a, v, side="left"):
     perm = np.argsort(v)
-    idx = GEARBOX.stock_fn("numpy.searchsorted")(a, v[perm], side=side)
+    idx = GEARBOX.stock_fn("numpy.searchsorted")(a, v.take(perm), side=side)
     out = np.empty_like(idx)
     out[perm] = idx
     return out

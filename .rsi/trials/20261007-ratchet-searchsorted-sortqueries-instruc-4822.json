@@ -1,0 +1,24 @@
+{
+ "closed": null,
+ "def_hash": "b50485036d5eee7d",
+ "id": "20261007-ratchet-searchsorted-sortqueries-instruc-4822",
+ "idea": "_run gathers v[perm] with v.take(perm) (skips fancy-index dispatch; same values)",
+ "lane": "normal",
+ "metric": "ratchet.searchsorted_sortqueries.instructions",
+ "opened": {
+  "at": "2026-10-07T10:33:59+00:00",
+  "by": "blogi",
+  "commit": "2140487c5bb35e480e60b28015bd134fb17fe10b",
+  "machine": "MPC-HELL"
+ },
+ "pass_line": null,
+ "predict": {
+  "expect": 533000000.0,
+  "hi": 534000000.0,
+  "lo": 531000000.0,
+  "p_keep": 0.3
+ },
+ "probe_minutes": null,
+ "project": "pyoverdrive",
+ "schema": "hydra-rsi-trial/1"
+}
