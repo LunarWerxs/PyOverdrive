@@ -104,7 +104,7 @@ NumPy or NumFOCUS.
 4. **No unverified claims.** Issue comments, papers, and benchmarks are leads
    until independently reproduced with Dyno on fingerprinted hardware.
 
-The full implementation brief is [docs/BUILD_SPEC.md](docs/BUILD_SPEC.md).
+The full implementation brief is kept in the maintainers' private project docs.
 
 ## Repository layout
 
@@ -116,7 +116,7 @@ lab/           ProsPyctor Performance Lab (research tooling, not shipped)
 src/pyoverdrive/  The shipped runtime (Gearbox, fast paths, PyRallel, SIMD)
 benchmarks/    Reproducers (historical/), workloads, and committed results
 compatibility/ Differential + fuzz testing against stock NumPy
-docs/          Architecture, decisions (ADRs), research reports
+docs/          Tool comparison, 2026-09-19 evidence report, issue-sweep shortlists
 ```
 
 ## Install, verify, roll back
@@ -204,7 +204,7 @@ narrowly on purpose. They were re-derived on 2026-08-24 on the Intel box -
 the only reliably idle machine here, and threading numbers taken under load
 are worthless - after the previous ones turned out to rest on a per-process
 P-core/E-core coin flip in the single-threaded baseline
-(`docs/research/hybrid-cpu-baseline-coin-flip.md`); 15 of 16 rows moved and
+(explained under "Per-machine calibration" below); 15 of 16 rows moved and
 `np.sqrt` left the threaded family altogether.
 
 One machine is not enough for numbers this hardware-dependent, and the
@@ -306,7 +306,7 @@ simply stay off. Both committed outcomes exist as evidence: the Intel
 box enables the argmax path, the Zen 4 box declines it (0.65x/0.75x at
 the probe cells), and both are correct.
 
-`pyrallel_<op>` is the Phase 4 PyRallel prototype (`docs/decisions/ADR-0002`):
+`pyrallel_<op>` is the Phase 4 PyRallel prototype:
 one persistent thread pool, a byte-keyed thread schedule, the caller's
 `np.errstate` mirrored into every chunk, `PYOVERDRIVE_THREADS` as the cap and
 `=1` as the whole-core kill switch. Its thresholds were re-derived from
@@ -318,7 +318,7 @@ so the BASELINE of a threading speedup is a per-process coin flip - the same
 and 497 us in the other 10. The threaded candidate spans cores and averages
 over the split, so the flip inflates every ratio by up to 1.44x and never
 deflates one. `np.sqrt` left the family altogether over it. Details and the
-measurements in `docs/research/hybrid-cpu-baseline-coin-flip.md`.
+measurements: `tools/probe_baseline_stability.py` (the fresh-process baseline probe), the METHOD note in `tools/calibrate_dispatch.py`, and `benchmarks/results/PYRALLEL-DISPATCH-CAL/`.
 
 Honest numbers from the same runs: float64/float32/int16/int8 unique show no
 win (int8 would LOSE 7x, so the predicate excludes them); tiny patched calls
@@ -330,7 +330,7 @@ size floors exist. `np.isin` stays on stock: the searchsorted approach lost
 to NumPy's table method at every size. Rejected as stale after measurement:
 the classic `ufunc.at` slowness, fixed upstream in 2023 (OPP-000003).
 
-Full evidence, including losses: `docs/research/opportunities/` and
+Full evidence, including losses: `lab/corpus/` (opportunity records) and
 `benchmarks/results/`. Recalibrate the threaded ufuncs on new hardware with
 `tools/calibrate_dispatch.py`, which measures end-to-end through the patched
 name, one cell per process, and refuses to trust a process that drew a slow

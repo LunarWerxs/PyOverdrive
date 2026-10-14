@@ -51,7 +51,7 @@ runs each cell in a FRESH SUBPROCESS and re-draws until it lands on a fast
 core, and it requires two agreeing readings before removing anything.
 
 So: DO NOT ADD A THREADED CANDIDATE TO AN IN-PROCESS PROBE. Model it on
-the pyrallel gate instead. See docs/research/hybrid-cpu-baseline-coin-flip.md.
+the pyrallel gate instead. See the hybrid-cpu-baseline research note (private project docs).
 """
 
 from __future__ import annotations

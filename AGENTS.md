@@ -1,6 +1,6 @@
 # PyOverdrive: agent operating instructions
 
-Read `docs/BUILD_SPEC.md` first. It is the authoritative brief. This file is the
+Read the PyOverdrive build spec (private project docs) first. It is the authoritative brief. This file is the
 short operational digest.
 
 ## What this project is
@@ -54,7 +54,7 @@ Two systems in one monorepo:
   `lab/cli/calibrate_pyrallel.py` prints into
   `src/pyoverdrive/fastpaths/parallel_ufunc.py` by hand.
 - Opportunity records live in `lab/corpus/` (YAML, schema in
-  `lab/corpus/SCHEMA.md`) with reports in `docs/research/opportunities/`.
+  the corpus-schema note, private project docs); per-opportunity reports are in the private project docs too.
 - Reproducers live in `benchmarks/historical/opp_XXXXXX_<slug>.py` and use the
   Dyno harness (`lab/dyno`). Results JSON goes to
   `benchmarks/results/OPP-XXXXXX/<fingerprint>.json` and IS committed.

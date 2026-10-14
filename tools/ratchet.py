@@ -62,7 +62,7 @@ Safety: refuses on a detached HEAD, on main/master, and on a dirty tree
 
 A kept verdict is a search result, not shipping evidence: a path still
 needs its Dyno benchmark, provenance record and the full
-verify_no_pessimization sweep (docs/BUILD_SPEC.md section 10.2) before it
+verify_no_pessimization sweep (build spec section 10.2, private project docs) before it
 is listed as shipped. Run on a quiet machine; --require-quiet makes a
 contended measurement (before or after the run) inconclusive instead of a
 verdict.

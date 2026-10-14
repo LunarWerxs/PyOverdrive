@@ -231,7 +231,7 @@ the reference machines include:
   as a red does. The second sweep moved no floor. `np.sqrt` left the
   threaded family entirely - it is memory-bandwidth bound and reaches 1.3x
   at no measured size, having shipped at 1.05x at its own advertised floor.
-  Write-up: `docs/research/hybrid-cpu-baseline-coin-flip.md`.
+  Write-up: the hybrid-CPU baseline coin-flip research note (private project docs).
 - The threaded BINARY family (`np.add` and friends) came from the same
   battery and was corrected the same way, with one extra rule: its wins are
   bandwidth, they cross the 1.3x bar only between 1e7 and 3e7 elements, and
@@ -299,7 +299,7 @@ the reference machines include:
   box, 33 aspect cells dispatch and none is below 1.0x; the refused cells
   were spot-checked to be genuine predicate refusals (valid shapes, the
   gate declining), including the long-contraction corner np.inner used to
-  lose in (docs/research/batch15-notes.md).
+  lose in.
 - Two more audit findings were REFUTED by measuring them, which is the point
   of measuring: `np.vectorize` needs no floor (it wins 3.1x even at size 1,
   because stock is slow at every size), and `intersect1d`'s 1.19x at its
@@ -327,5 +327,4 @@ the reference machines include:
   hit independently while getting the Linux gate green - np.linalg.pinv
   never returns for a matrix 3x3 or larger carrying an infinity on the
   diagonal - and turned out to be numpy/numpy#7461, open upstream since
-  2016; it is narrowed here to compute_uv=True on Linux only
-  (docs/research/upstream-pinv-inf-hang.md).
+  2016; it is narrowed here to compute_uv=True on Linux only.

@@ -21,7 +21,7 @@ This reproducer measures:
     timed call.
   - candidate "ucast_isin" (all other cases): the same sorting-path route
     with the U width computed from the data inside the timed call
-    (np.strings.str_len(...).max()), as OPP-000023.md requires ("the
+    (np.strings.str_len(...).max()), as the OPP-000023 report (private project docs) requires ("the
     U-cast width is computed from the data rather than assumed"), so the
     measured speedup pays for both the length scan and the casts.
   - candidate "hashset_membership": the reporter's second route, a
@@ -47,7 +47,7 @@ Regime and shrinks: the claim point (n=30000, cardinality 3, self-isin) is
 reproduced EXACTLY, but at samples=5 with warmup=1 because its baseline
 runs ~3s per call on the reporter's laptop (7 baseline invocations, about
 20s, is the bulk of this battery). The record's suggested wider sweep
-(element counts to 1e6, per OPP-000023.md item 2) is NOT run at full size:
+(element counts to 1e6, per item 2 of the OPP-000023 report) is NOT run at full size:
 the O(n*m) fallback makes a 1e6 self-isin take on the order of hours, so
 the cardinality sweep (3, 100, n distinct) runs at n=3000 where the
 baseline is ~30ms, the disjoint small-test-set case (the common real-world

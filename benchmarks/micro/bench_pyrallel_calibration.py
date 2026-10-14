@@ -14,7 +14,7 @@ and never the numerator - up to 1.44x, always flattering the candidate.
 
 Thresholds derived from this file were wrong in 15 of 16 rows, and one op
 (sqrt) was dispatching at 1.05x against a promised 1.3x. See
-docs/research/hybrid-cpu-baseline-coin-flip.md, and note that re-running it on
+the hybrid-cpu-baseline research note (private project docs), and note that re-running it on
 an idle machine does NOT fix this: it is reproducible within a process and
 only visible across processes.
 

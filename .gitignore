@@ -31,7 +31,6 @@ lab/corpus/index.sqlite
 # ⛔ PUBLIC REPO: the to-do list is not published (owner directive, 2026-08-29).
 # These notes are the most candid writing in the repo - what is broken, what is half-built, what is
 # waiting on a person - and Odin's Loki files them here automatically from chat history. The
-# folder's own README stays tracked (it is already tracked, and it states the convention); only the
-# items are ignored. Managed by public_todo_guard.py in the Odin repo.
+# whole folder is ignored; its convention note lives in the private project docs. Managed by
+# public_guard.py in Project Hydra.
 /docs/todo/*
-!/docs/todo/README.md

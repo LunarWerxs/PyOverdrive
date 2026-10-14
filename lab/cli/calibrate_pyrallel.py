@@ -7,7 +7,7 @@ on the reference box, measured over 25 processes). A threaded candidate
 averages over that split, so every ratio in the input is inflated by up to
 1.44x. Thresholds derived here were wrong in 15 of 16 rows. Kept because the
 binary family still reads it and because the scaling question it answers is
-a real one; see docs/research/hybrid-cpu-baseline-coin-flip.md.
+a real one; see the hybrid-cpu-baseline research note (private project docs).
 
 Reads benchmarks/results/PYRALLEL-CAL/<fingerprint>.json (default: this
 machine's fingerprint) and prints, for each (op, dtype), the smallest

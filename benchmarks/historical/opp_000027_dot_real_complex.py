@@ -33,7 +33,7 @@ path, so the full battery is nowhere near the ~90s budget):
     thread measured as roughly as fast as all-complex, as its own case
     with the same upcast route applied to the cheap operand (the vector).
     The record's route sketch only covers the real-left slow direction,
-    and OPP-000027.md asks that both directions be measured before the
+    and the OPP-000027 report (private project docs) asks that both directions be measured before the
     predicate is designed; if this direction shows ~1x, the predicate
     needs only real-left.
 
@@ -52,7 +52,7 @@ What is NOT measured, and why:
     candidates anyway: view_as_real_gemv is ~2x the real-real GEMV work,
     and upcast_then_complex_gemv is cast + the complex-complex GEMV.
   - The size ladder, GEMM (matrix-matrix) shapes, float32/complex64
-    pairings, and the BLAS-vs-fallback profiling that OPP-000027.md
+    pairings, and the BLAS-vs-fallback profiling that the OPP-000027 report's
     steps 2-3 call for: the corpus record's input_regime names exactly
     float64/complex128 at (10000, 1000) x (1000,), so the claim is
     re-established there; the wider sweep belongs to fast-path design,
@@ -161,7 +161,7 @@ suite.measure(
 
 # The reverse direction, which the thread measured as fast (~ all-complex
 # speed): measured so current numpy confirms the asymmetry, per
-# OPP-000027.md's instruction to sweep both directions before designing
+# the OPP-000027 report's instruction to sweep both directions before designing
 # the predicate.
 suite.measure(
     case=f"complex_dot_real_{N}x{M}",

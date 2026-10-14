@@ -25,7 +25,7 @@ a fast core.
     .venv/Scripts/python tools/probe_searchsorted_haystack.py
 
 VERDICT (2026-08-25, idle Intel box, fp 9bbe7063c555): THE HAYSTACK, and it
-is not close. See docs/research/batch16-notes.md.
+is not close. See the batch-16 research notes (private project docs).
 """
 
 from __future__ import annotations

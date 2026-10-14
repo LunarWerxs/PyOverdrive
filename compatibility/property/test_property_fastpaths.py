@@ -1166,7 +1166,7 @@ def test_svd_small_batch(batch, d, dtype, op, hazard, kwarg_twist, data):
         # stock, and stock pinv on a matrix 3x3 or larger with an infinite
         # DIAGONAL entry never returns on Linux - it calls svd with
         # compute_uv=True, which spins in LAPACK there (upstream, see
-        # docs/research/upstream-pinv-inf-hang.md). svdvals and norm(ord=2)
+        # numpy/numpy#7461). svdvals and norm(ord=2)
         # both go through compute_uv=False and are unaffected, so they keep
         # the full hazard.
         bad = [np.nan] if op == "pinv" else [np.nan, np.inf]

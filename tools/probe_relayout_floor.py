@@ -23,7 +23,7 @@ sides interleaved, one cell per fresh process, fast core only.
     .venv/Scripts/python tools/probe_relayout_floor.py
 
 VERDICT (2026-08-25, idle Intel box, fp 9bbe7063c555): see
-docs/research/batch16-notes.md.
+the batch-16 research notes (private project docs).
 """
 
 from __future__ import annotations

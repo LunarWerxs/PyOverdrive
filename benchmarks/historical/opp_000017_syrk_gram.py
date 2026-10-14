@@ -1,6 +1,6 @@
 """OPP-000017: BLAS herk fast path for a @ a.H (Hermitian rank-k) operations.
 
-Source: docs/research/opportunities/OPP-000017.md, numpy/numpy#6951
+Source: the OPP-000017 research report (private project docs), numpy/numpy#6951
 ("Optimization of `a @ a.H` style operations using BLAS herk routines").
 lab/corpus/OPP-000017.yaml carries the same claim: baseline is the stock
 gemm call `a @ a.conj().T` (equivalently `np.dot(a, a.conj().T)`), and the

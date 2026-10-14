@@ -66,7 +66,7 @@ from ..dispatcher.gearbox import GEARBOX, FastPath
 # reads 0.88x at n=10_000 and ~0.97x at n=100_000 in the 256-distinct band,
 # in both grids. No floor removes that - it is a band in the middle, not a
 # tail - and no gate can see it, because counting distinct values is the
-# work itself. See docs/research/batch16-notes.md section 11 for the
+# work itself. See section 11 of the batch-16 research notes (private project docs) for the
 # keep-or-withdraw argument and the numbers behind it. The fresh evidence
 # below supersedes the earlier decision to keep these rows.
 SIZE_THRESHOLD = 10_000  # retained 32-bit floor; the name is imported by tests

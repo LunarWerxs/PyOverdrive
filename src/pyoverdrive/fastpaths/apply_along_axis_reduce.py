@@ -127,7 +127,7 @@ _DTYPES = frozenset(
 )
 
 # Below this many 1-D slices the Python loop is short enough that the
-# dispatch tax (ADR-0003, ~300ns) is a real fraction of the win.
+# dispatch tax (~300ns per patched call) is a real fraction of the win.
 # Measured: the margin is already 50x+ at a few hundred slices, so the
 # floor is set for tax safety, not for the crossing.
 SLICE_MIN = 16

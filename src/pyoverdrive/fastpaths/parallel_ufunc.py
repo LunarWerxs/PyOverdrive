@@ -84,7 +84,7 @@ _F32 = np.dtype(np.float32)
 #     490.8 us, pyrallel_4t 307.8 us, 1.59x) is simply a run that drew an
 #     E-core: the candidate is unchanged today at ~302 us and stock is
 #     344 us, making the same cell 1.10x.
-#     Full write-up: docs/research/hybrid-cpu-baseline-coin-flip.md.
+#     Full write-up: the hybrid-cpu-baseline research note (private project docs).
 #
 # The numbers below are measured END TO END through the patched public name,
 # one cell per process, both sides interleaved, only on processes that drew

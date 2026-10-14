@@ -1,6 +1,6 @@
 """Rebuild lab/corpus/index.sqlite from the YAML opportunity records.
 
-The YAML files are the source of truth (lab/corpus/SCHEMA.md); the SQLite
+The YAML files are the source of truth (field schema: the corpus-schema note, private project docs); the SQLite
 index is derived, disposable, and exists for querying/ranking as the corpus
 grows past what eyeballs handle.
 

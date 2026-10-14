@@ -20,7 +20,7 @@ current numpy:
     own description. No numpy-internal or scipy fast path implements this,
     so there is nothing to probe-import here.
 
-Sizes: OPP-000011.md step 1 names a square sweep of 256/512/1024/2048/4096
+Sizes: step 1 of the OPP-000011 report (private project docs) names a square sweep of 256/512/1024/2048/4096
 plus the reporter's own rectangular (m,n,k) = (2048,4096,2048) shape. All
 of it is kept: a direct timing probe on this dev machine (scipy-openblas
 0.3.31.188.0, SkylakeX, before this file existed, not part of any timed
@@ -62,7 +62,7 @@ than a separate report: the square cases at n=2048/4096 and the
 rect_2048x4096x2048_reporter_shape case are the direct "does this still
 replicate post-gufunc-rewrite, and at the reporter's own out-of-cache
 size" answer - read their printed speedups against the 2.21x (numpy
-1.13.1) and 1.09x (numpy 1.16.2) historical figures in OPP-000011.md.
+1.13.1) and 1.09x (numpy 1.16.2) historical figures in the OPP-000011 report.
 """
 
 import sys
@@ -169,7 +169,7 @@ suite.measure(
 )
 
 # edge_magnitude_skew: real parts ~1e4x the imaginary parts on both
-# operands, the regime OPP-000011.md's "What semantics differ" flags as
+# operands, the regime the OPP-000011 report's "What semantics differ" flags as
 # where gauss3's extra C3-C1-C2 subtraction is expected to lose the most
 # relative precision (it subtracts two O(real*real)-magnitude quantities
 # to recover an O(real*imag)-magnitude result). The matrix-norm check

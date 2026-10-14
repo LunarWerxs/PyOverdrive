@@ -34,7 +34,7 @@ Probed and DECLINED with measured proof (dev box unless noted):
   0.47-1.00x - the 1.17-era clip regression is long fixed. Stale.
 - np.full via empty+fill (numpy#13001/#16180/#17206): 2.67x at n=100
   but the margin is ~0.5us absolute; the ~300 ns dispatch tax
-  (ADR-0003) eats it. Declined by tax, not by direction.
+  eats it. Declined by tax, not by direction.
 - np.min tiny arrays (numpy#12350): tolist+builtin wins 15x raw at n=5,
   but NaN-correctness needs a scan, the result must be rewrapped
   np.float64, and the tax lands on every tiny call - the honest net is

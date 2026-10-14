@@ -10,7 +10,7 @@ Usage:
 
 This is the seed of the ProsPyctor collector. Full incremental repo-wide sync
 (resumable cursors, content hashing, link resolution; spec section 7.2) is
-Phase 1 work tracked in docs/BUILD_SPEC.md.
+Phase 1 work tracked in the build spec (private project docs).
 """
 
 from __future__ import annotations

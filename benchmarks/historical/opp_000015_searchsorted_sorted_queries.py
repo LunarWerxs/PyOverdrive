@@ -26,7 +26,7 @@ still runs both float64 and int64 at full sample count.
 
 Correctness check is bit-identical (np.array_equal on the integer index
 arrays): each element's insertion index depends only on x and that single
-element of y, not on y's other elements or their order (see OPP-000015.md,
+element of y, not on y's other elements or their order (see the OPP-000015 report, private project docs,
 "What semantics differ"), so reordering y and unpermuting the result must
 reproduce stock output exactly -- no tolerance is justified here.
 """
@@ -72,7 +72,7 @@ def argsort_unpermute(x, y):
     sorted copy, then scatter the result indices back into y's original
     positions using the same permutation. No stability requirement, since
     each element's insertion index is independent of the other query
-    elements (see OPP-000015.md, "What semantics differ")."""
+    elements (see the OPP-000015 report, "What semantics differ")."""
     perm = np.argsort(y)
     y_sorted = y[perm]
     idx = np.searchsorted(x, y_sorted)

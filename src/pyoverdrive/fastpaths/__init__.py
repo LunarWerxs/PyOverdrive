@@ -9,7 +9,7 @@ Each module in this package defines ``register(gearbox)`` and is listed in
 - a provenance record (opportunity id + sources),
 - a kill switch (automatic via Gearbox name registration).
 
-See docs/BUILD_SPEC.md section 10.2.
+This is the shipping checklist from section 10.2 of the build spec (private project docs).
 
 Searching for a new path unattended: commit each attempt at
 fastpaths/<name>.py on a search branch and run tools/ratchet.py --path

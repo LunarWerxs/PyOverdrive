@@ -17,7 +17,7 @@ This reproducer measures:
     summation, O(n^2) for equal-length self-correlation/convolution).
   - candidate "fft_rfft_irfft": an FFT-based full convolution built from
     numpy.fft.rfft/irfft as sketched by commenter endolith and named in
-    OPP-000016.md step 1, zero-padded to the next power of two so the
+    step 1 of the OPP-000016 report (private project docs), zero-padded to the next power of two so the
     transform lands on a fast FFT length, then truncated to the true
     full-mode output length. np.correlate(a, b, 'full') is computed via
     the standard identity correlate(a, b) == convolve(a, b[::-1]) for real

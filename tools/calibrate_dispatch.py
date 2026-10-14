@@ -19,7 +19,7 @@ invalidated the whole table.
    here: for these paths candidate and dispatched agree, so the predicate is
    not where the error was.
 3. ITS BASELINE IS A COIN FLIP ON A HYBRID CPU. This is the one. See the
-   METHOD note below and docs/research/hybrid-cpu-baseline-coin-flip.md.
+   METHOD note below and the hybrid-cpu-baseline research note (private project docs).
 
 A fourth thing is not a defect in the battery but a genuine gap in what it
 covers: its input is np.linspace, which is SORTED, and the speedup of a

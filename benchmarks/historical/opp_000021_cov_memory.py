@@ -17,7 +17,7 @@ reproducer measures:
   - candidate "post_hoc": the formula above, implemented from the report's
     description, no numpy internals, no pyoverdrive import
 
-Per docs/research/opportunities/OPP-000021.md step 1, this sweeps
+Per step 1 of the OPP-000021 research report (private project docs), this sweeps
 n_features in {2, 16, 64}, n_samples across a size ladder, dtypes float32
 and float64, and both well-conditioned (mean 0, std 1) and deliberately
 ill-conditioned (mean/std, i.e. mu/sigma, swept through the reporter's

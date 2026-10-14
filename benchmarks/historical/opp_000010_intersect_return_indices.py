@@ -10,7 +10,7 @@ which for integer dtypes <= 16 bits routes into NumPy's radix-sort path;
 without indices, NumPy calls plain `ar.sort()` (quicksort by default), which
 does not. The speed gap is a side effect of which sort NumPy happens to
 invoke, not a deliberate dtype-based choice (see
-docs/research/opportunities/OPP-000010.md).
+the OPP-000010 research report, private project docs).
 
 This reproducer measures, per report step 1, four calls on the same seeded
 random input: `np.unique(a, return_index=False)` (baseline, today's default

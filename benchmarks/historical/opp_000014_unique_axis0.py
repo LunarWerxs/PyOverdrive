@@ -3,7 +3,7 @@ pays the full structured-dtype comparison/sort overhead that axis=0 unique
 needs for genuine multi-column data, even though there is nothing to make
 "contiguous" that is not already contiguous (numpy/numpy#15713).
 
-This reproducer measures two separate things, per OPP-000014.md's "What
+This reproducer measures two separate things, per the OPP-000014 report's (private project docs) "What
 PyOverdrive should do next" steps 1 and 2:
 
   1. Single-column trivial-expansion case (the issue's actual claim):
@@ -12,7 +12,7 @@ PyOverdrive should do next" steps 1 and 2:
      ravels `mat` back to 1-D and reshapes the unique result to (-1, 1) -
      semantically identical, since row-uniqueness on a single-column array
      is definitionally the same as element-uniqueness of that column (see
-     OPP-000014.md "What semantics differ"). Swept across dtypes [int32,
+     the OPP-000014 report, "What semantics differ"). Swept across dtypes [int32,
      int64, uint32, uint64, float32, float64] as the report specifies. Sizes
      are [1000, 10000, 100000, 400000] - the report names 1_000_000 as the
      top size, but that is shrunk here to 400_000 to keep the full
@@ -41,7 +41,7 @@ PyOverdrive should do next" steps 1 and 2:
      columns as the report names, not swept to a wide column count. Sizes
      [1000, 10000, 100000] keep this part inside the same time budget.
 
-Per OPP-000014.md step 5, PR numpy/numpy#10588 (the PR that removed the
+Per step 5 of the OPP-000014 report, PR numpy/numpy#10588 (the PR that removed the
 *original* axis=0 optimization eric-wieser refers to) was not separately
 fetched here - this reproducer measures current numpy's behavior directly,
 which is the thing that matters for a PyOverdrive fast-path decision

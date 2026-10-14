@@ -500,7 +500,7 @@ def test_refusal_inf_entry(op):
     compute_uv=False, 2x2, and an infinity off the diagonal are all
     unaffected, so SVD_OP (compute_uv=False) and NORM_OP (which reaches
     stock's own _multi_svd_norm, also compute_uv=False) keep their full
-    raise-parity check. See docs/research/upstream-pinv-inf-hang.md.
+    raise-parity check. See numpy/numpy#7461 (the upstream-pinv-inf-hang research note, private project docs).
 
     What PyOverdrive owns either way is the refusal itself: a non-finite
     batch must go to stock rather than through the closed form, and

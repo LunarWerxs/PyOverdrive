@@ -7,7 +7,7 @@ flip (P-core or E-core, 1.44x apart, measured over 25 fresh processes),
 while the threaded candidate spans cores and averages over both. Every ratio
 here is inflated by up to that factor, never deflated, and re-running on an
 idle machine does not help: the split is reproducible WITHIN a process and
-only visible across them. See docs/research/hybrid-cpu-baseline-coin-flip.md.
+only visible across them. See the hybrid-cpu-baseline research note (private project docs).
 
 Worth stressing for this family in particular: its wins sit within about
 0.1x of the 1.3x bar across the sizes where they cross it, and consecutive

@@ -36,7 +36,7 @@ What this reproducer measures:
      calibrates that), and kind='stable' alongside the default 'quick'.
   4. Adversarial guard floor: baseline-only case "almost_sorted" -- arange
      with its last two elements swapped, i.e. the single inversion at index
-     n-2 that docs/research/opportunities/OPP-000028.md names as the
+     n-2 that the OPP-000028 research report (private project docs) names as the
      worst case for a guarded router (full scan paid, then the full sort).
 
 What is deliberately NOT measured, and why:

@@ -5,7 +5,7 @@ Both paths remove a PYTHON LOOP, so their margin scales with the loop's
 trip count, not with the array's byte size: the apply_along_axis cells
 sweep slice COUNT (and slice length separately, to show it barely
 matters), and the vectorize cells sweep element count. That is also why
-the floors here are set for dispatch-tax safety (ADR-0003) rather than
+the floors here are set for dispatch-tax safety (the dispatch-tax ADR, private project docs) rather than
 at a 1.3x crossing - both are far past the bar everywhere they apply.
 
 Candidates are the shipped routes exactly: the reducer's own axis= call
