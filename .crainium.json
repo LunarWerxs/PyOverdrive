@@ -1,0 +1,18 @@
+{
+  "docs": {
+    "home": "cloud",
+    "since": "2026-10-14",
+    "repo": "lunarwerxs/pyoverdrive",
+    "read": "docs tool: search, get",
+    "write": "docs tool: edit then put",
+    "keep": [
+      "docs/COMPARISON.md",
+      "docs/research/2026-09-19-burndown.md",
+      "docs/research/batch11-shortlist.md",
+      "docs/research/batch3-shortlist.md",
+      "docs/research/batch6-shortlist.md",
+      "docs/research/batch7-shortlist.md",
+      "docs/research/batch8-shortlist.md"
+    ]
+  }
+}
