@@ -9347,7 +9347,7 @@
     },
     {
       "cell": "isclose_fused%u",
-      "error": "missing/invalid child evidence: [Errno 2] No such file or directory: 'C:\\\\Users\\\\blogi\\\\AppData\\\\Local\\\\Temp\\\\pyoverdrive-evidence-bbd16ihj\\\\243.json'",
+      "error": "missing/invalid child evidence: [Errno 2] No such file or directory: 'C:\\\\Users\\\\<user>\\\\AppData\\\\Local\\\\Temp\\\\pyoverdrive-evidence-bbd16ihj\\\\243.json'",
       "phase": "initial",
       "attempt": 1,
       "returncode": 4294967295,
