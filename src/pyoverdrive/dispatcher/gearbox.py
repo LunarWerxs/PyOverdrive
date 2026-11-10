@@ -230,7 +230,7 @@ class Gearbox:
     def patch(self, operations: list[str] | None = None) -> None:
         import numpy
 
-        targets = operations or self.supported_operations()
+        targets = operations if operations is not None else self.supported_operations()
         pending = {}
         # Resolve every target and construct every replacement before changing
         # NumPy or recording stock functions. A bad target or class factory
