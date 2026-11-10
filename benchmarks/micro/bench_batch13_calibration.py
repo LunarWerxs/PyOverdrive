@@ -191,4 +191,5 @@ for label, pw in (("scalar", 3), ("pair", (2, 3)), ("nested", ((2, 3),)),
         samples=SAMPLES,
     )
 
-suite.save()
+if not SMOKE:
+    suite.save()
