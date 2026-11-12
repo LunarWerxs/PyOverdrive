@@ -58,7 +58,6 @@ Two systems in one monorepo:
 - Reproducers live in `benchmarks/historical/opp_XXXXXX_<slug>.py` and use the
   Dyno harness (`lab/dyno`). Results JSON goes to
   `benchmarks/results/OPP-XXXXXX/<fingerprint>.json` and IS committed.
-- Commit small, path-scoped changes (`git add <paths>`, never `git add -A`).
 - Naming: PyOverdrive, ProsPyctor, Dyno, Gearbox, PyRallel in docs and
   diagnostics; descriptive module paths (`dispatcher/`, `parallel/`) in code.
 - Trademark: never put "NumPy" in the package/repo/product name. Say
